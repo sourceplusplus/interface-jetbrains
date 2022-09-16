@@ -16,10 +16,18 @@
  */
 package spp.jetbrains.marker.js
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.projectView.PresentationData
+import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
+import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
+import org.apache.commons.lang3.EnumUtils
+import spp.jetbrains.marker.ErrorVariableSimpleNode
 import spp.protocol.instrument.variable.LiveVariable
+import spp.protocol.instrument.variable.LiveVariableScope
 
 /**
  * todo: description.
@@ -28,16 +36,73 @@ import spp.protocol.instrument.variable.LiveVariable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class JavascriptVariableSimpleNode(private val variable: LiveVariable) : SimpleNode() {
+class JavascriptVariableSimpleNode(
+    private val variable: LiveVariable,
+    private val nodeMap: MutableMap<String, Array<SimpleNode>>
+) : SimpleNode() {
 
     private val scheme = DebuggerUIUtil.getColorScheme(null)
 
+    //todo: LiveSimpleNode super class
     override fun getChildren(): Array<SimpleNode> {
-        TODO("Not yet implemented")
+        if (variable.value == null && variable.liveIdentity != null) {
+            //found reference, use children of referenced node
+            return nodeMap[variable.liveIdentity!!] ?: arrayOf()
+        }
+
+        val children = if (variable.value is JsonArray) {
+            (variable.value as JsonArray).map { JsonObject.mapFrom(it) }.map {
+                if (it.getString("@skip") != null) {
+                    ErrorVariableSimpleNode(JsonObject.mapFrom(it).map)
+                } else {
+                    JavascriptVariableSimpleNode(toLiveVariable(it), nodeMap)
+                }
+            }.toList().toTypedArray()
+        } else if (variable.value is LiveVariable) {
+            arrayOf(JavascriptVariableSimpleNode(variable.value as LiveVariable, nodeMap) as SimpleNode)
+        } else {
+            emptyArray()
+        }
+
+        //add children to nodeMap for reference lookup
+        if (variable.liveIdentity != null) {
+            nodeMap[variable.liveIdentity!!] = children
+        }
+        return children
+    }
+
+    private fun toLiveVariable(it: JsonObject): LiveVariable {
+        var varValue = it.getValue("value")
+        if (varValue is JsonArray && varValue.size() == 1 &&
+            (varValue.first() as JsonObject).containsKey("liveClazz")
+        ) {
+            varValue = toLiveVariable(varValue.first() as JsonObject)
+        }
+        return LiveVariable(
+            name = it.getString("name"),
+            value = varValue,
+            lineNumber = it.getInteger("lineNumber") ?: -1,
+            scope = EnumUtils.getEnum(LiveVariableScope::class.java, it.getString("scope")),
+            liveClazz = it.getString("liveClazz"),
+            liveIdentity = it.getString("liveIdentity")
+        )
     }
 
     override fun update(presentation: PresentationData) {
-        TODO("Not yet implemented")
+        if (variable.scope == LiveVariableScope.GENERATED_METHOD) {
+            presentation.addText(variable.name + " = ", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+            presentation.setIcon(AllIcons.Nodes.Method)
+        } else {
+            presentation.addText(variable.name + " = ", XDebuggerUIConstants.VALUE_NAME_ATTRIBUTES)
+        }
+
+        if (childCount > 0) {
+            presentation.setIcon(AllIcons.Nodes.Variable)
+            presentation.addText("todo", SimpleTextAttributes.REGULAR_ATTRIBUTES)
+        } else {
+            presentation.setIcon(AllIcons.Nodes.Field)
+            presentation.addText(variable.value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES)
+        }
     }
 
     override fun getEqualityObjects(): Array<Any> = arrayOf(variable)

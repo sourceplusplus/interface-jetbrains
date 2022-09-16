@@ -16,9 +16,14 @@
  */
 package spp.jetbrains.sourcemarker.service.instrument.breakpoint.tree
 
+import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationInfo
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.psi.PsiManager
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.util.containers.hash.LinkedHashMap
+import spp.jetbrains.marker.js.JavascriptVariableRootNode
 import spp.jetbrains.marker.jvm.JVMVariableSimpleNode
 import spp.jetbrains.marker.py.PythonVariableRootNode
 import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.PYCHARM_PRODUCT_CODES
@@ -48,6 +53,31 @@ class VariableRootSimpleNode : SimpleNode() {
             NO_CHILDREN
         } else {
             val vars = stackFrameManager.currentFrame!!.variables
+
+            //todo: get language via LiveStackTrace
+            var language: Language? = null
+            val project = ProjectManager.getInstance().openProjects.first()
+            val manager = FileEditorManager.getInstance(project)
+            val selectedFile = manager.selectedFiles.firstOrNull()
+            if (selectedFile != null) {
+                val psiFile = PsiManager.getInstance(project).findFile(selectedFile)
+                if (psiFile != null) {
+                    language = psiFile.language
+                }
+            }
+            if (language?.id == "ECMAScript 6") {
+                return arrayOf(
+                    JavascriptVariableRootNode(
+                        vars.filter { it.scope == LiveVariableScope.LOCAL_VARIABLE },
+                        LiveVariableScope.LOCAL_VARIABLE
+                    ),
+                    JavascriptVariableRootNode(
+                        vars.filter { it.scope == LiveVariableScope.GLOBAL_VARIABLE },
+                        LiveVariableScope.GLOBAL_VARIABLE
+                    )
+                )
+            }
+
             val productCode = ApplicationInfo.getInstance().build.productCode
             if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
                 return arrayOf(
