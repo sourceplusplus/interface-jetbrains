@@ -17,7 +17,7 @@
 package spp.jetbrains.indicator
 
 import com.apollographql.apollo3.exception.ApolloException
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
@@ -31,10 +31,7 @@ import spp.jetbrains.status.SourceStatusService
 @Suppress("unused")
 abstract class LiveIndicator(val project: Project) {
 
-    companion object {
-        private val log = logger<LiveIndicator>()
-    }
-
+    val log by lazy { Logger.getInstance("spp.jetbrains.indicator." + this::class.java.simpleName) }
     open val listenForAllEvents: Boolean = false
     open val listenForEvents: List<IEventCode> = emptyList()
 
