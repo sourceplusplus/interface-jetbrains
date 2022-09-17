@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.impl
 
+import com.intellij.openapi.application.ReadAction
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -39,6 +40,8 @@ object SourceGuideProvider : AbstractSourceGuideProvider {
     }
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
-        getProvider(fileMarker.psiFile.language.id).determineGuideMarks(fileMarker)
+        ReadAction.run<Nothing> {
+            getProvider(fileMarker.psiFile.language.id).determineGuideMarks(fileMarker)
+        }
     }
 }
