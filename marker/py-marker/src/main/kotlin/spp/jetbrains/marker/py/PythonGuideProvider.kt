@@ -32,9 +32,12 @@ class PythonGuideProvider : AbstractSourceGuideProvider {
                 super.visitPyFunction(function)
 
                 ApplicationManager.getApplication().runReadAction {
-                    fileMarker.createMethodSourceMark(
+                    val guideMark = fileMarker.createMethodSourceMark(
                         function as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
-                    ).apply(true)
+                    )
+                    if (!fileMarker.containsSourceMark(guideMark)) {
+                        guideMark.apply(true)
+                    }
                 }
             }
         })
