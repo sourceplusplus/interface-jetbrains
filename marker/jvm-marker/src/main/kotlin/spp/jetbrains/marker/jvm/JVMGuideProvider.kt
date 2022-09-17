@@ -42,9 +42,12 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
 
     private fun makeMethodGuideMark(fileMarker: SourceFileMarker, element: PsiElement) {
         ApplicationManager.getApplication().runReadAction {
-            fileMarker.createMethodSourceMark(
+            val guideMark = fileMarker.createMethodSourceMark(
                 element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
-            ).apply(true)
+            )
+            if (!fileMarker.containsSourceMark(guideMark)) {
+                guideMark.apply(true)
+            }
         }
     }
 }

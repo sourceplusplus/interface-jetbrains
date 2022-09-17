@@ -123,8 +123,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
         SourceMarker.getInstance(project).getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
-        if (addToMarker) {
-            check(sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true))
+        if (addToMarker && sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true)) {
             triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_ADDED))
 
             if (this is GutterMark) {

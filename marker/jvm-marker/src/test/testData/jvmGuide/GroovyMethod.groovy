@@ -1,0 +1,4 @@
+class GroovyMethod {
+    void foo() {
+    }
+}

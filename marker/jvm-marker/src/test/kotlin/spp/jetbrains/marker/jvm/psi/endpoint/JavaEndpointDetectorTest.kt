@@ -14,21 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.psi.endpoint
+package spp.jetbrains.marker.jvm.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
 import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import org.junit.jupiter.api.Test
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 
-class JavaEndpointDetectorTest : EndpointDetectorTest() {
+class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
-    @Test
-    fun `SpringMVC RequestMapping method`() {
+    fun `test SpringMVC RequestMapping method`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping;
                     public class TestController {
@@ -50,8 +48,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with static import`() {
+    fun `test SpringMVC RequestMapping method with static import`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping;
                     import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -74,8 +71,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with no value`() {
+    fun `test SpringMVC RequestMapping method with no value`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping;
                     import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -98,8 +94,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with class request mapping`() {
+    fun `test SpringMVC RequestMapping method with class request mapping`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping;
                     import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -123,8 +118,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with class request mapping 2`() {
+    fun `test SpringMVC RequestMapping method with class request mapping 2`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping;
                     import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -148,8 +142,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with class request mapping 3`() {
+    fun `test SpringMVC RequestMapping method with class request mapping 3`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping;
                     import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -173,8 +166,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC GetMapping method`() {
+    fun `test SpringMVC GetMapping method`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.GetMapping;
                     public class TestController {
@@ -196,8 +188,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC GetMapping method_value`() {
+    fun `test SpringMVC GetMapping method_value`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.GetMapping;
                     public class TestController {
@@ -219,8 +210,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC GetMapping method_path`() {
+    fun `test SpringMVC GetMapping method_path`() {
         @Language("Java") val code = """
                     import org.springframework.web.bind.annotation.GetMapping;
                     public class TestController {
@@ -242,8 +232,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SkyWalking Trace with operation name`() {
+    fun `test SkyWalking Trace with operation name`() {
         @Language("Java") val code = """
                     import org.apache.skywalking.apm.toolkit.trace.Trace;
                     public class TestController {
@@ -265,8 +254,7 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SkyWalking Trace no operation name`() {
+    fun `test SkyWalking Trace no operation name`() {
         @Language("Java") val code = """
                     import org.apache.skywalking.apm.toolkit.trace.Trace;
                     public class TestController {
