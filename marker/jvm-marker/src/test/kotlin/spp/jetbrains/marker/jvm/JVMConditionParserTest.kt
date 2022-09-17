@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.service.breakpoint
+package spp.jetbrains.marker.jvm
 
 import com.intellij.debugger.engine.evaluation.TextWithImportsImpl
 import com.intellij.debugger.impl.DebuggerUtilsEx
@@ -27,25 +27,16 @@ import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import spp.jetbrains.marker.impl.InstrumentConditionParser
-import spp.jetbrains.marker.jvm.JVMConditionParser
 
 class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
 
-    @BeforeEach
-    override fun setUp() = super.setUp()
-
-    @AfterEach
     override fun tearDown() {
         super.tearDown()
         TestApplicationManager.getInstance().setDataProvider(null)
     }
 
-    @Test
-    fun `polyadic expression`() {
+    fun `test polyadic expression`() {
         @Language("Java") val code = """
                 public class Test {
                     private static final int staticVar = 1;
@@ -78,8 +69,7 @@ class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
         }
     }
 
-    @Test
-    fun `qualified string expression`() {
+    fun `test qualified string expression`() {
         @Language("Java") val code = """
                 public class Test {
                     public void test() {
@@ -110,8 +100,7 @@ class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
         }
     }
 
-    @Test
-    fun `polyadic expression back to string`() {
+    fun `test polyadic expression back to string`() {
         assertEquals(
             "staticVar == 1 && instanceVar == 2 && localVar == 3",
             InstrumentConditionParser.fromLiveConditional(
