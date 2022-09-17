@@ -1,4 +1,4 @@
-class kotlinMethod {
+class KotlinMethod {
     fun foo() {
     }
 }

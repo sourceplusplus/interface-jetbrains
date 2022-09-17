@@ -1,4 +1,4 @@
-public class javaMethod {
+public class JavaMethod {
     public void foo() {
     }
 }

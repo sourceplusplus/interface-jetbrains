@@ -26,14 +26,9 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.impl.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
-/*
- * todo: have to call SourceGuideProvider.determineGuideMarks() manually since
- *  otherwise "Read access is allowed from inside read-action (or EDT) only" is thrown.
- */
 @TestDataPath("\$CONTENT_ROOT/testData/jvmGuide/")
 class JVMGuideProviderTest : BasePlatformTestCase() {
 
@@ -57,11 +52,7 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
 
     fun testJavaMethod() {
         val psiFile = myFixture.configureByFile(getTestName(false) + ".java")
-        val fileMarker = ApplicationManager.getApplication().runReadAction(Computable {
-            val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
-            SourceGuideProvider.determineGuideMarks(fileMarker!!) //todo: shouldn't need to manually call
-            fileMarker
-        })
+        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
         runBlocking {
@@ -73,16 +64,12 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
         assertEquals(1, sourceMarks.size)
 
         val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
-        assertEquals("javaMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
+        assertEquals("${getTestName(false)}.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 
     fun testKotlinMethod() {
         val psiFile = myFixture.configureByFile(getTestName(false) + ".kt")
-        val fileMarker = ApplicationManager.getApplication().runReadAction(Computable {
-            val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
-            SourceGuideProvider.determineGuideMarks(fileMarker!!) //todo: shouldn't need to manually call
-            fileMarker
-        })
+        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
         runBlocking {
@@ -94,16 +81,12 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
         assertEquals(1, sourceMarks.size)
 
         val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
-        assertEquals("kotlinMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
+        assertEquals("${getTestName(false)}.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 
     fun testGroovyMethod() {
         val psiFile = myFixture.configureByFile(getTestName(false) + ".groovy")
-        val fileMarker = ApplicationManager.getApplication().runReadAction(Computable {
-            val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
-            SourceGuideProvider.determineGuideMarks(fileMarker!!) //todo: shouldn't need to manually call
-            fileMarker
-        })
+        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
         runBlocking {
@@ -115,6 +98,6 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
         assertEquals(1, sourceMarks.size)
 
         val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
-        assertEquals("groovyMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
+        assertEquals("${getTestName(false)}.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 }

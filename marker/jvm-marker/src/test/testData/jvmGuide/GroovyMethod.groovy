@@ -1,4 +1,4 @@
-class groovyMethod {
+class GroovyMethod {
     void foo() {
     }
 }
