@@ -14,28 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.jvm.endpoint
+package spp.jetbrains.marker.jvm.psi.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
 import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import org.junit.jupiter.api.Test
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 
-class JavaEndpointDetectorTest : EndpointDetectorTest() {
+class GroovyEndpointDetectorTest : EndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    public class TestController {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.*
+                    class TestController {
                         @RequestMapping(value = "/doGet", method = RequestMethod.GET)
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -50,15 +49,15 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SpringMVC RequestMapping method with static import`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
-                    public class TestController {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import static org.springframework.web.bind.annotation.RequestMethod.*
+                    class TestController {
                         @RequestMapping(method = GET, value = "/doGet")
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -73,12 +72,12 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SpringMVC RequestMapping method with no value`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
-                    public class TestController {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import static org.springframework.web.bind.annotation.RequestMethod.*
+                    class TestController {
                         @RequestMapping(method = GET)
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
         val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
@@ -96,16 +95,16 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SpringMVC RequestMapping method with class request mapping`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import static org.springframework.web.bind.annotation.RequestMethod.*
                     @RequestMapping("/todos")
-                    public class TestController {
+                    class TestController {
                         @RequestMapping(method = GET)
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -120,16 +119,16 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SpringMVC RequestMapping method with class request mapping 2`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import static org.springframework.web.bind.annotation.RequestMethod.*
                     @RequestMapping("/todos/")
-                    public class TestController {
+                    class TestController {
                         @RequestMapping(method = GET)
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -144,16 +143,16 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SpringMVC RequestMapping method with class request mapping 3`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.RequestMapping
+                    import static org.springframework.web.bind.annotation.RequestMethod.*
                     @RequestMapping("/todos")
-                    public class TestController {
+                    class TestController {
                         @RequestMapping(method = GET, value = "/doGet")
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -168,14 +167,14 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SpringMVC GetMapping method`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping;
-                    public class TestController {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
                         @GetMapping(name = "/doGet")
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -189,15 +188,15 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    fun `test SpringMVC GetMapping method_value`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping;
-                    public class TestController {
-                        @GetMapping(value = "/doGet")
-                        public void doGet() {}
+    fun `test SpringMVC GetMapping method_path`() {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
+                        @GetMapping(path = "/doGet")
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -211,15 +210,15 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    fun `test SpringMVC GetMapping method_path`() {
-        @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping;
-                    public class TestController {
-                        @GetMapping(path = "/doGet")
-                        public void doGet() {}
+    fun `test SpringMVC GetMapping method_value`() {
+        @Language("Groovy") val code = """
+                    import org.springframework.web.bind.annotation.GetMapping
+                    class TestController {
+                        @GetMapping(value = "/doGet")
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -234,14 +233,14 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SkyWalking Trace with operation name`() {
-        @Language("Java") val code = """
-                    import org.apache.skywalking.apm.toolkit.trace.Trace;
-                    public class TestController {
+        @Language("Groovy") val code = """
+                    import org.apache.skywalking.apm.toolkit.trace.Trace
+                    class TestController {
                         @Trace(operationName = "doGet")
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
@@ -256,14 +255,14 @@ class JavaEndpointDetectorTest : EndpointDetectorTest() {
     }
 
     fun `test SkyWalking Trace no operation name`() {
-        @Language("Java") val code = """
-                    import org.apache.skywalking.apm.toolkit.trace.Trace;
-                    public class TestController {
+        @Language("Groovy") val code = """
+                    import org.apache.skywalking.apm.toolkit.trace.Trace
+                    class TestController {
                         @Trace
-                        public void doGet() {}
+                        void doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
