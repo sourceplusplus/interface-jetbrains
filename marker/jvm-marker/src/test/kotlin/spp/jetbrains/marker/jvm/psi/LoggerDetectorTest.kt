@@ -57,6 +57,12 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                         )
                     }
 
+                    File("/opt/hostedtoolcache/Java_Zulu_jdk/11.0.16-8/x64").exists() -> {
+                        JavaSdk.getInstance().createJdk(
+                            "jdk-11", "/opt/hostedtoolcache/Java_Zulu_jdk/11.0.16-8/x64", false
+                        )
+                    }
+
                     File("/opt/java/openjdk").exists() -> {
                         JavaSdk.getInstance().createJdk(
                             "jdk-11", "/opt/java/openjdk", false
