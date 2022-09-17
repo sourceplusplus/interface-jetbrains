@@ -23,22 +23,14 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyFile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.impl.SourceGuideProvider
 import spp.jetbrains.marker.py.PythonMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
-/*
- * todo: have to call SourceGuideProvider.determineGuideMarks() manually since
- *  otherwise "Read access is allowed from inside read-action (or EDT) only" is thrown.
- */
-@TestDataPath("/testData/pythonGuide/")
+@TestDataPath("\$CONTENT_ROOT/testData/pythonGuide/")
 class PythonGuideProviderTest : BasePlatformTestCase() {
 
-    @BeforeEach
     override fun setUp() {
         super.setUp()
         ApplicationManager.getApplication().runReadAction(Computable {
@@ -55,14 +47,9 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
         return "src/test/testData/pythonGuide/"
     }
 
-    @Test
-    fun pythonMethod() {
-        val psiFile = myFixture.configureByFile("pythonMethod.py")
-        val fileMarker = ApplicationManager.getApplication().runReadAction(Computable {
-            val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
-            SourceGuideProvider.determineGuideMarks(fileMarker!!) //todo: shouldn't need to manually call
-            fileMarker
-        })
+    fun testPythonMethod() {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".py")
+        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
         runBlocking {
@@ -74,6 +61,6 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
         assertEquals(1, sourceMarks.size)
 
         val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
-        assertEquals("pythonMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
+        assertEquals("PythonMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 }

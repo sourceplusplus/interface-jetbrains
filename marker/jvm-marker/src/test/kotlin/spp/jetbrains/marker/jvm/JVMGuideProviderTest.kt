@@ -20,15 +20,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.TestDataPath
-import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase5
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.impl.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -39,13 +35,13 @@ import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
  *  otherwise "Read access is allowed from inside read-action (or EDT) only" is thrown.
  */
 @TestDataPath("\$CONTENT_ROOT/testData/jvmGuide/")
-class JVMGuideProviderTest : LightJavaCodeInsightFixtureTestCase5() {
+class JVMGuideProviderTest : BasePlatformTestCase() {
 
-    @BeforeEach
-    fun setup() {
+    override fun setUp() {
+        super.setUp()
         ApplicationManager.getApplication().runReadAction(Computable {
             runBlocking {
-                SourceMarker.getInstance(fixture.project).clearAvailableSourceFileMarkers()
+                SourceMarker.getInstance(myFixture.project).clearAvailableSourceFileMarkers()
             }
         })
 
@@ -59,11 +55,10 @@ class JVMGuideProviderTest : LightJavaCodeInsightFixtureTestCase5() {
         return "src/test/testData/jvmGuide/"
     }
 
-    @Test
-    fun javaMethod() {
-        val psiFile = fixture.configureByFile("javaMethod.java")
+    fun testJavaMethod() {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".java")
         val fileMarker = ApplicationManager.getApplication().runReadAction(Computable {
-            val fileMarker = SourceMarker.getInstance(fixture.project).getSourceFileMarker(psiFile)
+            val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
             SourceGuideProvider.determineGuideMarks(fileMarker!!) //todo: shouldn't need to manually call
             fileMarker
         })
@@ -81,11 +76,10 @@ class JVMGuideProviderTest : LightJavaCodeInsightFixtureTestCase5() {
         assertEquals("javaMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 
-    @Test
-    fun kotlinMethod() {
-        val psiFile = fixture.configureByFile("kotlinMethod.kt")
+    fun testKotlinMethod() {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".kt")
         val fileMarker = ApplicationManager.getApplication().runReadAction(Computable {
-            val fileMarker = SourceMarker.getInstance(fixture.project).getSourceFileMarker(psiFile)
+            val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
             SourceGuideProvider.determineGuideMarks(fileMarker!!) //todo: shouldn't need to manually call
             fileMarker
         })
@@ -103,11 +97,10 @@ class JVMGuideProviderTest : LightJavaCodeInsightFixtureTestCase5() {
         assertEquals("kotlinMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 
-    @Test
-    fun groovyMethod() {
-        val psiFile = fixture.configureByFile("groovyMethod.groovy")
+    fun testGroovyMethod() {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".groovy")
         val fileMarker = ApplicationManager.getApplication().runReadAction(Computable {
-            val fileMarker = SourceMarker.getInstance(fixture.project).getSourceFileMarker(psiFile)
+            val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
             SourceGuideProvider.determineGuideMarks(fileMarker!!) //todo: shouldn't need to manually call
             fileMarker
         })

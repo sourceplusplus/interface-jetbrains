@@ -34,7 +34,3 @@ fun projectDependency(name: String): ProjectDependency {
         DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
     }
 }
-
-tasks.test {
-    useJUnitPlatform()
-}
