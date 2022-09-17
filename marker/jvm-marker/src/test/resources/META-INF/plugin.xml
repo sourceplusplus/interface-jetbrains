@@ -1,9 +1,0 @@
-<idea-plugin>
-    <id>test.plugin</id>
-    <name>Source++</name>
-    <vendor email="support@sourceplusplus.com" url="https://github.com/sourceplusplus">Source++</vendor>
-
-    <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.modules.xdebugger</depends>
-</idea-plugin>
