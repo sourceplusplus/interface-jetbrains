@@ -51,41 +51,19 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
     }
 
     fun testJavaMethod() {
-        val psiFile = myFixture.configureByFile(getTestName(false) + ".java")
-        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
-        assertNotNull(fileMarker)
-
-        runBlocking {
-            delay(2_500)
-        }
-
-        val sourceMarks = fileMarker!!.getSourceMarks()
-        assertNotNull(sourceMarks)
-        assertEquals(1, sourceMarks.size)
-
-        val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
-        assertEquals("${getTestName(false)}.foo()", methodMarks[0].artifactQualifiedName.identifier)
+        doTest("java")
     }
 
     fun testKotlinMethod() {
-        val psiFile = myFixture.configureByFile(getTestName(false) + ".kt")
-        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
-        assertNotNull(fileMarker)
-
-        runBlocking {
-            delay(2_500)
-        }
-
-        val sourceMarks = fileMarker!!.getSourceMarks()
-        assertNotNull(sourceMarks)
-        assertEquals(1, sourceMarks.size)
-
-        val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
-        assertEquals("${getTestName(false)}.foo()", methodMarks[0].artifactQualifiedName.identifier)
+        doTest("kt")
     }
 
     fun testGroovyMethod() {
-        val psiFile = myFixture.configureByFile(getTestName(false) + ".groovy")
+        doTest("groovy")
+    }
+
+    private fun doTest(extension: String) {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".$extension")
         val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
