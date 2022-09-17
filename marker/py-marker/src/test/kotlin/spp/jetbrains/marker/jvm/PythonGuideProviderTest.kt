@@ -61,6 +61,6 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
         assertEquals(1, sourceMarks.size)
 
         val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
-        assertEquals("PythonMethod.foo()", methodMarks[0].artifactQualifiedName.identifier)
+        assertEquals("${getTestName(false)}.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 }
