@@ -14,16 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.psi.endpoint
+package spp.jetbrains.marker.jvm.psi.endpoint
 
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 
-abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
+abstract class AbstractEndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
-    @BeforeEach
     public override fun setUp() {
         super.setUp()
 
@@ -111,7 +108,6 @@ abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
         )
     }
 
-    @AfterEach
     override fun tearDown() {
         super.tearDown()
         TestApplicationManager.getInstance().setDataProvider(null)

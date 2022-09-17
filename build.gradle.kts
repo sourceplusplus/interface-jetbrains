@@ -68,6 +68,15 @@ allprojects {
         verifyPlugin { enabled = false }
         listProductsReleases { enabled = false }
         instrumentCode { enabled = false }
+
+        // workaround for tests not being found in 2021.3+
+        // see https://youtrack.jetbrains.com/issue/IDEA-278926#focus=Comments-27-5561012.0-0
+        test {
+            isScanForTestClasses = false
+            include("**/*Test.class")
+            include("**/Test*.class")
+            exclude("**/Abstract*Test.class")
+        }
     }
 }
 

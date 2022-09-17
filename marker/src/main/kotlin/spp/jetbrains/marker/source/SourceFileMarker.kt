@@ -17,7 +17,6 @@
 package spp.jetbrains.marker.source
 
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.MapMaker
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
@@ -42,6 +41,7 @@ import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Used to mark a source code file with SourceMarker artifact marks.
@@ -65,7 +65,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     }
 
     val project: Project = psiFile.project
-    private val sourceMarks: MutableSet<SourceMark> = Collections.newSetFromMap(MapMaker().weakKeys().makeMap())
+    private val sourceMarks: MutableSet<SourceMark> = Collections.newSetFromMap(ConcurrentHashMap())
 
     /**
      * Gets the [SourceMark]s recognized in the current source code file.
