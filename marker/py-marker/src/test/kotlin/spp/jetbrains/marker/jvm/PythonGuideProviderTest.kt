@@ -53,7 +53,7 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
         assertNotNull(fileMarker)
 
         runBlocking {
-            delay(2_500)
+            delay(1_500)
         }
 
         val sourceMarks = fileMarker!!.getSourceMarks()
