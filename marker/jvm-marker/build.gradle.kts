@@ -8,7 +8,7 @@ val joorVersion: String by project
 val intellijVersion: String by project
 
 intellij {
-    plugins.set(listOf("java", "Groovy", "Kotlin"))
+    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13"))
 }
 
 dependencies {
@@ -16,6 +16,7 @@ dependencies {
     implementation(projectDependency(":marker"))
     implementation("plus.sourceplus:protocol:$projectVersion")
 
+    implementation("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.1-jre")
@@ -23,9 +24,9 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
 
+    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
 }
 

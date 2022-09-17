@@ -21,14 +21,12 @@ import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import org.junit.jupiter.api.Test
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 
 class GroovyEndpointDetectorTest : EndpointDetectorTest() {
 
-    @Test
-    fun `SpringMVC RequestMapping method`() {
+    fun `test SpringMVC RequestMapping method`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.*
                     class TestController {
@@ -50,8 +48,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with static import`() {
+    fun `test SpringMVC RequestMapping method with static import`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping
                     import static org.springframework.web.bind.annotation.RequestMethod.*
@@ -74,8 +71,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with no value`() {
+    fun `test SpringMVC RequestMapping method with no value`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping
                     import static org.springframework.web.bind.annotation.RequestMethod.*
@@ -98,8 +94,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with class request mapping`() {
+    fun `test SpringMVC RequestMapping method with class request mapping`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping
                     import static org.springframework.web.bind.annotation.RequestMethod.*
@@ -123,8 +118,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with class request mapping 2`() {
+    fun `test SpringMVC RequestMapping method with class request mapping 2`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping
                     import static org.springframework.web.bind.annotation.RequestMethod.*
@@ -148,8 +142,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC RequestMapping method with class request mapping 3`() {
+    fun `test SpringMVC RequestMapping method with class request mapping 3`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.RequestMapping
                     import static org.springframework.web.bind.annotation.RequestMethod.*
@@ -173,8 +166,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC GetMapping method`() {
+    fun `test SpringMVC GetMapping method`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.GetMapping
                     class TestController {
@@ -196,8 +188,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC GetMapping method_path`() {
+    fun `test SpringMVC GetMapping method_path`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.GetMapping
                     class TestController {
@@ -219,8 +210,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVC GetMapping method_value`() {
+    fun `test SpringMVC GetMapping method_value`() {
         @Language("Groovy") val code = """
                     import org.springframework.web.bind.annotation.GetMapping
                     class TestController {
@@ -242,8 +232,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SkyWalking Trace with operation name`() {
+    fun `test SkyWalking Trace with operation name`() {
         @Language("Groovy") val code = """
                     import org.apache.skywalking.apm.toolkit.trace.Trace
                     class TestController {
@@ -265,8 +254,7 @@ class GroovyEndpointDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SkyWalking Trace no operation name`() {
+    fun `test SkyWalking Trace no operation name`() {
         @Language("Groovy") val code = """
                     import org.apache.skywalking.apm.toolkit.trace.Trace
                     class TestController {

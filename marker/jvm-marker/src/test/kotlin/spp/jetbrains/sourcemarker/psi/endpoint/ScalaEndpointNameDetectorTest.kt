@@ -21,14 +21,12 @@ import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import org.junit.jupiter.api.Test
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 
 class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
 
-    @Test
-    fun `SpringMVCEndpoint RequestMapping method`() {
+    fun `test SpringMVCEndpoint RequestMapping method`() {
         @Language("Scala") val code = """
                     import org.springframework.web.bind.annotation._
                     class TestController {
@@ -50,8 +48,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVCEndpoint GetMapping method`() {
+    fun `test SpringMVCEndpoint GetMapping method`() {
         @Language("Scala") val code = """
                     import org.springframework.web.bind.annotation._
                     class TestController {
@@ -73,8 +70,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVCEndpoint GetMapping method_path`() {
+    fun `test SpringMVCEndpoint GetMapping method_path`() {
         @Language("Scala") val code = """
                     import org.springframework.web.bind.annotation._
                     class TestController {
@@ -96,8 +92,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SpringMVCEndpoint GetMapping method_value`() {
+    fun `test SpringMVCEndpoint GetMapping method_value`() {
         @Language("Scala") val code = """
                     import org.springframework.web.bind.annotation._
                     class TestController {
@@ -119,8 +114,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SkyWalking Trace with operation name`() {
+    fun `test SkyWalking Trace with operation name`() {
         @Language("Scala") val code = """
                     import org.apache.skywalking.apm.toolkit.trace.Trace
                     class TestController {
@@ -142,8 +136,7 @@ class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
         }
     }
 
-    @Test
-    fun `SkyWalking Trace no operation name`() {
+    fun `test SkyWalking Trace no operation name`() {
         @Language("Scala") val code = """
                     import org.apache.skywalking.apm.toolkit.trace.Trace
                     class TestController {

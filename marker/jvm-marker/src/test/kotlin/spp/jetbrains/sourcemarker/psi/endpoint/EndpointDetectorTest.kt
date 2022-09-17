@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach
 
 abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
-    @BeforeEach
     public override fun setUp() {
         super.setUp()
 
@@ -111,7 +110,6 @@ abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
         )
     }
 
-    @AfterEach
     override fun tearDown() {
         super.tearDown()
         TestApplicationManager.getInstance().setDataProvider(null)
