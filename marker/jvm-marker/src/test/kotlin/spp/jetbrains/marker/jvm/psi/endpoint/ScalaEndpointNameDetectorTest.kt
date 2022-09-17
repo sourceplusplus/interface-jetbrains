@@ -24,7 +24,7 @@ import org.jetbrains.uast.toUElement
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 
-class ScalaEndpointNameDetectorTest : EndpointDetectorTest() {
+class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVCEndpoint RequestMapping method`() {
         @Language("Scala") val code = """

@@ -18,10 +18,8 @@ package spp.jetbrains.marker.jvm.psi.endpoint
 
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 
-abstract class EndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
+abstract class AbstractEndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     public override fun setUp() {
         super.setUp()

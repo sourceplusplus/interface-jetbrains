@@ -24,7 +24,7 @@ import org.jetbrains.uast.toUElement
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 
-class KotlinEndpointDetectorTest : EndpointDetectorTest() {
+class KotlinEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method`() {
         @Language("Kt") val code = """

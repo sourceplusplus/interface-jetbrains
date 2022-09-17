@@ -64,7 +64,7 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                     }
 
                     else -> {
-                        throw IllegalStateException("Failed to find JDK 11")
+                        error("Failed to find JDK 11")
                     }
                 }
             }

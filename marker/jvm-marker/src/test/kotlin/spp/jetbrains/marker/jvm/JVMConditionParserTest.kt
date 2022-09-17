@@ -29,7 +29,7 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
 import org.intellij.lang.annotations.Language
 import spp.jetbrains.marker.impl.InstrumentConditionParser
 
-class InstrumentConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
+class JVMConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
 
     override fun tearDown() {
         super.tearDown()
