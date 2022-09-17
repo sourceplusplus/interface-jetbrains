@@ -12,9 +12,9 @@ intellij {
 }
 
 dependencies {
-    compileOnly(projectDependency(":common"))
-    compileOnly(projectDependency(":marker"))
-    compileOnly("plus.sourceplus:protocol:$projectVersion")
+    implementation(projectDependency(":common"))
+    implementation(projectDependency(":marker"))
+    implementation("plus.sourceplus:protocol:$projectVersion")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -25,6 +25,8 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
 }
 
 fun projectDependency(name: String): ProjectDependency {
@@ -33,4 +35,8 @@ fun projectDependency(name: String): ProjectDependency {
     } else {
         DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

@@ -1,0 +1,4 @@
+class kotlinMethod {
+    fun foo() {
+    }
+}
