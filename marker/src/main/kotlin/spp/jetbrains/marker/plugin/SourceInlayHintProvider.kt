@@ -73,17 +73,17 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getInlineElementsInRange(0, Integer.MAX_VALUE)?.forEach {
-                                it.repaint()
+                                it.update()
                             }
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getAfterLineEndElementsInRange(0, Integer.MAX_VALUE)?.forEach {
-                                it.repaint()
+                                it.update()
                             }
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
-                                it.repaint()
+                                it.update()
                             }
                     }
                 }
@@ -198,7 +198,11 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         private val font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
         override val width: Int
             get() = editor.contentComponent.getFontMetrics(font).stringWidth(virtualText.getRenderedVirtualText())
-        override val height = editor.lineHeight
+        override val height: Int
+            get() {
+                if (virtualText.getVirtualText().isEmpty()) return 0
+                return editor.lineHeight
+            }
 
         override fun paint(g: Graphics2D, attributes: TextAttributes) {
             if (!inlayMark.isVisible()) return
