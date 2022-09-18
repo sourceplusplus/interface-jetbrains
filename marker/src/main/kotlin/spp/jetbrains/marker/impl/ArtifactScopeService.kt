@@ -50,4 +50,8 @@ object ArtifactScopeService : AbstractArtifactScopeService {
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {
         return getService(element.language.id).isInsideEndlessLoop(element)
     }
+
+    override fun isJVM(element: PsiElement): Boolean {
+        return getService(element.language.id).isJVM(element)
+    }
 }

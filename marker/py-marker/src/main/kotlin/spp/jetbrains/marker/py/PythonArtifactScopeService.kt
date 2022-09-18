@@ -54,4 +54,6 @@ class PythonArtifactScopeService : AbstractArtifactScopeService {
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {
         return false
     }
+
+    override fun isJVM(element: PsiElement): Boolean = false
 }

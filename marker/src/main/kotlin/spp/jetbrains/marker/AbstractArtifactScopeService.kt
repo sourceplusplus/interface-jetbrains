@@ -30,4 +30,5 @@ interface AbstractArtifactScopeService {
     fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
     fun isInsideFunction(element: PsiElement): Boolean
     fun isInsideEndlessLoop(element: PsiElement): Boolean
+    fun isJVM(element: PsiElement): Boolean
 }

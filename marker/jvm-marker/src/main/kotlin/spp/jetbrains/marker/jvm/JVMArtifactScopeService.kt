@@ -67,4 +67,6 @@ class JVMArtifactScopeService : AbstractArtifactScopeService {
         val parentLoop = element.parentOfTypes(PsiConditionalLoopStatement::class)
         return parentLoop != null && ControlFlowUtils.isEndlessLoop(parentLoop)
     }
+
+    override fun isJVM(element: PsiElement): Boolean = true
 }
