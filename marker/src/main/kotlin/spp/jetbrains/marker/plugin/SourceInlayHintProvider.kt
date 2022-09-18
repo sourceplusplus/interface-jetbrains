@@ -214,15 +214,15 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 if (virtualText.icon != null) {
                     virtualText.icon!!.paintIcon(null, g, virtualText.iconLocation.x, virtualText.iconLocation.y)
                 }
-                g.font = virtualText.font ?: font.let {
+                g.font = (virtualText.font ?: font).let {
                     if (virtualText.fontSize != null) {
                         if (virtualText.relativeFontSize) {
-                            font.deriveFont(it.size + virtualText.fontSize!!)
+                            it.deriveFont(it.size + virtualText.fontSize!!)
                         } else {
-                            font.deriveFont(virtualText.fontSize!!)
+                            it.deriveFont(virtualText.fontSize!!)
                         }
                     } else {
-                        font
+                        it
                     }
                 }
                 g.setRenderingHint(

@@ -47,7 +47,7 @@ allprojects {
         updateSinceUntilBuild.set(false)
 
         plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
-        //plugins.add("com.intellij.zh:202.413") //test chinese locale
+        //plugins.add("com.intellij.zh:222.202") //test chinese locale
     }
 
     tasks {
