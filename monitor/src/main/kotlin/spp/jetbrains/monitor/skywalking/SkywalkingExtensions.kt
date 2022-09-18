@@ -51,7 +51,7 @@ fun toProtocol(
 
 fun GetLinearIntValuesQuery.Result.toProtocol(metricType: String): ArtifactMetrics {
     return ArtifactMetrics(
-        metricType = MetricType.realValueOf(metricType),
+        metricType = MetricType(metricType),
         values = values.map { (it.value as Int).toDouble() }
     )
 }

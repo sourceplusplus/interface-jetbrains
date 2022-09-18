@@ -34,7 +34,6 @@ import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.metrics.MetricType
-import spp.protocol.artifact.metrics.MetricType.ServiceLevelAgreement_Average
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveViewEvent
@@ -217,7 +216,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             .put("value", value)
             .put("total", value)
             .apply {
-                if (MetricType.realValueOf(metricName) == ServiceLevelAgreement_Average) {
+                if (MetricType(metricName) == MetricType.Endpoint_SLA) {
                     put("percentage", value)
                 }
             }
