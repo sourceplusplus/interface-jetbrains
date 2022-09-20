@@ -16,7 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.PluginUI.BGND_FOCUS_COLOR
+import spp.jetbrains.PluginUI.getBackgroundFocusColor
+import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
 import spp.jetbrains.sourcemarker.element.AutocompleteRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -55,8 +56,10 @@ class AutoCompleteCellRenderer(private val artifactQualifiedName: ArtifactQualif
         }
 
         if (isSelected) {
-            row.background = BGND_FOCUS_COLOR
+            row.background = getBackgroundFocusColor()
             row.setCommandIcon(entry.getSelectedIcon())
+        } else {
+            row.background = getBackgroundUnfocusedColor()
         }
         return row
     }
