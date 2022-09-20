@@ -16,7 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.PluginUI.BGND_FOCUS_COLOR
+import spp.jetbrains.PluginUI.getBackgroundFocusColor
+import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
@@ -50,7 +51,7 @@ class ControlBarCellRenderer(
         row.setCommandName(entry.name, autocompleteField.text)
         row.setCommandIcon(rowValue.getUnselectedIcon())
 
-        var formattedDescription = entry.description
+        var formattedDescription = entry.getDescription()
         if (formattedDescription.contains("*lineNumber*")) {
             formattedDescription = formattedDescription.replace(
                 "*lineNumber*",
@@ -66,8 +67,10 @@ class ControlBarCellRenderer(
         row.setDescription(formattedDescription)
 
         if (isSelected) {
-            row.background = BGND_FOCUS_COLOR
+            row.background = getBackgroundFocusColor()
             row.setCommandIcon(rowValue.getSelectedIcon())
+        } else {
+            row.background = getBackgroundUnfocusedColor()
         }
         return row
     }

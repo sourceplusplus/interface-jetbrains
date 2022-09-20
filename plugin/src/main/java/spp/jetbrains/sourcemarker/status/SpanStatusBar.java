@@ -62,7 +62,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -190,7 +190,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                         table.setStriped(true);
                         table.setShowColumns(true);
 
-                        table.setBackground(DFLT_BGND_COLOR);
+                        table.setBackground(getBackgroundColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -288,7 +288,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(BGND_FOCUS_COLOR);
+                    configPanel.setBackground(getBackgroundFocusColor());
                 }
             }
         });
@@ -415,7 +415,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -428,7 +428,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -464,7 +464,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
 
         //======== mainPanel ========
         {
-            mainPanel.setBackground(DFLT_BGND_COLOR);
+            mainPanel.setBackground(getBackgroundColor());
             mainPanel.setLayout(new MigLayout(
                 "novisualpadding,hidemode 3",
                 // columns
@@ -474,7 +474,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
                 "0[grow]0"));
 
             //---- spanOperationNameField ----
-            spanOperationNameField.setBackground(STATUS_BAR_TXT_BG_COLOR);
+            spanOperationNameField.setBackground(getInputBackgroundColor());
             spanOperationNameField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));

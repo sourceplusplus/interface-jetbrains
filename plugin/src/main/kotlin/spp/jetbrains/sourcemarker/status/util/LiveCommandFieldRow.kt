@@ -22,7 +22,7 @@ import javax.swing.Icon
 
 class LiveCommandFieldRow(val liveCommand: LiveCommand, val project: Project) : AutocompleteFieldRow {
     override fun getText(): String = liveCommand.name
-    override fun getDescription(): String = liveCommand.description
+    override fun getDescription(): String = liveCommand.getDescription()
     override fun getSelectedIcon(): Icon? = liveCommand.selectedIcon
     override fun getUnselectedIcon(): Icon? = liveCommand.unselectedIcon
 }

@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
 public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstrumentListener, VisibleAreaListener {
@@ -280,7 +280,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                             }
                         }));
 
-                        table.setBackground(DFLT_BGND_COLOR);
+                        table.setBackground(getBackgroundColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -391,7 +391,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(BGND_FOCUS_COLOR);
+                    configPanel.setBackground(getBackgroundFocusColor());
                 }
             }
         });
@@ -525,7 +525,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -540,7 +540,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -576,7 +576,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
         //======== mainPanel ========
         {
-            mainPanel.setBackground(DFLT_BGND_COLOR);
+            mainPanel.setBackground(getBackgroundColor());
             mainPanel.setLayout(new MigLayout(
                 "novisualpadding,hidemode 3",
                 // columns
@@ -586,7 +586,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                 "0[grow]0"));
 
             //---- breakpointConditionField ----
-            breakpointConditionField.setBackground(STATUS_BAR_TXT_BG_COLOR);
+            breakpointConditionField.setBackground(getInputBackgroundColor());
             breakpointConditionField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));

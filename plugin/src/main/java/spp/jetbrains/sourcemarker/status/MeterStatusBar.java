@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
@@ -193,7 +193,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                         table.setStriped(true);
                         table.setShowColumns(true);
 
-                        table.setBackground(DFLT_BGND_COLOR);
+                        table.setBackground(getBackgroundColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -301,7 +301,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(BGND_FOCUS_COLOR);
+                    configPanel.setBackground(getBackgroundFocusColor());
                 }
             }
         });
@@ -434,7 +434,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -449,7 +449,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -485,7 +485,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         //======== mainPanel ========
         {
-            mainPanel.setBackground(DFLT_BGND_COLOR);
+            mainPanel.setBackground(getBackgroundColor());
             mainPanel.setLayout(new MigLayout(
                 "novisualpadding,hidemode 3",
                 // columns
@@ -495,7 +495,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
                 "0[grow]0"));
 
             //---- meterConditionField ----
-            meterNameField.setBackground(STATUS_BAR_TXT_BG_COLOR);
+            meterNameField.setBackground(getInputBackgroundColor());
             meterNameField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));

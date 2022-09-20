@@ -31,7 +31,6 @@ import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
-import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.impl.InstrumentConditionParser;
@@ -81,7 +80,7 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 
 public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener,
@@ -366,7 +365,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                     table.setStriped(true);
                     table.setShowColumns(true);
 
-                    table.setBackground(DFLT_BGND_COLOR);
+                    table.setBackground(getBackgroundColor());
                     panel.add(scrollPane);
                     panel.setPreferredSize(new Dimension(0, 250));
                     wrapper.add(panel, BorderLayout.NORTH);
@@ -409,7 +408,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(UIUtil.getBoundsColor(), 0, true),
                         new EmptyBorder(2, 6, 0, 0)));
-                liveLogTextField.setBackground(DFLT_BGND_COLOR);
+                liveLogTextField.setBackground(getBackgroundColor());
                 liveLogTextField.setEditable(false);
             }
         });
@@ -419,7 +418,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));
-        liveLogTextField.setBackground(STATUS_BAR_TXT_BG_COLOR);
+        liveLogTextField.setBackground(getInputBackgroundColor());
         liveLogTextField.setEditable(true);
     }
 
@@ -548,7 +547,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!watchExpression && !errored && !removed) configPanel.setBackground(BGND_FOCUS_COLOR);
+                if (!watchExpression && !errored && !removed) configPanel.setBackground(getBackgroundFocusColor());
             }
         });
 
@@ -725,7 +724,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -738,7 +737,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
                 "hidemode 3",
                 // columns
@@ -789,7 +788,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         add(separator1, "cell 1 0");
 
         //---- liveLogTextField ----
-        liveLogTextField.setBackground(UIUtil.getTextFieldBackground());
+        liveLogTextField.setBackground(getInputBackgroundColor());
         liveLogTextField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 new EmptyBorder(2, 6, 0, 0)));

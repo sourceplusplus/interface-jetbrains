@@ -28,7 +28,6 @@ import javax.swing.Icon
 @Suppress("unused")
 abstract class LiveCommand(val project: Project) {
     abstract val name: String
-    abstract val description: String
     open val params: List<String> = emptyList()
     open val aliases: Set<String> = emptySet()
     open var selectedIcon: Icon? = null
@@ -40,6 +39,8 @@ abstract class LiveCommand(val project: Project) {
     val liveViewService = UserData.liveViewService(project)!!
     val liveStatusManager = LiveStatusManager.getInstance(project)
     val liveInstrumentService = UserData.liveInstrumentService(project)
+
+    abstract fun getDescription(): String
 
     open fun trigger(context: LiveCommandContext) {
         ApplicationManager.getApplication().runReadAction {

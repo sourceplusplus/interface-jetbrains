@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status.util
+package spp.jetbrains.utils
 
 import com.intellij.openapi.editor.impl.EditorComponentImpl
 import java.awt.AWTEvent

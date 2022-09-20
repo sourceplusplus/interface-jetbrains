@@ -17,7 +17,6 @@
 package spp.jetbrains.sourcemarker.settings;
 
 import net.miginfocom.swing.MigLayout;
-import spp.jetbrains.PluginUI;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 
 import javax.swing.*;
@@ -25,8 +24,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static spp.jetbrains.PluginBundle.message;
-import static spp.jetbrains.PluginUI.DFLT_BGND_COLOR;
-import static spp.jetbrains.PluginUI.SMALLER_FONT;
+import static spp.jetbrains.PluginUI.*;
 
 public class LiveBreakpointConfigurationPanel extends JPanel {
 
@@ -123,7 +121,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         panel3 = new JPanel();
         label3 = new JLabel();
         panel1 = new JPanel();
@@ -143,7 +141,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
         rateLimitStepCombobox = new JComboBox<>();
 
         //======== this ========
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns

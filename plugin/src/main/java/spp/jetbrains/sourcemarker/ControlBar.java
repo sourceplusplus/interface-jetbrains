@@ -22,7 +22,6 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import net.miginfocom.swing.MigLayout;
-import spp.jetbrains.PluginUI;
 import spp.jetbrains.command.LiveCommand;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
@@ -45,7 +44,7 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {
 
@@ -199,7 +198,10 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
-        inlayMark.dispose(true, false);
+
+        if (inlayMark.getSourceFileMarker().containsSourceMarkByIdentity(inlayMark)) {
+            inlayMark.dispose(true, false);
+        }
     }
 
     private void removeActiveDecorations() {
@@ -208,7 +210,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         label1 = new JLabel();
         String fullyQualified = inlayMark.getArtifactQualifiedName().getIdentifier();
         String location = fullyQualified;
@@ -234,7 +236,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -249,7 +251,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         add(label1, "cell 0 0");
 
         //---- textField1 ----
-        textField1.setBackground(STATUS_BAR_TXT_BG_COLOR);
+        textField1.setBackground(getInputBackgroundColor());
         textField1.setBorder(new CompoundBorder(
             new LineBorder(UIUtil.getBoundsColor(), 1, true),
             new EmptyBorder(2, 6, 0, 0)));

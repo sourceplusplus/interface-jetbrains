@@ -37,7 +37,7 @@ public class LiveControlBarRow extends JPanel {
 
     public void setCommandName(String commandName, String input) {
         String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
-        String defaultHex = "#" + Integer.toHexString(CONTROL_BAR_CMD_FOREGROUND.getRGB()).substring(2);
+        String defaultHex = getCommandTypeColor();
 
         int minIndex = 0;
         Map<Integer, Integer> matches = new HashMap<>();

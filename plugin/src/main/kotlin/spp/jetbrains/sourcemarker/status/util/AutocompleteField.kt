@@ -20,7 +20,6 @@ import com.intellij.openapi.util.ScalableIcon
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
-import spp.jetbrains.PluginUI.BGND_FOCUS_COLOR
 import spp.jetbrains.PluginUI.COMPLETE_COLOR_PURPLE
 import spp.jetbrains.PluginUI.SMALLEST_FONT
 import spp.jetbrains.icons.PluginIcons
@@ -107,7 +106,6 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         list.font = SMALLEST_FONT
         list.setCellRenderer(AutoCompleteCellRenderer(artifactQualifiedName))
 
-        list.setBackground(BGND_FOCUS_COLOR)
         list.setBorder(JBUI.Borders.empty())
         val scroll: JScrollPane = object : JScrollPane(list) {
             override fun getPreferredSize(): Dimension {
