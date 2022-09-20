@@ -165,6 +165,10 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         return sourceMarks.contains(sourceMark)
     }
 
+    fun containsSourceMarkByIdentity(sourceMark: SourceMark): Boolean {
+        return sourceMarks.any { it === sourceMark }
+    }
+
     fun containsPsiElement(psiElement: PsiElement): Boolean {
         return sourceMarks.find { it.getPsiElement() === psiElement } != null
     }

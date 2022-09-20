@@ -72,8 +72,10 @@ object ControlBarController {
         LivePluginService.getInstance(editor.project!!).getRegisteredLiveCommands()
             .find { it.name == input }?.let {
                 val prevCommandBar = previousControlBar!!
-                previousControlBar!!.dispose()
-                previousControlBar = null
+                safeRunBlocking {
+                    previousControlBar!!.disposeSuspend()
+                    previousControlBar = null
+                }
 
                 val argsString = substringAfterIgnoreCase(fullText, input).trim()
                 val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")

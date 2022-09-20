@@ -198,7 +198,10 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
-        inlayMark.dispose(true, false);
+
+        if (inlayMark.getSourceFileMarker().containsSourceMarkByIdentity(inlayMark)) {
+            inlayMark.dispose(true, false);
+        }
     }
 
     private void removeActiveDecorations() {
