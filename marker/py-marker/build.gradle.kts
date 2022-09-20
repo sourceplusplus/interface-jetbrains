@@ -20,7 +20,7 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 
     testImplementation(projectDependency(":common"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
