@@ -80,7 +80,7 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 
 public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener,

@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
 
