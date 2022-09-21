@@ -4,6 +4,7 @@ plugins {
 
 val vertxVersion: String by project
 val projectVersion: String by project
+val jupiterVersion: String by project
 
 intellij {
     plugins.set(listOf("PythonCore:222.3739.68"))
@@ -20,7 +21,7 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 
     testImplementation(projectDependency(":common"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

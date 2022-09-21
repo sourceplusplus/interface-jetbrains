@@ -6,6 +6,7 @@ val vertxVersion: String by project
 val projectVersion: String by project
 val joorVersion: String by project
 val intellijVersion: String by project
+val jupiterVersion: String by project
 
 intellij {
     plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13"))
@@ -27,7 +28,7 @@ dependencies {
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
 
     testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }
 
 fun projectDependency(name: String): ProjectDependency {
