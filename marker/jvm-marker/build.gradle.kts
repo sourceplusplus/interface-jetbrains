@@ -27,7 +27,7 @@ dependencies {
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
 
     testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 
 fun projectDependency(name: String): ProjectDependency {

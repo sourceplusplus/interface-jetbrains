@@ -94,7 +94,7 @@ dependencies {
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
     implementation("info.debatty:java-string-similarity:2.0.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
 }
 
 tasks {
