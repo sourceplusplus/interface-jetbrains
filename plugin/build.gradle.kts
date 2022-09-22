@@ -12,6 +12,7 @@ val jacksonVersion: String by project
 val vertxVersion: String by project
 val kotlinVersion: String by project
 val projectVersion: String by project
+val jupiterVersion: String by project
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
@@ -94,7 +95,8 @@ dependencies {
     implementation("eu.geekplace.javapinning:java-pinning-core:1.2.0")
     implementation("info.debatty:java-string-similarity:2.0.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks {
