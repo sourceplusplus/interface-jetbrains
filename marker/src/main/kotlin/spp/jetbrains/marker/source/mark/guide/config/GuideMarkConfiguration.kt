@@ -29,6 +29,7 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class GuideMarkConfiguration(
+    var liveTooltip: LiveTooltip? = null,
     override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.ALL,
     override var activateOnKeyboardShortcut: Boolean = false,
     override var componentProvider: SourceMarkComponentProvider = SourceMarkJcefComponentProvider()
