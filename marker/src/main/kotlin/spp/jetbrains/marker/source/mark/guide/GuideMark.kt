@@ -18,8 +18,8 @@ package spp.jetbrains.marker.source.mark.guide
 
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
-import spp.jetbrains.marker.source.mark.guide.config.LiveTooltip
-import spp.jetbrains.marker.source.mark.guide.config.TextLiveTooltip
+import spp.jetbrains.marker.source.mark.api.component.tooltip.LiveTooltip
+import spp.jetbrains.marker.source.mark.api.component.tooltip.TextLiveTooltip
 import javax.swing.JPanel
 
 /**

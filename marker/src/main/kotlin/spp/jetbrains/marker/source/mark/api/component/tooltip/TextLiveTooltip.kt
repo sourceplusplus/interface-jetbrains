@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.source.mark.guide.config
+package spp.jetbrains.marker.source.mark.api.component.tooltip
 
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI

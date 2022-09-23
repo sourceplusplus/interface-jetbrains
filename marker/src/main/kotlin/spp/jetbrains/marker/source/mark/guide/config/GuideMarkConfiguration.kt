@@ -18,6 +18,7 @@ package spp.jetbrains.marker.source.mark.guide.config
 
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
+import spp.jetbrains.marker.source.mark.api.component.tooltip.LiveTooltip
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
 import spp.jetbrains.marker.source.mark.api.filter.ApplySourceMarkFilter
 import spp.jetbrains.marker.source.mark.guide.GuideMark
