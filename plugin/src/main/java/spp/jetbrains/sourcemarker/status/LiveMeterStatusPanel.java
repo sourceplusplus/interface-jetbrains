@@ -30,7 +30,6 @@ import spp.jetbrains.plugin.LiveStatusManager;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;
-import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.service.listen.LiveInstrumentListener;
 import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
@@ -73,21 +72,19 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
         meterType = meterType.substring(0, 1).toUpperCase() + meterType.substring(1);
         meterTypeValueLabel.setText(message(meterType.toLowerCase()));
 
-        if (liveMeter.getMeterType() == MeterType.GAUGE) {
-            minuteLabel.setText("Value");
-            hourLabel.setVisible(false);
-            hourValueLabel.setVisible(false);
-            dayLabel.setVisible(false);
-            dayValueLabel.setVisible(false);
-        }
+        minuteLabel.setText("Value");
+        hourLabel.setVisible(false);
+        hourValueLabel.setVisible(false);
+        dayLabel.setVisible(false);
+        dayValueLabel.setVisible(false);
         LiveStatusManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
     }
 
     public void accept(@NotNull LiveInstrumentEvent event) {
         JsonObject rawMetrics = new JsonObject(new JsonObject(event.getData()).getString("metricsData"));
-        minuteValueLabel.setText(getShortNumber(rawMetrics.getString("last_minute")));
-        hourValueLabel.setText(getShortNumber(rawMetrics.getString("last_hour")));
-        dayValueLabel.setText(getShortNumber(rawMetrics.getString("last_day")));
+        minuteValueLabel.setText(getShortNumber(rawMetrics.getValue("value").toString()));
+//        hourValueLabel.setText(getShortNumber(rawMetrics.getString("last_hour")));
+//        dayValueLabel.setText(getShortNumber(rawMetrics.getString("last_day")));
     }
 
     @Override
