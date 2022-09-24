@@ -219,7 +219,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 UserData.liveViewService(project)!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
-                        logPatterns,
+                        logPatterns.toMutableSet(),
                         ArtifactQualifiedName(
                             inlayMark.artifactQualifiedName.identifier,
                             lineNumber = inlayMark.artifactQualifiedName.lineNumber,
@@ -469,7 +469,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 UserData.liveViewService(project)!!.addLiveViewSubscription(
                     LiveViewSubscription(
                         null,
-                        listOf(liveMeter.toMetricId()),
+                        mutableSetOf(liveMeter.toMetricId()),
                         ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
                         liveMeter.location,
                         LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
