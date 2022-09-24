@@ -19,9 +19,9 @@ package spp.jetbrains.plugin.impl
 import com.apollographql.apollo3.exception.ApolloNetworkException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.command.LiveCommand
+import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.indicator.LiveIndicator
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
@@ -97,8 +97,8 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         return commands.toList()
     }
 
-    override fun getRegisteredLiveCommands(selfInfo: SelfInfo, element: PsiElement): List<LiveCommand> {
-        return commands.filter { it.isAvailable(selfInfo, element) }
+    override fun getRegisteredLiveCommands(selfInfo: SelfInfo, context: LiveLocationContext): List<LiveCommand> {
+        return commands.filter { it.isAvailable(selfInfo, context) }
     }
 
     override fun getRegisteredLiveIndicators(): List<LiveIndicator> {
