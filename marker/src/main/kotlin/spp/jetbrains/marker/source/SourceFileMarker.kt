@@ -301,7 +301,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
                 gutterMark.apply(true)
                 gutterMark
             } else {
-                error("Could not apply inlay mark: $gutterMark")
+                error("Could not apply gutter mark: $gutterMark")
             }
         } else {
             gutterMark

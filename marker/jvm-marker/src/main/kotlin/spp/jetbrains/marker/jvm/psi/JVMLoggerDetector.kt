@@ -70,13 +70,17 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
     override fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int) {
         //todo: better way to handle logger detector with inlay marks
         ApplicationManager.getApplication().runReadAction {
-            val guideMark = findMethodSourceMark(editor, inlayMark.sourceFileMarker, lineLocation)
+            val guideMark = findMethodGuideMark(editor, inlayMark.sourceFileMarker, lineLocation)
             if (guideMark != null) {
                 safeRunBlocking {
                     getOrFindLoggerStatements(guideMark)
                 }
+
+                val detectedLogger = DetectedLogger(logPattern, "live", lineLocation)
+                inlayMark.putUserData(DETECTED_LOGGER, detectedLogger)
+
                 val loggerStatements = guideMark.getUserData(LOGGER_STATEMENTS)!! as MutableList<DetectedLogger>
-                loggerStatements.add(DetectedLogger(logPattern, "live", lineLocation))
+                loggerStatements.add(detectedLogger)
             } else {
                 val loggerStatements = inlayMark.getUserData(LOGGER_STATEMENTS) as MutableList?
                 if (loggerStatements == null) {
@@ -110,7 +114,7 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         }
     }
 
-    private fun getOrFindLoggerStatements(
+    fun getOrFindLoggerStatements(
         uMethod: UMethod,
         fileMarker: SourceFileMarker
     ): Future<List<DetectedLogger>> {
@@ -183,8 +187,8 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         return document?.getLineNumber(index) ?: 0
     }
 
-    private fun findMethodSourceMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodGuideMark? {
-        return fileMarker.getSourceMarks().find {
+    private fun findMethodGuideMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodGuideMark? {
+        return fileMarker.getGuideMarks().find {
             if (it is MethodGuideMark) {
                 if (it.configuration.activateOnKeyboardShortcut) {
                     //+1 on end offset so match is made even right after method end

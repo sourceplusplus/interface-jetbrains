@@ -19,6 +19,7 @@ package spp.jetbrains.sourcemarker.mark
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.trace
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiManager
@@ -88,30 +89,29 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
     }
 
     override fun handleEvent(event: SourceMarkEvent) {
-        if (log.isTraceEnabled) {
-            log.trace("Handling event: $event")
-        }
+        log.trace { "Handling event: $event" }
 
         if (event.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
             val sourceMark = event.sourceMark
 
+            //setup endpoint detector and attempt detection
             if (sourceMark is MethodGuideMark) {
-                //setup endpoint detector and attempt detection
                 val endpointDetector = endpointDetectors[sourceMark.language.id]
                 if (endpointDetector != null) {
                     sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
-                    vertx.safeLaunch {
-                        endpointDetector.getOrFindEndpointId(sourceMark)
-                    }
+                    vertx.safeLaunch { endpointDetector.getOrFindEndpointId(sourceMark) }
                 }
+            }
 
-                //setup logger detector and attempt detection
-                val loggerDetector = loggerDetectors[sourceMark.language.id]
-                if (loggerDetector != null) {
-                    sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
-                    vertx.safeLaunch {
-                        loggerDetector.getOrFindLoggerStatements(sourceMark)
-                    }
+            //setup logger detector
+            val loggerDetector = loggerDetectors[sourceMark.language.id]
+            if (loggerDetector != null) {
+                //add logger detector to all marks as live logs can be placed anywhere
+                sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
+
+                //attempt to detect logger(s) on method guide marks
+                if (sourceMark is MethodGuideMark) {
+                    vertx.safeLaunch { loggerDetector.getOrFindLoggerStatements(sourceMark) }
                 }
             }
         }
