@@ -18,6 +18,8 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.*
+import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -33,8 +35,14 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
                     makeClassGuideMark(fileMarker, element)
                 } else if (element is PsiMethod) {
                     makeMethodGuideMark(fileMarker, element)
-                } else if (element::class.java.name == "org.jetbrains.kotlin.psi.KtNamedFunction") {
-                    makeMethodGuideMark(fileMarker, element)
+                }
+
+                if (element.language.id == "kotlin") {
+                    if (element is KtClass) {
+                        makeClassGuideMark(fileMarker, element)
+                    } else if (element is KtNamedFunction) {
+                        makeMethodGuideMark(fileMarker, element)
+                    }
                 }
             }
         })
