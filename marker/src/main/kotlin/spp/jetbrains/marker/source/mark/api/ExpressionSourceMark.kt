@@ -20,7 +20,6 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
-import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
@@ -32,7 +31,6 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import java.util.*
 
 /**
@@ -109,14 +107,10 @@ abstract class ExpressionSourceMark(
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
-    fun getParentSourceMark(): SourceMark? {
-        return SourceMarker.getInstance(project).getSourceMark(
-            artifactQualifiedName.copy(
-                identifier = artifactQualifiedName.identifier.substringBefore("#"),
-                type = ArtifactType.METHOD
-            ),
-            SourceMark.Type.GUIDE
-        )
+    fun getParent(): SourceMark? {
+        return artifactQualifiedName.asParent()?.let {
+            sourceFileMarker.getSourceMark(it, SourceMark.Type.GUIDE)
+        }
     }
 
     private val userData = HashMap<Any, Any>()

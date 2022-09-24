@@ -20,6 +20,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.refactoring.suggested.endOffset
@@ -31,9 +33,14 @@ import io.vertx.kotlin.coroutines.await
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElementOfType
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.UserData
 import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.info.LoggerDetector
+import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
+import spp.jetbrains.marker.source.info.LoggerDetector.Companion.LOGGER_STATEMENTS
+import spp.jetbrains.marker.source.info.LoggerDetector.DetectedLogger
+import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.safeLaunch
 
@@ -43,11 +50,10 @@ import spp.jetbrains.safeLaunch
  * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LoggerDetector(val vertx: Vertx) {
+class JVMLoggerDetector(val project: Project) : LoggerDetector {
 
     companion object {
-        private val log = logger<LoggerDetector>()
-        val LOGGER_STATEMENTS = SourceKey<List<DetectedLogger>>("LOGGER_STATEMENTS")
+        private val log = logger<JVMLoggerDetector>()
 
         private val LOGGER_CLASSES = setOf(
             "org.apache.logging.log4j.spi.AbstractLogger",
@@ -59,15 +65,17 @@ class LoggerDetector(val vertx: Vertx) {
         )
     }
 
-    fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int) {
+    private val vertx: Vertx = UserData.vertx(project)
+
+    override fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int) {
         //todo: better way to handle logger detector with inlay marks
         ApplicationManager.getApplication().runReadAction {
-            val methodSourceMark = findMethodSourceMark(editor, inlayMark.sourceFileMarker, lineLocation)
-            if (methodSourceMark != null) {
+            val guideMark = findMethodSourceMark(editor, inlayMark.sourceFileMarker, lineLocation)
+            if (guideMark != null) {
                 safeRunBlocking {
-                    getOrFindLoggerStatements(methodSourceMark)
+                    getOrFindLoggerStatements(guideMark)
                 }
-                val loggerStatements = methodSourceMark.getUserData(LOGGER_STATEMENTS)!! as MutableList<DetectedLogger>
+                val loggerStatements = guideMark.getUserData(LOGGER_STATEMENTS)!! as MutableList<DetectedLogger>
                 loggerStatements.add(DetectedLogger(logPattern, "live", lineLocation))
             } else {
                 val loggerStatements = inlayMark.getUserData(LOGGER_STATEMENTS) as MutableList?
@@ -83,36 +91,34 @@ class LoggerDetector(val vertx: Vertx) {
         }
     }
 
-    suspend fun getOrFindLoggerStatements(sourceMark: MethodSourceMark): List<DetectedLogger> {
-        val loggerStatements = sourceMark.getUserData(LOGGER_STATEMENTS)
+    override suspend fun getOrFindLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger> {
+        val loggerStatements = guideMark.getUserData(LOGGER_STATEMENTS)
         return if (loggerStatements != null) {
             log.trace("Found logger statements: $loggerStatements")
             loggerStatements
         } else {
-            if (sourceMark.language.id == "Python") {
-                //todo: issue #625
-                val emptyList = mutableListOf<DetectedLogger>()
-                sourceMark.putUserData(LOGGER_STATEMENTS, emptyList)
-                return emptyList
-            }
-
-            val uMethod = sourceMark.getPsiMethod().toUElementOfType<UMethod>()
+            val uMethod = ApplicationManager.getApplication().runReadAction(Computable {
+                guideMark.getPsiMethod().toUElementOfType<UMethod>()
+            })
             if (uMethod != null) {
-                val foundLoggerStatements = getOrFindLoggerStatements(uMethod).await()
-                sourceMark.putUserData(LOGGER_STATEMENTS, foundLoggerStatements)
+                val foundLoggerStatements = getOrFindLoggerStatements(uMethod, guideMark.sourceFileMarker).await()
+                guideMark.putUserData(LOGGER_STATEMENTS, foundLoggerStatements)
                 foundLoggerStatements
-            } else { //todo: python functions don't have UMethod
+            } else {
                 emptyList()
             }
         }
     }
 
-    fun getOrFindLoggerStatements(uMethod: UMethod): Future<List<DetectedLogger>> {
+    private fun getOrFindLoggerStatements(
+        uMethod: UMethod,
+        fileMarker: SourceFileMarker
+    ): Future<List<DetectedLogger>> {
         val promise = Promise.promise<List<DetectedLogger>>()
         vertx.safeLaunch {
             val loggerStatements = mutableListOf<DetectedLogger>()
             try {
-                loggerStatements.addAll(determineLoggerStatements(uMethod).await())
+                loggerStatements.addAll(determineLoggerStatements(uMethod, fileMarker).await())
             } catch (throwable: Throwable) {
                 promise.fail(throwable)
             }
@@ -121,7 +127,10 @@ class LoggerDetector(val vertx: Vertx) {
         return promise.future()
     }
 
-    private fun determineLoggerStatements(uMethod: UMethod): Future<List<DetectedLogger>> {
+    private fun determineLoggerStatements(
+        uMethod: UMethod,
+        fileMarker: SourceFileMarker
+    ): Future<List<DetectedLogger>> {
         val promise = Promise.promise<List<DetectedLogger>>()
         val loggerStatements = mutableListOf<DetectedLogger>()
         ApplicationManager.getApplication().runReadAction {
@@ -135,10 +144,25 @@ class LoggerDetector(val vertx: Vertx) {
                                 (this as? PsiLiteral)?.value as? String
                             })
                             if (logTemplate != null) {
-                                loggerStatements.add(
-                                    DetectedLogger(logTemplate, methodName, getLineNumber(expression) + 1)
-                                )
                                 log.debug("Found log statement: $logTemplate")
+                                val detectedLogger = DetectedLogger(
+                                    logTemplate, methodName, getLineNumber(expression) + 1
+                                )
+
+                                //create expression guide mark for the log statement
+                                val guideMark = fileMarker.createExpressionSourceMark(
+                                    expression, SourceMark.Type.GUIDE
+                                )
+                                if (!fileMarker.containsSourceMark(guideMark)) {
+                                    guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
+                                    guideMark.apply(true)
+                                } else {
+                                    fileMarker.getSourceMark(guideMark.artifactQualifiedName, SourceMark.Type.GUIDE)
+                                        ?.putUserData(DETECTED_LOGGER, detectedLogger)
+                                }
+
+                                //add to method guide mark list
+                                loggerStatements.add(detectedLogger)
                             } else {
                                 log.warn("No log template argument available for expression: $expression")
                             }
@@ -159,9 +183,9 @@ class LoggerDetector(val vertx: Vertx) {
         return document?.getLineNumber(index) ?: 0
     }
 
-    private fun findMethodSourceMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodSourceMark? {
+    private fun findMethodSourceMark(editor: Editor, fileMarker: SourceFileMarker, line: Int): MethodGuideMark? {
         return fileMarker.getSourceMarks().find {
-            if (it is MethodSourceMark) {
+            if (it is MethodGuideMark) {
                 if (it.configuration.activateOnKeyboardShortcut) {
                     //+1 on end offset so match is made even right after method end
                     val incTextRange = TextRange(
@@ -175,18 +199,6 @@ class LoggerDetector(val vertx: Vertx) {
             } else {
                 false
             }
-        } as MethodSourceMark?
+        } as MethodGuideMark?
     }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.2.1
-     * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
-     */
-    data class DetectedLogger(
-        val logPattern: String,
-        val level: String,
-        val lineLocation: Int
-    )
 }

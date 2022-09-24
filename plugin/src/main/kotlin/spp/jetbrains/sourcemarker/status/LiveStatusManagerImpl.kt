@@ -31,7 +31,6 @@ import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.impl.ArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
-import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
@@ -203,8 +202,8 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
             if (watchExpression) {
                 val logPatterns = mutableListOf<String>()
-                val parentMark = inlayMark.getParentSourceMark()
-                if (parentMark is MethodSourceMark) {
+                val parentMark = inlayMark.getParent()
+                if (parentMark is MethodGuideMark) {
                     val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
                     if (loggerDetector != null) {
                         safeRunBlocking {

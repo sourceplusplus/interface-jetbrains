@@ -39,7 +39,7 @@ import org.jetbrains.uast.toUElement
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import java.io.File
 
-class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
+class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     override fun getProjectDescriptor(): LightProjectDescriptor {
         return object : DefaultLightProjectDescriptor() {
@@ -143,7 +143,7 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes[0].methods.size)
 
             safeRunBlocking {
-                val result = LoggerDetector(Vertx.vertx())
+                val result = JVMLoggerDetector(Vertx.vertx())
                     .getOrFindLoggerStatements(uFile.classes[0].methods[0]).await()
                     .map { it.logPattern }
                 assertEquals(5, result.size)

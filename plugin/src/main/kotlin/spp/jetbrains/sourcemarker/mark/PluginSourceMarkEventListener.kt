@@ -25,9 +25,10 @@ import com.intellij.psi.PsiManager
 import io.vertx.core.Vertx
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
-import spp.jetbrains.marker.jvm.psi.LoggerDetector
+import spp.jetbrains.marker.jvm.psi.JVMLoggerDetector
 import spp.jetbrains.marker.py.PythonEndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector
+import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
@@ -49,7 +50,6 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
         private val log = logger<PluginSourceMarkEventListener>()
     }
 
-    private val loggerDetector = LoggerDetector(vertx)
     private val endpointDetectors = mutableMapOf<String, EndpointDetector<*>>()
         .apply {
             JVMEndpointDetector(project).let {
@@ -59,6 +59,15 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
                 put("Groovy", it)
             }
             put("Python", PythonEndpointDetector(project))
+        }.toMap()
+    private val loggerDetectors = mutableMapOf<String, LoggerDetector>()
+        .apply {
+            JVMLoggerDetector(project).let {
+                put("JAVA", it)
+                put("kotlin", it)
+                put("Scala", it)
+                put("Groovy", it)
+            }
         }.toMap()
 
     init {
@@ -88,14 +97,23 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
 
             if (sourceMark is MethodGuideMark) {
                 //setup endpoint detector and attempt detection
-                sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetectors[sourceMark.language.id])
-                vertx.safeLaunch {
-                    endpointDetectors[sourceMark.language.id]!!.getOrFindEndpointId(sourceMark)
+                val endpointDetector = endpointDetectors[sourceMark.language.id]
+                if (endpointDetector != null) {
+                    sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
+                    vertx.safeLaunch {
+                        endpointDetector.getOrFindEndpointId(sourceMark)
+                    }
+                }
+
+                //setup logger detector and attempt detection
+                val loggerDetector = loggerDetectors[sourceMark.language.id]
+                if (loggerDetector != null) {
+                    sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
+                    vertx.safeLaunch {
+                        loggerDetector.getOrFindLoggerStatements(sourceMark)
+                    }
                 }
             }
-
-            //setup logger detector
-            sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
         }
     }
 }

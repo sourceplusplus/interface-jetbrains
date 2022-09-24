@@ -39,7 +39,9 @@ abstract class LiveCommand(val project: Project) {
     val statusManager = LiveStatusManager.getInstance(project)
     val instrumentService = UserData.liveInstrumentService(project)
 
-    abstract fun getDescription(): String
+    open fun getDescription(): String = ""
+
+    open fun getDescription(context: LiveLocationContext): String = getDescription()
 
     open fun trigger(context: LiveCommandContext) {
         ApplicationManager.getApplication().runReadAction {

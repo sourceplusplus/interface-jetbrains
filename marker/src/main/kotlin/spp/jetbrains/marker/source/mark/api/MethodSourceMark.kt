@@ -158,6 +158,12 @@ abstract class MethodSourceMark(
         return true
     }
 
+    fun getParent(): GuideMark? {
+        return artifactQualifiedName.asParent()?.let {
+            sourceFileMarker.getSourceMark(it, SourceMark.Type.GUIDE) as GuideMark?
+        }
+    }
+
     private val eventListeners = ArrayList<SourceMarkEventListener>()
     override fun clearEventListeners() = eventListeners.clear()
     override fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()

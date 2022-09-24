@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.mark
 
-import spp.jetbrains.marker.jvm.psi.LoggerDetector
 import spp.jetbrains.marker.source.info.EndpointDetector
+import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.sourcemarker.status.StatusBar

@@ -115,6 +115,10 @@ abstract class ClassSourceMark(
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
+    fun getChildren(): List<GuideMark> {
+        return sourceFileMarker.getGuideMarks().filterNot { it === this }
+    }
+
     private val userData = HashMap<Any, Any>()
     override fun getUserData() = userData
     override fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
