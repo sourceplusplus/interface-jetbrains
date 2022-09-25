@@ -74,6 +74,35 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertEquals(ArtifactType.CLASS, name.type)
     }
 
+    fun testJavaInnerClassName() {
+        doTestInnerClassName<PsiClass>("java")
+    }
+
+    fun testKotlinInnerClassName() {
+        doTestInnerClassName<KtClass>("kt")
+    }
+
+    fun testGroovyInnerClassName() {
+        doTestInnerClassName<PsiClass>("groovy")
+    }
+
+    private inline fun <reified T : PsiElement> doTestInnerClassName(extension: String) {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".$extension")
+        val clazz = psiFile.findDescendantOfType<T> { true }
+        assertNotNull(clazz)
+
+        val parentName = JVMArtifactNamingService().getFullyQualifiedName(clazz!!)
+        assertEquals(getTestName(false) + "", parentName.identifier)
+        assertEquals(ArtifactType.CLASS, parentName.type)
+
+        val innerClazz = clazz.findDescendantOfType<T> { it !== clazz }
+        assertNotNull(innerClazz)
+
+        val innerName = JVMArtifactNamingService().getFullyQualifiedName(innerClazz!!)
+        assertEquals(getTestName(false) + "\$InnerClassName", innerName.identifier)
+        assertEquals(ArtifactType.CLASS, innerName.type)
+    }
+
     fun testJavaMethodName() {
         doTestMethodName<PsiMethod>("java")
     }
@@ -93,6 +122,28 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(method!!)
         assertEquals(getTestName(false) + ".foo()", name.identifier)
+        assertEquals(ArtifactType.METHOD, name.type)
+    }
+
+    fun testJavaInnerClassMethodName() {
+        doTestInnerClassMethodName<PsiMethod>("java")
+    }
+
+    fun testKotlinInnerClassMethodName() {
+        doTestInnerClassMethodName<KtFunction>("kt")
+    }
+
+    fun testGroovyInnerClassMethodName() {
+        doTestInnerClassMethodName<PsiMethod>("groovy")
+    }
+
+    private inline fun <reified T : PsiElement> doTestInnerClassMethodName(extension: String) {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".$extension")
+        val method = psiFile.findDescendantOfType<T> { true }
+        assertNotNull(method)
+
+        val name = JVMArtifactNamingService().getFullyQualifiedName(method!!)
+        assertEquals(getTestName(false) + "\$InnerClassName.foo()", name.identifier)
         assertEquals(ArtifactType.METHOD, name.type)
     }
 
@@ -126,6 +177,36 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertEquals(3, name.lineNumber)
     }
 
+    fun testJavaInnerClassMethodVariable() {
+        doTestInnerClassMethodVariable("java")
+    }
+
+    fun testKotlinInnerClassMethodVariable() {
+        doTestInnerClassMethodVariable("kt")
+    }
+
+    fun testGroovyInnerClassMethodVariable() {
+        doTestInnerClassMethodVariable("groovy")
+    }
+
+    private fun doTestInnerClassMethodVariable(extension: String) {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".$extension")
+        val identifier = psiFile.findDescendantOfType<PsiNameIdentifierOwner> {
+            it.identifyingElement?.text == "id"
+        }!!.identifyingElement
+        assertNotNull(identifier)
+
+        val name = JVMArtifactNamingService().getFullyQualifiedName(identifier!!)
+        when (extension) {
+            "kt" -> assertEquals(getTestName(false) + "\$InnerClassName.foo()#aWQ6MTA4", name.identifier)
+            "java" -> assertEquals(getTestName(false) + "\$InnerClassName.foo()#aWQ6MTIy", name.identifier)
+            "groovy" -> assertEquals(getTestName(false) + "\$InnerClassName.foo()#aWQ6MTAz", name.identifier)
+            else -> fail("Unknown extension: $extension")
+        }
+        assertEquals(ArtifactType.EXPRESSION, name.type)
+        assertEquals(4, name.lineNumber)
+    }
+
     fun testJavaClassVariable() {
         doTestClassVariable("java")
     }
@@ -154,5 +235,35 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         }
         assertEquals(ArtifactType.EXPRESSION, name.type)
         assertEquals(2, name.lineNumber)
+    }
+
+    fun testJavaInnerClassVariable() {
+        doTestInnerClassVariable("java")
+    }
+
+    fun testKotlinInnerClassVariable() {
+        doTestInnerClassVariable("kt")
+    }
+
+    fun testGroovyInnerClassVariable() {
+        doTestInnerClassVariable("groovy")
+    }
+
+    private fun doTestInnerClassVariable(extension: String) {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".$extension")
+        val identifier = psiFile.findDescendantOfType<PsiNameIdentifierOwner> {
+            it.identifyingElement?.text == "id"
+        }!!.identifyingElement
+        assertNotNull(identifier)
+
+        val name = JVMArtifactNamingService().getFullyQualifiedName(identifier!!)
+        when (extension) {
+            "kt" -> assertEquals(getTestName(false) + "\$InnerClassName#aWQ6Nzg=", name.identifier)
+            "java" -> assertEquals(getTestName(false) + "\$InnerClassName#aWQ6ODQ=", name.identifier)
+            "groovy" -> assertEquals(getTestName(false) + "\$InnerClassName#aWQ6NzI=", name.identifier)
+            else -> fail("Unknown extension: $extension")
+        }
+        assertEquals(ArtifactType.EXPRESSION, name.type)
+        assertEquals(3, name.lineNumber)
     }
 }

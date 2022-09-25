@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.source
 
+import com.intellij.lang.jvm.util.JvmClassUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
@@ -504,9 +505,11 @@ object JVMMarkerUtils {
      */
     @JvmStatic
     fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
-        //todo: PsiUtil.getMemberQualifiedName(method)!!
+        val classQualifiedName = method.getContainingUClass()?.let {
+            getFullyQualifiedName(it).identifier
+        }
         return ArtifactQualifiedName(
-            "${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}",
+            "$classQualifiedName.${getQualifiedName(method)}",
             type = ArtifactType.METHOD
         )
     }
@@ -518,8 +521,7 @@ object JVMMarkerUtils {
      */
     @JvmStatic
     fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
-        //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return ArtifactQualifiedName("${theClass.qualifiedName}", type = ArtifactType.CLASS)
+        return ArtifactQualifiedName("${JvmClassUtil.getJvmClassName(theClass)}", type = ArtifactType.CLASS)
     }
 
     /**
