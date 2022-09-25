@@ -505,9 +505,11 @@ object JVMMarkerUtils {
      */
     @JvmStatic
     fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
-        //todo: PsiUtil.getMemberQualifiedName(method)!!
+        val classQualifiedName = method.getContainingUClass()?.let {
+            getFullyQualifiedName(it).identifier
+        }
         return ArtifactQualifiedName(
-            "${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}",
+            "$classQualifiedName.${getQualifiedName(method)}",
             type = ArtifactType.METHOD
         )
     }
