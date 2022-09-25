@@ -115,19 +115,7 @@ abstract class ClassSourceMark(
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
-    private val userData = HashMap<Any, Any>()
-    override fun getUserData() = userData
-    override fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
-    override fun <T> putUserData(key: SourceKey<T>, value: T?) {
-        if (value != null) {
-            userData.put(key, value)
-        } else {
-            userData.remove(key)
-        }
-        triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_USER_DATA_UPDATED, key, value))
-    }
-
-    override fun hasUserData(): Boolean = userData.isNotEmpty()
+    override val userData = HashMap<Any, Any>()
 
     override fun getPsiElement(): PsiNameIdentifierOwner {
         return psiClass
@@ -153,12 +141,7 @@ abstract class ClassSourceMark(
         return true
     }
 
-    private val eventListeners = ArrayList<SourceMarkEventListener>()
-    override fun clearEventListeners() = eventListeners.clear()
-    override fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()
-    override fun addEventListener(listener: SourceMarkEventListener) {
-        eventListeners += listener
-    }
+    override val eventListeners = ArrayList<SourceMarkEventListener>()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

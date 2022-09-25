@@ -48,6 +48,7 @@ import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
 import spp.jetbrains.marker.source.mark.api.event.*
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.event.GutterMarkEventCode
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
@@ -252,14 +253,47 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         clearEventListeners()
     }
 
-    fun getUserData(): Map<Any, Any>
-    fun <T> getUserData(key: SourceKey<T>): T?
-    fun <T> putUserData(key: SourceKey<T>, value: T?)
-    fun hasUserData(): Boolean
+    fun getParent(): GuideMark? {
+        return artifactQualifiedName.asParent()?.let {
+            sourceFileMarker.getSourceMark(it, Type.GUIDE) as GuideMark?
+        }
+    }
 
-    fun clearEventListeners()
-    fun getEventListeners(): List<SourceMarkEventListener>
-    fun addEventListener(listener: SourceMarkEventListener)
+    fun getChildren(): List<SourceMark> {
+        return sourceFileMarker.getSourceMarks().filter { it.artifactQualifiedName.isChildOf(artifactQualifiedName) }
+    }
+
+    val userData: HashMap<Any, Any>
+    fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
+    fun <T> putUserData(key: SourceKey<T>, value: T?) {
+        if (value != null) {
+            userData.put(key, value)
+        } else {
+            userData.remove(key)
+        }
+
+        val event = SourceMarkEvent(this, SourceMarkEventCode.MARK_USER_DATA_UPDATED, key, value)
+        triggerEvent(event) {
+            val parentEvent = SourceMarkEvent(this, SourceMarkEventCode.CHILD_USER_DATA_UPDATED, key, value)
+            propagateEventToParents(parentEvent)
+        }
+    }
+    fun hasUserData(): Boolean = userData.isNotEmpty()
+
+    val eventListeners: ArrayList<SourceMarkEventListener>
+    fun clearEventListeners() = eventListeners.clear()
+    fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()
+    fun addEventListener(listener: SourceMarkEventListener) {
+        eventListeners += listener
+    }
+
+    fun propagateEventToParents(event: SourceMarkEvent) {
+        var parent = getParent()
+        while (parent != null) {
+            parent.triggerEvent(event)
+            parent = parent.getParent()
+        }
+    }
 
     fun triggerEvent(eventCode: IEventCode, params: List<Any?>, listen: (() -> Unit)? = null) {
         triggerEvent(SourceMarkEvent(this, eventCode, *params.toTypedArray()), listen)

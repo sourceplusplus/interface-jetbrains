@@ -23,6 +23,7 @@ import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.command.LiveCommand;
+import spp.jetbrains.command.LiveLocationContext;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
@@ -59,8 +60,14 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         this.editor = editor;
         this.inlayMark = inlayMark;
 
+        LiveLocationContext context = new LiveLocationContext(
+                inlayMark.getLineNumber(),
+                inlayMark.getArtifactQualifiedName(),
+                inlayMark.getSourceFileMarker(),
+                inlayMark.getPsiElement()
+        );
         List<LiveCommandFieldRow> commands = availableCommands.stream()
-                .map(it -> new LiveCommandFieldRow(it, Objects.requireNonNull(editor.getProject())))
+                .map(it -> new LiveCommandFieldRow(it, context))
                 .collect(Collectors.toList());
         this.availableCommands = commands;
         this.lookup = text -> commands.stream()
@@ -230,7 +237,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1 = new AutocompleteField(
                 message("location") + ": " + location + "#" + inlayMark.getLineNumber(),
                 availableCommands, lookup, inlayMark.getArtifactQualifiedName(), true, true, SELECT_COLOR_RED);
-        textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
+        textField1.setCellRenderer(new ControlBarCellRenderer(inlayMark, textField1));
         label2 = new JLabel();
 
         //======== this ========

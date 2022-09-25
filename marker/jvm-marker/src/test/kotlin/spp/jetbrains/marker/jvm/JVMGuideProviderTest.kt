@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
 @TestDataPath("\$CONTENT_ROOT/testData/jvmGuide/")
@@ -73,9 +74,14 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
 
         val sourceMarks = fileMarker!!.getSourceMarks()
         assertNotNull(sourceMarks)
-        assertEquals(1, sourceMarks.size)
+        assertEquals(2, sourceMarks.size)
+
+        val clazzMarks = sourceMarks.filterIsInstance<ClassGuideMark>()
+        assertEquals(1, clazzMarks.size)
+        assertEquals(getTestName(false), clazzMarks[0].artifactQualifiedName.identifier)
 
         val methodMarks = sourceMarks.filterIsInstance<MethodGuideMark>()
+        assertEquals(1, methodMarks.size)
         assertEquals("${getTestName(false)}.foo()", methodMarks[0].artifactQualifiedName.identifier)
     }
 }

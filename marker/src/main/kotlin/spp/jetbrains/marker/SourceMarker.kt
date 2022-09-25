@@ -29,6 +29,7 @@ import spp.jetbrains.marker.impl.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
@@ -48,6 +49,7 @@ class SourceMarker {
         private val log = logger<SourceMarker>()
         private val KEY = Key.create<SourceMarker>("SPP_SOURCE_MARKER")
 
+        @JvmStatic
         @Synchronized
         fun getInstance(project: Project): SourceMarker {
             if (project.getUserData(KEY) == null) {
@@ -162,6 +164,10 @@ class SourceMarker {
             }
         }
         return null
+    }
+
+    fun getGuideMark(artifactQualifiedName: ArtifactQualifiedName): GuideMark? {
+        return getSourceMark(artifactQualifiedName, SourceMark.Type.GUIDE) as GuideMark?
     }
 
     fun getSourceMarks(artifactQualifiedName: ArtifactQualifiedName): List<SourceMark> {

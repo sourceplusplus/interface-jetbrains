@@ -17,10 +17,9 @@
 package spp.jetbrains.marker.jvm
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.psi.JavaRecursiveElementVisitor
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.*
+import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -31,13 +30,33 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
         fileMarker.psiFile.acceptChildren(object : JavaRecursiveElementVisitor() {
             override fun visitElement(element: PsiElement) {
                 super.visitElement(element)
-                if (element is PsiMethod) {
+
+                if (element is PsiClass) {
+                    makeClassGuideMark(fileMarker, element)
+                } else if (element is PsiMethod) {
                     makeMethodGuideMark(fileMarker, element)
-                } else if (element::class.java.name == "org.jetbrains.kotlin.psi.KtNamedFunction") {
-                    makeMethodGuideMark(fileMarker, element)
+                }
+
+                if (element.language.id == "kotlin") {
+                    if (element is KtClass) {
+                        makeClassGuideMark(fileMarker, element)
+                    } else if (element is KtNamedFunction) {
+                        makeMethodGuideMark(fileMarker, element)
+                    }
                 }
             }
         })
+    }
+
+    private fun makeClassGuideMark(fileMarker: SourceFileMarker, element: PsiElement) {
+        ApplicationManager.getApplication().runReadAction {
+            val guideMark = fileMarker.createClassSourceMark(
+                element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
+            )
+            if (!fileMarker.containsSourceMark(guideMark)) {
+                guideMark.apply(true)
+            }
+        }
     }
 
     private fun makeMethodGuideMark(fileMarker: SourceFileMarker, element: PsiElement) {

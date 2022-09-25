@@ -17,8 +17,8 @@
 package spp.jetbrains.command
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.plugin.LiveStatusManager
@@ -27,6 +27,9 @@ import javax.swing.Icon
 
 @Suppress("unused")
 abstract class LiveCommand(val project: Project) {
+
+    val log by lazy { Logger.getInstance("spp.jetbrains.command." + this::class.java.simpleName) }
+
     abstract val name: String
     open val params: List<String> = emptyList()
     open val aliases: Set<String> = emptySet()
@@ -35,12 +38,14 @@ abstract class LiveCommand(val project: Project) {
 
     val vertx = UserData.vertx(project)
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
-    val liveManagementService = UserData.liveManagementService(project)!!
-    val liveViewService = UserData.liveViewService(project)!!
-    val liveStatusManager = LiveStatusManager.getInstance(project)
-    val liveInstrumentService = UserData.liveInstrumentService(project)
+    val managementService = UserData.liveManagementService(project)!!
+    val viewService = UserData.liveViewService(project)!!
+    val statusManager = LiveStatusManager.getInstance(project)
+    val instrumentService = UserData.liveInstrumentService(project)
 
-    abstract fun getDescription(): String
+    open fun getDescription(): String = ""
+
+    open fun getDescription(context: LiveLocationContext): String = getDescription()
 
     open fun trigger(context: LiveCommandContext) {
         ApplicationManager.getApplication().runReadAction {
@@ -52,5 +57,5 @@ abstract class LiveCommand(val project: Project) {
 
     open suspend fun triggerSuspend(context: LiveCommandContext) = Unit
 
-    open fun isAvailable(selfInfo: SelfInfo, element: PsiElement): Boolean = true
+    open fun isAvailable(selfInfo: SelfInfo, context: LiveLocationContext): Boolean = true
 }

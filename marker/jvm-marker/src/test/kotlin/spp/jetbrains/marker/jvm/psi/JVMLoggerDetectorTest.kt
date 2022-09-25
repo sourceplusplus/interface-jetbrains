@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.marker.jvm.psi
 
-import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.JavaSdk
@@ -25,21 +24,23 @@ import com.intellij.openapi.roots.ContentEntry
 import com.intellij.openapi.roots.LanguageLevelModuleExtension
 import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.pom.java.LanguageLevel
-import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import io.vertx.core.Vertx
-import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlin.idea.core.util.toPsiFile
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.UserData
+import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.jvm.JVMMarker
+import spp.jetbrains.marker.source.SourceFileMarker
 import java.io.File
 
-class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
+class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     override fun getProjectDescriptor(): LightProjectDescriptor {
         return object : DefaultLightProjectDescriptor() {
@@ -135,20 +136,23 @@ class LoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                 """.trimIndent()
 
         ApplicationManager.getApplication().runReadAction {
-            val sourceFile = PsiFileFactory.getInstance(project).createFileFromText(
-                "TestLogback.java", JavaFileType.INSTANCE, code
-            ) as PsiJavaFile
+            val sourceFile = myFixture.createFile("TestLogback.java", code).toPsiFile(project)
+            assertNotNull(sourceFile)
+
             val uFile = sourceFile.toUElement() as UFile
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            safeRunBlocking {
-                val result = LoggerDetector(Vertx.vertx())
-                    .getOrFindLoggerStatements(uFile.classes[0].methods[0]).await()
-                    .map { it.logPattern }
-                assertEquals(5, result.size)
-                assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
-            }
+            JVMMarker.setup()
+            SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
+            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(sourceFile!!)
+            assertNotNull(fileMarker)
+
+            val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
+                .determineLoggerStatements(uFile.classes[0].methods[0], fileMarker!!)
+                .map { it.logPattern }
+            assertEquals(5, result.size)
+            assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
         }
     }
 }
