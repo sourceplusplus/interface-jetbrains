@@ -54,11 +54,15 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
         return when (psiFile) {
             is PsiClassOwner -> psiFile.classes.map {
                 getFullyQualifiedName(it)
-            }.toList() + psiFile.classes.flatMap { it.innerClasses.toList() }.map {
+            }.toList() + psiFile.classes.flatMap { getInnerClassesRecursively(it) }.map {
                 getFullyQualifiedName(it)
             }.toList()
 
             else -> error("Unsupported file: $psiFile")
         }
+    }
+
+    private fun getInnerClassesRecursively(psiClass: PsiClass): List<PsiClass> {
+        return psiClass.innerClasses.toList() + psiClass.innerClasses.flatMap { getInnerClassesRecursively(it) }
     }
 }
