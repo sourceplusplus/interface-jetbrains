@@ -1,0 +1,4 @@
+class GroovyInnerClassName {
+    class InnerClassName {
+    }
+}

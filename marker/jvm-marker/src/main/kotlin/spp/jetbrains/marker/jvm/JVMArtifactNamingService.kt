@@ -21,7 +21,6 @@ import org.jetbrains.uast.*
 import spp.jetbrains.marker.AbstractArtifactNamingService
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
@@ -54,7 +53,7 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
     override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
         return when (psiFile) {
             is PsiClassOwner -> psiFile.classes.map {
-                ArtifactQualifiedName(it.qualifiedName!!, type = ArtifactType.CLASS)
+                getFullyQualifiedName(it)
             }.toList()
 
             else -> error("Unsupported file: $psiFile")
