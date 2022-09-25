@@ -18,6 +18,7 @@ package spp.jetbrains.marker.source.mark.guide.config
 
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
+import spp.jetbrains.marker.source.mark.api.component.tooltip.LiveTooltip
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
 import spp.jetbrains.marker.source.mark.api.filter.ApplySourceMarkFilter
 import spp.jetbrains.marker.source.mark.guide.GuideMark
@@ -29,6 +30,7 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class GuideMarkConfiguration(
+    var liveTooltip: LiveTooltip? = null,
     override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.ALL,
     override var activateOnKeyboardShortcut: Boolean = false,
     override var componentProvider: SourceMarkComponentProvider = SourceMarkJcefComponentProvider()

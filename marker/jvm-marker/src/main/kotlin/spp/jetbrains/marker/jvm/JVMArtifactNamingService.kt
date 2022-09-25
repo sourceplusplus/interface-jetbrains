@@ -46,6 +46,7 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
             is UMethod -> JVMMarkerUtils.getFullyQualifiedName(uElement)
             is UExpression -> JVMMarkerUtils.getFullyQualifiedName(element)
             is UDeclaration -> JVMMarkerUtils.getFullyQualifiedName(element)
+            is UIdentifier -> JVMMarkerUtils.getFullyQualifiedName(element)
             else -> TODO("Not yet implemented")
         }
     }

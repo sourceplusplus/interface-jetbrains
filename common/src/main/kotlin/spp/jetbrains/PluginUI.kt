@@ -20,7 +20,6 @@ import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
 import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.ui.Gray
-import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil.getWindowColor
 import spp.jetbrains.PluginBundle.LOCALE
@@ -44,9 +43,6 @@ object PluginUI {
 
     @JvmField
     val COMPLETE_COLOR_PURPLE: Color = Color.decode("#9876AA")
-
-    @JvmField
-    val CNFG_PANEL_BGND_COLOR = JBColor(Gray._242, Gray._37)
 
     @JvmStatic
     val commandTypeColor: String

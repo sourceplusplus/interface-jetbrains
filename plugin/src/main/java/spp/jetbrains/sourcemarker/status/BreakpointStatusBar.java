@@ -184,7 +184,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
 
             if (!breakpointConditionField.getEditMode()) {
                 breakpointConditionField.setBorder(new CompoundBorder(
@@ -552,7 +552,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
         //======== configPanel ========
         {
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);

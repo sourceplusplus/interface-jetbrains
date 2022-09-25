@@ -67,7 +67,7 @@ class ControlBarCellRenderer(
                 autocompleteField.artifactQualifiedName.lineNumber.toString()
             )
         }
-        if (formattedDescription.contains("*lineNumber*")) {
+        if (formattedDescription.contains("*methodName*")) {
             formattedDescription = formattedDescription.replace(
                 "*methodName*",
                 getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)

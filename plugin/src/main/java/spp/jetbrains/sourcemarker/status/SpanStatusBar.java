@@ -125,7 +125,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
 
             if (!spanOperationNameField.getEditMode()) {
                 spanOperationNameField.setBorder(new CompoundBorder(
@@ -440,7 +440,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
 
         //======== configPanel ========
         {
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);

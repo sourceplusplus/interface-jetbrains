@@ -128,7 +128,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
 
             if (!meterNameField.getEditMode()) {
                 meterNameField.setBorder(new CompoundBorder(
@@ -461,7 +461,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
         //======== configPanel ========
         {
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
