@@ -54,6 +54,8 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
         return when (psiFile) {
             is PsiClassOwner -> psiFile.classes.map {
                 getFullyQualifiedName(it)
+            }.toList() + psiFile.classes.flatMap { it.innerClasses.toList() }.map {
+                getFullyQualifiedName(it)
             }.toList()
 
             else -> error("Unsupported file: $psiFile")
