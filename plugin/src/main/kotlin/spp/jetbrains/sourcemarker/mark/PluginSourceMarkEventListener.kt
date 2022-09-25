@@ -111,7 +111,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
 
                 //attempt to detect logger(s) on method guide marks
                 if (sourceMark is MethodGuideMark) {
-                    vertx.safeLaunch { loggerDetector.getOrFindLoggerStatements(sourceMark) }
+                    vertx.safeLaunch { loggerDetector.determineLoggerStatements(sourceMark) }
                 }
             }
         }

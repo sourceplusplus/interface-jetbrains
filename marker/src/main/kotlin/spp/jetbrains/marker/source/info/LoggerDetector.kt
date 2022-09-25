@@ -30,14 +30,11 @@ interface LoggerDetector {
 
     companion object {
         @JvmStatic
-        val LOGGER_STATEMENTS = SourceKey<List<DetectedLogger>>("LOGGER_STATEMENTS")
-
-        @JvmStatic
         val DETECTED_LOGGER = SourceKey<DetectedLogger>("DETECTED_LOGGER")
     }
 
     fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int)
-    suspend fun getOrFindLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger>
+    fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger>
 
     /**
      * Represents a detected log statement.

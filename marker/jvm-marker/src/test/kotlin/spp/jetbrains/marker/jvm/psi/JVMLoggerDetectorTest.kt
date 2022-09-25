@@ -30,12 +30,10 @@ import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import io.vertx.core.Vertx
-import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.idea.core.util.toPsiFile
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
-import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.JVMMarker
@@ -150,13 +148,11 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
 
-            safeRunBlocking {
-                val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
-                    .getOrFindLoggerStatements(uFile.classes[0].methods[0], fileMarker!!).await()
-                    .map { it.logPattern }
-                assertEquals(5, result.size)
-                assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
-            }
+            val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
+                .determineLoggerStatements(uFile.classes[0].methods[0], fileMarker!!)
+                .map { it.logPattern }
+            assertEquals(5, result.size)
+            assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
         }
     }
 }
