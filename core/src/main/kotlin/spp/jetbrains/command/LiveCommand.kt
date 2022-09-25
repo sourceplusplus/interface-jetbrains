@@ -17,6 +17,7 @@
 package spp.jetbrains.command
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
@@ -26,6 +27,9 @@ import javax.swing.Icon
 
 @Suppress("unused")
 abstract class LiveCommand(val project: Project) {
+
+    val log by lazy { Logger.getInstance("spp.jetbrains.command." + this::class.java.simpleName) }
+
     abstract val name: String
     open val params: List<String> = emptyList()
     open val aliases: Set<String> = emptySet()
