@@ -50,8 +50,13 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
 
     private fun makeClassGuideMark(fileMarker: SourceFileMarker, element: PsiElement) {
         ApplicationManager.getApplication().runReadAction {
+            val nameIdentifierOwner = element as PsiNameIdentifierOwner
+            if (nameIdentifierOwner.nameIdentifier == null) {
+                return@runReadAction //anonymous class
+            }
+
             val guideMark = fileMarker.createClassSourceMark(
-                element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
+                nameIdentifierOwner, SourceMark.Type.GUIDE
             )
             if (!fileMarker.containsSourceMark(guideMark)) {
                 guideMark.apply(true)
