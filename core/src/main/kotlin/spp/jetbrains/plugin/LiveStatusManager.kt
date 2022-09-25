@@ -31,7 +31,7 @@ import spp.protocol.service.listen.LiveViewEventListener
 
 interface LiveStatusManager {
     fun showBreakpointStatusBar(editor: Editor, lineNumber: Int)
-    fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean)
+    fun showLogStatusBar(editor: Editor, lineNumber: Int)
     fun showMeterStatusBar(editor: Editor, lineNumber: Int)
     fun showSpanStatusBar(editor: Editor, lineNumber: Int)
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker)

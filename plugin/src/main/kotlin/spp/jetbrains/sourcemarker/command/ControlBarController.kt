@@ -27,6 +27,7 @@ import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
+import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -57,8 +58,15 @@ object ControlBarController {
         val selfInfo = safeRunBlocking { UserData.liveManagementService(inlayMark.project)!!.getSelf().await() }
         val availableCommandsAtLocation = mutableSetOf<LiveCommand>()
         availableCommandsAtLocation.addAll(
-            LivePluginService.getInstance(inlayMark.project)
-                .getRegisteredLiveCommands(selfInfo, inlayMark.getPsiElement())
+            LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(
+                selfInfo,
+                LiveLocationContext(
+                    inlayMark.lineNumber,
+                    inlayMark.artifactQualifiedName,
+                    inlayMark.sourceFileMarker,
+                    inlayMark.getPsiElement()
+                )
+            )
         )
         return availableCommandsAtLocation.toList()
     }

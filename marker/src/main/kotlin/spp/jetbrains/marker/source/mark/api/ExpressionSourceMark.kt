@@ -20,7 +20,6 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
-import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
@@ -32,7 +31,6 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import java.util.*
 
 /**
@@ -109,29 +107,7 @@ abstract class ExpressionSourceMark(
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
-    fun getParentSourceMark(): SourceMark? {
-        return SourceMarker.getInstance(project).getSourceMark(
-            artifactQualifiedName.copy(
-                identifier = artifactQualifiedName.identifier.substringBefore("#"),
-                type = ArtifactType.METHOD
-            ),
-            SourceMark.Type.GUIDE
-        )
-    }
-
-    private val userData = HashMap<Any, Any>()
-    override fun getUserData() = userData
-    override fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
-    override fun <T> putUserData(key: SourceKey<T>, value: T?) {
-        if (value != null) {
-            userData.put(key, value)
-        } else {
-            userData.remove(key)
-        }
-        triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_USER_DATA_UPDATED, key, value))
-    }
-
-    override fun hasUserData(): Boolean = userData.isNotEmpty()
+    override val userData = HashMap<Any, Any>()
 
     fun getPsiExpression(): PsiElement {
         return psiExpression
@@ -155,12 +131,7 @@ abstract class ExpressionSourceMark(
         return true
     }
 
-    private val eventListeners = ArrayList<SourceMarkEventListener>()
-    override fun clearEventListeners() = eventListeners.clear()
-    override fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()
-    override fun addEventListener(listener: SourceMarkEventListener) {
-        eventListeners += listener
-    }
+    override val eventListeners = ArrayList<SourceMarkEventListener>()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

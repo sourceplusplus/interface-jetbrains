@@ -18,6 +18,7 @@ package spp.jetbrains.marker.source
 
 import com.google.common.collect.ImmutableList
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.codeInsight.daemon.GutterMark
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProcessCanceledException
@@ -33,11 +34,13 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
 import spp.jetbrains.marker.source.mark.guide.ExpressionGuideMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
@@ -74,6 +77,18 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
      */
     open fun getSourceMarks(): List<SourceMark> {
         return ImmutableList.copyOf(sourceMarks)
+    }
+
+    fun getInlayMarks(): List<InlayMark> {
+        return getSourceMarks().filterIsInstance<InlayMark>()
+    }
+
+    fun getGutterMarks(): List<GutterMark> {
+        return getSourceMarks().filterIsInstance<GutterMark>()
+    }
+
+    fun getGuideMarks(): List<GuideMark> {
+        return getSourceMarks().filterIsInstance<GuideMark>()
     }
 
     open fun refresh() {
@@ -277,19 +292,19 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         autoApply: Boolean = false
     ): ExpressionGutterMark {
         log.trace("createExpressionGutterMark: $element")
-        val inlayMark = createExpressionSourceMark(
+        val gutterMark = createExpressionSourceMark(
             element,
             SourceMark.Type.GUTTER
         ) as ExpressionGutterMark
         return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
+            if (gutterMark.canApply()) {
+                gutterMark.apply(true)
+                gutterMark
             } else {
-                error("Could not apply inlay mark: $inlayMark")
+                error("Could not apply gutter mark: $gutterMark")
             }
         } else {
-            inlayMark
+            gutterMark
         }
     }
 

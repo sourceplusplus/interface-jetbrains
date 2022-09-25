@@ -14,18 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status.util
+package spp.jetbrains.command
 
-import spp.jetbrains.command.LiveCommand
-import spp.jetbrains.command.LiveLocationContext
-import javax.swing.Icon
+import com.intellij.psi.PsiElement
+import spp.jetbrains.marker.source.SourceFileMarker
+import spp.protocol.artifact.ArtifactQualifiedName
 
-class LiveCommandFieldRow(
-    val liveCommand: LiveCommand,
-    private val context: LiveLocationContext
-) : AutocompleteFieldRow {
-    override fun getText(): String = liveCommand.name
-    override fun getDescription(): String = liveCommand.getDescription(context)
-    override fun getSelectedIcon(): Icon? = liveCommand.selectedIcon
-    override fun getUnselectedIcon(): Icon? = liveCommand.unselectedIcon
-}
+data class LiveLocationContext(
+    val lineNumber: Int,
+    val qualifiedName: ArtifactQualifiedName,
+    val fileMarker: SourceFileMarker,
+    val element: PsiElement,
+)
