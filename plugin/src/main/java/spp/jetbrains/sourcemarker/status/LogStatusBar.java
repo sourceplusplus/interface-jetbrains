@@ -68,7 +68,6 @@ import java.awt.event.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -98,7 +97,6 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
     private final String placeHolderText = message("input_log_message");
-    private final boolean watchExpression;
     private EditorImpl editor;
     private LiveLog liveLog;
     private Instant latestTime;
@@ -115,8 +113,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private ListTableModel commandModel = null;
     private final Pattern varPattern;
 
-    public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark,
-                        boolean watchExpression) {
+    public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this.sourceLocation = sourceLocation;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
@@ -160,26 +157,14 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         varPattern = VariableParser.createPattern(scopeVars, "$", true, false);
 
         this.inlayMark = inlayMark;
-        this.watchExpression = watchExpression;
 
         initComponents();
         setupComponents();
 
-        if (watchExpression) {
-            LiveStatusManager.getInstance(inlayMark.getProject()).addViewEventListener(inlayMark, this);
-            liveLogTextField.setCanShowSaveButton(false);
-            liveLogTextField.setEditMode(false);
-            removeActiveDecorations();
-            configDropdownLabel.setVisible(false);
-            displayTimeField();
-            addExpandButton();
-            initCommandModel();
-        } else {
-            LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
-            showEditableMode();
-            liveLogTextField.setEditMode(true);
-            liveLogTextField.addSaveListener(this::saveLiveLog);
-        }
+        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
+        showEditableMode();
+        liveLogTextField.setEditMode(true);
+        liveLogTextField.addSaveListener(this::saveLiveLog);
     }
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
@@ -195,28 +180,19 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     }
 
     private void initCommandModel() {
-        if (watchExpression) {
+        List logData = LiveStatusManager.getInstance(inlayMark.getProject()).getLogData(inlayMark);
+        if (logData.isEmpty()) {
             liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
-            commandModel = new ListTableModel(
-                    new ColumnInfo[]{
-                            new LogHitColumnInfo(MESSAGE),
-                            new LogHitColumnInfo(TIME)
-                    }, new ArrayList<>(), 0, SortOrder.DESCENDING);
         } else {
-            List logData = LiveStatusManager.getInstance(inlayMark.getProject()).getLogData(inlayMark);
-            if (logData.isEmpty()) {
-                liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
-            } else {
-                LiveLogHit logHit = (LiveLogHit) logData.get(0);
-                Instant logTime = logHit.getOccurredAt();
-                setLatestLog(logTime, logHit.getLogResult().getLogs().get(0));
-            }
-            commandModel = new ListTableModel(
-                    new ColumnInfo[]{
-                            new LogHitColumnInfo(MESSAGE),
-                            new LogHitColumnInfo(TIME)
-                    }, logData, 0, SortOrder.DESCENDING);
+            LiveLogHit logHit = (LiveLogHit) logData.get(0);
+            Instant logTime = logHit.getOccurredAt();
+            setLatestLog(logTime, logHit.getLogResult().getLogs().get(0));
         }
+        commandModel = new ListTableModel(
+                new ColumnInfo[]{
+                        new LogHitColumnInfo(MESSAGE),
+                        new LogHitColumnInfo(TIME)
+                }, logData, 0, SortOrder.DESCENDING);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -233,7 +209,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     }
 
     public void setLatestLog(Instant time, Log latestLog) {
-        if (liveLog == null && !watchExpression) return;
+        if (liveLog == null) return;
         this.latestTime = time;
         this.latestLog = latestLog;
 
@@ -466,7 +442,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (watchExpression || errored || liveLogTextField.getEditMode()) return;
+                if (errored || liveLogTextField.getEditMode()) return;
                 liveLogTextField.setEditMode(true);
 
                 if (liveLog != null) {
@@ -498,7 +474,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
 
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
-                if (!watchExpression && !errored && !removed) showEditableMode();
+                if (!errored && !removed) showEditableMode();
             }
 
             @Override
@@ -547,7 +523,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configPanel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!watchExpression && !errored && !removed) configPanel.setBackground(getBackgroundFocusColor());
+                if (!errored && !removed) configPanel.setBackground(getBackgroundFocusColor());
             }
         });
 
@@ -555,8 +531,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         addRecursiveMouseListener(configPanel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!watchExpression && !errored && !removed
-                        && System.currentTimeMillis() - popupLastOpened.get() > 200) {
+                if (!errored && !removed && System.currentTimeMillis() - popupLastOpened.get() > 200) {
                     ApplicationManager.getApplication().runWriteAction(() -> showConfigurationPopup(popupLastOpened));
                 }
             }

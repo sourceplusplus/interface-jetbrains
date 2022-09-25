@@ -23,8 +23,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Vertx
-import io.vertx.core.json.JsonObject
-import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.impl.ArtifactCreationService
@@ -47,7 +45,6 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_ID
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.sourcemarker.status.util.CircularList
-import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
@@ -55,7 +52,6 @@ import spp.protocol.instrument.meter.MeterType
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 import spp.protocol.view.LiveViewConfig
-import spp.protocol.view.LiveViewEvent
 import spp.protocol.view.LiveViewSubscription
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -170,7 +166,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
      * Invoked via control bar. Force visible.
      */
     @Suppress("unused")
-    override fun showLogStatusBar(editor: Editor, lineNumber: Int, watchExpression: Boolean) {
+    override fun showLogStatusBar(editor: Editor, lineNumber: Int) {
         val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
             .getUserData(SourceFileMarker.KEY)
         if (fileMarker == null) {
@@ -195,59 +191,9 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                     qualifiedClassNameOrFilename, lineNumber,
                     service = config.serviceName
                 ),
-                if (watchExpression) emptyList() else ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
-                inlayMark,
-                watchExpression
+                ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
+                inlayMark
             )
-
-            if (watchExpression) {
-                val logPatterns = mutableListOf<String>()
-                val parentMark = inlayMark.getParent()
-                if (parentMark is MethodGuideMark) {
-                    val loggerDetector = parentMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)
-                    if (loggerDetector != null) {
-                        safeRunBlocking {
-                            val detectedLogs = loggerDetector.getOrFindLoggerStatements(parentMark)
-                            val logOnCurrentLine = detectedLogs.find { it.lineLocation == inlayMark.lineNumber }
-                            if (logOnCurrentLine != null) {
-                                logPatterns.add(logOnCurrentLine.logPattern)
-                            }
-                        }
-                    }
-                }
-
-                UserData.liveViewService(project)!!.addLiveViewSubscription(
-                    LiveViewSubscription(
-                        null,
-                        logPatterns.toMutableSet(),
-                        ArtifactQualifiedName(
-                            inlayMark.artifactQualifiedName.identifier,
-                            lineNumber = inlayMark.artifactQualifiedName.lineNumber,
-                            type = ArtifactType.EXPRESSION
-                        ),
-                        LiveSourceLocation(
-                            inlayMark.artifactQualifiedName.identifier,
-                            line = inlayMark.artifactQualifiedName.lineNumber!!
-                        ),
-                        LiveViewConfig("LOGS", listOf("endpoint_logs"))
-                    )
-                ).onComplete {
-                    if (it.succeeded()) {
-                        val subscriptionId = it.result().subscriptionId!!
-                        inlayMark.putUserData(VIEW_SUBSCRIPTION_ID, subscriptionId)
-                        vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
-                            statusBar.accept(LiveViewEvent(it.body()))
-                        }
-                        inlayMark.addEventListener { event ->
-                            if (event.eventCode == SourceMarkEventCode.MARK_REMOVED) {
-                                UserData.liveViewService(project)!!.removeLiveViewSubscription(subscriptionId)
-                            }
-                        }
-                    } else {
-                        log.error("Failed to add live view subscription", it.cause())
-                    }
-                }
-            }
 
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
@@ -262,9 +208,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             inlayMark.visible.set(true)
             inlayMark.apply()
 
-            if (!watchExpression) {
-                statusBar.focus()
-            }
+            statusBar.focus()
         }
     }
 
@@ -412,8 +356,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                     val statusBar = LogStatusBar(
                         liveLog.location,
                         ArtifactScopeService.getScopeVariables(fileMarker, liveLog.location.line),
-                        inlayMark,
-                        false
+                        inlayMark
                     )
                     inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)
