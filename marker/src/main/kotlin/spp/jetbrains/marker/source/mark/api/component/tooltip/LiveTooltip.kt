@@ -161,7 +161,10 @@ open class LiveTooltip(val guideMark: GuideMark, var panel: JPanel? = null) {
                 HintManager.getInstance().showHint(
                     liveTooltip.panel!!,
                     relativePoint,
-                    HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_SCROLLING or HintManager.HIDE_BY_OTHER_HINT,
+                    HintManager.HIDE_BY_ANY_KEY or
+                            HintManager.HIDE_BY_TEXT_CHANGE or
+                            HintManager.HIDE_BY_SCROLLING or
+                            HintManager.HIDE_BY_OTHER_HINT,
                     0,
                 ) {
                     showingLiveTooltip.set(null)

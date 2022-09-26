@@ -24,7 +24,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface AbstractSourceGuideProvider: ISourceMarkerService {
+interface AbstractSourceGuideProvider : ISourceMarkerService {
 
     fun determineGuideMarks(fileMarker: SourceFileMarker)
 }

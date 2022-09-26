@@ -25,7 +25,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IArtifactScopeService: ISourceMarkerService {
+interface IArtifactScopeService : ISourceMarkerService {
 
     fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
     fun isInsideFunction(element: PsiElement): Boolean
