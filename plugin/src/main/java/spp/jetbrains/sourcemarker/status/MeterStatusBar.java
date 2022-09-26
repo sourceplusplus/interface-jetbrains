@@ -377,9 +377,9 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         meta.put("original_source_mark", inlayMark.getId());
 
         LiveMeter instrument = new LiveMeter(
-                meterNameField.getText(),
                 MeterType.values()[meterTypeComboBox.getSelectedIndex()],
                 new MetricValue(MetricValueType.NUMBER, "1"),
+                meterNameField.getText(),
                 sourceLocation,
                 condition,
                 expirationDate,
