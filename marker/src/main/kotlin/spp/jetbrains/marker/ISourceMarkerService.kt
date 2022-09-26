@@ -16,21 +16,4 @@
  */
 package spp.jetbrains.marker
 
-import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
-
-/**
- * todo: description.
- *
- * @since 0.3.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-interface AbstractInstrumentConditionParser {
-
-    data class ParseRange(
-        val textRange: TextRange,
-        val variable: PsiElement
-    )
-
-    fun getCondition(condition: String, context: PsiElement): String
-}
+interface ISourceMarkerService

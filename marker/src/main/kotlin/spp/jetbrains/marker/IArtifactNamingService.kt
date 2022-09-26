@@ -14,10 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.py
+package spp.jetbrains.marker
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import com.intellij.psi.PsiFile
+import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
  * todo: description.
@@ -25,9 +26,9 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonConditionParser : AbstractInstrumentConditionParser {
+interface IArtifactNamingService: ISourceMarkerService {
 
-    override fun getCondition(condition: String, context: PsiElement): String {
-        return condition
-    }
+    fun getVariableName(element: PsiElement): String?
+    fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
+    fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>
 }

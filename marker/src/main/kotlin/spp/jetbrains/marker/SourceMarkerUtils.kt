@@ -83,4 +83,8 @@ object SourceMarkerUtils {
         val document = element.containingFile.viewProvider.document
         return document!!.getLineNumber(element.textRange.startOffset) + 1
     }
+
+    fun getJvmLanguages(): List<String> {
+        return listOf("JAVA", "kotlin", "Groovy", "Scala")
+    }
 }

@@ -18,7 +18,7 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.psi.*
 import org.jetbrains.uast.*
-import spp.jetbrains.marker.AbstractArtifactNamingService
+import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 
@@ -28,7 +28,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMArtifactNamingService : AbstractArtifactNamingService {
+class JVMArtifactNamingService : IArtifactNamingService {
 
     override fun getVariableName(element: PsiElement): String? {
         return if (element is PsiDeclarationStatement) {

@@ -27,7 +27,7 @@ import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
 import org.intellij.lang.annotations.Language
-import spp.jetbrains.marker.impl.InstrumentConditionParser
+import spp.jetbrains.marker.impl.ArtifactConditionService
 
 class JVMConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
 
@@ -64,7 +64,7 @@ class JVMConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
                 .createCodeFragment(expressionText, context, project)
             assertEquals(
                 "staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3",
-                JVMConditionParser.toLiveConditional(codeFragment)
+                JVMArtifactConditionService.toLiveConditional(codeFragment)
             )
         }
     }
@@ -95,7 +95,7 @@ class JVMConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
                 .createCodeFragment(expressionText, context, project)
             assertEquals(
                 "localVariables[s].startsWith(\"hi\")",
-                JVMConditionParser.toLiveConditional(codeFragment)
+                JVMArtifactConditionService.toLiveConditional(codeFragment)
             )
         }
     }
@@ -103,7 +103,7 @@ class JVMConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
     fun `test polyadic expression back to string`() {
         assertEquals(
             "staticVar == 1 && instanceVar == 2 && localVar == 3",
-            InstrumentConditionParser.fromLiveConditional(
+            ArtifactConditionService.fromLiveConditional(
                 "staticFields[staticVar] == 1 && fields[instanceVar] == 2 && localVariables[localVar] == 3"
             )
         )

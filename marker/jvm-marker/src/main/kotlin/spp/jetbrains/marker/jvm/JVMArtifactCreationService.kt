@@ -19,7 +19,7 @@ package spp.jetbrains.marker.jvm
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiStatement
-import spp.jetbrains.marker.AbstractArtifactCreationService
+import spp.jetbrains.marker.IArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -37,7 +37,7 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMArtifactCreationService : AbstractArtifactCreationService {
+class JVMArtifactCreationService : IArtifactCreationService {
 
     override fun getOrCreateExpressionGutterMark(
         fileMarker: SourceFileMarker,

@@ -34,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.InstrumentConditionParser;
+import spp.jetbrains.marker.impl.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
@@ -449,7 +449,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
         String condition = null;
         if (!breakpointConditionField.getText().isEmpty()) {
-            condition = InstrumentConditionParser.INSTANCE.getCondition(
+            condition = ArtifactConditionService.INSTANCE.getCondition(
                     breakpointConditionField.getText(), inlayMark.getPsiElement()
             );
         }

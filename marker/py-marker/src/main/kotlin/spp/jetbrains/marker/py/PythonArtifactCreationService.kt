@@ -18,7 +18,7 @@ package spp.jetbrains.marker.py
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
-import spp.jetbrains.marker.AbstractArtifactCreationService
+import spp.jetbrains.marker.IArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -36,7 +36,7 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactCreationService : AbstractArtifactCreationService {
+class PythonArtifactCreationService : IArtifactCreationService {
 
     override fun getOrCreateExpressionGutterMark(
         fileMarker: SourceFileMarker,

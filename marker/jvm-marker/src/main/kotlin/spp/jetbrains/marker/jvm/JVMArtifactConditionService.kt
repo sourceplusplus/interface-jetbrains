@@ -20,8 +20,8 @@ import com.intellij.debugger.engine.evaluation.TextWithImportsImpl
 import com.intellij.debugger.impl.DebuggerUtilsEx
 import com.intellij.psi.*
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
-import spp.jetbrains.marker.AbstractInstrumentConditionParser.ParseRange
+import spp.jetbrains.marker.IArtifactConditionService
+import spp.jetbrains.marker.IArtifactConditionService.ParseRange
 
 /**
  * todo: description.
@@ -29,7 +29,7 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser.ParseRange
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMConditionParser : AbstractInstrumentConditionParser {
+class JVMArtifactConditionService : IArtifactConditionService {
 
     override fun getCondition(condition: String, context: PsiElement): String {
         val expressionText = TextWithImportsImpl.fromXExpression(

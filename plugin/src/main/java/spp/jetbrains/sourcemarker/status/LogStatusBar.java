@@ -33,7 +33,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.InstrumentConditionParser;
+import spp.jetbrains.marker.impl.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
@@ -620,7 +620,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         int hitLimit = 100;
         if (configurationPanel != null) {
             if (configurationPanel.getCondition() != null) {
-                condition = InstrumentConditionParser.INSTANCE.getCondition(
+                condition = ArtifactConditionService.INSTANCE.getCondition(
                         configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
                 );
             }
