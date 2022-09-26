@@ -35,6 +35,10 @@ object SourceGuideProvider : AbstractSourceGuideProvider {
         languages.forEach { providers.computeIfAbsent(it) { mutableListOf() }.add(guideProvider) }
     }
 
+    fun addProvider(guideProvider: AbstractSourceGuideProvider, languages: List<String>) {
+        languages.forEach { providers.computeIfAbsent(it) { mutableListOf() }.add(guideProvider) }
+    }
+
     private fun getProvider(language: String): AbstractSourceGuideProvider {
         return providers[language]?.let {
             object : AbstractSourceGuideProvider {

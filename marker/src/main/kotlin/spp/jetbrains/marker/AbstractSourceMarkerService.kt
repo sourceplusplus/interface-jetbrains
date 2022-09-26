@@ -16,15 +16,20 @@
  */
 package spp.jetbrains.marker
 
-import spp.jetbrains.marker.source.SourceFileMarker
+abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
 
-/**
- * todo: description.
- *
- * @since 0.5.5
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-interface AbstractSourceGuideProvider : ISourceMarkerService {
+    private val services = mutableMapOf<String, T>()
 
-    fun determineGuideMarks(fileMarker: SourceFileMarker)
+    fun addService(service: T, language: String, vararg languages: String) {
+        services[language] = service
+        languages.forEach { services[it] = service }
+    }
+
+    fun addService(service: T, languages: List<String>) {
+        languages.forEach { services[it] = service }
+    }
+
+    internal fun getService(language: String): T {
+        return services[language] ?: throw IllegalArgumentException("No service for language $language")
+    }
 }

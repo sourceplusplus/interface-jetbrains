@@ -16,19 +16,21 @@
  */
 package spp.jetbrains.marker
 
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * todo: description.
  *
- * @since 0.4.0
+ * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface AbstractArtifactScopeService {
+interface IArtifactConditionService : ISourceMarkerService {
 
-    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
-    fun isInsideFunction(element: PsiElement): Boolean
-    fun isInsideEndlessLoop(element: PsiElement): Boolean
-    fun isJVM(element: PsiElement): Boolean
+    data class ParseRange(
+        val textRange: TextRange,
+        val variable: PsiElement
+    )
+
+    fun getCondition(condition: String, context: PsiElement): String
 }

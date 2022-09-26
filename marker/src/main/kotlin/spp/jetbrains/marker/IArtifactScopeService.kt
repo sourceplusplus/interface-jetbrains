@@ -14,26 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.jvm
+package spp.jetbrains.marker
 
-import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.impl.*
+import com.intellij.psi.PsiElement
+import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * todo: description.
  *
- * @since 0.5.5
+ * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object JVMMarker {
+interface IArtifactScopeService : ISourceMarkerService {
 
-    fun canSetup(): Boolean = true
-
-    fun setup() {
-        ArtifactCreationService.addService(JVMArtifactCreationService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactNamingService.addService(JVMArtifactNamingService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactScopeService.addService(JVMArtifactScopeService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactConditionService.addService(JVMArtifactConditionService(), SourceMarkerUtils.getJvmLanguages())
-        SourceGuideProvider.addProvider(JVMGuideProvider(), SourceMarkerUtils.getJvmLanguages())
-    }
+    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
+    fun isInsideFunction(element: PsiElement): Boolean
+    fun isInsideEndlessLoop(element: PsiElement): Boolean
+    fun isJVM(element: PsiElement): Boolean
 }

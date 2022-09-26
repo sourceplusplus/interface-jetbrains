@@ -17,7 +17,8 @@
 package spp.jetbrains.marker.impl
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import spp.jetbrains.marker.AbstractSourceMarkerService
+import spp.jetbrains.marker.IArtifactConditionService
 
 /**
  * todo: description.
@@ -25,7 +26,7 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object InstrumentConditionParser : AbstractInstrumentConditionParser {
+object ArtifactConditionService : AbstractSourceMarkerService<IArtifactConditionService>(), IArtifactConditionService {
 
     private val LOCAL_VAR_REGEX: Regex = Regex("localVariables\\[(.+)\\]")
     private val FIELD_VAR_REGEX: Regex = Regex("fields\\[(.+)\\]")
@@ -44,17 +45,6 @@ object InstrumentConditionParser : AbstractInstrumentConditionParser {
             rtnConditional = rtnConditional.replace(it.groupValues[0], it.groupValues[1])
         }
         return rtnConditional
-    }
-
-    private val services = mutableMapOf<String, AbstractInstrumentConditionParser>()
-
-    fun addService(conditionParser: AbstractInstrumentConditionParser, language: String, vararg languages: String) {
-        services[language] = conditionParser
-        languages.forEach { services[it] = conditionParser }
-    }
-
-    private fun getService(language: String): AbstractInstrumentConditionParser {
-        return services[language] ?: throw IllegalArgumentException("No service for language $language")
     }
 
     override fun getCondition(condition: String, context: PsiElement): String {

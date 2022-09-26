@@ -20,7 +20,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import com.jetbrains.python.psi.*
-import spp.jetbrains.marker.AbstractArtifactNamingService
+import spp.jetbrains.marker.IArtifactNamingService
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 
@@ -30,7 +30,7 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PythonArtifactNamingService : AbstractArtifactNamingService {
+class PythonArtifactNamingService : IArtifactNamingService {
 
     override fun getVariableName(element: PsiElement): String? {
         return null //todo: this

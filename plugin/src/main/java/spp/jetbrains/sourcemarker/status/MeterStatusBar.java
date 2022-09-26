@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.InstrumentConditionParser;
+import spp.jetbrains.marker.impl.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
@@ -362,7 +362,7 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         int hitLimit = -1;
         if (configurationPanel != null) {
             if (configurationPanel.getCondition() != null) {
-                condition = InstrumentConditionParser.INSTANCE.getCondition(
+                condition = ArtifactConditionService.INSTANCE.getCondition(
                         configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
                 );
             }
@@ -377,9 +377,9 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
         meta.put("original_source_mark", inlayMark.getId());
 
         LiveMeter instrument = new LiveMeter(
-                meterNameField.getText(),
                 MeterType.values()[meterTypeComboBox.getSelectedIndex()],
                 new MetricValue(MetricValueType.NUMBER, "1"),
+                meterNameField.getText(),
                 sourceLocation,
                 condition,
                 expirationDate,
