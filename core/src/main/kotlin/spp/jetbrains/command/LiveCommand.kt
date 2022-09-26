@@ -42,6 +42,8 @@ abstract class LiveCommand(val project: Project) {
     val viewService = UserData.liveViewService(project)!!
     val statusManager = LiveStatusManager.getInstance(project)
     val instrumentService = UserData.liveInstrumentService(project)
+    val selfInfo: SelfInfo
+        get() = UserData.selfInfo(project)
 
     open fun getDescription(): String = ""
 
@@ -57,5 +59,5 @@ abstract class LiveCommand(val project: Project) {
 
     open suspend fun triggerSuspend(context: LiveCommandContext) = Unit
 
-    open fun isAvailable(selfInfo: SelfInfo, context: LiveLocationContext): Boolean = true
+    open fun isAvailable(context: LiveLocationContext): Boolean = true
 }

@@ -29,7 +29,6 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
-import spp.protocol.platform.developer.SelfInfo
 
 class LivePluginServiceImpl(val project: Project) : LivePluginService {
 
@@ -97,8 +96,8 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         return commands.toList()
     }
 
-    override fun getRegisteredLiveCommands(selfInfo: SelfInfo, context: LiveLocationContext): List<LiveCommand> {
-        return commands.filter { it.isAvailable(selfInfo, context) }
+    override fun getRegisteredLiveCommands(context: LiveLocationContext): List<LiveCommand> {
+        return commands.filter { it.isAvailable(context) }
     }
 
     override fun getRegisteredLiveIndicators(): List<LiveIndicator> {

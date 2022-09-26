@@ -21,7 +21,6 @@ import com.intellij.openapi.util.Key
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.indicator.LiveIndicator
-import spp.protocol.platform.developer.SelfInfo
 import java.io.File
 
 interface LivePluginService {
@@ -29,7 +28,7 @@ interface LivePluginService {
     fun registerLiveCommand(command: LiveCommand)
     fun unregisterLiveCommand(commandName: String)
     fun getRegisteredLiveCommands(): List<LiveCommand>
-    fun getRegisteredLiveCommands(selfInfo: SelfInfo, context: LiveLocationContext): List<LiveCommand>
+    fun getRegisteredLiveCommands(context: LiveLocationContext): List<LiveCommand>
     fun registerLiveIndicator(indicator: LiveIndicator)
     fun unregisterLiveIndicator(indicator: LiveIndicator)
     fun getRegisteredLiveIndicators(): List<LiveIndicator>

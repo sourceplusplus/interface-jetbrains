@@ -28,6 +28,7 @@ import spp.jetbrains.safeLaunch
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Ready
 import spp.jetbrains.status.SourceStatusService
+import spp.protocol.platform.developer.SelfInfo
 
 @Suppress("unused")
 abstract class LiveIndicator(val project: Project) {
@@ -43,6 +44,8 @@ abstract class LiveIndicator(val project: Project) {
     val viewService = UserData.liveViewService(project)!!
     val statusManager = LiveStatusManager.getInstance(project)
     val instrumentService = UserData.liveInstrumentService(project)
+    val selfInfo: SelfInfo
+        get() = UserData.selfInfo(project)
 
     open suspend fun onRegister() {
         vertx.setPeriodic(5000) { timerId ->

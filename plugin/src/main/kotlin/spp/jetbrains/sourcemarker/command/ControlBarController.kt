@@ -20,11 +20,9 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
-import io.vertx.kotlin.coroutines.await
 import liveplugin.implementation.common.toFilePath
 import org.joor.Reflect
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
-import spp.jetbrains.UserData
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.command.LiveLocationContext
@@ -54,12 +52,9 @@ object ControlBarController {
     private var previousControlBar: InlayMark? = null
 
     private fun determineAvailableCommandsAtLocation(inlayMark: ExpressionInlayMark): List<LiveCommand> {
-        //todo: should store selfInfo locally and add a platform listener to trigger on changes
-        val selfInfo = safeRunBlocking { UserData.liveManagementService(inlayMark.project)!!.getSelf().await() }
         val availableCommandsAtLocation = mutableSetOf<LiveCommand>()
         availableCommandsAtLocation.addAll(
             LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(
-                selfInfo,
                 LiveLocationContext(
                     inlayMark.lineNumber,
                     inlayMark.artifactQualifiedName,
