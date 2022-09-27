@@ -41,6 +41,7 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_ID
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_TYPE
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.sourcemarker.status.util.CircularList
