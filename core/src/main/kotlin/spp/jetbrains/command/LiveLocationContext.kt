@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.command
 
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -25,4 +26,7 @@ data class LiveLocationContext(
     val qualifiedName: ArtifactQualifiedName,
     val fileMarker: SourceFileMarker,
     val element: PsiElement,
-)
+) {
+    val project: Project
+        get() = fileMarker.project
+}
