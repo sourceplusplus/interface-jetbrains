@@ -24,7 +24,7 @@ class LiveCommandFieldRow(
     val liveCommand: LiveCommand,
     private val context: LiveLocationContext
 ) : AutocompleteFieldRow {
-    override fun getText(): String = liveCommand.name
+    override fun getText(): String = liveCommand.getTriggerName()
     override fun getDescription(): String = liveCommand.getDescription(context)
     override fun getSelectedIcon(): Icon? = liveCommand.selectedIcon
     override fun getUnselectedIcon(): Icon? = liveCommand.unselectedIcon

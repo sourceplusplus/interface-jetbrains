@@ -53,13 +53,6 @@ abstract class MethodSourceMark(
     override val isClassMark: Boolean = false
     override val isMethodMark: Boolean = true
     override val isExpressionMark: Boolean = false
-    override val valid: Boolean; get() {
-        return try {
-            psiMethod.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiMethod)
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
-        }
-    }
 
     override val moduleName: String
         get() = ProjectRootManager.getInstance(sourceFileMarker.project).fileIndex
@@ -76,14 +69,6 @@ abstract class MethodSourceMark(
         get() {
             val document = psiMethod.nameIdentifier!!.containingFile.viewProvider.document
             return document!!.getLineNumber(psiMethod.nameIdentifier!!.textRange.startOffset)
-        }
-
-    override val viewProviderBound: Boolean
-        get() = try {
-            psiMethod.containingFile.viewProvider.document
-            true
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
         }
 
     @Synchronized

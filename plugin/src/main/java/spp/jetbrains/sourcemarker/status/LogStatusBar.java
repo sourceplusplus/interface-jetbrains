@@ -26,6 +26,7 @@ import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
@@ -36,12 +37,12 @@ import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.impl.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
 import spp.jetbrains.sourcemarker.service.instrument.log.LogHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
+import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.protocol.artifact.log.Log;
 import spp.protocol.artifact.log.LogOrderType;
 import spp.protocol.artifact.log.LogResult;
@@ -59,7 +60,6 @@ import spp.protocol.view.LiveViewEvent;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.StyleContext;
@@ -383,7 +383,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             if (!liveLogTextField.getEditMode()) {
                 liveLogTextField.setBorder(new CompoundBorder(
                         new LineBorder(UIUtil.getBoundsColor(), 0, true),
-                        new EmptyBorder(2, 6, 0, 0)));
+                        JBUI.Borders.empty(2, 6, 0, 0)));
                 liveLogTextField.setBackground(getBackgroundColor());
                 liveLogTextField.setEditable(false);
             }
@@ -393,7 +393,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
     private void showEditableMode() {
         liveLogTextField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
+                JBUI.Borders.empty(2, 6, 0, 0)));
         liveLogTextField.setBackground(getInputBackgroundColor());
         liveLogTextField.setEditable(true);
     }
@@ -766,7 +766,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         liveLogTextField.setBackground(getInputBackgroundColor());
         liveLogTextField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
+                JBUI.Borders.empty(2, 6, 0, 0)));
         liveLogTextField.setFont(BIG_FONT);
         liveLogTextField.setMinimumSize(new Dimension(0, 27));
         add(liveLogTextField, "cell 2 0");

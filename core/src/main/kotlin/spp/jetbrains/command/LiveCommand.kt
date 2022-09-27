@@ -36,6 +36,8 @@ abstract class LiveCommand(val project: Project) {
     open var selectedIcon: Icon? = null
     open var unselectedIcon: Icon? = null
 
+    open fun getTriggerName(): String = name
+
     val vertx = UserData.vertx(project)
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
     val managementService = UserData.liveManagementService(project)!!

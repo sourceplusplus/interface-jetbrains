@@ -239,7 +239,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         if (e.keyCode == KeyEvent.VK_SPACE && hasControlHeld) {
             results.clear()
             results.addAll(allLookup
-                .filter { it.getText().toLowerCase().contains(text) }
+                .filter { it.getText().lowercase().contains(text) }
                 .sortedBy { it.getText() })
             model.updateView()
             list.visibleRowCount = results.size.coerceAtMost(10)
@@ -268,7 +268,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             if (text.isBlank() || list.selectedValue == null || !replaceCommandOnTab) return
             val autocompleteRow = list.selectedValue
             if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
-                if (getText().toLowerCase().startsWith(autocompleteRow.liveCommand.name.toLowerCase() + " ")) {
+                if (getText().lowercase().startsWith(autocompleteRow.liveCommand.getTriggerName().lowercase() + " ")) {
                     return //do nothing
                 }
                 setText(autocompleteRow.getText() + " ")
@@ -289,11 +289,11 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             if (text is LiveCommandFieldRow) {
                 val liveCommand = text.liveCommand
                 if (liveCommand.params.isNotEmpty()) {
-                    if (!getText().toLowerCase().startsWith(liveCommand.name.toLowerCase() + " ")) {
+                    if (!getText().lowercase().startsWith(liveCommand.getTriggerName().lowercase() + " ")) {
                         setText(text.getText() + " ")
                         caretPosition = getText().length
                     } else {
-                        val params = substringAfterIgnoreCase(getText(), liveCommand.name)
+                        val params = substringAfterIgnoreCase(getText(), liveCommand.getTriggerName())
                             .split(" ").filter { it.isNotEmpty() }
                         if (params.size < liveCommand.params.size) {
                             setText(getText().trimEnd() + " ")
@@ -388,8 +388,8 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         //paint live command argument hints
         if (list.selectedValue is LiveCommandFieldRow) {
             val liveCommand = (list.selectedValue as LiveCommandFieldRow).liveCommand
-            if (!text.toLowerCase().startsWith(liveCommand.name.toLowerCase())) return
-            val params = substringAfterIgnoreCase(text, liveCommand.name).split(" ").filter { it.isNotEmpty() }
+            if (!text.lowercase().startsWith(liveCommand.getTriggerName().lowercase())) return
+            val params = substringAfterIgnoreCase(text, liveCommand.getTriggerName()).split(" ").filter { it.isNotEmpty() }
 
             var textOffset = 0
             for ((index, param) in liveCommand.params.withIndex()) {

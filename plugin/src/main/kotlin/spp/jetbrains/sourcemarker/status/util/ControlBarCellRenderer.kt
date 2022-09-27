@@ -51,7 +51,7 @@ class ControlBarCellRenderer(
         val entry = rowValue.liveCommand
 
         val row = LiveControlBarRow()
-        row.setCommandName(entry.name, autocompleteField.text)
+        row.setCommandName(entry.getTriggerName(), autocompleteField.text)
         row.setCommandIcon(rowValue.getUnselectedIcon())
 
         val context = LiveLocationContext(

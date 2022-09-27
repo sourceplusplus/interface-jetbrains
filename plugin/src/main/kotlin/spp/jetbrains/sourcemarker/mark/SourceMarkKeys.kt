@@ -21,6 +21,7 @@ import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.sourcemarker.status.StatusBar
+import spp.protocol.instrument.LiveInstrumentType
 import spp.protocol.portal.PortalConfiguration
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
@@ -41,4 +42,5 @@ object SourceMarkKeys {
     val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableSet<LiveInstrumentListener>>("INSTRUMENT_EVENT_LISTENERS")
     val VIEW_EVENT_LISTENERS = SourceKey<MutableSet<LiveViewEventListener>>("LIVE_VIEW_EVENT_LISTENERS")
     val STATUS_BAR = SourceKey<StatusBar>("STATUS_BAR")
+    val INSTRUMENT_TYPE = SourceKey<LiveInstrumentType>("INSTRUMENT_TYPE")
 }

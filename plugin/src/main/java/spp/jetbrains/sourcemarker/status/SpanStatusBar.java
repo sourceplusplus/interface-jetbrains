@@ -22,9 +22,11 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
@@ -48,7 +50,6 @@ import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import java.awt.*;
@@ -129,8 +130,8 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
 
             if (!spanOperationNameField.getEditMode()) {
                 spanOperationNameField.setBorder(new CompoundBorder(
-                        new LineBorder(Color.darkGray, 0, true),
-                        new EmptyBorder(2, 6, 0, 0)));
+                        new LineBorder(JBColor.DARK_GRAY, 0, true),
+                        JBUI.Borders.empty(2, 6, 0, 0)));
                 spanOperationNameField.setBackground(PluginUI.getEditCompleteColor());
                 spanOperationNameField.setEditable(false);
             }
@@ -476,8 +477,8 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             //---- spanOperationNameField ----
             spanOperationNameField.setBackground(getInputBackgroundColor());
             spanOperationNameField.setBorder(new CompoundBorder(
-                new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
+                    new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                    JBUI.Borders.empty(2, 6, 0, 0)));
             spanOperationNameField.setFont(BIG_FONT);
             spanOperationNameField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(spanOperationNameField, "cell 0 0 2 1");

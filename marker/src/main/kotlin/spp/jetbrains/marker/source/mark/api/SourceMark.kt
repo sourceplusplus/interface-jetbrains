@@ -34,6 +34,7 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
@@ -41,6 +42,7 @@ import com.intellij.util.ui.JBUI
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -103,10 +105,8 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val moduleName: String
     val artifactQualifiedName: ArtifactQualifiedName
     val sourceFileMarker: SourceFileMarker
-    val valid: Boolean
     val lineNumber: Int
     var editor: Editor?
-    val viewProviderBound: Boolean
     var visiblePopup: Disposable?
     val configuration: SourceMarkConfiguration
     var sourceMarkComponent: SourceMarkComponent
@@ -114,12 +114,35 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val language: Language
         get() = getPsiElement().language
 
+    val valid: Boolean
+        get() = try {
+            val psiElement = getPsiElement()
+            psiElement.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiElement)
+        } catch (ignore: PsiInvalidElementAccessException) {
+            false
+        }
+
+    val viewProviderBound: Boolean
+        get() = try {
+            getPsiElement().containingFile.viewProvider.document
+            true
+        } catch (ignore: PsiInvalidElementAccessException) {
+            false
+        }
+
     fun getPsiElement(): PsiElement
 
     fun isVisible(): Boolean
     fun setVisible(visible: Boolean)
 
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
+
+    fun applyIfMissing() {
+        if (!sourceFileMarker.containsSourceMark(this)) {
+            apply(true)
+        }
+    }
+
     fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true, editor: Editor? = null)
     fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
         SourceMarker.getInstance(project).getGlobalSourceMarkEventListeners().forEach(::addEventListener)
@@ -278,6 +301,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             propagateEventToParents(parentEvent)
         }
     }
+
     fun hasUserData(): Boolean = userData.isNotEmpty()
 
     val eventListeners: ArrayList<SourceMarkEventListener>

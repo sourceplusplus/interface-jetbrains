@@ -30,6 +30,8 @@ import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
@@ -189,5 +191,17 @@ class SourceMarker {
 
     fun getSourceMark(id: String): SourceMark? {
         return getSourceMarks().find { it.id == id }
+    }
+
+    fun getInlayMarks(): List<InlayMark> {
+        return getSourceMarks().filterIsInstance<InlayMark>()
+    }
+
+    fun getGutterMarks(): List<GutterMark> {
+        return getSourceMarks().filterIsInstance<GutterMark>()
+    }
+
+    fun getGuideMarks(): List<GuideMark> {
+        return getSourceMarks().filterIsInstance<GuideMark>()
     }
 }

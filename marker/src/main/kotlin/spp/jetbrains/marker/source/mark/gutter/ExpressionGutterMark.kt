@@ -18,7 +18,7 @@ package spp.jetbrains.marker.source.mark.gutter
 
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction
+import spp.jetbrains.marker.plugin.action.SourceMarkerVisibilityAction
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent

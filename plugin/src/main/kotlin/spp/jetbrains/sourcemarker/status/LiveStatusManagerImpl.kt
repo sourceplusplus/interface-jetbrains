@@ -41,6 +41,7 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_ID
+import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_TYPE
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_EVENT_LISTENERS
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.sourcemarker.status.util.CircularList
@@ -247,6 +248,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(locationSource, lineNumber, service = config.serviceName),
+                ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
@@ -398,6 +400,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             )
             if (gutterMark.isPresent) {
                 gutterMark.get().putUserData(INSTRUMENT_ID, liveMeter.id!!)
+                gutterMark.get().putUserData(INSTRUMENT_TYPE, LiveInstrumentType.METER)
                 when (liveMeter.meterType) {
                     MeterType.COUNT -> gutterMark.get().configuration.icon = PluginIcons.count
                     MeterType.GAUGE -> gutterMark.get().configuration.icon = PluginIcons.gauge
@@ -405,6 +408,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 }
                 gutterMark.get().configuration.activateOnMouseHover = true
                 gutterMark.get().configuration.activateOnMouseClick = true
+                gutterMark.get().setVisible(false) //hide by default
 
                 val statusBar = LiveMeterStatusPanel(liveMeter, gutterMark.get())
                 val panel = JPanel(GridBagLayout())
@@ -425,7 +429,10 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                         mutableSetOf(liveMeter.toMetricId()),
                         ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
                         liveMeter.location,
-                        LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
+                        LiveViewConfig(
+                            "LIVE_METER",
+                            listOf(liveMeter.toMetricId())
+                        )
                     )
                 ).onComplete {
                     if (it.succeeded()) {

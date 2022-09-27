@@ -73,7 +73,7 @@ object ControlBarController {
     fun handleCommandInput(input: String, fullText: String, editor: Editor) {
         log.info("Processing command input: $input")
         LivePluginService.getInstance(editor.project!!).getRegisteredLiveCommands()
-            .find { it.name == input }?.let {
+            .find { it.getTriggerName() == input }?.let {
                 val prevCommandBar = previousControlBar!!
                 safeRunBlocking {
                     previousControlBar!!.disposeSuspend()

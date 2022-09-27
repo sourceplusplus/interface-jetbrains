@@ -53,13 +53,6 @@ abstract class ClassSourceMark(
     override val isClassMark: Boolean = true
     override val isMethodMark: Boolean = false
     override val isExpressionMark: Boolean = false
-    override val valid: Boolean; get() {
-        return try {
-            psiClass.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiClass)
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
-        }
-    }
 
     override val moduleName: String
         get() = ProjectRootManager.getInstance(sourceFileMarker.project).fileIndex
@@ -76,14 +69,6 @@ abstract class ClassSourceMark(
         get() {
             val document = psiClass.nameIdentifier!!.containingFile.viewProvider.document
             return document!!.getLineNumber(psiClass.nameIdentifier!!.textRange.startOffset)
-        }
-
-    override val viewProviderBound: Boolean
-        get() = try {
-            psiClass.containingFile.viewProvider.document
-            true
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
         }
 
     override fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean, editor: Editor?) {
