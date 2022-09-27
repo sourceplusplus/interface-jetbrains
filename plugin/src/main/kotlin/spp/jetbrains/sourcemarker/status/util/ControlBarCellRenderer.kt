@@ -16,7 +16,10 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import spp.jetbrains.PluginUI.BGND_FOCUS_COLOR
+import spp.jetbrains.PluginUI.getBackgroundFocusColor
+import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
+import spp.jetbrains.command.LiveLocationContext
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.element.LiveControlBarRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
@@ -30,6 +33,7 @@ import javax.swing.JList
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ControlBarCellRenderer(
+    private val inlayMark: InlayMark,
     private val autocompleteField: AutocompleteField<LiveCommandFieldRow>
 ) : DefaultListCellRenderer() {
     init {
@@ -47,17 +51,23 @@ class ControlBarCellRenderer(
         val entry = rowValue.liveCommand
 
         val row = LiveControlBarRow()
-        row.setCommandName(entry.name, autocompleteField.text)
+        row.setCommandName(entry.getTriggerName(), autocompleteField.text)
         row.setCommandIcon(rowValue.getUnselectedIcon())
 
-        var formattedDescription = entry.description
+        val context = LiveLocationContext(
+            autocompleteField.artifactQualifiedName.lineNumber!!,
+            autocompleteField.artifactQualifiedName,
+            inlayMark.sourceFileMarker,
+            inlayMark.getPsiElement()
+        )
+        var formattedDescription = entry.getDescription(context)
         if (formattedDescription.contains("*lineNumber*")) {
             formattedDescription = formattedDescription.replace(
                 "*lineNumber*",
                 autocompleteField.artifactQualifiedName.lineNumber.toString()
             )
         }
-        if (formattedDescription.contains("*lineNumber*")) {
+        if (formattedDescription.contains("*methodName*")) {
             formattedDescription = formattedDescription.replace(
                 "*methodName*",
                 getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
@@ -66,8 +76,10 @@ class ControlBarCellRenderer(
         row.setDescription(formattedDescription)
 
         if (isSelected) {
-            row.background = BGND_FOCUS_COLOR
+            row.background = getBackgroundFocusColor()
             row.setCommandIcon(rowValue.getSelectedIcon())
+        } else {
+            row.background = getBackgroundUnfocusedColor()
         }
         return row
     }

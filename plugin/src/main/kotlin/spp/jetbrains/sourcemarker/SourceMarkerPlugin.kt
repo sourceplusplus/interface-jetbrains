@@ -361,15 +361,21 @@ class SourceMarkerPlugin(val project: Project) {
 
         //live service
         if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_MANAGEMENT_SERVICE }) {
-            log.info("Live service available")
+            log.info("Live management available")
 
             val liveManagementService = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
                 .setAddress(SourceServices.Utilize.LIVE_MANAGEMENT_SERVICE)
                 .build(LiveManagementService::class.java)
             UserData.liveManagementService(project, liveManagementService)
+
+            //todo: selfInfo listener to trigger on changes
+            log.info("Getting self info")
+            val selfInfo = liveManagementService.getSelf().await()
+            UserData.selfInfo(project, selfInfo)
+            log.info("Self info: $selfInfo")
         } else {
-            log.warn("Live service unavailable")
+            log.warn("Live management unavailable")
         }
 
         //live instrument
@@ -422,7 +428,7 @@ class SourceMarkerPlugin(val project: Project) {
         discovery = null
 
         vertx?.close()?.await()
-        UserData.clearServices(project)
+        UserData.clear(project)
     }
 
     private suspend fun initServices(vertx: Vertx, config: SourceMarkerConfig) {

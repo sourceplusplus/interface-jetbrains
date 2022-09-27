@@ -19,11 +19,12 @@ package spp.jetbrains.sourcemarker;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import net.miginfocom.swing.MigLayout;
-import spp.jetbrains.PluginUI;
 import spp.jetbrains.command.LiveCommand;
+import spp.jetbrains.command.LiveLocationContext;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.impl.ArtifactNamingService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
@@ -34,18 +35,16 @@ import spp.jetbrains.sourcemarker.status.util.LiveCommandFieldRow;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class ControlBar extends JPanel implements VisibleAreaListener {
 
@@ -60,8 +59,14 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         this.editor = editor;
         this.inlayMark = inlayMark;
 
+        LiveLocationContext context = new LiveLocationContext(
+                inlayMark.getLineNumber(),
+                inlayMark.getArtifactQualifiedName(),
+                inlayMark.getSourceFileMarker(),
+                inlayMark.getPsiElement()
+        );
         List<LiveCommandFieldRow> commands = availableCommands.stream()
-                .map(it -> new LiveCommandFieldRow(it, Objects.requireNonNull(editor.getProject())))
+                .map(it -> new LiveCommandFieldRow(it, context))
                 .collect(Collectors.toList());
         this.availableCommands = commands;
         this.lookup = text -> commands.stream()
@@ -199,7 +204,10 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);
-        inlayMark.dispose(true, false);
+
+        if (inlayMark.getSourceFileMarker().containsSourceMarkByIdentity(inlayMark)) {
+            inlayMark.dispose(true, false);
+        }
     }
 
     private void removeActiveDecorations() {
@@ -208,7 +216,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         label1 = new JLabel();
         String location = ArtifactNamingService.INSTANCE.getLocation(
                 inlayMark.getLanguage().getID(),
@@ -217,13 +225,13 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1 = new AutocompleteField(
                 message("location") + ": " + location + "#" + inlayMark.getLineNumber(),
                 availableCommands, lookup, inlayMark.getArtifactQualifiedName(), true, true, SELECT_COLOR_RED);
-        textField1.setCellRenderer(new ControlBarCellRenderer(textField1));
+        textField1.setCellRenderer(new ControlBarCellRenderer(inlayMark, textField1));
         label2 = new JLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -238,10 +246,10 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         add(label1, "cell 0 0");
 
         //---- textField1 ----
-        textField1.setBackground(STATUS_BAR_TXT_BG_COLOR);
+        textField1.setBackground(getInputBackgroundColor());
         textField1.setBorder(new CompoundBorder(
-            new LineBorder(UIUtil.getBoundsColor(), 1, true),
-            new EmptyBorder(2, 6, 0, 0)));
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                JBUI.Borders.empty(2, 6, 0, 0)));
         textField1.setFont(BIG_FONT);
         textField1.setMinimumSize(new Dimension(0, 27));
         add(textField1, "cell 1 0");

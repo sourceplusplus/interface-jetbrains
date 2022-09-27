@@ -47,7 +47,7 @@ allprojects {
         updateSinceUntilBuild.set(false)
 
         plugins.set(platformPlugins.split(',').map(String::trim).filter(String::isNotEmpty).toMutableList())
-        //plugins.add("com.intellij.zh:202.413") //test chinese locale
+        //plugins.add("com.intellij.zh:222.202") //test chinese locale
     }
 
     tasks {
@@ -68,6 +68,15 @@ allprojects {
         verifyPlugin { enabled = false }
         listProductsReleases { enabled = false }
         instrumentCode { enabled = false }
+
+        // workaround for tests not being found in 2021.3+
+        // see https://youtrack.jetbrains.com/issue/IDEA-278926#focus=Comments-27-5561012.0-0
+        test {
+            isScanForTestClasses = false
+            include("**/*Test.class")
+            include("**/Test*.class")
+            exclude("**/Abstract*Test.class")
+        }
     }
 }
 
@@ -115,8 +124,8 @@ subprojects {
         }
 
         withType<JavaCompile> {
-            sourceCompatibility = "1.8"
-            targetCompatibility = "1.8"
+            sourceCompatibility = "11"
+            targetCompatibility = "11"
         }
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
             kotlinOptions.jvmTarget = "11"

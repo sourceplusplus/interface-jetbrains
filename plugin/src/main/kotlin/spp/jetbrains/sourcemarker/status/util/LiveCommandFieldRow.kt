@@ -16,13 +16,16 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
-import com.intellij.openapi.project.Project
 import spp.jetbrains.command.LiveCommand
+import spp.jetbrains.command.LiveLocationContext
 import javax.swing.Icon
 
-class LiveCommandFieldRow(val liveCommand: LiveCommand, val project: Project) : AutocompleteFieldRow {
-    override fun getText(): String = liveCommand.name
-    override fun getDescription(): String = liveCommand.description
+class LiveCommandFieldRow(
+    val liveCommand: LiveCommand,
+    private val context: LiveLocationContext
+) : AutocompleteFieldRow {
+    override fun getText(): String = liveCommand.getTriggerName()
+    override fun getDescription(): String = liveCommand.getDescription(context)
     override fun getSelectedIcon(): Icon? = liveCommand.selectedIcon
     override fun getUnselectedIcon(): Icon? = liveCommand.unselectedIcon
 }

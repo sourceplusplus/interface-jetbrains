@@ -17,7 +17,6 @@
 package spp.jetbrains.marker.source
 
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.MapMaker
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
@@ -34,14 +33,18 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
 import spp.jetbrains.marker.source.mark.guide.ExpressionGuideMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Used to mark a source code file with SourceMarker artifact marks.
@@ -65,7 +68,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     }
 
     val project: Project = psiFile.project
-    private val sourceMarks: MutableSet<SourceMark> = Collections.newSetFromMap(MapMaker().weakKeys().makeMap())
+    private val sourceMarks: MutableSet<SourceMark> = Collections.newSetFromMap(ConcurrentHashMap())
 
     /**
      * Gets the [SourceMark]s recognized in the current source code file.
@@ -74,6 +77,18 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
      */
     open fun getSourceMarks(): List<SourceMark> {
         return ImmutableList.copyOf(sourceMarks)
+    }
+
+    fun getInlayMarks(): List<InlayMark> {
+        return getSourceMarks().filterIsInstance<InlayMark>()
+    }
+
+    fun getGutterMarks(): List<GutterMark> {
+        return getSourceMarks().filterIsInstance<GutterMark>()
+    }
+
+    fun getGuideMarks(): List<GuideMark> {
+        return getSourceMarks().filterIsInstance<GuideMark>()
     }
 
     open fun refresh() {
@@ -163,6 +178,10 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
     fun containsSourceMark(sourceMark: SourceMark): Boolean {
         return sourceMarks.contains(sourceMark)
+    }
+
+    fun containsSourceMarkByIdentity(sourceMark: SourceMark): Boolean {
+        return sourceMarks.any { it === sourceMark }
     }
 
     fun containsPsiElement(psiElement: PsiElement): Boolean {
@@ -273,19 +292,19 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         autoApply: Boolean = false
     ): ExpressionGutterMark {
         log.trace("createExpressionGutterMark: $element")
-        val inlayMark = createExpressionSourceMark(
+        val gutterMark = createExpressionSourceMark(
             element,
             SourceMark.Type.GUTTER
         ) as ExpressionGutterMark
         return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
+            if (gutterMark.canApply()) {
+                gutterMark.apply(true)
+                gutterMark
             } else {
-                error("Could not apply inlay mark: $inlayMark")
+                error("Could not apply gutter mark: $gutterMark")
             }
         } else {
-            inlayMark
+            gutterMark
         }
     }
 

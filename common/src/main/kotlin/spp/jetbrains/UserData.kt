@@ -20,6 +20,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import io.vertx.core.Vertx
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
+import spp.protocol.platform.developer.SelfInfo
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveManagementService
 import spp.protocol.service.LiveViewService
@@ -27,6 +28,7 @@ import spp.protocol.service.LiveViewService
 object UserData {
 
     private val VERTX = Key.create<Vertx>("SPP_VERTX")
+    private val SELF_INFO = Key.create<SelfInfo>("SPP_SELF_INFO")
     private val LIVE_MANAGEMENT_SERVICE = Key.create<LiveManagementService>("SPP_LIVE_MANAGEMENT_SERVICE")
     private val LIVE_VIEW_SERVICE = Key.create<LiveViewService>("SPP_LIVE_VIEW_SERVICE")
     private val LIVE_INSTRUMENT_SERVICE = Key.create<LiveInstrumentService>("SPP_LIVE_INSTRUMENT_SERVICE")
@@ -72,8 +74,18 @@ object UserData {
         return liveInstrumentService
     }
 
-    fun clearServices(project: Project) {
+    fun selfInfo(project: Project): SelfInfo {
+        return project.getUserData(SELF_INFO)!!
+    }
+
+    fun selfInfo(project: Project, selfInfo: SelfInfo): SelfInfo {
+        project.putUserData(SELF_INFO, selfInfo)
+        return selfInfo
+    }
+
+    fun clear(project: Project) {
         project.putUserData(VERTX, null)
+        project.putUserData(SELF_INFO, null)
         project.putUserData(SkywalkingMonitorService.KEY, null)
         project.putUserData(LIVE_MANAGEMENT_SERVICE, null)
         project.putUserData(LIVE_VIEW_SERVICE, null)

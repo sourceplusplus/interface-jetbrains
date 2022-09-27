@@ -17,7 +17,8 @@
 package spp.jetbrains.marker.impl
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractArtifactScopeService
+import spp.jetbrains.marker.AbstractSourceMarkerService
+import spp.jetbrains.marker.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
@@ -26,18 +27,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object ArtifactScopeService : AbstractArtifactScopeService {
-
-    private val services = mutableMapOf<String, AbstractArtifactScopeService>()
-
-    fun addService(scopeService: AbstractArtifactScopeService, language: String, vararg languages: String) {
-        services[language] = scopeService
-        languages.forEach { services[it] = scopeService }
-    }
-
-    private fun getService(language: String): AbstractArtifactScopeService {
-        return services[language] ?: throw IllegalArgumentException("No service for language $language")
-    }
+object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>(), IArtifactScopeService {
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         return getService(fileMarker.psiFile.language.id).getScopeVariables(fileMarker, lineNumber)
@@ -49,5 +39,9 @@ object ArtifactScopeService : AbstractArtifactScopeService {
 
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {
         return getService(element.language.id).isInsideEndlessLoop(element)
+    }
+
+    override fun isJVM(element: PsiElement): Boolean {
+        return getService(element.language.id).isJVM(element)
     }
 }

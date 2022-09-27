@@ -36,6 +36,17 @@ object ScopeExtensions {
         }
     }
 
+    fun <T> safeRunBlocking(dispatcher: CoroutineDispatcher, action: suspend () -> T): T {
+        return runBlocking(dispatcher) {
+            try {
+                return@runBlocking action()
+            } catch (throwable: Throwable) {
+                log.error(throwable)
+                throw throwable
+            }
+        }
+    }
+
     suspend fun safeExecute(action: suspend () -> Unit) {
         try {
             action()

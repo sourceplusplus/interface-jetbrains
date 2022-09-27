@@ -22,10 +22,12 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.JBIntSpinner;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
@@ -34,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.InstrumentConditionParser;
+import spp.jetbrains.marker.impl.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
@@ -56,7 +58,6 @@ import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import java.awt.*;
@@ -72,7 +73,7 @@ import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
 public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstrumentListener, VisibleAreaListener {
@@ -184,12 +185,12 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         SwingUtilities.invokeLater(() -> {
             if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
 
             if (!breakpointConditionField.getEditMode()) {
                 breakpointConditionField.setBorder(new CompoundBorder(
-                        new LineBorder(Color.darkGray, 0, true),
-                        new EmptyBorder(2, 6, 0, 0)));
+                        new LineBorder(JBColor.DARK_GRAY, 0, true),
+                        JBUI.Borders.empty(2, 6, 0, 0)));
                 breakpointConditionField.setBackground(PluginUI.getEditCompleteColor());
                 breakpointConditionField.setEditable(false);
             }
@@ -280,7 +281,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                             }
                         }));
 
-                        table.setBackground(DFLT_BGND_COLOR);
+                        table.setBackground(getBackgroundColor());
                         panel.add(scrollPane);
                         panel.setPreferredSize(new Dimension(0, 250));
                         wrapper.add(panel, BorderLayout.NORTH);
@@ -391,7 +392,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (configDropdownLabel.isVisible()) {
-                    configPanel.setBackground(BGND_FOCUS_COLOR);
+                    configPanel.setBackground(getBackgroundFocusColor());
                 }
             }
         });
@@ -449,7 +450,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
         String condition = null;
         if (!breakpointConditionField.getText().isEmpty()) {
-            condition = InstrumentConditionParser.INSTANCE.getCondition(
+            condition = ArtifactConditionService.INSTANCE.getCondition(
                     breakpointConditionField.getText(), inlayMark.getPsiElement()
             );
         }
@@ -525,7 +526,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         configPanel = new JPanel();
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
@@ -540,7 +541,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
         setMinimumSize(new Dimension(500, 40));
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -552,7 +553,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
         //======== configPanel ========
         {
-            configPanel.setBackground(CNFG_PANEL_BGND_COLOR);
+            configPanel.setBackground(getInputBackgroundColor());
             configPanel.setPreferredSize(null);
             configPanel.setMinimumSize(null);
             configPanel.setMaximumSize(null);
@@ -576,7 +577,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
         //======== mainPanel ========
         {
-            mainPanel.setBackground(DFLT_BGND_COLOR);
+            mainPanel.setBackground(getBackgroundColor());
             mainPanel.setLayout(new MigLayout(
                 "novisualpadding,hidemode 3",
                 // columns
@@ -586,10 +587,10 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                 "0[grow]0"));
 
             //---- breakpointConditionField ----
-            breakpointConditionField.setBackground(STATUS_BAR_TXT_BG_COLOR);
+            breakpointConditionField.setBackground(getInputBackgroundColor());
             breakpointConditionField.setBorder(new CompoundBorder(
-                new LineBorder(UIUtil.getBoundsColor(), 1, true),
-                new EmptyBorder(2, 6, 0, 0)));
+                    new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                    JBUI.Borders.empty(2, 6, 0, 0)));
             breakpointConditionField.setFont(BIG_FONT);
             breakpointConditionField.setMinimumSize(new Dimension(0, 27));
             mainPanel.add(breakpointConditionField, "cell 0 0");

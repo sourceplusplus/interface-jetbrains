@@ -34,7 +34,6 @@ import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
 import spp.protocol.artifact.metrics.MetricType
-import spp.protocol.artifact.metrics.MetricType.ServiceLevelAgreement_Average
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveViewEvent
@@ -217,7 +216,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             .put("value", value)
             .put("total", value)
             .apply {
-                if (MetricType.realValueOf(metricName) == ServiceLevelAgreement_Average) {
+                if (MetricType(metricName) == MetricType.Endpoint_SLA) {
                     put("percentage", value)
                 }
             }
@@ -251,8 +250,26 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         return Future.succeededFuture(sub.subscription)
     }
 
-    override fun removeLiveViewSubscription(subscriptionId: String): Future<LiveViewSubscription> {
-        val sub = subscriptionMap.remove(subscriptionId)
+    override fun updateLiveViewSubscription(
+        id: String,
+        subscription: LiveViewSubscription
+    ): Future<LiveViewSubscription> {
+        val sub = subscriptionMap[id]
+        if (sub != null) {
+            subscriptionMap[id] = SWLiveViewSubscription(subscription.copy(subscriptionId = id))
+            return Future.succeededFuture(subscription)
+        }
+        return Future.failedFuture("Subscription not found")
+    }
+
+    override fun removeLiveViewSubscription(id: String): Future<LiveViewSubscription> {
+        val sub = subscriptionMap.remove(id)
+            ?: return Future.failedFuture(IllegalStateException("Invalid subscription id"))
+        return Future.succeededFuture(sub.subscription)
+    }
+
+    override fun getLiveViewSubscription(id: String): Future<LiveViewSubscription> {
+        val sub = subscriptionMap[id]
             ?: return Future.failedFuture(IllegalStateException("Invalid subscription id"))
         return Future.succeededFuture(sub.subscription)
     }

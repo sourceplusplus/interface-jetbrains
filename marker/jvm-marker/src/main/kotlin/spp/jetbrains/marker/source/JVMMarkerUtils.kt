@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.source
 
+import com.intellij.lang.jvm.util.JvmClassUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
@@ -466,16 +467,31 @@ object JVMMarkerUtils {
     @JvmStatic
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         val expression = element.toUElement()!!
+        var expressionString = expression.sourcePsi?.text ?: expression.toString()
         var parentIdentifier = expression.getContainingUMethod()?.let { getFullyQualifiedName(it) }
+        if (parentIdentifier == null) {
+            parentIdentifier = expression.sourcePsi?.findAnyContainingStrict(UMethod::class.java)?.let {
+                getFullyQualifiedName(it)
+            }
+        }
         if (parentIdentifier == null) {
             parentIdentifier = expression.getContainingUClass()?.let { getFullyQualifiedName(it) }
         }
         if (parentIdentifier == null) {
+            parentIdentifier = expression.sourcePsi?.findAnyContainingStrict(UClass::class.java)?.let {
+                getFullyQualifiedName(it)
+            }
+        }
+        if (parentIdentifier == null) {
             error("Could not determine parent of element: $element")
+        }
+
+        expression.sourcePsi?.textRange?.startOffset?.let {
+            expressionString = "$expressionString:$it"
         }
         return ArtifactQualifiedName(
             """${parentIdentifier.identifier}#${
-                Base64.getEncoder().encodeToString(expression.toString().toByteArray())
+                Base64.getEncoder().encodeToString(expressionString.toByteArray())
             }""",
             type = ArtifactType.EXPRESSION,
             lineNumber = SourceMarkerUtils.getLineNumber(element)
@@ -488,20 +504,12 @@ object JVMMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getFullyQualifiedName(method: PsiMethod): ArtifactQualifiedName {
-        return getFullyQualifiedName(method.toUElement() as UMethod)
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
     fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
-        //todo: PsiUtil.getMemberQualifiedName(method)!!
+        val classQualifiedName = method.getContainingUClass()?.let {
+            getFullyQualifiedName(it).identifier
+        }
         return ArtifactQualifiedName(
-            "${method.containingClass!!.qualifiedName}.${getQualifiedName(method)}",
+            "$classQualifiedName.${getQualifiedName(method)}",
             type = ArtifactType.METHOD
         )
     }
@@ -513,8 +521,7 @@ object JVMMarkerUtils {
      */
     @JvmStatic
     fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
-        //todo: PsiUtil.getMemberQualifiedName(method)!!
-        return ArtifactQualifiedName("${theClass.qualifiedName}", type = ArtifactType.CLASS)
+        return ArtifactQualifiedName("${JvmClassUtil.getJvmClassName(theClass)}", type = ArtifactType.CLASS)
     }
 
     /**
@@ -564,5 +571,25 @@ object JVMMarkerUtils {
             }
         }
         return arrayDimensions
+    }
+
+    private fun <T : UElement> PsiElement?.findAnyContainingStrict(
+        vararg types: Class<out T>
+    ): T? {
+        val depthLimit: Int = Integer.MAX_VALUE
+        var element = this
+        var i = 0
+        while (i < depthLimit && element != null && element !is PsiFileSystemItem) {
+            element.toUElement()?.let {
+                for (type in types) {
+                    if (type.isInstance(it)) {
+                        return it as T
+                    }
+                }
+            }
+            element = element.parent
+            i++
+        }
+        return null
     }
 }

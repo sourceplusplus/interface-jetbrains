@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.impl
 
+import com.intellij.openapi.application.ReadAction
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -27,18 +28,30 @@ import spp.jetbrains.marker.source.SourceFileMarker
  */
 object SourceGuideProvider : AbstractSourceGuideProvider {
 
-    private val providers = mutableMapOf<String, AbstractSourceGuideProvider>()
+    private val providers = mutableMapOf<String, MutableList<AbstractSourceGuideProvider>>()
 
     fun addProvider(guideProvider: AbstractSourceGuideProvider, language: String, vararg languages: String) {
-        providers[language] = guideProvider
-        languages.forEach { providers[it] = guideProvider }
+        providers.computeIfAbsent(language) { mutableListOf() }.add(guideProvider)
+        languages.forEach { providers.computeIfAbsent(it) { mutableListOf() }.add(guideProvider) }
+    }
+
+    fun addProvider(guideProvider: AbstractSourceGuideProvider, languages: List<String>) {
+        languages.forEach { providers.computeIfAbsent(it) { mutableListOf() }.add(guideProvider) }
     }
 
     private fun getProvider(language: String): AbstractSourceGuideProvider {
-        return providers[language] ?: throw IllegalArgumentException("No provider for language $language")
+        return providers[language]?.let {
+            object : AbstractSourceGuideProvider {
+                override fun determineGuideMarks(fileMarker: SourceFileMarker) {
+                    it.forEach { provider -> provider.determineGuideMarks(fileMarker) }
+                }
+            }
+        } ?: throw IllegalArgumentException("No provider for language $language")
     }
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
-        getProvider(fileMarker.psiFile.language.id).determineGuideMarks(fileMarker)
+        ReadAction.run<Nothing> {
+            getProvider(fileMarker.psiFile.language.id).determineGuideMarks(fileMarker)
+        }
     }
 }

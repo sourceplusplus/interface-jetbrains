@@ -57,7 +57,6 @@ public class AutocompleteRow extends JPanel {
         descriptionLabel = new JLabel();
 
         //======== this ========
-        setBackground(PANEL_BACKGROUND_COLOR);
         setMaximumSize(new Dimension(2147483647, 38));
         setLayout(new MigLayout(
             "hidemode 3",

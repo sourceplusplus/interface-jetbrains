@@ -53,13 +53,6 @@ abstract class ClassSourceMark(
     override val isClassMark: Boolean = true
     override val isMethodMark: Boolean = false
     override val isExpressionMark: Boolean = false
-    override val valid: Boolean; get() {
-        return try {
-            psiClass.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiClass)
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
-        }
-    }
 
     override val moduleName: String
         get() = ProjectRootManager.getInstance(sourceFileMarker.project).fileIndex
@@ -76,14 +69,6 @@ abstract class ClassSourceMark(
         get() {
             val document = psiClass.nameIdentifier!!.containingFile.viewProvider.document
             return document!!.getLineNumber(psiClass.nameIdentifier!!.textRange.startOffset)
-        }
-
-    override val viewProviderBound: Boolean
-        get() = try {
-            psiClass.containingFile.viewProvider.document
-            true
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
         }
 
     override fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean, editor: Editor?) {
@@ -115,19 +100,7 @@ abstract class ClassSourceMark(
         super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
-    private val userData = HashMap<Any, Any>()
-    override fun getUserData() = userData
-    override fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
-    override fun <T> putUserData(key: SourceKey<T>, value: T?) {
-        if (value != null) {
-            userData.put(key, value)
-        } else {
-            userData.remove(key)
-        }
-        triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_USER_DATA_UPDATED, key, value))
-    }
-
-    override fun hasUserData(): Boolean = userData.isNotEmpty()
+    override val userData = HashMap<Any, Any>()
 
     override fun getPsiElement(): PsiNameIdentifierOwner {
         return psiClass
@@ -153,12 +126,7 @@ abstract class ClassSourceMark(
         return true
     }
 
-    private val eventListeners = ArrayList<SourceMarkEventListener>()
-    override fun clearEventListeners() = eventListeners.clear()
-    override fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()
-    override fun addEventListener(listener: SourceMarkEventListener) {
-        eventListeners += listener
-    }
+    override val eventListeners = ArrayList<SourceMarkEventListener>()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

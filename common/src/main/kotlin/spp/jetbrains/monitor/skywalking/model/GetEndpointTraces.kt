@@ -26,7 +26,7 @@ import spp.protocol.artifact.trace.TraceOrderType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class GetEndpointTraces(
-    val artifactQualifiedName: ArtifactQualifiedName,
+    val artifactQualifiedName: ArtifactQualifiedName?,
     val serviceId: String? = null,
     val serviceInstanceId: String? = null,
     val endpointId: String? = null,

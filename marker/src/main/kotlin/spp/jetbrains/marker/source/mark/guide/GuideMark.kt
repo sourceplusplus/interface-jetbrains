@@ -17,7 +17,10 @@
 package spp.jetbrains.marker.source.mark.guide
 
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.api.component.tooltip.LiveTooltip
+import spp.jetbrains.marker.source.mark.api.component.tooltip.TextLiveTooltip
 import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
+import javax.swing.JPanel
 
 /**
  * A [SourceMark] with no visual display used for internal purposes.
@@ -34,4 +37,12 @@ interface GuideMark : SourceMark {
     //todo: remove
     override fun isVisible(): Boolean = false
     override fun setVisible(visible: Boolean): Unit = throw UnsupportedOperationException()
+
+    fun setLiveDisplay(panel: JPanel) {
+        configuration.liveTooltip = LiveTooltip(this, panel)
+    }
+
+    fun setLiveDisplay(text: String) {
+        configuration.liveTooltip = TextLiveTooltip(this, text)
+    }
 }

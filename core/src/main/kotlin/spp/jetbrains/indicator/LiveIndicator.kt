@@ -23,10 +23,12 @@ import spp.jetbrains.UserData
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Ready
 import spp.jetbrains.status.SourceStatusService
+import spp.protocol.platform.developer.SelfInfo
 
 @Suppress("unused")
 abstract class LiveIndicator(val project: Project) {
@@ -38,7 +40,12 @@ abstract class LiveIndicator(val project: Project) {
     private var periodicTimerId = -1L
     val vertx = UserData.vertx(project)
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
-    val liveViewService = UserData.liveViewService(project)!!
+    val managementService = UserData.liveManagementService(project)!!
+    val viewService = UserData.liveViewService(project)!!
+    val statusManager = LiveStatusManager.getInstance(project)
+    val instrumentService = UserData.liveInstrumentService(project)
+    val selfInfo: SelfInfo
+        get() = UserData.selfInfo(project)
 
     open suspend fun onRegister() {
         vertx.setPeriodic(5000) { timerId ->

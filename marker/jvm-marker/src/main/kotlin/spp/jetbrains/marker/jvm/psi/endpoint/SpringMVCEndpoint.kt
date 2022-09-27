@@ -169,7 +169,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 return Optional.of(DetectedEndpoint(value.toString(), false, value.toString()))
             }
 
-            val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
+            val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
             var value = if (endpointNameExpr == null) "" else (endpointNameExpr as UInjectionHost).evaluateToString()
             val method = if (methodExpr is UQualifiedReferenceExpression) {
                 methodExpr.selector.toString()
@@ -177,7 +177,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 when (methodExpr) {
                     is JavaUSimpleNameReferenceExpression -> methodExpr.resolvedName.toString()
                     is GrUReferenceExpression -> methodExpr.resolvedName.toString()
-                    else -> throw UnsupportedOperationException(methodExpr.javaClass.name)
+                    else -> "GET" //todo: is actually all method types
                 }
             }
             if (value.isNullOrEmpty()) value = "/"
@@ -219,19 +219,17 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 return Optional.of(DetectedEndpoint(value, false, value))
             }
 
-            val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
+            val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
             var value = if (endpointNameExpr?.javaClass?.simpleName?.equals("KotlinUCollectionLiteralExpression") == true) {
                 getField<List<UExpression>>(endpointNameExpr, "valueArguments")[0].evaluate()
             } else {
                 endpointNameExpr?.evaluate() ?: ""
             }
-            val valueArg = getField<List<Any>>(methodExpr, "valueArguments")[0]
-            val method = if (valueArg is KotlinUSimpleReferenceExpression) {
-                valueArg.resolvedName
-            } else if (valueArg is KotlinUQualifiedReferenceExpression) {
-                valueArg.selector.asSourceString()
-            } else {
-                throw UnsupportedOperationException(valueArg.javaClass.name)
+            val valueArg = methodExpr?.let { getField<List<Any>>(it, "valueArguments")[0] }
+            val method = when (valueArg) {
+                is KotlinUSimpleReferenceExpression -> valueArg.resolvedName
+                is KotlinUQualifiedReferenceExpression -> valueArg.selector.asSourceString()
+                else -> "GET" //todo: is actually all method types
             }
             if (value?.toString().isNullOrEmpty()) value = "/"
             return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
@@ -272,15 +270,15 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 return Optional.of(DetectedEndpoint(value, false, value))
             }
 
-            val methodExpr = annotation.attributeValues.find { it.name == "method" }!!.expression
+            val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
             var value = endpointNameExpr.getUCallExpression()!!.valueArguments[0].evaluate()
-            val valueArg = (methodExpr as UCallExpressionAdapter).valueArguments[0]
+            val valueArg = methodExpr?.let { (it as UCallExpressionAdapter).valueArguments[0] }
             val method = if (valueArg is USimpleNameReferenceExpression) {
                 valueArg.resolvedName
             } else if (valueArg is UQualifiedReferenceExpressionAdapter) {
                 valueArg.selector.asSourceString().substringAfter("RequestMethod.")
             } else {
-                throw UnsupportedOperationException(valueArg.javaClass.name)
+                "GET" //todo: is actually all method types
             }
             if (value?.toString().isNullOrEmpty()) value = "/"
             return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))

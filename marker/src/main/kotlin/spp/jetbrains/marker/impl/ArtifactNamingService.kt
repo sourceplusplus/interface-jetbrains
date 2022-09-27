@@ -18,7 +18,8 @@ package spp.jetbrains.marker.impl
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import spp.jetbrains.marker.AbstractArtifactNamingService
+import spp.jetbrains.marker.AbstractSourceMarkerService
+import spp.jetbrains.marker.IArtifactNamingService
 import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
@@ -27,18 +28,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object ArtifactNamingService : AbstractArtifactNamingService {
-
-    private val services = mutableMapOf<String, AbstractArtifactNamingService>()
-
-    fun addService(namingService: AbstractArtifactNamingService, language: String, vararg languages: String) {
-        services[language] = namingService
-        languages.forEach { services[it] = namingService }
-    }
-
-    private fun getService(language: String): AbstractArtifactNamingService {
-        return services[language] ?: throw IllegalArgumentException("No service for language $language")
-    }
+object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingService>(), IArtifactNamingService {
 
     override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
         return getService(language).getLocation(language, artifactQualifiedName)

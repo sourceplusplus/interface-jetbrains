@@ -18,11 +18,10 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.psi.*
 import org.jetbrains.uast.*
-import spp.jetbrains.marker.AbstractArtifactNamingService
+import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
@@ -30,7 +29,7 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMArtifactNamingService : AbstractArtifactNamingService {
+class JVMArtifactNamingService : IArtifactNamingService {
 
     override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
         var fullyQualified = artifactQualifiedName.identifier
@@ -63,6 +62,7 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
             is UMethod -> JVMMarkerUtils.getFullyQualifiedName(uElement)
             is UExpression -> JVMMarkerUtils.getFullyQualifiedName(element)
             is UDeclaration -> JVMMarkerUtils.getFullyQualifiedName(element)
+            is UIdentifier -> JVMMarkerUtils.getFullyQualifiedName(element)
             else -> TODO("Not yet implemented")
         }
     }
@@ -70,10 +70,16 @@ class JVMArtifactNamingService : AbstractArtifactNamingService {
     override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
         return when (psiFile) {
             is PsiClassOwner -> psiFile.classes.map {
-                ArtifactQualifiedName(it.qualifiedName!!, type = ArtifactType.CLASS)
+                getFullyQualifiedName(it)
+            }.toList() + psiFile.classes.flatMap { getInnerClassesRecursively(it) }.map {
+                getFullyQualifiedName(it)
             }.toList()
 
             else -> error("Unsupported file: $psiFile")
         }
+    }
+
+    private fun getInnerClassesRecursively(psiClass: PsiClass): List<PsiClass> {
+        return psiClass.innerClasses.toList() + psiClass.innerClasses.flatMap { getInnerClassesRecursively(it) }
     }
 }

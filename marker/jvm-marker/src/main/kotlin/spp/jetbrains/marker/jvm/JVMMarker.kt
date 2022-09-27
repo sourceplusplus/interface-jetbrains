@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.jvm
 
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.impl.*
 
 /**
@@ -29,10 +30,11 @@ object JVMMarker {
     fun canSetup(): Boolean = true
 
     fun setup() {
-        ArtifactCreationService.addService(JVMArtifactCreationService(), "JAVA", "kotlin", "Groovy", "Scala")
-        ArtifactNamingService.addService(JVMArtifactNamingService(), "JAVA", "kotlin", "Groovy", "Scala")
-        ArtifactScopeService.addService(JVMArtifactScopeService(), "JAVA", "kotlin", "Groovy", "Scala")
-        InstrumentConditionParser.addService(JVMConditionParser(), "JAVA", "kotlin", "Groovy", "Scala")
-        SourceGuideProvider.addProvider(JVMGuideProvider(), "JAVA", "kotlin", "Groovy", "Scala")
+        ArtifactCreationService.addService(JVMArtifactCreationService(), SourceMarkerUtils.getJvmLanguages())
+        ArtifactNamingService.addService(JVMArtifactNamingService(), SourceMarkerUtils.getJvmLanguages())
+        ArtifactScopeService.addService(JVMArtifactScopeService(), SourceMarkerUtils.getJvmLanguages())
+        ArtifactConditionService.addService(JVMArtifactConditionService(), SourceMarkerUtils.getJvmLanguages())
+        ArtifactTypeService.addService(JVMArtifactTypeService(), SourceMarkerUtils.getJvmLanguages())
+        SourceGuideProvider.addProvider(JVMGuideProvider(), SourceMarkerUtils.getJvmLanguages())
     }
 }

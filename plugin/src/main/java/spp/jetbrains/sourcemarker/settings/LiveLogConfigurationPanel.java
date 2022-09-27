@@ -30,8 +30,7 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
-import spp.jetbrains.PluginUI;
-import spp.jetbrains.marker.impl.InstrumentConditionParser;
+import spp.jetbrains.marker.impl.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 
@@ -40,8 +39,7 @@ import java.awt.*;
 import java.util.Objects;
 
 import static spp.jetbrains.PluginBundle.message;
-import static spp.jetbrains.PluginUI.DFLT_BGND_COLOR;
-import static spp.jetbrains.PluginUI.SMALLER_FONT;
+import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.INTELLIJ_PRODUCT_CODES;
 import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES;
 
@@ -115,7 +113,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         if (condition == null) {
             setCondition(null);
         } else {
-            setCondition(XExpressionImpl.fromText(InstrumentConditionParser.fromLiveConditional(condition)));
+            setCondition(XExpressionImpl.fromText(ArtifactConditionService.fromLiveConditional(condition)));
         }
     }
 
@@ -215,7 +213,7 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(DFLT_BGND_COLOR);
+        setBackground(getBackgroundColor());
         panel4 = new JPanel();
         lblCondition = new JLabel();
         conditionPanel = new JPanel();
@@ -243,7 +241,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         rateLimitStepCombobox = new JComboBox<>();
 
         //======== this ========
-        setBorder(PluginUI.PANEL_BORDER);
+        setBorder(getPanelBorder());
         setLayout(new MigLayout(
             "hidemode 3",
             // columns

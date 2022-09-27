@@ -32,7 +32,8 @@ data class ServiceInstance(
         RUBY,
         GO,
         LUA,
-        PHP
+        PHP,
+        UNKNOWN
     }
 
     data class Attribute(

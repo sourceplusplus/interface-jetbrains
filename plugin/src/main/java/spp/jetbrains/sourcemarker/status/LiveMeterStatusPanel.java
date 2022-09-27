@@ -22,6 +22,7 @@ import com.jgoodies.forms.layout.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
@@ -30,7 +31,6 @@ import spp.jetbrains.plugin.LiveStatusManager;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;
-import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.service.listen.LiveInstrumentListener;
 import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
@@ -43,7 +43,7 @@ import java.awt.event.MouseEvent;
 
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
-import static spp.jetbrains.sourcemarker.status.util.ViewUtils.addRecursiveMouseListener;
+import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListener, LiveViewEventListener {
 
@@ -67,27 +67,34 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
             dayValueLabel.setForeground(UIUtil.getLabelForeground());
         });
 
-        meterDescriptionTextField.setText(liveMeter.getMeterName());
+        if (liveMeter.getMeterDescription() != null) {
+            meterDescriptionTextField.setText(liveMeter.getMeterDescription());
+        } else {
+            meterDescriptionTextField.setText(liveMeter.getId());
+        }
 
         String meterType = liveMeter.getMeterType().name().toLowerCase();
         meterType = meterType.substring(0, 1).toUpperCase() + meterType.substring(1);
         meterTypeValueLabel.setText(message(meterType.toLowerCase()));
 
-        if (liveMeter.getMeterType() == MeterType.GAUGE) {
-            minuteLabel.setText("Value");
-            hourLabel.setVisible(false);
-            hourValueLabel.setVisible(false);
-            dayLabel.setVisible(false);
-            dayValueLabel.setVisible(false);
-        }
+        minuteLabel.setText("Value");
+        hourLabel.setVisible(false);
+        hourValueLabel.setVisible(false);
+        dayLabel.setVisible(false);
+        dayValueLabel.setVisible(false);
         LiveStatusManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
     }
 
     public void accept(@NotNull LiveInstrumentEvent event) {
         JsonObject rawMetrics = new JsonObject(new JsonObject(event.getData()).getString("metricsData"));
-        minuteValueLabel.setText(getShortNumber(rawMetrics.getString("last_minute")));
-        hourValueLabel.setText(getShortNumber(rawMetrics.getString("last_hour")));
-        dayValueLabel.setText(getShortNumber(rawMetrics.getString("last_day")));
+        String meterValue = rawMetrics.getValue("value").toString();
+        if (NumberUtils.isCreatable(meterValue)) {
+            minuteValueLabel.setText(getShortNumber(meterValue));
+        } else {
+            minuteValueLabel.setText(meterValue);
+        }
+//        hourValueLabel.setText(getShortNumber(rawMetrics.getString("last_hour")));
+//        dayValueLabel.setText(getShortNumber(rawMetrics.getString("last_day")));
     }
 
     @Override

@@ -34,6 +34,7 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.ui.BalloonImpl
 import com.intellij.ui.JBColor
 import com.intellij.ui.awt.RelativePoint
@@ -41,6 +42,7 @@ import com.intellij.util.ui.JBUI
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -48,6 +50,7 @@ import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
 import spp.jetbrains.marker.source.mark.api.event.*
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.event.GutterMarkEventCode
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
@@ -102,10 +105,8 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val moduleName: String
     val artifactQualifiedName: ArtifactQualifiedName
     val sourceFileMarker: SourceFileMarker
-    val valid: Boolean
     val lineNumber: Int
     var editor: Editor?
-    val viewProviderBound: Boolean
     var visiblePopup: Disposable?
     val configuration: SourceMarkConfiguration
     var sourceMarkComponent: SourceMarkComponent
@@ -113,18 +114,40 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     val language: Language
         get() = getPsiElement().language
 
+    val valid: Boolean
+        get() = try {
+            val psiElement = getPsiElement()
+            psiElement.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiElement)
+        } catch (ignore: PsiInvalidElementAccessException) {
+            false
+        }
+
+    val viewProviderBound: Boolean
+        get() = try {
+            getPsiElement().containingFile.viewProvider.document
+            true
+        } catch (ignore: PsiInvalidElementAccessException) {
+            false
+        }
+
     fun getPsiElement(): PsiElement
 
     fun isVisible(): Boolean
     fun setVisible(visible: Boolean)
 
     fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
+
+    fun applyIfMissing() {
+        if (!sourceFileMarker.containsSourceMark(this)) {
+            apply(true)
+        }
+    }
+
     fun apply(sourceMarkComponent: SourceMarkComponent, addToMarker: Boolean = true, editor: Editor? = null)
     fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
         SourceMarker.getInstance(project).getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
-        if (addToMarker) {
-            check(sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true))
+        if (addToMarker && sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true)) {
             triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_ADDED))
 
             if (this is GutterMark) {
@@ -253,14 +276,48 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         clearEventListeners()
     }
 
-    fun getUserData(): Map<Any, Any>
-    fun <T> getUserData(key: SourceKey<T>): T?
-    fun <T> putUserData(key: SourceKey<T>, value: T?)
-    fun hasUserData(): Boolean
+    fun getParent(): GuideMark? {
+        return artifactQualifiedName.asParent()?.let {
+            sourceFileMarker.getSourceMark(it, Type.GUIDE) as GuideMark?
+        }
+    }
 
-    fun clearEventListeners()
-    fun getEventListeners(): List<SourceMarkEventListener>
-    fun addEventListener(listener: SourceMarkEventListener)
+    fun getChildren(): List<SourceMark> {
+        return sourceFileMarker.getSourceMarks().filter { it.artifactQualifiedName.isChildOf(artifactQualifiedName) }
+    }
+
+    val userData: HashMap<Any, Any>
+    fun <T> getUserData(key: SourceKey<T>): T? = userData[key] as T?
+    fun <T> putUserData(key: SourceKey<T>, value: T?) {
+        if (value != null) {
+            userData.put(key, value)
+        } else {
+            userData.remove(key)
+        }
+
+        val event = SourceMarkEvent(this, SourceMarkEventCode.MARK_USER_DATA_UPDATED, key, value)
+        triggerEvent(event) {
+            val parentEvent = SourceMarkEvent(this, SourceMarkEventCode.CHILD_USER_DATA_UPDATED, key, value)
+            propagateEventToParents(parentEvent)
+        }
+    }
+
+    fun hasUserData(): Boolean = userData.isNotEmpty()
+
+    val eventListeners: ArrayList<SourceMarkEventListener>
+    fun clearEventListeners() = eventListeners.clear()
+    fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()
+    fun addEventListener(listener: SourceMarkEventListener) {
+        eventListeners += listener
+    }
+
+    fun propagateEventToParents(event: SourceMarkEvent) {
+        var parent = getParent()
+        while (parent != null) {
+            parent.triggerEvent(event)
+            parent = parent.getParent()
+        }
+    }
 
     fun triggerEvent(eventCode: IEventCode, params: List<Any?>, listen: (() -> Unit)? = null) {
         triggerEvent(SourceMarkEvent(this, eventCode, *params.toTypedArray()), listen)

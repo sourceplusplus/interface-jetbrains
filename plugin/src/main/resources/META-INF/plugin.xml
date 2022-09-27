@@ -71,8 +71,8 @@
                 text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>
-        <action id="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
-                class="spp.jetbrains.marker.plugin.SourceMarkerVisibilityAction"
+        <action id="spp.jetbrains.marker.plugin.action.SourceMarkerVisibilityAction"
+                class="spp.jetbrains.marker.plugin.action.SourceMarkerVisibilityAction"
                 text="SourceMarkVisibility Action" description="SourceMark visibility action">
             <keyboard-shortcut first-keystroke="control shift D" keymap="$default"/>
         </action>

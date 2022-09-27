@@ -16,9 +16,12 @@
  */
 package spp.jetbrains
 
+import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
+import com.intellij.openapi.editor.colors.EditorColors
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.ui.Gray
-import com.intellij.ui.JBColor
-import com.intellij.util.ui.UIUtil
+import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil.getWindowColor
 import spp.jetbrains.PluginBundle.LOCALE
 import java.awt.Color
 import java.awt.Font
@@ -41,47 +44,53 @@ object PluginUI {
     @JvmField
     val COMPLETE_COLOR_PURPLE: Color = Color.decode("#9876AA")
 
-    @JvmField
-    val STATUS_BAR_TXT_BG_COLOR = JBColor(JBColor.WHITE, Gray._37)
-
-    @JvmField
-    val CONTROL_BAR_CMD_FOREGROUND = JBColor(JBColor.BLACK, JBColor.GRAY)
-
-    @JvmField
-    val DFLT_BGND_COLOR = JBColor(Gray._242, Gray._50)
-
-    @JvmField
-    val CNFG_PANEL_BGND_COLOR = JBColor(Gray._242, Gray._37)
-
-    @JvmField
-    val BGND_FOCUS_COLOR = JBColor(Gray._175, Gray._25)
-
-    @JvmField
-    val COMMAND_TYPE_COLOR = JBColor(JBColor.BLACK, Gray._125)
-
-    @JvmField
-    val COMMAND_HIGHLIGHT_COLOR = JBColor(SELECT_COLOR_RED, Color.decode("#E6E6E6"))
-
     @JvmStatic
     val commandTypeColor: String
-        get() = "#" + Integer.toHexString(COMMAND_TYPE_COLOR.rgb).substring(2)
+        get() = "#" + Integer.toHexString(getLabelForeground().rgb).substring(2)
 
     @JvmStatic
     val commandHighlightColor: String
-        get() = "#" + Integer.toHexString(COMMAND_HIGHLIGHT_COLOR.rgb).substring(2)
+        get() = "#" + Integer.toHexString(LookupCellRenderer.MATCHED_FOREGROUND_COLOR.rgb).substring(2)
 
     @JvmStatic
     val editCompleteColor: Color
-        get() = UIUtil.getWindowColor()
+        get() = getWindowColor()
 
     @JvmField
     val PANEL_BACKGROUND_COLOR: Color = Gray._37
 
     @JvmField
-    val PANEL_BORDER = LineBorder(Gray._85)
-
-    @JvmField
     val ROBOTO_LIGHT_BOLD_14: Font
+
+    @JvmStatic
+    fun getBackgroundColor(): Color {
+        return EditorColorsManager.getInstance().globalScheme.defaultBackground
+    }
+
+    @JvmStatic
+    fun getLabelForeground(): Color {
+        return JBUI.CurrentTheme.Label.foreground()
+    }
+
+    @JvmStatic
+    fun getBackgroundUnfocusedColor(): Color {
+        return LookupCellRenderer.BACKGROUND_COLOR
+    }
+
+    @JvmStatic
+    fun getBackgroundFocusColor(): Color {
+        return LookupCellRenderer.SELECTED_BACKGROUND_COLOR
+    }
+
+    @JvmStatic
+    fun getInputBackgroundColor(): Color {
+        return EditorColorsManager.getInstance().globalScheme.getColor(EditorColors.CARET_ROW_COLOR)!!
+    }
+
+    @JvmStatic
+    fun getPanelBorder(): LineBorder {
+        return LineBorder(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())
+    }
 
     private val ROBOTO_LIGHT_PLAIN_13: Font
     private val ROBOTO_LIGHT_PLAIN_14: Font

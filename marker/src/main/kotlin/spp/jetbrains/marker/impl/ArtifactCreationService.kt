@@ -17,7 +17,8 @@
 package spp.jetbrains.marker.impl
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractArtifactCreationService
+import spp.jetbrains.marker.AbstractSourceMarkerService
+import spp.jetbrains.marker.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
@@ -33,18 +34,7 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object ArtifactCreationService : AbstractArtifactCreationService {
-
-    private val services = mutableMapOf<String, AbstractArtifactCreationService>()
-
-    fun addService(creationService: AbstractArtifactCreationService, language: String, vararg languages: String) {
-        services[language] = creationService
-        languages.forEach { services[it] = creationService }
-    }
-
-    private fun getService(language: String): AbstractArtifactCreationService {
-        return services[language] ?: throw IllegalArgumentException("No service for language $language")
-    }
+object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationService>(), IArtifactCreationService {
 
     override fun getOrCreateExpressionGutterMark(
         fileMarker: SourceFileMarker,
