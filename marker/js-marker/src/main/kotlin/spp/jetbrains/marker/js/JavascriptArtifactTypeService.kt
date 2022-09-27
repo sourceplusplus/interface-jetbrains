@@ -14,21 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker
+package spp.jetbrains.marker.js
 
+import com.intellij.lang.javascript.psi.JSExpression
+import com.intellij.lang.javascript.psi.JSFunction
+import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.IArtifactTypeService
+import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
  *
- * @since 0.4.0
+ * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface IArtifactScopeService : ISourceMarkerService {
+class JavascriptArtifactTypeService : IArtifactTypeService {
+    override fun getType(element: PsiElement): ArtifactType? {
+        return when (element) {
+            is JSClass -> ArtifactType.CLASS
+            is JSFunction -> ArtifactType.METHOD
+            is JSExpression -> ArtifactType.EXPRESSION
 
-    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
-    fun isInsideFunction(element: PsiElement): Boolean
-    fun isInsideEndlessLoop(element: PsiElement): Boolean = false
-    fun isJVM(element: PsiElement): Boolean = false
+            else -> null
+        }
+    }
 }

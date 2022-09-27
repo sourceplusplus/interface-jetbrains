@@ -18,7 +18,9 @@ package spp.jetbrains.marker
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.instrument.LiveSourceLocation
 
 /**
  * todo: description.
@@ -28,6 +30,13 @@ import spp.protocol.artifact.ArtifactQualifiedName
  */
 interface IArtifactNamingService : ISourceMarkerService {
 
+    fun getLiveSourceLocation(
+        sourceMark: SourceMark,
+        lineNumber: Int,
+        serviceName: String?
+    ): LiveSourceLocation?
+
+    fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String
     fun getVariableName(element: PsiElement): String?
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
     fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>

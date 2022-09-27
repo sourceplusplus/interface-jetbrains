@@ -25,7 +25,7 @@ import io.vertx.core.Future
 import io.vertx.core.Promise
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
-import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import java.util.*
 
 /**
@@ -36,7 +36,11 @@ import java.util.*
  */
 class FlaskEndpoint : EndpointDetector.EndpointNameDeterminer {
 
-    override fun determineEndpointName(guideMark: MethodGuideMark): Future<Optional<DetectedEndpoint>> {
+    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
+        if (!guideMark.isMethodMark) {
+            return Future.succeededFuture(Optional.empty())
+        }
+
         val promise = Promise.promise<Optional<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             val decorators = (guideMark.getPsiElement() as PyFunction).decoratorList?.decorators

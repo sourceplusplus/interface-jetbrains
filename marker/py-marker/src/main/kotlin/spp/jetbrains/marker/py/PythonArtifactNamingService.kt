@@ -21,8 +21,10 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import com.jetbrains.python.psi.*
 import spp.jetbrains.marker.IArtifactNamingService
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
+import spp.protocol.instrument.LiveSourceLocation
 
 /**
  * todo: description.
@@ -31,6 +33,19 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PythonArtifactNamingService : IArtifactNamingService {
+
+    override fun getLiveSourceLocation(
+        sourceMark: SourceMark,
+        lineNumber: Int,
+        serviceName: String?
+    ): LiveSourceLocation {
+        val locationSource = sourceMark.sourceFileMarker.psiFile.virtualFile.name
+        return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+    }
+
+    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+        return artifactQualifiedName.identifier
+    }
 
     override fun getVariableName(element: PsiElement): String? {
         return null //todo: this

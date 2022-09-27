@@ -32,7 +32,6 @@ import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusService
-import javax.annotation.concurrent.GuardedBy
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
@@ -41,16 +40,9 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     }
 
     private val statusLock = Any()
-
-    @GuardedBy("statusLock")
     private var status: SourceStatus = Pending
-
-    @GuardedBy("statusLock")
     private var message: String? = null
-
     private val reconnectionLock = Any()
-
-    @GuardedBy("reconnectionLock")
     private var reconnectionJob: Job? = null
 
     override fun getCurrentStatus(): Pair<SourceStatus, String?> {

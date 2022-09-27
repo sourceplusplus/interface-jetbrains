@@ -26,12 +26,12 @@ import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.command.LiveCommand;
 import spp.jetbrains.command.LiveLocationContext;
 import spp.jetbrains.icons.PluginIcons;
+import spp.jetbrains.marker.impl.ArtifactNamingService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
 import spp.jetbrains.sourcemarker.status.util.LiveCommandFieldRow;
-import spp.protocol.artifact.ArtifactNameUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -218,21 +218,10 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
         label1 = new JLabel();
-        String fullyQualified = inlayMark.getArtifactQualifiedName().getIdentifier();
-        String location = fullyQualified;
-        if (!"Python".equals(inlayMark.getLanguage().getID())) {
-            if (fullyQualified.contains("#")) {
-                fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
-            }
-            String className = ArtifactNameUtils.INSTANCE.getClassName(fullyQualified);
-            if (fullyQualified.contains("(")) {
-                String shortFuncName = ArtifactNameUtils.INSTANCE
-                        .getShortFunctionSignature(ArtifactNameUtils.INSTANCE.removePackageNames(fullyQualified));
-                location = className + "." + shortFuncName;
-            } else {
-                location = className;
-            }
-        }
+        String location = ArtifactNamingService.INSTANCE.getLocation(
+                inlayMark.getLanguage().getID(),
+                inlayMark.getArtifactQualifiedName()
+        );
         textField1 = new AutocompleteField(
                 message("location") + ": " + location + "#" + inlayMark.getLineNumber(),
                 availableCommands, lookup, inlayMark.getArtifactQualifiedName(), true, true, SELECT_COLOR_RED);

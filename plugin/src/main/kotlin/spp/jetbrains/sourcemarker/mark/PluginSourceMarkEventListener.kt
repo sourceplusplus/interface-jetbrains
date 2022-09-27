@@ -25,15 +25,20 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiManager
 import io.vertx.core.Vertx
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.js.JavascriptEndpointDetector
+import spp.jetbrains.marker.js.JavascriptLoggerDetector
 import spp.jetbrains.marker.jvm.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.psi.JVMLoggerDetector
 import spp.jetbrains.marker.py.PythonEndpointDetector
+import spp.jetbrains.marker.py.PythonLoggerDetector
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
@@ -60,6 +65,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
                 put("Groovy", it)
             }
             put("Python", PythonEndpointDetector(project))
+            put("ECMAScript 6", JavascriptEndpointDetector(project))
         }.toMap()
     private val loggerDetectors = mutableMapOf<String, LoggerDetector>()
         .apply {
@@ -69,6 +75,8 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
                 put("Scala", it)
                 put("Groovy", it)
             }
+            put("Python", PythonLoggerDetector(project))
+            put("ECMAScript 6", JavascriptLoggerDetector(project))
         }.toMap()
 
     init {
@@ -95,7 +103,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
             val sourceMark = event.sourceMark
 
             //setup endpoint detector and attempt detection
-            if (sourceMark is MethodGuideMark) {
+            if (sourceMark is GuideMark) {
                 val endpointDetector = endpointDetectors[sourceMark.language.id]
                 if (endpointDetector != null) {
                     sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
@@ -106,8 +114,10 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
             //setup logger detector
             val loggerDetector = loggerDetectors[sourceMark.language.id]
             if (loggerDetector != null) {
-                //add logger detector to all marks as live logs can be placed anywhere
-                sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
+                if (sourceMark is InlayMark) {
+                    //add logger detector to all inlay marks as live logs can be placed anywhere
+                    sourceMark.putUserData(LOGGER_DETECTOR, loggerDetector)
+                }
 
                 //attempt to detect logger(s) on method guide marks
                 if (sourceMark is MethodGuideMark) {

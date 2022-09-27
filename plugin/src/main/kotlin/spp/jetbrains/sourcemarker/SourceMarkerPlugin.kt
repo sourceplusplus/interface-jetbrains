@@ -64,6 +64,7 @@ import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.js.JavascriptMarker
 import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -135,6 +136,10 @@ class SourceMarkerPlugin(val project: Project) {
         if (PythonMarker.canSetup()) {
             log.info("Setting up Python marker")
             PythonMarker.setup()
+        }
+        if (JavascriptMarker.canSetup()) {
+            log.info("Setting up JavaScript marker")
+            JavascriptMarker.setup()
         }
 
         project.putUserData(SourceStatusService.KEY, SourceStatusServiceImpl(project))

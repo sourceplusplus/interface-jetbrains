@@ -1,3 +1,4 @@
 [submodule "commander"]
 	path = commander
 	url = https://github.com/sourceplusplus/jetbrains-commander
+	branch = master
