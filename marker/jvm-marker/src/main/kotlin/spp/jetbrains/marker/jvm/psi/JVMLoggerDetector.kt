@@ -18,7 +18,6 @@ package spp.jetbrains.marker.jvm.psi
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.psi.*
@@ -32,7 +31,6 @@ import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
 import spp.jetbrains.marker.source.info.LoggerDetector.DetectedLogger
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 
 /**
  * Detects the presence of log statements within methods and saves log patterns.
@@ -53,11 +51,6 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         private val LOGGER_METHODS = setOf(
             "trace", "debug", "info", "warn", "error"
         )
-    }
-
-    override fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int) {
-        val detectedLogger = DetectedLogger(logPattern, "live", lineLocation)
-        inlayMark.putUserData(DETECTED_LOGGER, detectedLogger)
     }
 
     override fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger> {

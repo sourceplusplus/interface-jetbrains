@@ -18,8 +18,10 @@ package spp.jetbrains.marker.js
 
 import com.intellij.lang.javascript.psi.JSFunction
 import com.intellij.lang.javascript.psi.JSVariable
-import com.intellij.lang.javascript.psi.util.JSTreeUtil
+import com.intellij.lang.javascript.psi.resolve.JSResolveUtil
+import com.intellij.lang.javascript.psi.resolve.processors.JSResolveProcessor
 import com.intellij.psi.PsiElement
+import com.intellij.psi.ResolveState
 import com.intellij.psi.util.parentOfTypes
 import spp.jetbrains.marker.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
@@ -33,11 +35,18 @@ import spp.jetbrains.marker.source.SourceFileMarker
  */
 class JavascriptArtifactScopeService : IArtifactScopeService {
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
-        return emptyList() //todo: this
+        val vars = mutableListOf<JSVariable>()
         val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
-        val els = JSTreeUtil.findNamedElementsInScope(position, null)
-        val vars = els.filterIsInstance<JSVariable>()
+        JSResolveUtil.processDeclarationsInScopeAndUp(position, object : JSResolveProcessor {
+            override fun execute(element: PsiElement, state: ResolveState): Boolean {
+                if (element is JSVariable) {
+                    vars.add(element)
+                }
+                return true
+            }
 
+            override fun getName(): String? = null
+        })
         return vars.mapNotNull { it.name }
     }
 

@@ -33,7 +33,11 @@ interface LoggerDetector {
         val DETECTED_LOGGER = SourceKey<DetectedLogger>("DETECTED_LOGGER")
     }
 
-    fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int)
+    fun addLiveLog(editor: Editor, inlayMark: InlayMark, logPattern: String, lineLocation: Int) {
+        val detectedLogger = DetectedLogger(logPattern, "live", lineLocation)
+        inlayMark.putUserData(DETECTED_LOGGER, detectedLogger)
+    }
+
     fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger>
 
     /**

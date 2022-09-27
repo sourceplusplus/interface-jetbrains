@@ -68,10 +68,14 @@ class ControlBarCellRenderer(
             )
         }
         if (formattedDescription.contains("*methodName*")) {
-            formattedDescription = formattedDescription.replace(
-                "*methodName*",
-                getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
-            )
+            formattedDescription = try {
+                formattedDescription.replace(
+                    "*methodName*",
+                    getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
+                )
+            } catch (ex: Exception) {
+                formattedDescription.replace("*methodName*", "anonymous")
+            }
         }
         row.setDescription(formattedDescription)
 
