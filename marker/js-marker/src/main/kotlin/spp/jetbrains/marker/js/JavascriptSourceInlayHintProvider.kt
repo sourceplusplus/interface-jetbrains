@@ -29,7 +29,7 @@ import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 /**
  * todo: description.
  *
- * @since 0.6.10
+ * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptSourceInlayHintProvider : SourceInlayHintProvider() {
