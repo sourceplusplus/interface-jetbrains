@@ -24,8 +24,10 @@ import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfType
 import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
+import spp.protocol.instrument.LiveSourceLocation
 import java.io.File
 import java.util.*
 
@@ -36,6 +38,24 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptArtifactNamingService : IArtifactNamingService {
+
+    override fun getLiveSourceLocation(
+        sourceMark: SourceMark,
+        lineNumber: Int,
+        serviceName: String?
+    ): LiveSourceLocation {
+        var locationSource = sourceMark.sourceFileMarker.psiFile.virtualFile.name
+        val projectBasePath = sourceMark.project.basePath
+        if (projectBasePath != null) {
+            val relativePath = sourceMark.sourceFileMarker.psiFile.virtualFile.path.substringAfter(projectBasePath)
+            locationSource = if (relativePath.startsWith(File.separator)) {
+                relativePath.substring(1)
+            } else {
+                relativePath
+            }
+        }
+        return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+    }
 
     override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
         return if (artifactQualifiedName.identifier.contains("(")) {

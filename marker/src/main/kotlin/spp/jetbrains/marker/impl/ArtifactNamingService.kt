@@ -20,7 +20,9 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import spp.jetbrains.marker.AbstractSourceMarkerService
 import spp.jetbrains.marker.IArtifactNamingService
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.instrument.LiveSourceLocation
 
 /**
  * todo: description.
@@ -29,6 +31,14 @@ import spp.protocol.artifact.ArtifactQualifiedName
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingService>(), IArtifactNamingService {
+
+    override fun getLiveSourceLocation(
+        sourceMark: SourceMark,
+        lineNumber: Int,
+        serviceName: String?
+    ): LiveSourceLocation? {
+        return getService(sourceMark.language.id).getLiveSourceLocation(sourceMark, lineNumber, serviceName)
+    }
 
     override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
         return getService(language).getLocation(language, artifactQualifiedName)

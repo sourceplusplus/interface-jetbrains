@@ -16,12 +16,16 @@
  */
 package spp.jetbrains.marker.jvm
 
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
 import org.jetbrains.uast.*
 import spp.jetbrains.marker.IArtifactNamingService
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.instrument.LiveSourceLocation
 
 /**
  * todo: description.
@@ -30,6 +34,23 @@ import spp.protocol.artifact.ArtifactQualifiedName
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactNamingService : IArtifactNamingService {
+
+    companion object {
+        private val log = logger<SourceMarker>()
+    }
+
+    override fun getLiveSourceLocation(
+        sourceMark: SourceMark,
+        lineNumber: Int,
+        serviceName: String?
+    ): LiveSourceLocation? {
+        val locationSource = sourceMark.artifactQualifiedName.toClass()?.identifier
+        if (locationSource == null) {
+            log.warn("Unable to determine location source of: $sourceMark")
+            return null
+        }
+        return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+    }
 
     override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
         var fullyQualified = artifactQualifiedName.identifier

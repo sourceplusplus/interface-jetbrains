@@ -26,6 +26,7 @@ import io.vertx.core.Vertx
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.impl.ArtifactCreationService
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.marker.impl.ArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -136,19 +137,15 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val locationSource = if (ArtifactScopeService.isJVM(inlayMark.getPsiElement())) {
-                inlayMark.artifactQualifiedName.toClass()?.identifier
-            } else {
-                fileMarker.psiFile.virtualFile.name
-            }
-            if (locationSource == null) {
-                log.error("Unable to determine location source of: ${inlayMark.artifactQualifiedName}")
-                return
-            }
-
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
+            val location = ArtifactNamingService.getLiveSourceLocation(
+                inlayMark,
+                lineNumber,
+                config.serviceName
+            ) ?: return
+
             val statusBar = BreakpointStatusBar(
-                LiveSourceLocation(locationSource, lineNumber, service = config.serviceName),
+                location,
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -187,19 +184,15 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val locationSource = if (ArtifactScopeService.isJVM(inlayMark.getPsiElement())) {
-                inlayMark.artifactQualifiedName.toClass()?.identifier
-            } else {
-                fileMarker.psiFile.virtualFile.name
-            }
-            if (locationSource == null) {
-                log.error("Unable to determine location source of: ${inlayMark.artifactQualifiedName}")
-                return
-            }
-
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
+            val location = ArtifactNamingService.getLiveSourceLocation(
+                inlayMark,
+                lineNumber,
+                config.serviceName
+            ) ?: return
+
             val statusBar = LogStatusBar(
-                LiveSourceLocation(locationSource, lineNumber, service = config.serviceName),
+                location,
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -235,19 +228,15 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val locationSource = if (ArtifactScopeService.isJVM(inlayMark.getPsiElement())) {
-                inlayMark.artifactQualifiedName.toClass()?.identifier
-            } else {
-                fileMarker.psiFile.virtualFile.name
-            }
-            if (locationSource == null) {
-                log.error("Unable to determine location source of: ${inlayMark.artifactQualifiedName}")
-                return
-            }
-
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
+            val location = ArtifactNamingService.getLiveSourceLocation(
+                inlayMark,
+                lineNumber,
+                config.serviceName
+            ) ?: return
+
             val statusBar = MeterStatusBar(
-                LiveSourceLocation(locationSource, lineNumber, service = config.serviceName),
+                location,
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
@@ -282,21 +271,14 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val wrapperPanel = JPanel()
             wrapperPanel.layout = BorderLayout()
 
-            val locationSource = if (ArtifactScopeService.isJVM(inlayMark.getPsiElement())) {
-                inlayMark.artifactQualifiedName.toClass()?.identifier
-            } else {
-                fileMarker.psiFile.virtualFile.name
-            }
-            if (locationSource == null) {
-                log.error("Unable to determine location source of: ${inlayMark.artifactQualifiedName}")
-                return
-            }
-
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
-            val statusBar = SpanStatusBar(
-                LiveSourceLocation(locationSource, lineNumber, service = config.serviceName),
-                inlayMark
-            )
+            val location = ArtifactNamingService.getLiveSourceLocation(
+                inlayMark,
+                lineNumber,
+                config.serviceName
+            ) ?: return
+
+            val statusBar = SpanStatusBar(location, inlayMark)
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
