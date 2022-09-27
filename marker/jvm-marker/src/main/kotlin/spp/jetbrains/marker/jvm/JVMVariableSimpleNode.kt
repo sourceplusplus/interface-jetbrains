@@ -169,7 +169,7 @@ class JVMVariableSimpleNode(
                 ) {
                     val clazz = (varValue.first() as JsonObject).getString("@class").substringAfterLast(".")
                     val id = (varValue.first() as JsonObject).getString("@id")
-                    presentation.addText("{ ${clazz}@${id} }", GRAYED_ATTRIBUTES)
+                    presentation.addText("{ $clazz@$id }", GRAYED_ATTRIBUTES)
                 } else {
                     presentation.addText("\"" + varValue + "\"", fromTextAttributes(scheme.getAttributes(STRING)))
                 }

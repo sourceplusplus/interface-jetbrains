@@ -55,7 +55,7 @@ class JVMArtifactNamingService : IArtifactNamingService {
     override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
         var fullyQualified = artifactQualifiedName.identifier
         if (fullyQualified.contains("#")) {
-            fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"));
+            fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"))
         }
         val className = ArtifactNameUtils.getClassName(fullyQualified)!!
         return if (fullyQualified.contains("(")) {
