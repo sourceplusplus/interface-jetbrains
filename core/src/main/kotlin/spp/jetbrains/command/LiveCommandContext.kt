@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.command
 
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.guide.GuideMark
@@ -31,4 +32,7 @@ data class LiveCommandContext(
     val guideMark: GuideMark? = null,
     val psiElement: PsiElement,
     val variableName: String? = null
-)
+) {
+    val project: Project
+        get() = psiElement.project
+}

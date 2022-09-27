@@ -398,6 +398,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             )
             if (gutterMark.isPresent) {
                 gutterMark.get().putUserData(INSTRUMENT_ID, liveMeter.id!!)
+                gutterMark.get().putUserData(INSTRUMENT_TYPE, LiveInstrumentType.METER)
                 when (liveMeter.meterType) {
                     MeterType.COUNT -> gutterMark.get().configuration.icon = PluginIcons.count
                     MeterType.GAUGE -> gutterMark.get().configuration.icon = PluginIcons.gauge
@@ -405,6 +406,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 }
                 gutterMark.get().configuration.activateOnMouseHover = true
                 gutterMark.get().configuration.activateOnMouseClick = true
+                gutterMark.get().setVisible(false) //hide by default
 
                 val statusBar = LiveMeterStatusPanel(liveMeter, gutterMark.get())
                 val panel = JPanel(GridBagLayout())
