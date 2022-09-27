@@ -40,6 +40,7 @@ object PythonMarker {
         ArtifactNamingService.addService(PythonArtifactNamingService(), "Python")
         ArtifactScopeService.addService(PythonArtifactScopeService(), "Python")
         ArtifactConditionService.addService(PythonArtifactConditionService(), "Python")
+        ArtifactTypeService.addService(PythonArtifactTypeService(), "Python")
         SourceGuideProvider.addProvider(PythonGuideProvider(), "Python")
     }
 }

@@ -34,6 +34,7 @@ object JVMMarker {
         ArtifactNamingService.addService(JVMArtifactNamingService(), SourceMarkerUtils.getJvmLanguages())
         ArtifactScopeService.addService(JVMArtifactScopeService(), SourceMarkerUtils.getJvmLanguages())
         ArtifactConditionService.addService(JVMArtifactConditionService(), SourceMarkerUtils.getJvmLanguages())
+        ArtifactTypeService.addService(JVMArtifactTypeService(), SourceMarkerUtils.getJvmLanguages())
         SourceGuideProvider.addProvider(JVMGuideProvider(), SourceMarkerUtils.getJvmLanguages())
     }
 }
