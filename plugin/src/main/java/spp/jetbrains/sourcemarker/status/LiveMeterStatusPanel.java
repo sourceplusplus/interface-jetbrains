@@ -66,7 +66,11 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
             dayValueLabel.setForeground(UIUtil.getLabelForeground());
         });
 
-        meterDescriptionTextField.setText(liveMeter.getMeterDescription());
+        if (liveMeter.getMeterDescription() != null) {
+            meterDescriptionTextField.setText(liveMeter.getMeterDescription());
+        } else {
+            meterDescriptionTextField.setText(liveMeter.getId());
+        }
 
         String meterType = liveMeter.getMeterType().name().toLowerCase();
         meterType = meterType.substring(0, 1).toUpperCase() + meterType.substring(1);
