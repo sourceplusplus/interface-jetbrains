@@ -601,9 +601,9 @@ public class MeterStatusBar extends JPanel implements StatusBar, VisibleAreaList
 
             //---- meterTypeComboBox ----
             meterTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
-                "Count",
-                "Gauge",
-                "Histogram"
+                message("count"),
+                message("gauge"),
+                message("histogram")
             }));
             mainPanel.add(meterTypeComboBox, "cell 2 0");
 
