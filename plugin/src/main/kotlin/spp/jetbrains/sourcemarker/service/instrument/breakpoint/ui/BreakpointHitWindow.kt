@@ -26,7 +26,6 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.ExecutionPointManager
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.LiveBreakpointConstants
@@ -73,8 +72,7 @@ class BreakpointHitWindow(
     }
 
     private fun addFramesTab() {
-        val config = SourceMarkerPlugin.getInstance(project).getConfig()
-        val framesTab = FramesTab(this, config)
+        val framesTab = FramesTab(project, this)
         val content = layoutUi.createContent(
             LiveBreakpointConstants.LIVE_RECORDER_STACK_FRAMES, framesTab.component, "Frames",
             AllIcons.Debugger.Frame, null

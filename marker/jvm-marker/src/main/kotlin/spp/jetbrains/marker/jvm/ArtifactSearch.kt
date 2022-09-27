@@ -18,12 +18,10 @@ package spp.jetbrains.marker.jvm
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.ProjectScope
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
@@ -44,54 +42,6 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object ArtifactSearch {
-
-    @JvmStatic
-    fun detectRootPackage(project: Project): String? {
-        var basePackages = JavaPsiFacade.getInstance(project).findPackage("")
-            ?.getSubPackages(ProjectScope.getProjectScope(project)) ?: emptyArray()
-
-        //remove non-code packages
-        basePackages = basePackages.filter {
-            val dirs = it.directories
-            dirs.isNotEmpty() && !dirs[0].virtualFile.path.contains("/src/main/resources/")
-        }.toTypedArray()
-        basePackages = basePackages.filter {
-            it.qualifiedName != "asciidoc" && it.qualifiedName != "lib" && it.qualifiedName != "META-INF"
-        }.toTypedArray() //todo: probably shouldn't be necessary
-
-        //determine deepest common source package
-        if (basePackages.isNotEmpty()) {
-            var rootPackage: String? = null
-            while (basePackages.size == 1) {
-                rootPackage = basePackages[0].qualifiedName
-                basePackages = basePackages[0].getSubPackages(ProjectScope.getProjectScope(project))
-            }
-            if (rootPackage != null) {
-                return rootPackage
-            }
-        }
-
-        //look explicitly for /src/main/ pattern
-        var srcMains = basePackages.flatMap { it.directories.toList() }
-            .filter { it.toString().contains("/src/main/") }
-            .filterNot { it.toString().contains("/META-INF") }
-        val genPackage = StringBuilder()
-        var commonSuffix = commonSuffix(srcMains.map { it.toString() }).replace("/", "")
-        while (commonSuffix.isNotEmpty()) {
-            genPackage.append(commonSuffix)
-
-            srcMains = srcMains.flatMap { it.subdirectories.toList() }
-            commonSuffix = commonSuffix(srcMains.map { it.toString() }).replace("/", "")
-            if (commonSuffix.isNotEmpty()) {
-                genPackage.append(".")
-            }
-        }
-        if (genPackage.isNotEmpty()) {
-            return genPackage.toString()
-        }
-
-        return null
-    }
 
     @Suppress("UnstableApiUsage")
     suspend fun findArtifact(vertx: Vertx, artifact: ArtifactQualifiedName): PsiElement? {

@@ -17,14 +17,19 @@
 package spp.jetbrains.marker.jvm
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import com.intellij.psi.*
+import com.intellij.psi.util.ClassUtil
 import org.jetbrains.uast.*
 import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.JVMMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.exception.LiveStackTraceElement
+import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.instrument.LiveSourceLocation
 
 /**
@@ -98,6 +103,12 @@ class JVMArtifactNamingService : IArtifactNamingService {
 
             else -> error("Unsupported file: $psiFile")
         }
+    }
+
+    override fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile? {
+        val psiManager = PsiManager.getInstance(project)
+        val psiClass = ClassUtil.findPsiClassByJVMName(psiManager, frame.qualifiedClassName())
+        return psiClass?.containingFile
     }
 
     private fun getInnerClassesRecursively(psiClass: PsiClass): List<PsiClass> {

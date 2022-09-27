@@ -18,14 +18,15 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.project.Project
 import com.intellij.ui.CollectionListModel
 import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.exception.sourceAsLineNumber
 import java.awt.BorderLayout
@@ -41,12 +42,13 @@ import javax.swing.event.ListSelectionEvent
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class FramesTab(
+    private val project: Project,
     private val tab: BreakpointHitWindow,
-    private val config: SourceMarkerConfig
 ) : DebugStackFrameListener, Disposable {
 
     val component: JPanel = JPanel(BorderLayout())
     private val stackFrameList: JList<LiveStackTraceElement>
+    private var stackFrameManager: StackFrameManager? = null
 
     init {
         stackFrameList = JBList()
@@ -56,6 +58,8 @@ class FramesTab(
     }
 
     override fun onChanged(stackFrameManager: StackFrameManager) {
+        this.stackFrameManager = stackFrameManager
+
         val currentFrame = stackFrameManager.currentFrame
         stackFrameList.model = CollectionListModel(stackFrameManager.stackTrace.getElements(true))
         stackFrameList.setSelectedValue(currentFrame, true)
@@ -71,8 +75,11 @@ class FramesTab(
                 b1: Boolean
             ) {
                 this.icon = AllIcons.Debugger.Frame
-                if (config.rootSourcePackages.any { frame.method.startsWith(it) } &&
-                    frame.sourceAsLineNumber() != null) {
+
+                val psiFile = stackFrameManager?.stackTrace?.language?.let {
+                    ArtifactNamingService.getService(it).findPsiFile(it, project, frame)
+                }
+                if (psiFile?.isWritable == true && frame.sourceAsLineNumber() != null) {
                     this.append(frame.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES)
                 } else {
                     this.append(frame.toString(), SimpleTextAttributes.GRAY_ATTRIBUTES)

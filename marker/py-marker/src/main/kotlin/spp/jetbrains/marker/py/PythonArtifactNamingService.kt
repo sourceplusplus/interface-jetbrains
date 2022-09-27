@@ -16,14 +16,17 @@
  */
 package spp.jetbrains.marker.py
 
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import com.jetbrains.python.psi.*
 import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
+import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.LiveSourceLocation
 
 /**
@@ -94,5 +97,9 @@ class PythonArtifactNamingService : IArtifactNamingService {
             }
         })
         return classQualifiedNames
+    }
+
+    override fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile? {
+        return null //todo: this
     }
 }
