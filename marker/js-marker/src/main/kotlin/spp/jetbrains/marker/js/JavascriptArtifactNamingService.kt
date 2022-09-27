@@ -22,7 +22,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfType
-import spp.jetbrains.marker.AbstractArtifactNamingService
+import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
@@ -35,7 +35,7 @@ import java.util.*
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JavascriptArtifactNamingService : AbstractArtifactNamingService {
+class JavascriptArtifactNamingService : IArtifactNamingService {
 
     override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
         return if (artifactQualifiedName.identifier.contains("(")) {

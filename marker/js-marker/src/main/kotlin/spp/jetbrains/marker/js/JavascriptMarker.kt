@@ -39,7 +39,8 @@ object JavascriptMarker {
         ArtifactCreationService.addService(JavascriptArtifactCreationService(), "JavaScript", "ECMAScript 6")
         ArtifactNamingService.addService(JavascriptArtifactNamingService(), "JavaScript", "ECMAScript 6")
         ArtifactScopeService.addService(JavascriptArtifactScopeService(), "JavaScript", "ECMAScript 6")
-        InstrumentConditionParser.addService(JavascriptConditionParser(), "JavaScript", "ECMAScript 6")
+        ArtifactConditionService.addService(JavascriptArtifactConditionService(), "JavaScript", "ECMAScript 6")
+        ArtifactTypeService.addService(JavascriptArtifactTypeService(), "JavaScript", "ECMAScript 6")
         SourceGuideProvider.addProvider(JavascriptGuideProvider(), "JavaScript", "ECMAScript 6")
     }
 }

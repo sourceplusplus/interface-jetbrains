@@ -21,7 +21,7 @@ import com.intellij.lang.javascript.psi.JSVariable
 import com.intellij.lang.javascript.psi.util.JSTreeUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfTypes
-import spp.jetbrains.marker.AbstractArtifactScopeService
+import spp.jetbrains.marker.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -31,7 +31,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JavascriptArtifactScopeService : AbstractArtifactScopeService {
+class JavascriptArtifactScopeService : IArtifactScopeService {
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         return emptyList() //todo: this
         val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
@@ -43,9 +43,5 @@ class JavascriptArtifactScopeService : AbstractArtifactScopeService {
 
     override fun isInsideFunction(element: PsiElement): Boolean {
         return element.parentOfTypes(JSFunction::class) != null
-    }
-
-    override fun isInsideEndlessLoop(element: PsiElement): Boolean {
-        return false
     }
 }

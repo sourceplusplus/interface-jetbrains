@@ -17,7 +17,7 @@
 package spp.jetbrains.marker.js
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.AbstractInstrumentConditionParser
+import spp.jetbrains.marker.IArtifactConditionService
 
 /**
  * todo: description.
@@ -25,7 +25,7 @@ import spp.jetbrains.marker.AbstractInstrumentConditionParser
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JavascriptConditionParser : AbstractInstrumentConditionParser {
+class JavascriptArtifactConditionService : IArtifactConditionService {
 
     override fun getCondition(condition: String, context: PsiElement): String {
         return condition

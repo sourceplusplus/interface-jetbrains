@@ -35,6 +35,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.ENDPOINT_DETECTOR
@@ -97,7 +98,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
             val sourceMark = event.sourceMark
 
             //setup endpoint detector and attempt detection
-            if (sourceMark is MethodGuideMark) {
+            if (sourceMark is GuideMark) {
                 val endpointDetector = endpointDetectors[sourceMark.language.id]
                 if (endpointDetector != null) {
                     sourceMark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
