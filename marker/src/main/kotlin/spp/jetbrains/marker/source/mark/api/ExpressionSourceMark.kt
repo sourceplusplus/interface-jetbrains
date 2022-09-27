@@ -52,13 +52,6 @@ abstract class ExpressionSourceMark(
     override val isClassMark: Boolean = false
     override val isMethodMark: Boolean = false
     override val isExpressionMark: Boolean = true
-    override val valid: Boolean; get() {
-        return try {
-            psiExpression.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiExpression)
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
-        }
-    }
 
     override val moduleName: String
         get() = TODO("moduleName")
@@ -67,14 +60,6 @@ abstract class ExpressionSourceMark(
         get() {
             val document = getPsiElement().containingFile.viewProvider.document
             return document!!.getLineNumber(getPsiElement().textRange.startOffset) + 1
-        }
-
-    override val viewProviderBound: Boolean
-        get() = try {
-            psiExpression.containingFile.viewProvider.document
-            true
-        } catch (ignore: PsiInvalidElementAccessException) {
-            false
         }
 
     @Synchronized
