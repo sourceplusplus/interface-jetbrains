@@ -248,6 +248,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
             val statusBar = MeterStatusBar(
                 LiveSourceLocation(locationSource, lineNumber, service = config.serviceName),
+                ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
@@ -428,7 +429,10 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                         mutableSetOf(liveMeter.toMetricId()),
                         ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
                         liveMeter.location,
-                        LiveViewConfig("LIVE_METER", listOf("last_minute", "last_hour", "last_day"))
+                        LiveViewConfig(
+                            "LIVE_METER",
+                            listOf(liveMeter.toMetricId())
+                        )
                     )
                 ).onComplete {
                     if (it.succeeded()) {
