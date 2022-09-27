@@ -7,6 +7,7 @@ val projectVersion: String by project
 val jupiterVersion: String by project
 
 intellij {
+    type.set("IC")
     plugins.set(listOf("PythonCore:222.3739.68"))
 }
 
