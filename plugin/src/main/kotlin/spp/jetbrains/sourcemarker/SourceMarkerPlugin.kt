@@ -25,7 +25,6 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -33,7 +32,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -65,16 +63,13 @@ import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.js.JavascriptMarker
-import spp.jetbrains.marker.jvm.ArtifactSearch
 import spp.jetbrains.marker.jvm.JVMMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.py.PythonMarker
-import spp.jetbrains.marker.source.mark.api.filter.CreateSourceMarkFilter
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.Companion.INTELLIJ_PRODUCT_CODES
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.portal.PortalController
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
@@ -180,21 +175,6 @@ class SourceMarkerPlugin(val project: Project) {
             project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, localConfigListener)
         }
 
-        //attempt to determine root source package automatically (if necessary)
-        if (config.rootSourcePackages.isEmpty()) {
-            if (INTELLIJ_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
-                val rootPackage = ApplicationManager.getApplication().runReadAction(Computable {
-                    ArtifactSearch.detectRootPackage(project)
-                })
-                if (rootPackage != null) {
-                    log.info("Detected root source package: $rootPackage")
-                    config.rootSourcePackages = listOf(rootPackage)
-                    PropertiesComponent.getInstance(project)
-                        .setValue("sourcemarker_plugin_config", Json.encode(config))
-                }
-            }
-        }
-
         connectionJob?.cancel()
         connectionJob = null
 
@@ -247,7 +227,7 @@ class SourceMarkerPlugin(val project: Project) {
                         }
                     })
                 pluginsPromise.future().await()
-                initMarker(vertx, config)
+                initMarker(vertx)
             }
         }
     }
@@ -588,7 +568,7 @@ class SourceMarkerPlugin(val project: Project) {
         vertx.deployVerticle(PortalController(project, config)).await()
     }
 
-    private fun initMarker(vertx: Vertx, config: SourceMarkerConfig) {
+    private fun initMarker(vertx: Vertx) {
         log.info("Initializing marker")
         SourceMarker.getInstance(project).apply {
             addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
@@ -597,18 +577,6 @@ class SourceMarkerPlugin(val project: Project) {
 
         SourceMarker.getInstance(project).configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
         SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.strictlyManualCreation = true
-
-        if (config.rootSourcePackages.isNotEmpty()) {
-            SourceMarker.getInstance(project).configuration.createSourceMarkFilter =
-                CreateSourceMarkFilter { artifactQualifiedName ->
-                    config.rootSourcePackages.any { artifactQualifiedName.identifier.startsWith(it) }
-                }
-        } else {
-            val productCode = ApplicationInfo.getInstance().build.productCode
-            if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
-                log.warn("Could not determine root source package. Skipped adding create source mark filter...")
-            }
-        }
         SourceMarker.getInstance(project).enabled = true
         log.info("Source marker enabled")
 

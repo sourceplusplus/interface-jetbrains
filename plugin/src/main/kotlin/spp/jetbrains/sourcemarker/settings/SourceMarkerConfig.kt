@@ -23,7 +23,6 @@ package spp.jetbrains.sourcemarker.settings
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class SourceMarkerConfig(
-    var rootSourcePackages: List<String> = emptyList(),
     var autoResolveEndpointNames: Boolean = true,
     var localMentorEnabled: Boolean = true,
     var serviceHost: String? = null,

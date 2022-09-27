@@ -18,6 +18,7 @@ package spp.jetbrains.marker.js
 
 import com.intellij.lang.javascript.psi.*
 import com.intellij.lang.javascript.psi.ecmal4.JSClass
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
@@ -25,8 +26,10 @@ import com.intellij.psi.util.parentOfType
 import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
+import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.LiveSourceLocation
 import java.io.File
 import java.util.*
@@ -120,5 +123,9 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
             }
         })
         return classQualifiedNames
+    }
+
+    override fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile? {
+        return null //todo: this
     }
 }

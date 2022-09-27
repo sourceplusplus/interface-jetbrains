@@ -34,14 +34,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginBundle.message;
 
 public class PluginConfigurationPanel {
     private JPanel myWholePanel;
     private JPanel myGlobalSettingsPanel;
-    private JTextField rootSourcePackageTextField;
     private JCheckBox autoResolveEndpointNamesCheckBox;
     private JPanel myServiceSettingsPanel;
     private JTextField serviceHostTextField;
@@ -54,7 +52,6 @@ public class PluginConfigurationPanel {
     private JLabel accessTokenLabel;
     private JLabel certificatePinsLabel;
     private JLabel serviceLabel;
-    private JLabel rootSourcePackageLabel;
     private JPanel myPortalSettingsPanel;
     private JSpinner portalZoomSpinner;
     private SourceMarkerConfig config;
@@ -81,12 +78,10 @@ public class PluginConfigurationPanel {
         verifyHostLabel.setText(message("verify_host"));
         certificatePinsLabel.setText(message("certificate_pins"));
         serviceLabel.setText(message("service"));
-        rootSourcePackageLabel.setText(message("root_source_package"));
         autoResolveEndpointNamesCheckBox.setText(message("auto_resolve_endpoint_names"));
     }
 
     private void setUIEnabled(boolean enabled) {
-        rootSourcePackageTextField.setEnabled(enabled);
         autoResolveEndpointNamesCheckBox.setEnabled(enabled);
         serviceHostTextField.setEnabled(enabled);
         accessTokenTextField.setEnabled(enabled);
@@ -102,12 +97,6 @@ public class PluginConfigurationPanel {
     boolean isModified() {
         if (config.getOverride()) return false;
 
-        if (!Arrays.equals(
-                Arrays.stream(rootSourcePackageTextField.getText().split(",")).filter(s -> !s.isEmpty()).toArray(),
-                config.getRootSourcePackages().stream().filter(s -> !s.isEmpty()).toArray())
-        ) {
-            return true;
-        }
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {
             return true;
         }
@@ -140,8 +129,6 @@ public class PluginConfigurationPanel {
         }
 
         return new SourceMarkerConfig(
-                Arrays.stream(rootSourcePackageTextField.getText().split(","))
-                        .map(String::trim).collect(Collectors.toList()),
                 autoResolveEndpointNamesCheckBox.isSelected(),
                 true,
                 serviceHostTextField.getText(),
@@ -159,7 +146,6 @@ public class PluginConfigurationPanel {
 
     public void applySourceMarkerConfig(SourceMarkerConfig config) {
         this.config = config;
-        rootSourcePackageTextField.setText(String.join(",", config.getRootSourcePackages()));
         autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
         serviceHostTextField.setText(config.getServiceHost());
         accessTokenTextField.setText(config.getAccessToken());

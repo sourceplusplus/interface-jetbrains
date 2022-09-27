@@ -16,6 +16,8 @@
  */
 package spp.jetbrains.marker
 
+import spp.protocol.artifact.ArtifactLanguage
+
 abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
 
     private val services = mutableMapOf<String, T>()
@@ -31,5 +33,13 @@ abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
 
     internal fun getService(language: String): T {
         return services[language] ?: throw IllegalArgumentException("No service for language $language")
+    }
+
+    fun getService(language: ArtifactLanguage): T {
+        return when (language) {
+            ArtifactLanguage.JVM -> getService("JAVA")
+            ArtifactLanguage.NODEJS -> getService("JavaScript")
+            ArtifactLanguage.PYTHON -> getService("Python")
+        }
     }
 }
