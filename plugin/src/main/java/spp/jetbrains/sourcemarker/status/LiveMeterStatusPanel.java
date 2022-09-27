@@ -22,6 +22,7 @@ import com.jgoodies.forms.layout.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
@@ -86,7 +87,12 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
 
     public void accept(@NotNull LiveInstrumentEvent event) {
         JsonObject rawMetrics = new JsonObject(new JsonObject(event.getData()).getString("metricsData"));
-        minuteValueLabel.setText(getShortNumber(rawMetrics.getValue("value").toString()));
+        String meterValue = rawMetrics.getValue("value").toString();
+        if (NumberUtils.isCreatable(meterValue)) {
+            minuteValueLabel.setText(getShortNumber(meterValue));
+        } else {
+            minuteValueLabel.setText(meterValue);
+        }
 //        hourValueLabel.setText(getShortNumber(rawMetrics.getString("last_hour")));
 //        dayValueLabel.setText(getShortNumber(rawMetrics.getString("last_day")));
     }
