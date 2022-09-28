@@ -531,7 +531,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        breakpointConditionField = new AutocompleteField(placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE);
+        breakpointConditionField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE, false);
         label1 = new JLabel();
         hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
         timeLabel = new JLabel();

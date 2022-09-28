@@ -43,7 +43,9 @@ import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
-import spp.protocol.SourceServices.Utilize
+import spp.protocol.SourceServices.LIVE_INSTRUMENT
+import spp.protocol.SourceServices.LIVE_MANAGEMENT_SERVICE
+import spp.protocol.SourceServices.LIVE_VIEW
 import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
 import spp.protocol.platform.status.InstanceConnection
@@ -149,9 +151,9 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
             vertx.executeBlocking<Any> {
                 setupHandler(vertx, "get-records")
-                setupHandler(vertx, Utilize.LIVE_MANAGEMENT_SERVICE)
-                setupHandler(vertx, Utilize.LIVE_INSTRUMENT)
-                setupHandler(vertx, Utilize.LIVE_VIEW)
+                setupHandler(vertx, LIVE_MANAGEMENT_SERVICE)
+                setupHandler(vertx, LIVE_INSTRUMENT)
+                setupHandler(vertx, LIVE_VIEW)
 
                 //setup connection
                 val replyAddress = UUID.randomUUID().toString()

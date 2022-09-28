@@ -340,12 +340,12 @@ class SourceMarkerPlugin(val project: Project) {
         log.info("Discovered $availableRecords.size services")
 
         //live service
-        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_MANAGEMENT_SERVICE }) {
+        if (availableRecords.any { it.name == SourceServices.LIVE_MANAGEMENT_SERVICE }) {
             log.info("Live management available")
 
             val liveManagementService = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
-                .setAddress(SourceServices.Utilize.LIVE_MANAGEMENT_SERVICE)
+                .setAddress(SourceServices.LIVE_MANAGEMENT_SERVICE)
                 .build(LiveManagementService::class.java)
             UserData.liveManagementService(project, liveManagementService)
 
@@ -359,13 +359,13 @@ class SourceMarkerPlugin(val project: Project) {
         }
 
         //live instrument
-        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_INSTRUMENT }) {
+        if (availableRecords.any { it.name == SourceServices.LIVE_INSTRUMENT }) {
             log.info("Live instruments available")
             SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(liveStatusManager)
 
             val liveInstrument = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
-                .setAddress(SourceServices.Utilize.LIVE_INSTRUMENT)
+                .setAddress(SourceServices.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
             UserData.liveInstrumentService(project, liveInstrument)
 
@@ -379,11 +379,11 @@ class SourceMarkerPlugin(val project: Project) {
         }
 
         //live view
-        if (availableRecords.any { it.name == SourceServices.Utilize.LIVE_VIEW }) {
+        if (availableRecords.any { it.name == SourceServices.LIVE_VIEW }) {
             log.info("Live views available")
             val liveView = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
-                .setAddress(SourceServices.Utilize.LIVE_VIEW)
+                .setAddress(SourceServices.LIVE_VIEW)
                 .build(LiveViewService::class.java)
             UserData.liveViewService(project, liveView)
 

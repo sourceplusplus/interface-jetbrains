@@ -32,7 +32,7 @@ import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.SourceServices.Provide.toLiveInstrumentSubscriberAddress
+import spp.protocol.SourceServices.Subscribe.toLiveInstrumentSubscriberAddress
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.LiveBreakpointHit

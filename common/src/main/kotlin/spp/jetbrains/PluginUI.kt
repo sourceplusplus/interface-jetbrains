@@ -21,6 +21,7 @@ import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.ui.Gray
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.UIUtil.getWindowColor
 import spp.jetbrains.PluginBundle.LOCALE
 import java.awt.Color
@@ -49,8 +50,12 @@ object PluginUI {
         get() = "#" + Integer.toHexString(getLabelForeground().rgb).substring(2)
 
     @JvmStatic
+    val commandHighlightForeground: Color
+        get() = LookupCellRenderer.MATCHED_FOREGROUND_COLOR
+
+    @JvmStatic
     val commandHighlightColor: String
-        get() = "#" + Integer.toHexString(LookupCellRenderer.MATCHED_FOREGROUND_COLOR.rgb).substring(2)
+        get() = "#" + Integer.toHexString(commandHighlightForeground.rgb).substring(2)
 
     @JvmStatic
     val editCompleteColor: Color
@@ -61,6 +66,16 @@ object PluginUI {
 
     @JvmField
     val ROBOTO_LIGHT_BOLD_14: Font
+
+    @JvmStatic
+    fun getPlaceholderForeground(): Color {
+        return Color(
+            UIUtil.getTextFieldForeground().red,
+            UIUtil.getTextFieldForeground().green,
+            UIUtil.getTextFieldForeground().blue,
+            100
+        )
+    }
 
     @JvmStatic
     fun getBackgroundColor(): Color {
