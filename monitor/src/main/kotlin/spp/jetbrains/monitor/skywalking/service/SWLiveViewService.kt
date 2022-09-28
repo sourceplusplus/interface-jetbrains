@@ -71,7 +71,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         vertx.setPeriodic(5_000) {
             subscriptionMap.forEach { (_, subscription) ->
                 launch(vertx.dispatcher()) {
-                    when (subscription.subscription.liveViewConfig.viewName) {
+                    when (subscription.subscription.viewConfig.viewName) {
                         "LOGS" -> pullLatestLogs(subscription)
                         "TRACES" -> sendTracesSubscriptionUpdate(subscription)
                         else -> sendEndpointMetricSubscriptionUpdate(subscription)
@@ -115,7 +115,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                 endpointId,
                 subscription.artifactQualifiedName,
                 formatter.format(trace.start),
-                subscription.liveViewConfig,
+                subscription.viewConfig,
                 eventData.toString()
             )
             vertx.eventBus().publish(toLiveViewSubscriberAddress(developerId), JsonObject.mapFrom(event))
@@ -145,7 +145,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                         "entityId",
                         subscription.artifactQualifiedName,
                         formatter.format(it.timestamp),
-                        subscription.liveViewConfig,
+                        subscription.viewConfig,
                         JsonObject().put("log", JsonObject.mapFrom(it)).toString()
                     )
                     vertx.eventBus().publish(toLiveViewSubscriberAddress(developerId), JsonObject.mapFrom(viewEvent))
@@ -169,7 +169,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES) //exclusive
         val startTime = endTime.minusMinutes(3)
         val metricsRequest = GetEndpointMetrics(
-            subscription.liveViewConfig.viewMetrics,
+            subscription.viewConfig.viewMetrics,
             subscription.entityIds.first(),
             ZonedDuration(startTime, endTime, DurationStep.MINUTE)
         )
@@ -181,7 +181,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             val values = metrics.map { it.values[i] }
             if (values.size > 1) {
                 val jsonArray = JsonArray()
-                subscription.liveViewConfig.viewMetrics.forEachIndexed { x, metricName ->
+                subscription.viewConfig.viewMetrics.forEachIndexed { x, metricName ->
                     val metric = toMetric(subscription, metricName, timeBucket, values[x].value)
                     jsonArray.add(metric)
                 }
@@ -191,7 +191,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                     lastMetricsByTimeBucket[timeBucket.toEpochSecond()] = jsonArray
                 }
             } else {
-                val metricName = subscription.liveViewConfig.viewMetrics.first()
+                val metricName = subscription.viewConfig.viewMetrics.first()
                 val metric = toMetric(subscription, metricName, timeBucket, values.first().value)
                 if (lastMetricsByTimeBucket[timeBucket.toEpochSecond()] != JsonArray().add(metric)) {
                     sendActivitySubscriptionUpdate(subscription, timeBucket, metric)
@@ -237,7 +237,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             subscription.entityIds.first(),
             subscription.artifactQualifiedName,
             formatter.format(timeBucket),
-            subscription.liveViewConfig,
+            subscription.viewConfig,
             value.toString()
         )
         vertx.eventBus().publish(toLiveViewSubscriberAddress(developerId), JsonObject.mapFrom(event))
