@@ -32,12 +32,12 @@ import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
-import spp.protocol.SourceServices.Provide.toLiveViewSubscriberAddress
+import spp.protocol.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
+import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
-import spp.protocol.view.LiveViewSubscription
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
@@ -58,13 +58,13 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         private val log = logger<SWLiveViewService>()
     }
 
-    data class SWLiveViewSubscription(
-        val subscription: LiveViewSubscription,
+    data class SWLiveView(
+        val subscription: LiveView,
         val lastMetricsByTimeBucket: ConcurrentHashMap<Long, JsonArray> = ConcurrentHashMap<Long, JsonArray>()
     )
 
     private val developerId: String = "system"
-    private val subscriptionMap = ConcurrentHashMap<String, SWLiveViewSubscription>()
+    private val subscriptionMap = ConcurrentHashMap<String, SWLiveView>()
     private var currentService: Service? = null
 
     override suspend fun start() {
@@ -86,7 +86,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         }
     }
 
-    private suspend fun sendTracesSubscriptionUpdate(swSubscription: SWLiveViewSubscription) {
+    private suspend fun sendTracesSubscriptionUpdate(swSubscription: SWLiveView) {
         val subscription = swSubscription.subscription
         val endpointId = subscription.entityIds.first()
         val traceResult = EndpointTracesBridge.getTraces(
@@ -123,7 +123,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         }
     }
 
-    private suspend fun pullLatestLogs(swSubscription: SWLiveViewSubscription) {
+    private suspend fun pullLatestLogs(swSubscription: SWLiveView) {
         val subscription = swSubscription.subscription
         val logsResult = LogsBridge.queryLogs(
             LogsBridge.GetEndpointLogs(
@@ -163,7 +163,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         }
     }
 
-    private suspend fun sendEndpointMetricSubscriptionUpdate(swSubscription: SWLiveViewSubscription) {
+    private suspend fun sendEndpointMetricSubscriptionUpdate(swSubscription: SWLiveView) {
         val subscription = swSubscription.subscription
         val lastMetricsByTimeBucket = swSubscription.lastMetricsByTimeBucket
         val endTime = ZonedDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MINUTES) //exclusive
@@ -205,7 +205,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
     }
 
     private fun toMetric(
-        subscription: LiveViewSubscription,
+        subscription: LiveView,
         metricName: String,
         timeBucket: ZonedDateTime,
         value: Any
@@ -228,7 +228,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
     }
 
     private fun sendActivitySubscriptionUpdate(
-        subscription: LiveViewSubscription,
+        subscription: LiveView,
         timeBucket: ZonedDateTime,
         value: Any
     ) {
@@ -244,47 +244,47 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         vertx.eventBus().send(toLiveViewSubscriberAddress(subscription.subscriptionId!!), JsonObject.mapFrom(event))
     }
 
-    override fun addLiveViewSubscription(subscription: LiveViewSubscription): Future<LiveViewSubscription> {
-        val sub = SWLiveViewSubscription(subscription.copy(subscriptionId = UUID.randomUUID().toString()))
+    override fun addLiveView(subscription: LiveView): Future<LiveView> {
+        val sub = SWLiveView(subscription.copy(subscriptionId = UUID.randomUUID().toString()))
         subscriptionMap[sub.subscription.subscriptionId!!] = sub
         return Future.succeededFuture(sub.subscription)
     }
 
-    override fun updateLiveViewSubscription(
+    override fun updateLiveView(
         id: String,
-        subscription: LiveViewSubscription
-    ): Future<LiveViewSubscription> {
+        subscription: LiveView
+    ): Future<LiveView> {
         val sub = subscriptionMap[id]
         if (sub != null) {
-            subscriptionMap[id] = SWLiveViewSubscription(subscription.copy(subscriptionId = id))
+            subscriptionMap[id] = SWLiveView(subscription.copy(subscriptionId = id))
             return Future.succeededFuture(subscription)
         }
         return Future.failedFuture("Subscription not found")
     }
 
-    override fun removeLiveViewSubscription(id: String): Future<LiveViewSubscription> {
+    override fun removeLiveView(id: String): Future<LiveView> {
         val sub = subscriptionMap.remove(id)
             ?: return Future.failedFuture(IllegalStateException("Invalid subscription id"))
         return Future.succeededFuture(sub.subscription)
     }
 
-    override fun getLiveViewSubscription(id: String): Future<LiveViewSubscription> {
+    override fun getLiveView(id: String): Future<LiveView> {
         val sub = subscriptionMap[id]
             ?: return Future.failedFuture(IllegalStateException("Invalid subscription id"))
         return Future.succeededFuture(sub.subscription)
     }
 
-    override fun getLiveViewSubscriptions(): Future<List<LiveViewSubscription>> {
+    override fun getLiveViews(): Future<List<LiveView>> {
         return Future.succeededFuture(subscriptionMap.values.map { it.subscription })
     }
 
-    override fun clearLiveViewSubscriptions(): Future<List<LiveViewSubscription>> {
+    override fun clearLiveViews(): Future<List<LiveView>> {
         val subscriptions = subscriptionMap.values.toList()
         subscriptionMap.clear()
         return Future.succeededFuture(subscriptions.map { it.subscription })
     }
 
-    override fun getLiveViewSubscriptionStats(): Future<JsonObject> {
+    override fun getLiveViewStats(): Future<JsonObject> {
         return Future.failedFuture(UnsupportedOperationException())
     }
 }

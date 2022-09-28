@@ -52,8 +52,8 @@ import spp.protocol.instrument.*
 import spp.protocol.instrument.meter.MeterType
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
+import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewConfig
-import spp.protocol.view.LiveViewSubscription
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.GridBagConstraints
@@ -405,8 +405,8 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 gutterMark.get().apply(true)
                 addStatusBar(gutterMark.get(), statusBar)
 
-                UserData.liveViewService(project)!!.addLiveViewSubscription(
-                    LiveViewSubscription(
+                UserData.liveViewService(project)!!.addLiveView(
+                    LiveView(
                         null,
                         mutableSetOf(liveMeter.toMetricId()),
                         ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
