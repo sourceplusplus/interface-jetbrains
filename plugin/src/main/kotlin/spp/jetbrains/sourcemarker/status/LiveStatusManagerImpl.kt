@@ -420,7 +420,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                     if (it.succeeded()) {
                         gutterMark.get().putUserData(VIEW_SUBSCRIPTION_ID, it.result().subscriptionId)
                     } else {
-                        log.error("Failed to add live view subscription", it.cause())
+                        log.error("Failed to add live view", it.cause())
                     }
                 }
             } else {
