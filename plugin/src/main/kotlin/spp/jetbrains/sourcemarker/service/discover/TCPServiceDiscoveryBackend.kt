@@ -171,7 +171,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 }
                 val headers = JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } }
                 FrameHelper.sendFrame(
-                    BridgeEventType.SEND.name.toLowerCase(),
+                    BridgeEventType.SEND.name.lowercase(),
                     PlatformAddress.MARKER_CONNECTED,
                     replyAddress, headers, true, JsonObject.mapFrom(pc), socket!!
                 )
@@ -191,7 +191,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             val headers = JsonObject()
             resp.headers().entries().forEach { headers.put(it.key, it.value) }
             FrameHelper.sendFrame(
-                BridgeEventType.SEND.name.toLowerCase(),
+                BridgeEventType.SEND.name.lowercase(),
                 address, replyAddress, headers, true, resp.body(), socket!!
             )
         }
