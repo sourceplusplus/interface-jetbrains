@@ -24,6 +24,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
+import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.status.SourceStatus.Pending
@@ -148,6 +149,13 @@ class ServiceBridge(
         suspend fun getActiveServices(vertx: Vertx): List<Service> {
             return vertx.eventBus()
                 .request<List<Service>>(getActiveServicesAddress, true).await().body()
+        }
+
+        fun getCurrentServiceAwait(vertx: Vertx): Service? {
+            return safeRunBlocking(vertx.dispatcher()) {
+                vertx.eventBus()
+                    .request<Service>(getCurrentServiceAddress, true).await().body()
+            }
         }
     }
 }

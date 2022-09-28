@@ -99,7 +99,6 @@ class PortalController(
                 val portal = SourcePortal.getPortal(
                     SourcePortal.register(it.sourceMark.artifactQualifiedName, false)
                 )!!
-                it.sourceMark.putUserData(SourceMarkKeys.PORTAL_CONFIGURATION, portal.configuration)
 
                 it.sourceMark.addEventListener {
                     if (it.eventCode == SourceMarkEventCode.UPDATE_PORTAL_CONFIG) {

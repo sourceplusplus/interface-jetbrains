@@ -421,7 +421,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        spanOperationNameField = new AutocompleteField(placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE);
+        spanOperationNameField = new AutocompleteField(inlayMark.getProject(), placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE, false);
         timeLabel = new JLabel();
         separator1 = new JSeparator();
         closeLabel = new JLabel();

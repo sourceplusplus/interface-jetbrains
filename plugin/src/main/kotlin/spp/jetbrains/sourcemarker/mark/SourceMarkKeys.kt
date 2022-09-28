@@ -22,7 +22,6 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.sourcemarker.status.StatusBar
 import spp.protocol.instrument.LiveInstrumentType
-import spp.booster.PortalConfiguration
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 
@@ -33,7 +32,6 @@ import spp.protocol.service.listen.LiveViewEventListener
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkKeys {
-    val PORTAL_CONFIGURATION = SourceKey<PortalConfiguration>("PORTAL_CONFIGURATION")
     val ENDPOINT_DETECTOR = SourceKey<EndpointDetector<*>>("ENDPOINT_DETECTOR")
     val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
     val INSTRUMENT_ID = SourceKey<String>("INSTRUMENT_ID")

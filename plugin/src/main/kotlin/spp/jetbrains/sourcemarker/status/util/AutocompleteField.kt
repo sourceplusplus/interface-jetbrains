@@ -16,13 +16,16 @@
  */
 package spp.jetbrains.sourcemarker.status.util
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ScalableIcon
 import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import spp.jetbrains.PluginUI
 import spp.jetbrains.PluginUI.COMPLETE_COLOR_PURPLE
 import spp.jetbrains.PluginUI.SMALLEST_FONT
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.sourcemarker.element.AutocompleteDropdown
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
@@ -43,16 +46,19 @@ import javax.swing.text.*
  */
 @Suppress("MagicNumber")
 class AutocompleteField<T : AutocompleteFieldRow>(
+    val project: Project,
     var placeHolderText: String?,
     private val allLookup: List<T>,
     private val lookup: Function<String, List<T>>? = null,
     internal val artifactQualifiedName: ArtifactQualifiedName,
     private val replaceCommandOnTab: Boolean = false,
     private val autocompleteOnEnter: Boolean = true,
-    private val varColor: Color = COMPLETE_COLOR_PURPLE
+    private val varColor: Color = COMPLETE_COLOR_PURPLE,
+    addAutocompleteDropdownInfo: Boolean = false
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener, MouseMotionListener, MouseListener {
 
     private val results: MutableList<AutocompleteFieldRow>
+    private val autocompleteDropdown: AutocompleteDropdown?
     private val popup: JWindow
     private val list: JList<AutocompleteFieldRow>
     private val model: ListModel<AutocompleteFieldRow>
@@ -70,6 +76,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         private set
     var ready: Boolean = false
         private set
+    var maxSuggestSize = 10
 
     private val matchAndApplyStyle = { m: Matcher ->
         if (varPattern.pattern().isNotEmpty()) {
@@ -115,7 +122,16 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             }
         }
         scroll.border = JBUI.Borders.empty()
-        popup.add(scroll)
+
+        if (addAutocompleteDropdownInfo) {
+            autocompleteDropdown = AutocompleteDropdown(project).apply { setScrollPane(scroll) }
+            autocompleteDropdown.setTotalCommandsLabel(allLookup.size)
+            popup.add(autocompleteDropdown)
+        } else {
+            autocompleteDropdown = null
+            popup.add(scroll)
+        }
+
         addFocusListener(this)
         document.addDocumentListener(this)
         addKeyListener(this)
@@ -219,7 +235,8 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         results.clear()
         lookup?.let { results.addAll(it.apply(text)) }
         model.updateView()
-        list.visibleRowCount = results.size.coerceAtMost(10)
+        list.visibleRowCount = results.size.coerceAtMost(maxSuggestSize)
+        autocompleteDropdown?.setCurrentCommandsLabel(list.visibleRowCount)
         if (results.size > 0) {
             list.selectedIndex = 0
         }
@@ -242,7 +259,8 @@ class AutocompleteField<T : AutocompleteFieldRow>(
                 .filter { it.getText().lowercase().contains(text) }
                 .sortedBy { it.getText() })
             model.updateView()
-            list.visibleRowCount = results.size.coerceAtMost(10)
+            list.visibleRowCount = results.size.coerceAtMost(maxSuggestSize)
+            autocompleteDropdown?.setCurrentCommandsLabel(list.visibleRowCount)
             if (results.size > 0) {
                 list.selectedIndex = 0
             }
@@ -259,11 +277,13 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             if (index > 0) {
                 list.selectedIndex = index - 1
             }
+            scrollListToSelected()
         } else if (e.keyCode == KeyEvent.VK_DOWN) {
             val index = list.selectedIndex
             if (index != -1 && list.model.size > index + 1) {
                 list.selectedIndex = index + 1
             }
+            scrollListToSelected()
         } else if (e.keyCode == KeyEvent.VK_TAB) {
             if (text.isBlank() || list.selectedValue == null || !replaceCommandOnTab) return
             val autocompleteRow = list.selectedValue
@@ -309,6 +329,13 @@ class AutocompleteField<T : AutocompleteFieldRow>(
                 addAutoCompleteToInput(text)
                 ready = true
             }
+        }
+    }
+
+    private fun scrollListToSelected() {
+        val index = list.selectedIndex
+        if (index != -1) {
+            list.ensureIndexIsVisible(index)
         }
     }
 
@@ -372,12 +399,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             val textLength = pG.getFontMetrics().stringWidth(placeHolderText)
             val fieldLength = width
 
-            g.color = placeHolderTextColor ?: Color(
-                UIUtil.getTextFieldForeground().red,
-                UIUtil.getTextFieldForeground().green,
-                UIUtil.getTextFieldForeground().blue,
-                100
-            )
+            g.color = placeHolderTextColor ?: PluginUI.getPlaceholderForeground()
             g.drawString(
                 placeHolderText,
                 insets.left + (fieldLength / 2) - (textLength / 2),
