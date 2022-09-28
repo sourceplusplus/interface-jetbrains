@@ -74,7 +74,7 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
-    override fun updateClientAccess(id: String): Future<ClientAccess> {
+    override fun refreshClientAccess(id: String): Future<ClientAccess> {
         return Future.failedFuture("Illegal operation")
     }
 
