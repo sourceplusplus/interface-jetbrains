@@ -239,8 +239,10 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     fun dispose(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
         if (this is InlayMark) {
-            configuration.inlayRef?.get()?.dispose()
-            configuration.inlayRef = null
+            ApplicationManager.getApplication().invokeAndWait {
+                configuration.inlayRef?.get()?.dispose()
+                configuration.inlayRef = null
+            }
         }
         closePopup()
 

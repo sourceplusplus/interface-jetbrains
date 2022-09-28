@@ -67,7 +67,7 @@ class LiveInstrumentManager(
 
         //register listener
         FrameHelper.sendFrame(
-            BridgeEventType.REGISTER.name.toLowerCase(),
+            BridgeEventType.REGISTER.name.lowercase(),
             toLiveInstrumentSubscriberAddress(developer), null,
             JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
             null, null, TCPServiceDiscoveryBackend.getSocket(project)

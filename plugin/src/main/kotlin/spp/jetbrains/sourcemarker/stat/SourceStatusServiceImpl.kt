@@ -128,7 +128,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
             if (waitBefore) delay(repeatMillis)
             try {
                 SourceMarkerPlugin.getInstance(project).init()
-            } catch (ex: AlreadyDisposedException) {
+            } catch (ignore: AlreadyDisposedException) {
                 log.info("${project.name} is disposed, stopping reconnection loop")
                 break
             }

@@ -73,7 +73,7 @@ class ControlBarCellRenderer(
                     "*methodName*",
                     getShortFunctionSignature(autocompleteField.artifactQualifiedName.identifier)
                 )
-            } catch (ex: Exception) {
+            } catch (ignore: Exception) {
                 formattedDescription.replace("*methodName*", "anonymous")
             }
         }

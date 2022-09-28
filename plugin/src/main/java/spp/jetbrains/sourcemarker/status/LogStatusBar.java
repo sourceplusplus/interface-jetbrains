@@ -133,6 +133,12 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
             }
         }).collect(Collectors.toList());
         lookup = text -> scopeVars.stream()
+                .filter(v -> {
+                    //ignore exact matches
+                    String var = substringAfterLast(" ", text.toLowerCase());
+                    var = substringAfterLast("$", var);
+                    return !var.equalsIgnoreCase(v);
+                })
                 .filter(v -> VariableParser.isVariable(text, v))
                 .map(it -> new AutocompleteFieldRow() {
                     public String getText() {
@@ -697,6 +703,12 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         inlayMark.dispose(true);
     }
 
+    public static String substringAfterLast(String delimiter, String value) {
+        int index = value.lastIndexOf(delimiter);
+        if (index == -1) return value;
+        else return value.substring(index + delimiter.length());
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
@@ -705,7 +717,7 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         configDropdownLabel = new JLabel();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
-        liveLogTextField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE, false);
+        liveLogTextField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
         liveLogTextField.setVarPattern(varPattern);
         closeLabel = new JLabel();
 
