@@ -22,7 +22,6 @@ import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI
-import spp.jetbrains.PluginUI.COMPLETE_COLOR_PURPLE
 import spp.jetbrains.PluginUI.SMALLEST_FONT
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.sourcemarker.element.AutocompleteDropdown
@@ -51,12 +50,13 @@ class AutocompleteField<T : AutocompleteFieldRow>(
     private val allLookup: List<T>,
     private val lookup: Function<String, List<T>>? = null,
     internal val artifactQualifiedName: ArtifactQualifiedName,
-    private val replaceCommandOnTab: Boolean = false,
-    private val autocompleteOnEnter: Boolean = true,
-    private val varColor: Color = COMPLETE_COLOR_PURPLE,
     addAutocompleteDropdownInfo: Boolean = false
 ) : JTextPane(), FocusListener, DocumentListener, KeyListener, MouseMotionListener, MouseListener {
 
+    var autocompleteOnTab: Boolean = true
+    var replaceCommandOnTab: Boolean = false
+    var autocompleteAndFinishOnEnter: Boolean = false
+    var varColor: Color = PluginUI.commandHighlightForeground
     private val results: MutableList<AutocompleteFieldRow>
     private val autocompleteDropdown: AutocompleteDropdown?
     private val popup: JWindow
@@ -285,19 +285,24 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             }
             scrollListToSelected()
         } else if (e.keyCode == KeyEvent.VK_TAB) {
-            if (text.isBlank() || list.selectedValue == null || !replaceCommandOnTab) return
+            if (text.isBlank() || list.selectedValue == null || (!replaceCommandOnTab && !autocompleteOnTab)) return
             val autocompleteRow = list.selectedValue
-            if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
-                if (getText().lowercase().startsWith(autocompleteRow.liveCommand.getTriggerName().lowercase() + " ")) {
-                    return //do nothing
+            if (replaceCommandOnTab) {
+                if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
+                    if (getText().lowercase().startsWith(autocompleteRow.liveCommand.getTriggerName().lowercase() + " ")) {
+                        return //do nothing
+                    }
+                    setText(autocompleteRow.getText() + " ")
+                } else {
+                    setText(autocompleteRow.getText())
                 }
-                setText(autocompleteRow.getText() + " ")
             } else {
-                setText(autocompleteRow.getText())
+                val userInput = text.substringAfterLast(" ")
+                setText(text.substring(0, text.length - userInput.length) + autocompleteRow.getText())
             }
             caretPosition = getText().length
         } else if (e.keyCode == KeyEvent.VK_ENTER) {
-            if (!autocompleteOnEnter) {
+            if (!autocompleteAndFinishOnEnter) {
                 ready = true
                 actualText = text
                 hideAutocompletePopup()

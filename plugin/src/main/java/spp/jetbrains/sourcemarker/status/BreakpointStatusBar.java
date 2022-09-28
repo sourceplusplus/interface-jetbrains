@@ -151,6 +151,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
 
     @Override
     public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
+        LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(event.getLiveInstrument());
         this.liveBreakpoint = null;
     }
 
@@ -531,7 +532,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        breakpointConditionField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false, false, COMPLETE_COLOR_PURPLE, false);
+        breakpointConditionField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
         label1 = new JLabel();
         hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
         timeLabel = new JLabel();

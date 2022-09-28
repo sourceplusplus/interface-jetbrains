@@ -91,10 +91,10 @@ object VariableParser {
 
     @JvmStatic
     fun isVariable(text: String, v: String): Boolean {
-        val variable = text.toLowerCase().substringAfterLast(SPACE)
+        val variable = text.lowercase().substringAfterLast(SPACE)
         return ((variable.startsWith(DOLLAR) && variable.substring(1) != v
-                && v.toLowerCase().contains(variable.substring(1)))
+                && v.lowercase().contains(variable.substring(1)))
                 || (variable.startsWith("\${") && variable.substring(2) != v
-                && v.toLowerCase().contains(variable.substring(2))))
+                && v.lowercase().contains(variable.substring(2))))
     }
 }

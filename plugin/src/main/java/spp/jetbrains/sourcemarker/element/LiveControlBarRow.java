@@ -20,6 +20,7 @@ import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.PluginUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +37,7 @@ public class LiveControlBarRow extends JPanel {
     }
 
     public void setCommandName(String commandName, String input) {
-        String selectHex = "#" + Integer.toHexString(SELECT_COLOR_RED.getRGB()).substring(2);
+        String selectHex = "#" + Integer.toHexString(PluginUI.getCommandHighlightForeground().getRGB()).substring(2);
         String defaultHex = getCommandTypeColor();
 
         int minIndex = 0;
