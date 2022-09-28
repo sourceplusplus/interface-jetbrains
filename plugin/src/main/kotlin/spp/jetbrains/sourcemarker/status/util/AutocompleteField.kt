@@ -22,6 +22,7 @@ import com.intellij.ui.components.JBList
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI
+import spp.jetbrains.PluginUI
 import spp.jetbrains.PluginUI.SMALLEST_FONT
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.sourcemarker.element.AutocompleteDropdown
