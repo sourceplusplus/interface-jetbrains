@@ -22,7 +22,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.sourcemarker.status.StatusBar
 import spp.protocol.instrument.LiveInstrumentType
-import spp.protocol.portal.PortalConfiguration
+import spp.booster.PortalConfiguration
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 
