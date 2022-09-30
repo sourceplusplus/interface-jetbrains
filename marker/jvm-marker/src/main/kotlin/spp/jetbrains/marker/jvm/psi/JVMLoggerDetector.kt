@@ -20,11 +20,15 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
-import com.intellij.psi.*
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElementOfType
+import org.jetbrains.uast.visitor.AbstractUastVisitor
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
@@ -66,15 +70,17 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
     fun determineLoggerStatements(uMethod: UMethod, fileMarker: SourceFileMarker): List<DetectedLogger> {
         val loggerStatements = mutableListOf<DetectedLogger>()
         ApplicationManager.getApplication().runReadAction {
-            uMethod.javaPsi.accept(object : JavaRecursiveElementVisitor() {
-                override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
-                    val methodName = expression.methodExpression.referenceName
-                    if (methodName != null && LOGGER_METHODS.contains(methodName)) {
-                        val resolvedMethod = expression.resolveMethod() ?: return
-                        if (LOGGER_CLASSES.contains(resolvedMethod.containingClass?.qualifiedName.orEmpty())) {
-                            val logTemplate = (expression.argumentList.expressions.firstOrNull()?.run {
-                                (this as? PsiLiteral)?.value as? String
-                            })
+            uMethod.accept(object : AbstractUastVisitor() {
+                override fun visitCallExpression(node: UCallExpression): Boolean {
+                    val expression = node.sourcePsi ?: return super.visitCallExpression(node)
+                    val loggerClass = node.resolve()?.containingClass?.qualifiedName
+                    if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
+                        val methodName = node.methodIdentifier?.name
+                        if (methodName != null && LOGGER_METHODS.contains(methodName)) {
+                            val logTemplate = node.valueArguments.firstOrNull()?.run {
+                                (this as? ULiteralExpression)?.value as? String
+                            }
+
                             if (logTemplate != null) {
                                 log.debug("Found log statement: $logTemplate")
                                 val detectedLogger = DetectedLogger(
@@ -84,7 +90,7 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
 
                                 //create expression guide mark for the log statement
                                 val guideMark = fileMarker.createExpressionSourceMark(
-                                    expression, SourceMark.Type.GUIDE
+                                    expression.parent, SourceMark.Type.GUIDE
                                 )
                                 if (!fileMarker.containsSourceMark(guideMark)) {
                                     guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
@@ -98,6 +104,7 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
                             }
                         }
                     }
+                    return super.visitCallExpression(node)
                 }
             })
         }

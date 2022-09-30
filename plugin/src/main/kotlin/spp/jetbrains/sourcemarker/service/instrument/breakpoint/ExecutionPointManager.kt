@@ -25,12 +25,11 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import spp.jetbrains.marker.SourceMarker
-import spp.protocol.artifact.exception.qualifiedClassName
+import spp.jetbrains.marker.impl.ArtifactNamingService
 import spp.protocol.artifact.exception.sourceAsLineNumber
 
 /**
- * todo: probably don't need this as the breakpoint bar serves as the execution point indicator
+ * Shows the execution point in the editor for the selected stack frame.
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -47,18 +46,15 @@ class ExecutionPointManager(
 
     override fun onChanged(stackFrameManager: StackFrameManager) {
         if (!showExecutionPoint) return
-        val currentFrame = stackFrameManager.currentFrame
-        var fromClass = currentFrame!!.qualifiedClassName()
-
-        //check for inner class
-        val indexOfDollarSign = fromClass.indexOf("$")
-        if (indexOfDollarSign >= 0) {
-            fromClass = fromClass.substring(0, indexOfDollarSign)
-        }
-        val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(fromClass) ?: return
-        val virtualFile = fileMarker.psiFile.containingFile.virtualFile ?: return
+        val currentFrame = stackFrameManager.currentFrame ?: return
+        val psiFile = stackFrameManager.stackTrace.language?.let {
+            ArtifactNamingService.getService(it).findPsiFile(it, project, currentFrame)
+        } ?: return
+        val virtualFile = psiFile.containingFile.virtualFile ?: return
         val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
-        val lineStartOffset = document.getLineStartOffset(currentFrame.sourceAsLineNumber()!!) - 1
+        val lineStartOffset = currentFrame.sourceAsLineNumber()?.let {
+            document.getLineStartOffset(it) - 1
+        } ?: return
 
         ApplicationManager.getApplication().invokeLater {
             try {
@@ -69,7 +65,7 @@ class ExecutionPointManager(
                 executionPointHighlighter.show(
                     XDebuggerUtil.getInstance().createPositionByOffset(
                         virtualFile, lineStartOffset
-                    )!!, false, null
+                    )!!, true, null
                 )
             } catch (e: Throwable) {
                 log.error("Failed to set execution point", e)
