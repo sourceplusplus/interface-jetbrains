@@ -101,7 +101,7 @@ class FramesTab(
                     val psiFile = stackFrameManager?.stackTrace?.language?.let {
                         ArtifactNamingService.getService(it).findPsiFile(it, project, stackFrame)
                     }
-                    if (psiFile != null && psiFile.isWritable) {
+                    if (psiFile != null && psiFile.isWritable && stackFrame.sourceAsLineNumber() != null) {
                         val fileEditorManager = FileEditorManager.getInstance(project)
                         fileEditorManager.openFile(psiFile.virtualFile, true)
                         val editor = fileEditorManager.selectedTextEditor!!
