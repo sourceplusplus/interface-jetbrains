@@ -52,7 +52,9 @@ class ExecutionPointManager(
         } ?: return
         val virtualFile = psiFile.containingFile.virtualFile ?: return
         val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
-        val lineStartOffset = document.getLineStartOffset(currentFrame.sourceAsLineNumber()!!) - 1
+        val lineStartOffset = currentFrame.sourceAsLineNumber()?.let {
+            document.getLineStartOffset(it) - 1
+        } ?: return
 
         ApplicationManager.getApplication().invokeLater {
             try {
