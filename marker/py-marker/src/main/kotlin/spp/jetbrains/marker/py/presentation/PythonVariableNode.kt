@@ -20,9 +20,9 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
-import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
 import io.vertx.core.json.JsonObject
+import spp.jetbrains.marker.presentation.LiveVariableNode
 import spp.protocol.instrument.variable.LiveVariable
 
 /**
@@ -32,9 +32,16 @@ import spp.protocol.instrument.variable.LiveVariable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode() {
+class PythonVariableNode(
+    variable: LiveVariable
+) : LiveVariableNode(variable, mutableMapOf()) {
 
-    private val scheme = DebuggerUIUtil.getColorScheme(null)
+    override fun createVariableNode(
+        variable: LiveVariable,
+        nodeMap: MutableMap<String, Array<SimpleNode>>
+    ): SimpleNode {
+        return PythonVariableNode(variable)
+    }
 
     override fun getChildren(): Array<SimpleNode> {
         if (variable.liveClazz == "<class 'dict'>") {
@@ -44,7 +51,7 @@ class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode(
             )
             val children = mutableListOf<SimpleNode>()
             dict.map.forEach {
-                children.add(PythonVariableSimpleNode(LiveVariable("'" + it.key + "'", it.value)))
+                children.add(PythonVariableNode(LiveVariable("'" + it.key + "'", it.value)))
             }
             return children.toTypedArray()
         }
@@ -74,6 +81,7 @@ class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode(
                     )
                 )
             }
+
             variable.liveClazz == "<class 'str'>" -> {
                 presentation.addText(
                     "\"" + variable.value + "\"",
@@ -82,6 +90,7 @@ class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode(
                     )
                 )
             }
+
             else -> {
                 presentation.addText(
                     variable.value.toString(),
@@ -92,6 +101,4 @@ class PythonVariableSimpleNode(private val variable: LiveVariable) : SimpleNode(
             }
         }
     }
-
-    override fun getEqualityObjects(): Array<Any> = arrayOf(variable)
 }
