@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.py
 
 import spp.jetbrains.marker.impl.*
+import spp.jetbrains.marker.py.service.*
 
 /**
  * todo: description.

@@ -33,7 +33,7 @@ import org.jetbrains.uast.toUElementOfType
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
-import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey

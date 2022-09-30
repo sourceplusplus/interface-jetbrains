@@ -27,7 +27,7 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.source.JVMMarkerUtils
+import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 

@@ -18,9 +18,9 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint.tree
 
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.util.containers.hash.LinkedHashMap
-import spp.jetbrains.marker.js.JavascriptVariableRootNode
-import spp.jetbrains.marker.jvm.JVMVariableSimpleNode
-import spp.jetbrains.marker.py.PythonVariableRootNode
+import spp.jetbrains.marker.js.presentation.JavascriptVariableRootNode
+import spp.jetbrains.marker.jvm.presentation.JVMVariableSimpleNode
+import spp.jetbrains.marker.py.presentation.PythonVariableRootNode
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.instrument.variable.LiveVariableScope

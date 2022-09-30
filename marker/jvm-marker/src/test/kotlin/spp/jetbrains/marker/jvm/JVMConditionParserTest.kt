@@ -28,6 +28,7 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
 import org.intellij.lang.annotations.Language
 import spp.jetbrains.marker.impl.ArtifactConditionService
+import spp.jetbrains.marker.jvm.service.JVMArtifactConditionService
 
 class JVMConditionParserTest : LightJavaCodeInsightFixtureTestCase() {
 
