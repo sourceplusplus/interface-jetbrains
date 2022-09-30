@@ -18,6 +18,7 @@ package spp.jetbrains.marker.jvm
 
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.impl.*
+import spp.jetbrains.marker.jvm.service.*
 
 /**
  * todo: description.
