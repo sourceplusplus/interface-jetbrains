@@ -21,6 +21,7 @@ import com.intellij.psi.scope.processor.VariablesProcessor
 import com.intellij.psi.scope.util.PsiScopesUtil
 import com.intellij.psi.util.parentOfTypes
 import com.siyeh.ig.psiutils.ControlFlowUtils
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import spp.jetbrains.marker.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -60,6 +61,9 @@ class JVMArtifactScopeService : IArtifactScopeService {
     }
 
     override fun isInsideFunction(element: PsiElement): Boolean {
+        if (element.language.id == "kotlin") {
+            return element.parentOfTypes(KtNamedFunction::class) != null
+        }
         return element.parentOfTypes(PsiMethod::class) != null
     }
 

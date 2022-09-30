@@ -32,6 +32,7 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import io.vertx.core.Vertx
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.idea.core.util.toPsiFile
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import spp.jetbrains.UserData
@@ -120,7 +121,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
         TestApplicationManager.getInstance().setDataProvider(null)
     }
 
-    fun testLogbackLogger() {
+    fun testJavaLogbackLogger() {
         @Language("Java") val code = """
                     import ch.qos.logback.classic.Logger;
                     public class TestLogback {
@@ -150,6 +151,42 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
             val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
                 .determineLoggerStatements(uFile.classes[0].methods[0], fileMarker!!)
+                .map { it.logPattern }
+            assertEquals(5, result.size)
+            assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
+        }
+    }
+
+    fun testKotlinLogbackLogger() {
+        @Language("kotlin") val code = """
+                    import ch.qos.logback.classic.Logger
+                    class TestLogback {
+                        val log: Logger = Logger()
+                        fun loggers() {
+                            log.trace("trace {}", "trace")
+                            log.debug("debug {}", "debug")
+                            log.info("info {}", "info")
+                            log.warn("warn {}", "warn")
+                            log.error("error {}", "error")
+                        }
+                    }
+                """.trimIndent()
+
+        ApplicationManager.getApplication().runReadAction {
+            val sourceFile = myFixture.createFile("TestLogback.kt", code).toPsiFile(project)
+            assertNotNull(sourceFile)
+
+            val uFile = sourceFile.toUElement() as UFile
+            assertEquals(1, uFile.classes.size)
+            assertEquals(3, uFile.classes[0].methods.size)
+
+            JVMMarker.setup()
+            SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
+            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(sourceFile!!)
+            assertNotNull(fileMarker)
+
+            val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
+                .determineLoggerStatements(uFile.classes[0].methods[1], fileMarker!!)
                 .map { it.logPattern }
             assertEquals(5, result.size)
             assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
