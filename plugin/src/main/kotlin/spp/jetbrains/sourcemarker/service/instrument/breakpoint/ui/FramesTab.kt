@@ -18,6 +18,9 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.editor.LogicalPosition
+import com.intellij.openapi.editor.ScrollType
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.ui.CollectionListModel
 import com.intellij.ui.ColoredListCellRenderer
@@ -94,6 +97,23 @@ class FramesTab(
                     tab.stackFrameManager.currentFrame = stackFrame
                     tab.stackFrameManager.currentFrameIndex = stackFrameList.selectedIndex
                     tab.onStackFrameUpdated()
+
+                    val psiFile = stackFrameManager?.stackTrace?.language?.let {
+                        ArtifactNamingService.getService(it).findPsiFile(it, project, stackFrame)
+                    }
+                    if (psiFile != null && psiFile.isWritable) {
+                        val fileEditorManager = FileEditorManager.getInstance(project)
+                        fileEditorManager.openFile(psiFile.virtualFile, true)
+                        val editor = fileEditorManager.selectedTextEditor!!
+                        editor.caretModel.moveToLogicalPosition(
+                            LogicalPosition(
+                                stackFrame.sourceAsLineNumber()!! - 1,
+                                0
+                            )
+                        )
+
+                        editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                    }
                 }
             }
         }
