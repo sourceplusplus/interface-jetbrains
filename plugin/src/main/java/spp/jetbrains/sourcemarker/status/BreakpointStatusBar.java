@@ -277,7 +277,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
                                     BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
                                             .clearContent();
                                     BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
-                                            .showBreakpointHit(shownBreakpointHit.get(), false);
+                                            .showBreakpointHit(shownBreakpointHit.get(), true);
                                 });
                             }
                         }));
