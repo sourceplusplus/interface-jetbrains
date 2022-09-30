@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.jvm.service.JVMArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.protocol.artifact.ArtifactType
 

@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.js
 
 import spp.jetbrains.marker.impl.*
+import spp.jetbrains.marker.js.service.*
 
 /**
  * Provides JavaScript support for the Marker API.
