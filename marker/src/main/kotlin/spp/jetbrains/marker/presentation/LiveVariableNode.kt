@@ -44,7 +44,7 @@ abstract class LiveVariableNode(
     ): SimpleNode
 
     override fun getChildren(): Array<SimpleNode> {
-        if (variable.value == null && variable.liveIdentity != null) {
+        if (variable.liveIdentity != null && nodeMap.containsKey(variable.liveIdentity)) {
             //found reference, use children of referenced node
             return nodeMap[variable.liveIdentity!!] ?: arrayOf()
         }
@@ -64,7 +64,7 @@ abstract class LiveVariableNode(
         }
 
         //add children to nodeMap for reference lookup
-        if (variable.liveIdentity != null) {
+        if (variable.liveIdentity != null && children.isNotEmpty()) {
             nodeMap[variable.liveIdentity!!] = children
         }
         return children
@@ -88,4 +88,5 @@ abstract class LiveVariableNode(
     }
 
     override fun getEqualityObjects(): Array<Any> = arrayOf(variable)
+    override fun toString(): String = variable.name
 }

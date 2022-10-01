@@ -77,9 +77,10 @@ class VariableRootSimpleNode : SimpleNode() {
 
                 else -> {
                     val simpleNodeMap: MutableMap<String, JVMVariableNode> = LinkedHashMap()
+                    val nodeReferenceMap = mutableMapOf<String, Array<SimpleNode>>()
                     vars.forEach {
                         if (it.name.isNotEmpty()) {
-                            simpleNodeMap[it.name] = JVMVariableNode(it, mutableMapOf())
+                            simpleNodeMap[it.name] = JVMVariableNode(it, nodeReferenceMap)
                         }
                     }
                     simpleNodeMap.values.sortedWith { p0, p1 ->
