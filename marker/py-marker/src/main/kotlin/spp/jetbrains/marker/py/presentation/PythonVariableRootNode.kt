@@ -35,7 +35,7 @@ class PythonVariableRootNode(val variables: List<LiveVariable>, val scope: LiveV
     private val scheme = DebuggerUIUtil.getColorScheme(null)
 
     override fun getChildren(): Array<SimpleNode> {
-        return variables.map { PythonVariableSimpleNode(it) }.toTypedArray()
+        return variables.map { PythonVariableNode(it) }.toTypedArray()
     }
 
     override fun update(presentation: PresentationData) {

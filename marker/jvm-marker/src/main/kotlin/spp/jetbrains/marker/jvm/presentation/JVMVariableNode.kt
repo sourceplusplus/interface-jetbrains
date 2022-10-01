@@ -22,12 +22,10 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.NUMBER
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STRING
 import com.intellij.ui.SimpleTextAttributes.*
 import com.intellij.ui.treeStructure.SimpleNode
-import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import org.apache.commons.lang3.EnumUtils
-import spp.jetbrains.marker.ErrorVariableSimpleNode
+import spp.jetbrains.marker.presentation.LiveVariableNode
 import spp.protocol.instrument.variable.LiveVariable
 import spp.protocol.instrument.variable.LiveVariableScope
 
@@ -38,10 +36,10 @@ import spp.protocol.instrument.variable.LiveVariableScope
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class JVMVariableSimpleNode(
-    val variable: LiveVariable,
-    private val nodeMap: MutableMap<String, Array<SimpleNode>>
-) : SimpleNode() {
+class JVMVariableNode(
+    variable: LiveVariable,
+    nodeMap: MutableMap<String, Array<SimpleNode>>
+) : LiveVariableNode(variable, nodeMap) {
 
     private val primitives = setOf(
         "java.lang.String",
@@ -62,50 +60,12 @@ class JVMVariableSimpleNode(
         "java.lang.Float",
         "java.lang.Double"
     )
-    private val scheme = DebuggerUIUtil.getColorScheme(null)
 
-    override fun getChildren(): Array<SimpleNode> {
-        if (variable.value == null && variable.liveIdentity != null) {
-            //found reference, use children of referenced node
-            return nodeMap[variable.liveIdentity!!] ?: arrayOf()
-        }
-
-        val children = if (variable.value is JsonArray) {
-            (variable.value as JsonArray).map { JsonObject.mapFrom(it) }.map {
-                if (it.getString("@skip") != null) {
-                    ErrorVariableSimpleNode(JsonObject.mapFrom(it).map)
-                } else {
-                    JVMVariableSimpleNode(toLiveVariable(it), nodeMap)
-                }
-            }.toList().toTypedArray()
-        } else if (variable.value is LiveVariable) {
-            arrayOf(JVMVariableSimpleNode(variable.value as LiveVariable, nodeMap) as SimpleNode)
-        } else {
-            emptyArray()
-        }
-
-        //add children to nodeMap for reference lookup
-        if (variable.liveIdentity != null) {
-            nodeMap[variable.liveIdentity!!] = children
-        }
-        return children
-    }
-
-    private fun toLiveVariable(it: JsonObject): LiveVariable {
-        var varValue = it.getValue("value")
-        if (varValue is JsonArray && varValue.size() == 1 &&
-            (varValue.first() as JsonObject).containsKey("liveClazz")
-        ) {
-            varValue = toLiveVariable(varValue.first() as JsonObject)
-        }
-        return LiveVariable(
-            name = it.getString("name"),
-            value = varValue,
-            lineNumber = it.getInteger("lineNumber") ?: -1,
-            scope = EnumUtils.getEnum(LiveVariableScope::class.java, it.getString("scope")),
-            liveClazz = it.getString("liveClazz"),
-            liveIdentity = it.getString("liveIdentity")
-        )
+    override fun createVariableNode(
+        variable: LiveVariable,
+        nodeMap: MutableMap<String, Array<SimpleNode>>
+    ): SimpleNode {
+        return JVMVariableNode(variable, nodeMap)
     }
 
     override fun update(presentation: PresentationData) {
@@ -188,6 +148,4 @@ class JVMVariableSimpleNode(
             }
         }
     }
-
-    override fun getEqualityObjects(): Array<Any> = arrayOf(variable)
 }

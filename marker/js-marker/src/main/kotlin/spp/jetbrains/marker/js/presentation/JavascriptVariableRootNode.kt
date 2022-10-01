@@ -38,7 +38,7 @@ class JavascriptVariableRootNode(
     private val scheme = DebuggerUIUtil.getColorScheme(null)
 
     override fun getChildren(): Array<SimpleNode> {
-        return variables.map { JavascriptVariableSimpleNode(it, mutableMapOf()) }.toTypedArray()
+        return variables.map { JavascriptVariableNode(it, mutableMapOf()) }.toTypedArray()
     }
 
     override fun update(presentation: PresentationData) {
