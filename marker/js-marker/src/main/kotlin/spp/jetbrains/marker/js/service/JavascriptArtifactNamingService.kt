@@ -51,7 +51,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         val projectBasePath = sourceMark.project.basePath
         if (projectBasePath != null) {
             val relativePath = sourceMark.sourceFileMarker.psiFile.virtualFile.path.substringAfter(projectBasePath)
-            locationSource = if (relativePath.startsWith(File.separator)) {
+            locationSource = if (relativePath.startsWith("/")) {
                 relativePath.substring(1)
             } else {
                 relativePath
