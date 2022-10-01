@@ -19,7 +19,7 @@ package spp.jetbrains.sourcemarker.service.instrument.breakpoint.tree
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.util.containers.hash.LinkedHashMap
 import spp.jetbrains.marker.js.presentation.JavascriptVariableRootNode
-import spp.jetbrains.marker.jvm.presentation.JVMVariableSimpleNode
+import spp.jetbrains.marker.jvm.presentation.JVMVariableNode
 import spp.jetbrains.marker.py.presentation.PythonVariableRootNode
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import spp.protocol.artifact.ArtifactLanguage
@@ -76,10 +76,11 @@ class VariableRootSimpleNode : SimpleNode() {
                 }
 
                 else -> {
-                    val simpleNodeMap: MutableMap<String, JVMVariableSimpleNode> = LinkedHashMap()
+                    val simpleNodeMap: MutableMap<String, JVMVariableNode> = LinkedHashMap()
+                    val nodeReferenceMap = mutableMapOf<String, Array<SimpleNode>>()
                     vars.forEach {
                         if (it.name.isNotEmpty()) {
-                            simpleNodeMap[it.name] = JVMVariableSimpleNode(it, mutableMapOf())
+                            simpleNodeMap[it.name] = JVMVariableNode(it, nodeReferenceMap)
                         }
                     }
                     simpleNodeMap.values.sortedWith { p0, p1 ->
