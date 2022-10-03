@@ -409,10 +409,12 @@ object JVMMarkerUtils {
                     element.putUserData(SourceKey.GutterMark, null)
                     null
                 }
+
                 gutterMark.configuration.icon != null -> {
                     gutterMark.setVisible(true)
                     gutterMark
                 }
+
                 else -> {
                     gutterMark.setVisible(false)
                     gutterMark
@@ -461,7 +463,7 @@ object JVMMarkerUtils {
                 Base64.getEncoder().encodeToString(expression.toString().toByteArray())
             }""",
             type = ArtifactType.EXPRESSION,
-            lineNumber = SourceMarkerUtils.getLineNumber(expression.sourcePsi!!)
+            lineNumber = expression.sourcePsi?.let { SourceMarkerUtils.getLineNumber(it) }
         )
     }
 
@@ -511,7 +513,8 @@ object JVMMarkerUtils {
         }
         return ArtifactQualifiedName(
             "$classQualifiedName.${getQualifiedName(method)}",
-            type = ArtifactType.METHOD
+            type = ArtifactType.METHOD,
+            lineNumber = method.sourcePsi?.let { SourceMarkerUtils.getLineNumber(it) }
         )
     }
 
