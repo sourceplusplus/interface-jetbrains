@@ -62,7 +62,7 @@ class VariableEditorLinePainter : EditorLinePainter() {
                 val attributes =
                     EditorColorsManager.getInstance().globalScheme.getAttributes(DebuggerColors.INLINED_VALUES)
                 return if (attributes == null || attributes.foregroundColor == null) {
-                    TextAttributes(JBColor {
+                    TextAttributes(JBColor.lazy {
                         if (EditorColorsManager.getInstance().isDarkEditor
                         ) Color(0x3d8065) else Gray._135
                     }, null, null, null, Font.ITALIC)
