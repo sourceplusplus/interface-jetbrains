@@ -22,6 +22,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import com.jetbrains.python.psi.*
 import spp.jetbrains.marker.IArtifactNamingService
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -57,14 +58,24 @@ class PythonArtifactNamingService : IArtifactNamingService {
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (element) {
             is PyClass -> {
-                ArtifactQualifiedName(element.qualifiedName!!, null, ArtifactType.CLASS)
+                ArtifactQualifiedName(
+                    element.qualifiedName!!,
+                    null,
+                    ArtifactType.CLASS,
+                    lineNumber = SourceMarkerUtils.getLineNumber(element)
+                )
             }
 
             is PyFunction -> {
                 val parentQualifiedName = PyPsiFacade.getInstance(element.project)
                     .findShortestImportableName(element.containingFile.virtualFile, element)
                 val qualifiedName = element.qualifiedName ?: "$parentQualifiedName.${element.name}"
-                ArtifactQualifiedName("$qualifiedName()", null, ArtifactType.METHOD)
+                ArtifactQualifiedName(
+                    "$qualifiedName()",
+                    null,
+                    ArtifactType.METHOD,
+                    lineNumber = SourceMarkerUtils.getLineNumber(element)
+                )
             }
 
             is PyStatement, is PyStatementList -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
@@ -78,11 +89,21 @@ class PythonArtifactNamingService : IArtifactNamingService {
             val parentQualifiedName = PyPsiFacade.getInstance(element.project)
                 .findShortestImportableName(element.containingFile.virtualFile, element)
             val qualifiedName = parentFunction.qualifiedName ?: "$parentQualifiedName.${parentFunction.name!!}"
-            ArtifactQualifiedName("$qualifiedName()", null, type)
+            ArtifactQualifiedName(
+                "$qualifiedName()",
+                null,
+                type,
+                lineNumber = SourceMarkerUtils.getLineNumber(element)
+            )
         } else {
             val qName = PyPsiFacade.getInstance(element.project)
                 .findShortestImportableName(element.containingFile.virtualFile, element)
-            ArtifactQualifiedName("$qName", null, type)
+            ArtifactQualifiedName(
+                "$qName",
+                null,
+                type,
+                lineNumber = SourceMarkerUtils.getLineNumber(element)
+            )
         }
     }
 
