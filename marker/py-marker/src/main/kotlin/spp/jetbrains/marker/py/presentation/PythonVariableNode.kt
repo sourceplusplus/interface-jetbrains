@@ -45,10 +45,7 @@ class PythonVariableNode(
 
     override fun getChildren(): Array<SimpleNode> {
         if (variable.liveClazz == "<class 'dict'>") {
-            val dict = JsonObject(
-                (variable.value as String).replace("'", "\"")
-                    .replace(": True", ": true").replace(": False", ": false")
-            )
+            val dict = JsonObject(parseDict(variable.value as String))
             val children = mutableListOf<SimpleNode>()
             dict.map.forEach {
                 children.add(PythonVariableNode(LiveVariable("'" + it.key + "'", it.value)))
@@ -99,6 +96,58 @@ class PythonVariableNode(
                     )
                 )
             }
+        }
+    }
+
+    companion object {
+        fun parseDict(value: String): Map<String, String> {
+            var dictVar = value
+
+            //remove outer braces
+            if (dictVar.startsWith("{")) {
+                dictVar = dictVar.substring(1)
+            }
+            if (dictVar.endsWith("}")) {
+                dictVar = dictVar.substring(0, dictVar.length - 1)
+            }
+
+            //split by , but not inside quotes
+            val tokens = dictVar.split(Regex(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"))
+
+            //each token should contain ":", for those that don't we need to merge them with the previous token
+            val mergedTokens = mutableListOf<String>()
+            for (i in tokens.indices) {
+                if (tokens[i].contains(":")) {
+                    mergedTokens.add(tokens[i])
+                } else {
+                    mergedTokens[mergedTokens.size - 1] += "," + tokens[i]
+                }
+            }
+
+            //now we can split each token into key and value
+            val dict = mutableMapOf<String, String>()
+            for (token in mergedTokens) {
+                var key = token.substringBefore(":").trim()
+                var value = token.substringAfter(":").trim()
+
+                //remove quotes
+                if (key.startsWith("\"")) {
+                    key = key.substring(1)
+                }
+                if (key.endsWith("\"")) {
+                    key = key.substring(0, key.length - 1)
+                }
+                if (value.startsWith("\"")) {
+                    value = value.substring(1)
+                }
+                if (value.endsWith("\"")) {
+                    value = value.substring(0, value.length - 1)
+                }
+
+                dict[key] = value
+            }
+
+            return dict
         }
     }
 }
