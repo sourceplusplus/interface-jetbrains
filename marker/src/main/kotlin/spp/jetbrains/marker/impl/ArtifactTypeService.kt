@@ -24,6 +24,6 @@ import spp.protocol.artifact.ArtifactType
 object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>(), IArtifactTypeService {
 
     override fun getType(element: PsiElement): ArtifactType? {
-        return getService(element.language.id).getType(element)
+        return getService(element.language).getType(element)
     }
 }
