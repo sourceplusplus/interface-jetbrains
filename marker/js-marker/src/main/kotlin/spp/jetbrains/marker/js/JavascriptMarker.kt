@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.js
 
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.impl.*
 import spp.jetbrains.marker.js.service.*
 
@@ -37,11 +38,11 @@ object JavascriptMarker {
     }
 
     fun setup() {
-        ArtifactCreationService.addService(JavascriptArtifactCreationService(), "JavaScript", "ECMAScript 6")
-        ArtifactNamingService.addService(JavascriptArtifactNamingService(), "JavaScript", "ECMAScript 6")
-        ArtifactScopeService.addService(JavascriptArtifactScopeService(), "JavaScript", "ECMAScript 6")
-        ArtifactConditionService.addService(JavascriptArtifactConditionService(), "JavaScript", "ECMAScript 6")
-        ArtifactTypeService.addService(JavascriptArtifactTypeService(), "JavaScript", "ECMAScript 6")
-        SourceGuideProvider.addProvider(JavascriptGuideProvider(), "JavaScript", "ECMAScript 6")
+        ArtifactCreationService.addService(JavascriptArtifactCreationService(), SourceMarkerUtils.getJavaScriptLanguages())
+        ArtifactNamingService.addService(JavascriptArtifactNamingService(),  SourceMarkerUtils.getJavaScriptLanguages())
+        ArtifactScopeService.addService(JavascriptArtifactScopeService(),  SourceMarkerUtils.getJavaScriptLanguages())
+        ArtifactConditionService.addService(JavascriptArtifactConditionService(),  SourceMarkerUtils.getJavaScriptLanguages())
+        ArtifactTypeService.addService(JavascriptArtifactTypeService(),  SourceMarkerUtils.getJavaScriptLanguages())
+        SourceGuideProvider.addProvider(JavascriptGuideProvider(),  SourceMarkerUtils.getJavaScriptLanguages())
     }
 }

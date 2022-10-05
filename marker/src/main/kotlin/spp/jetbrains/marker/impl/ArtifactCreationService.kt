@@ -41,7 +41,7 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
         lineNumber: Int,
         autoApply: Boolean
     ): Optional<ExpressionGutterMark> {
-        return getService(fileMarker.psiFile.language.id)
+        return getService(fileMarker.psiFile.language)
             .getOrCreateExpressionGutterMark(fileMarker, lineNumber, autoApply)
     }
 
@@ -50,7 +50,7 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
         element: PsiElement,
         autoApply: Boolean
     ): MethodGutterMark? {
-        return getService(fileMarker.psiFile.language.id)
+        return getService(fileMarker.psiFile.language)
             .getOrCreateMethodGutterMark(fileMarker, element, autoApply)
     }
 
@@ -59,7 +59,7 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
         lineNumber: Int,
         autoApply: Boolean
     ): Optional<ExpressionInlayMark> {
-        return getService(fileMarker.psiFile.language.id)
+        return getService(fileMarker.psiFile.language)
             .getOrCreateExpressionInlayMark(fileMarker, lineNumber, autoApply)
     }
 
@@ -75,7 +75,7 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
         element: PsiElement,
         autoApply: Boolean
     ): MethodGutterMark {
-        return getService(fileMarker.psiFile.language.id)
+        return getService(fileMarker.psiFile.language)
             .createMethodGutterMark(fileMarker, element, autoApply)
     }
 
@@ -84,7 +84,7 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
         element: PsiElement,
         autoApply: Boolean
     ): MethodInlayMark {
-        return getService(fileMarker.psiFile.language.id)
+        return getService(fileMarker.psiFile.language)
             .createMethodInlayMark(fileMarker, element, autoApply)
     }
 
@@ -100,7 +100,7 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
         lineNumber: Int,
         autoApply: Boolean
     ): ExpressionGutterMark {
-        return getService(fileMarker.psiFile.language.id)
+        return getService(fileMarker.psiFile.language)
             .createExpressionGutterMark(fileMarker, lineNumber, autoApply)
     }
 
@@ -109,7 +109,7 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
         lineNumber: Int,
         autoApply: Boolean
     ): ExpressionInlayMark {
-        return getService(fileMarker.psiFile.language.id)
+        return getService(fileMarker.psiFile.language)
             .createExpressionInlayMark(fileMarker, lineNumber, autoApply)
     }
 }

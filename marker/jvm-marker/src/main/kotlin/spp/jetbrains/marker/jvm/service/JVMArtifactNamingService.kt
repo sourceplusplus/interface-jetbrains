@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.jvm.service
 
+import com.intellij.lang.Language
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
@@ -57,7 +58,7 @@ class JVMArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
         var fullyQualified = artifactQualifiedName.identifier
         if (fullyQualified.contains("#")) {
             fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"))

@@ -30,18 +30,18 @@ import spp.jetbrains.marker.source.SourceFileMarker
 object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>(), IArtifactScopeService {
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
-        return getService(fileMarker.psiFile.language.id).getScopeVariables(fileMarker, lineNumber)
+        return getService(fileMarker.psiFile.language).getScopeVariables(fileMarker, lineNumber)
     }
 
     override fun isInsideFunction(element: PsiElement): Boolean {
-        return getService(element.language.id).isInsideFunction(element)
+        return getService(element.language).isInsideFunction(element)
     }
 
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {
-        return getService(element.language.id).isInsideEndlessLoop(element)
+        return getService(element.language).isInsideEndlessLoop(element)
     }
 
     override fun isJVM(element: PsiElement): Boolean {
-        return getService(element.language.id).isJVM(element)
+        return getService(element.language).isJVM(element)
     }
 }

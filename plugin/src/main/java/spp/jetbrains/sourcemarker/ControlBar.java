@@ -219,7 +219,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         setBackground(getBackgroundColor());
         label1 = new JLabel();
         String location = ArtifactNamingService.INSTANCE.getLocation(
-                inlayMark.getLanguage().getID(),
+                inlayMark.getLanguage(),
                 inlayMark.getArtifactQualifiedName()
         );
         textField1 = new AutocompleteField(

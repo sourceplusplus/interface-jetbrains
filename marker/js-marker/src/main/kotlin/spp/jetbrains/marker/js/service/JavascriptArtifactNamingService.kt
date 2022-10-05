@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.js.service
 
+import com.intellij.lang.Language
 import com.intellij.lang.javascript.psi.*
 import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.openapi.project.Project
@@ -60,7 +61,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
         return if (artifactQualifiedName.identifier.contains("(")) {
             artifactQualifiedName.identifier
         } else {
