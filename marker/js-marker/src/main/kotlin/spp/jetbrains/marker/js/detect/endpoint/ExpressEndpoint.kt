@@ -57,7 +57,10 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
                 return@runReadAction
             }
             val router = method.firstChild as JSReferenceExpression
-            val routerVariable = router.resolve() as JSVariable? ?: return@runReadAction
+            val routerVariable = router.resolve() as JSInitializerOwner? ?: run {
+                promise.complete(Optional.empty())
+                return@runReadAction
+            }
 
             if (method.children.size < 3) {
                 promise.complete(Optional.empty())
@@ -97,7 +100,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
         return promise.future()
     }
 
-    private fun locateRouter(routerVariable: JSVariable): String? {
+    private fun locateRouter(routerVariable: JSInitializerOwner): String? {
         if (isExpressApp(routerVariable)) {
             return ""
         }
