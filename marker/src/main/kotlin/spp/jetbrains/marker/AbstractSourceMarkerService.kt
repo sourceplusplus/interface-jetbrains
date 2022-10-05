@@ -32,7 +32,7 @@ abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
         languages.forEach { services[it] = service }
     }
 
-    internal fun getService(language: String): T {
+    private fun getService(language: String): T {
         return services[language] ?: throw IllegalArgumentException("No service for language $language")
     }
 
