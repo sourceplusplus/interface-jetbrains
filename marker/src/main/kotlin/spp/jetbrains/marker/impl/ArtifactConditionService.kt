@@ -48,6 +48,6 @@ object ArtifactConditionService : AbstractSourceMarkerService<IArtifactCondition
     }
 
     override fun getCondition(condition: String, context: PsiElement): String {
-        return getService(context.language.id).getCondition(condition, context)
+        return getService(context.language).getCondition(condition, context)
     }
 }

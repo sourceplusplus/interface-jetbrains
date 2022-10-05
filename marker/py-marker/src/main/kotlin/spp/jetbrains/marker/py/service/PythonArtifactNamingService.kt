@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.py.service
 
+import com.intellij.lang.Language
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -47,7 +48,7 @@ class PythonArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
         return artifactQualifiedName.identifier
     }
 

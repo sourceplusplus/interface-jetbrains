@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.impl
 
+import com.intellij.lang.Language
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -40,23 +41,23 @@ object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingServic
         lineNumber: Int,
         serviceName: String?
     ): LiveSourceLocation? {
-        return getService(sourceMark.language.id).getLiveSourceLocation(sourceMark, lineNumber, serviceName)
+        return getService(sourceMark.language).getLiveSourceLocation(sourceMark, lineNumber, serviceName)
     }
 
-    override fun getLocation(language: String, artifactQualifiedName: ArtifactQualifiedName): String {
+    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
         return getService(language).getLocation(language, artifactQualifiedName)
     }
 
     override fun getVariableName(element: PsiElement): String? {
-        return getService(element.language.id).getVariableName(element)
+        return getService(element.language).getVariableName(element)
     }
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
-        return getService(element.language.id).getFullyQualifiedName(element)
+        return getService(element.language).getFullyQualifiedName(element)
     }
 
     override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
-        return getService(psiFile.language.id).getQualifiedClassNames(psiFile)
+        return getService(psiFile.language).getQualifiedClassNames(psiFile)
     }
 
     override fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile? {
