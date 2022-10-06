@@ -25,10 +25,6 @@ import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.gutter.GutterMark
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 
@@ -69,26 +65,6 @@ abstract class ExpressionSourceMark(
 
     override fun apply(addToMarker: Boolean, editor: Editor?) {
         apply(configuration.componentProvider.getComponent(this), addToMarker, editor)
-    }
-
-    override fun dispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
-        when (this) {
-            is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
-            is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
-            is GuideMark -> getPsiElement().putUserData(SourceKey.GuideMark, null)
-            else -> error("Unsupported source mark type: $this")
-        }
-        super.dispose(removeFromMarker, assertRemoval)
-    }
-
-    override suspend fun disposeSuspend(removeFromMarker: Boolean, assertRemoval: Boolean) {
-        when (this) {
-            is GutterMark -> getPsiElement().putUserData(SourceKey.GutterMark, null)
-            is InlayMark -> getPsiElement().putUserData(SourceKey.InlayMark, null)
-            is GuideMark -> getPsiElement().putUserData(SourceKey.GuideMark, null)
-            else -> error("Unsupported source mark type: $this")
-        }
-        super.disposeSuspend(removeFromMarker, assertRemoval)
     }
 
     override val userData = HashMap<Any, Any>()

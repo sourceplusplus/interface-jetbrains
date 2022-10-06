@@ -20,6 +20,7 @@ import com.intellij.codeInsight.hints.InlayHintsPassFactory
 import com.intellij.lang.Language
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.VisibleAreaEvent
@@ -33,6 +34,7 @@ import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Ref
+import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.ui.BalloonImpl
@@ -238,27 +240,23 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     }
 
     fun dispose(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
-        if (this is InlayMark) {
-            ApplicationManager.getApplication().invokeAndWait {
-                configuration.inlayRef?.get()?.dispose()
-                configuration.inlayRef = null
-            }
-        }
-        closePopup()
+        doDispose(removeFromMarker, assertRemoval)
 
-        if (removeFromMarker) {
-            if (assertRemoval) {
-                check(sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false))
-            } else {
-                sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false)
-            }
-        }
         triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED)) {
             clearEventListeners()
         }
     }
 
     suspend fun disposeSuspend(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
+        doDispose(removeFromMarker, assertRemoval)
+
+        triggerEventSuspend(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED))
+        clearEventListeners()
+    }
+
+    private fun doDispose(removeFromMarker: Boolean, assertRemoval: Boolean) {
+        removeMarkFromUserData()
+
         if (this is InlayMark) {
             ApplicationManager.getApplication().invokeAndWait {
                 configuration.inlayRef?.get()?.dispose()
@@ -274,8 +272,21 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 sourceFileMarker.removeSourceMark(this, autoRefresh = true, autoDispose = false)
             }
         }
-        triggerEventSuspend(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED))
-        clearEventListeners()
+    }
+
+    private fun removeMarkFromUserData() {
+        when (this) {
+            is ExpressionSourceMark -> removeMarkFromUserData(psiExpression)
+            is MethodSourceMark -> removeMarkFromUserData(ReadAction.compute(ThrowableComputable { getNameIdentifier() }))
+            is ClassSourceMark -> removeMarkFromUserData(ReadAction.compute(ThrowableComputable { getNameIdentifier() }))
+            else -> error("Unsupported source mark type: $this")
+        }
+    }
+
+    private fun removeMarkFromUserData(element: PsiElement) {
+        element.putUserData(SourceKey.GutterMark, null)
+        element.putUserData(SourceKey.InlayMark, null)
+        element.putUserData(SourceKey.GuideMark, null)
     }
 
     fun getParent(): GuideMark? {
