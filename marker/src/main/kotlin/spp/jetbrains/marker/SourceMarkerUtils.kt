@@ -87,4 +87,8 @@ object SourceMarkerUtils {
     fun getJvmLanguages(): List<String> {
         return listOf("JAVA", "kotlin", "Groovy", "Scala")
     }
+
+    fun getJavaScriptLanguages(): List<String> {
+        return listOf("JavaScript", "ECMAScript 6")
+    }
 }

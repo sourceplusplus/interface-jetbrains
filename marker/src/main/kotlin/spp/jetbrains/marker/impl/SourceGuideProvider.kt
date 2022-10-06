@@ -16,7 +16,9 @@
  */
 package spp.jetbrains.marker.impl
 
+import com.intellij.lang.Language
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.diagnostic.logger
 import spp.jetbrains.marker.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -28,6 +30,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  */
 object SourceGuideProvider : AbstractSourceGuideProvider {
 
+    private val log = logger<SourceGuideProvider>()
     private val providers = mutableMapOf<String, MutableList<AbstractSourceGuideProvider>>()
 
     fun addProvider(guideProvider: AbstractSourceGuideProvider, language: String, vararg languages: String) {
@@ -39,19 +42,28 @@ object SourceGuideProvider : AbstractSourceGuideProvider {
         languages.forEach { providers.computeIfAbsent(it) { mutableListOf() }.add(guideProvider) }
     }
 
-    private fun getProvider(language: String): AbstractSourceGuideProvider {
+    private fun getProvider(language: String): AbstractSourceGuideProvider? {
         return providers[language]?.let {
             object : AbstractSourceGuideProvider {
                 override fun determineGuideMarks(fileMarker: SourceFileMarker) {
                     it.forEach { provider -> provider.determineGuideMarks(fileMarker) }
                 }
             }
-        } ?: throw IllegalArgumentException("No provider for language $language")
+        }
+    }
+
+    private fun getProvider(language: Language): AbstractSourceGuideProvider? {
+        return getProvider(language.baseLanguage?.id ?: language.id)
     }
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
         ReadAction.run<Nothing> {
-            getProvider(fileMarker.psiFile.language.id).determineGuideMarks(fileMarker)
+            val guideProvider = getProvider(fileMarker.psiFile.language)
+            if (guideProvider != null) {
+                guideProvider.determineGuideMarks(fileMarker)
+            } else {
+                log.warn("No guide provider found for language: ${fileMarker.psiFile.language}")
+            }
         }
     }
 }
