@@ -42,12 +42,12 @@ class SourceMarkJcefComponent(
 ) : SourceMarkComponent {
 
     companion object {
-        private val client: JBCefClient by lazy { JBCefApp.getInstance().createClient() }
-
-        init {
+        private val client: JBCefClient by lazy {
+            val client = JBCefApp.getInstance().createClient()
             if (!ApplicationManager.getApplication().isUnitTestMode) {
                 Disposer.register(ApplicationManager.getApplication(), client)
             }
+            client
         }
     }
 
