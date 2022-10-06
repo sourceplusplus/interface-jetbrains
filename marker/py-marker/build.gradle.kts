@@ -21,6 +21,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 
+    testImplementation("io.vertx:vertx-core:$vertxVersion")
     testImplementation(projectDependency(":common"))
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }
