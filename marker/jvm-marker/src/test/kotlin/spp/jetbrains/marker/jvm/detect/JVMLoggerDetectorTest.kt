@@ -148,7 +148,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
             JVMMarker.setup()
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
-            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(sourceFile!!)
+            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
 
             val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
@@ -184,7 +184,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
             JVMMarker.setup()
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
-            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(sourceFile!!)
+            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
 
             val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })

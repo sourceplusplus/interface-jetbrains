@@ -19,15 +19,14 @@ package spp.jetbrains.sourcemarker.command
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
 import liveplugin.implementation.common.toFilePath
-import org.joor.Reflect
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.marker.impl.ArtifactCreationService
 import spp.jetbrains.marker.impl.ArtifactNamingService
+import spp.jetbrains.marker.impl.ArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
@@ -56,7 +55,6 @@ object ControlBarController {
         availableCommandsAtLocation.addAll(
             LivePluginService.getInstance(inlayMark.project).getRegisteredLiveCommands(
                 LiveLocationContext(
-                    inlayMark.lineNumber,
                     inlayMark.artifactQualifiedName,
                     inlayMark.sourceFileMarker,
                     inlayMark.getPsiElement()
@@ -66,10 +64,12 @@ object ControlBarController {
         return availableCommandsAtLocation.toList()
     }
 
+    @JvmStatic
     fun handleCommandInput(input: String, editor: Editor) {
         handleCommandInput(input, input, editor)
     }
 
+    @JvmStatic
     fun handleCommandInput(input: String, fullText: String, editor: Editor) {
         log.info("Processing command input: $input")
         LivePluginService.getInstance(editor.project!!).getRegisteredLiveCommands()
@@ -103,7 +103,8 @@ object ControlBarController {
     /**
      * Attempts to display live control bar below [lineNumber].
      */
-    fun showControlBar(editor: Editor, lineNumber: Int, tryingAboveLine: Boolean = false) {
+    @JvmStatic
+    fun showControlBar(editor: Editor, lineNumber: Int) {
         //close previous control bar (if open)
         previousControlBar?.dispose(true, false)
         previousControlBar = null
@@ -117,14 +118,9 @@ object ControlBarController {
         }
 
         val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
-        if (findInlayMark.isPresent && canShowControlBar(findInlayMark.get().getPsiElement())) {
+        if (findInlayMark.isPresent && ArtifactScopeService.canShowControlBar(findInlayMark.get().getPsiElement())) {
             val inlayMark = findInlayMark.get()
-            if (fileMarker.containsSourceMark(inlayMark)) {
-                if (!tryingAboveLine) {
-                    //already showing inlay here, try line above
-                    showControlBar(editor, lineNumber - 1, true)
-                }
-            } else {
+            if (!fileMarker.containsSourceMark(inlayMark)) {
                 //create and display control bar
                 previousControlBar = inlayMark
 
@@ -144,27 +140,35 @@ object ControlBarController {
 
                 controlBar.focus()
             }
-        } else if (tryingAboveLine) {
-            log.warn("No detected expression at line $lineNumber. Inlay mark ignored")
-        } else {
-            showControlBar(editor, lineNumber - 1, true)
         }
     }
 
-    fun canShowControlBar(fileMarker: SourceFileMarker, lineNumber: Int): Boolean {
-        val expressionInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
-        return expressionInlayMark.isPresent && canShowControlBar(expressionInlayMark.get().getPsiElement())
+    private fun canShowControlBar(fileMarker: SourceFileMarker, lineNumber: Int): InlayMark? {
+        val inlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
+        return if (inlayMark.isPresent && ArtifactScopeService.canShowControlBar(inlayMark.get().getPsiElement())) {
+            inlayMark.get()
+        } else null
     }
 
-    private fun canShowControlBar(psiElement: PsiElement): Boolean {
-        return when (psiElement::class.java.name) {
-            "org.jetbrains.kotlin.psi.KtObjectDeclaration" -> false
-            "org.jetbrains.kotlin.psi.KtProperty" -> {
-                Reflect.on(psiElement).call("isLocal").get<Boolean>() == true
+    @JvmStatic
+    fun getNextAvailableControlBarLine(editor: Editor, inlayMark: InlayMark, moveUp: Boolean): Int? {
+        var lineNumber = inlayMark.artifactQualifiedName.lineNumber!!
+        if (moveUp) {
+            while (--lineNumber > 0) {
+                val nextMark = canShowControlBar(inlayMark.sourceFileMarker, lineNumber)
+                if (nextMark != null && nextMark.artifactQualifiedName != inlayMark.artifactQualifiedName) {
+                    return lineNumber
+                }
             }
-
-            else -> true
+        } else {
+            while (++lineNumber < editor.document.lineCount) {
+                val nextMark = canShowControlBar(inlayMark.sourceFileMarker, lineNumber)
+                if (nextMark != null && nextMark.artifactQualifiedName != inlayMark.artifactQualifiedName) {
+                    return lineNumber
+                }
+            }
         }
+        return null
     }
 
     private fun substringAfterIgnoreCase(str: String, search: String): String {

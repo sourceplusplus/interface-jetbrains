@@ -48,7 +48,7 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
 
     fun testPythonMethod() {
         val psiFile = myFixture.configureByFile(getTestName(false) + ".py")
-        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
+        val fileMarker = SourceMarker.getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
         runBlocking {

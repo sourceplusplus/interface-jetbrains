@@ -55,7 +55,6 @@ class ControlBarCellRenderer(
         row.setCommandIcon(rowValue.getUnselectedIcon())
 
         val context = LiveLocationContext(
-            autocompleteField.artifactQualifiedName.lineNumber!!,
             autocompleteField.artifactQualifiedName,
             inlayMark.sourceFileMarker,
             inlayMark.getPsiElement()

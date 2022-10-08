@@ -20,6 +20,8 @@ import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.AbstractSourceMarkerService
 import spp.jetbrains.marker.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.protocol.artifact.ArtifactQualifiedName
+import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
@@ -33,8 +35,16 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
         return getService(fileMarker.psiFile.language).getScopeVariables(fileMarker, lineNumber)
     }
 
+    fun isOnFunction(qualifiedName: ArtifactQualifiedName): Boolean {
+        return qualifiedName.type == ArtifactType.METHOD
+    }
+
     override fun isInsideFunction(element: PsiElement): Boolean {
         return getService(element.language).isInsideFunction(element)
+    }
+
+    fun isOnOrInsideFunction(qualifiedName: ArtifactQualifiedName, element: PsiElement): Boolean {
+        return isOnFunction(qualifiedName) || isInsideFunction(element)
     }
 
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {

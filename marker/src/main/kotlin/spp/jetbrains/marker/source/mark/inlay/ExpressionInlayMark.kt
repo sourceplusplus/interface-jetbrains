@@ -21,6 +21,7 @@ import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.action.SourceMarkerVisibilityAction
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
+import spp.protocol.artifact.ArtifactType
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -39,4 +40,11 @@ class ExpressionInlayMark constructor(
     override val configuration = SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.copy()
     override var visible = AtomicBoolean(SourceMarkerVisibilityAction.globalVisibility)
     var showAboveExpression = false
+
+    init {
+        //show above element by default for method and class artifacts
+        if (artifactQualifiedName.type in listOf(ArtifactType.METHOD, ArtifactType.CLASS)) {
+            showAboveExpression = true
+        }
+    }
 }

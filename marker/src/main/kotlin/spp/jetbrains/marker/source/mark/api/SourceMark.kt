@@ -137,8 +137,6 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun isVisible(): Boolean
     fun setVisible(visible: Boolean)
 
-    fun canApply(): Boolean = configuration.applySourceMarkFilter.test(this)
-
     fun applyIfMissing() {
         if (!sourceFileMarker.containsSourceMark(this)) {
             apply(true)
@@ -149,7 +147,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     fun apply(addToMarker: Boolean = true, editor: Editor? = null) {
         SourceMarker.getInstance(project).getGlobalSourceMarkEventListeners().forEach(::addEventListener)
 
-        if (addToMarker && sourceFileMarker.applySourceMark(this, autoRefresh = true, overrideFilter = true)) {
+        if (addToMarker && sourceFileMarker.applySourceMark(this, autoRefresh = true)) {
             triggerEvent(SourceMarkEvent(this, SourceMarkEventCode.MARK_ADDED))
 
             if (this is GutterMark) {
@@ -168,60 +166,56 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 }
             } else if (this is InlayMark) {
                 if (configuration.showComponentInlay) {
-                    val selectedEditor = editor ?: FileEditorManager.getInstance(project).selectedTextEditor
-                    if (selectedEditor == null) {
-                        TODO()
-                    } else {
-                        val provider = SourceInlayComponentProvider.from(selectedEditor)
-                        val viewport = (selectedEditor as? EditorImpl)?.scrollPane?.viewport!!
-                        var displayLineIndex = lineNumber - 1
-                        if (this is ExpressionInlayMark) {
-                            if (showAboveExpression) {
-                                displayLineIndex--
-                            }
+                    val selectedEditor = editor ?: FileEditorManager.getInstance(project).selectedTextEditor!!
+                    val provider = SourceInlayComponentProvider.from(selectedEditor)
+                    val viewport = (selectedEditor as? EditorImpl)?.scrollPane?.viewport!!
+                    var displayLineIndex = artifactQualifiedName.lineNumber!! - 1
+                    if (this is ExpressionInlayMark) {
+                        if (showAboveExpression) {
+                            displayLineIndex--
                         }
-
-                        if (isVisible()) {
-                            val inlay = provider.insertAfter(
-                                displayLineIndex,
-                                configuration.componentProvider.getComponent(this).getComponent()
-                            )
-                            configuration.inlayRef = Ref.create()
-                            configuration.inlayRef!!.set(inlay)
-                            viewport.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
-
-                            //initial mark visible event
-                            triggerEvent(SourceMarkEvent(this, INLAY_MARK_VISIBLE))
-                        } else {
-                            setVisible(false)
-                        }
-
-                        addEventListener(SynchronousSourceMarkEventListener {
-                            when (it.eventCode) {
-                                INLAY_MARK_VISIBLE -> {
-                                    ApplicationManager.getApplication().invokeLater {
-                                        configuration.inlayRef = Ref.create()
-                                        configuration.inlayRef!!.set(
-                                            provider.insertAfter(
-                                                displayLineIndex,
-                                                configuration.componentProvider.getComponent(this).getComponent()
-                                            )
-                                        )
-                                        viewport.dispatchEvent(
-                                            ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED)
-                                        )
-                                    }
-                                }
-
-                                INLAY_MARK_HIDDEN -> {
-                                    ApplicationManager.getApplication().invokeLater {
-                                        configuration.inlayRef?.get()?.dispose()
-                                        configuration.inlayRef = null
-                                    }
-                                }
-                            }
-                        })
                     }
+
+                    if (isVisible()) {
+                        val inlay = provider.insertAfter(
+                            displayLineIndex,
+                            configuration.componentProvider.getComponent(this).getComponent()
+                        )
+                        configuration.inlayRef = Ref.create()
+                        configuration.inlayRef!!.set(inlay)
+                        viewport.dispatchEvent(ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED))
+
+                        //initial mark visible event
+                        triggerEvent(SourceMarkEvent(this, INLAY_MARK_VISIBLE))
+                    } else {
+                        setVisible(false)
+                    }
+
+                    addEventListener(SynchronousSourceMarkEventListener {
+                        when (it.eventCode) {
+                            INLAY_MARK_VISIBLE -> {
+                                ApplicationManager.getApplication().invokeLater {
+                                    configuration.inlayRef = Ref.create()
+                                    configuration.inlayRef!!.set(
+                                        provider.insertAfter(
+                                            displayLineIndex,
+                                            configuration.componentProvider.getComponent(this).getComponent()
+                                        )
+                                    )
+                                    viewport.dispatchEvent(
+                                        ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED)
+                                    )
+                                }
+                            }
+
+                            INLAY_MARK_HIDDEN -> {
+                                ApplicationManager.getApplication().invokeLater {
+                                    configuration.inlayRef?.get()?.dispose()
+                                    configuration.inlayRef = null
+                                }
+                            }
+                        }
+                    })
                 } else {
                     ApplicationManager.getApplication().invokeLater {
                         InlayHintsPassFactory.forceHintsUpdateOnNextPass()

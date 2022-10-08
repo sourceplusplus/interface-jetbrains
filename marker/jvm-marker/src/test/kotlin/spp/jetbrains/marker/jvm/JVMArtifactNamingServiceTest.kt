@@ -73,6 +73,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         val name = JVMArtifactNamingService().getFullyQualifiedName(clazz!!)
         assertEquals(getTestName(false) + "", name.identifier)
         assertEquals(ArtifactType.CLASS, name.type)
+        assertNotNull(name.lineNumber)
     }
 
     fun testJavaInnerClassName() {
@@ -95,6 +96,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         val parentName = JVMArtifactNamingService().getFullyQualifiedName(clazz!!)
         assertEquals(getTestName(false) + "", parentName.identifier)
         assertEquals(ArtifactType.CLASS, parentName.type)
+        assertNotNull(parentName.lineNumber)
 
         val innerClazz = clazz.findDescendantOfType<T> { it !== clazz }
         assertNotNull(innerClazz)
@@ -102,6 +104,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         val innerName = JVMArtifactNamingService().getFullyQualifiedName(innerClazz!!)
         assertEquals(getTestName(false) + "\$InnerClassName", innerName.identifier)
         assertEquals(ArtifactType.CLASS, innerName.type)
+        assertNotNull(innerName.lineNumber)
     }
 
     fun testJavaMethodName() {
@@ -124,6 +127,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         val name = JVMArtifactNamingService().getFullyQualifiedName(method!!)
         assertEquals(getTestName(false) + ".foo()", name.identifier)
         assertEquals(ArtifactType.METHOD, name.type)
+        assertNotNull(name.lineNumber)
     }
 
     fun testJavaInnerClassMethodName() {
@@ -146,6 +150,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         val name = JVMArtifactNamingService().getFullyQualifiedName(method!!)
         assertEquals(getTestName(false) + "\$InnerClassName.foo()", name.identifier)
         assertEquals(ArtifactType.METHOD, name.type)
+        assertNotNull(name.lineNumber)
     }
 
     fun testJavaMethodVariable() {

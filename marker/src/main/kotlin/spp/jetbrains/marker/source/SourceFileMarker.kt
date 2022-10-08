@@ -150,28 +150,25 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     @JvmOverloads
     open fun applySourceMark(
         sourceMark: SourceMark,
-        autoRefresh: Boolean = false,
-        overrideFilter: Boolean = false
+        autoRefresh: Boolean = false
     ): Boolean {
-        if (overrideFilter || sourceMark.canApply()) {
-            log.trace("Applying source mark for artifact: $sourceMark")
-            sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.MARK_BEFORE_ADDED))
-            if (sourceMarks.add(sourceMark)) {
-                when (sourceMark) {
-                    is ClassGutterMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GutterMark, sourceMark)
-                    is ClassGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
-                    is MethodGutterMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GutterMark, sourceMark)
-                    is MethodInlayMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.InlayMark, sourceMark)
-                    is MethodGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
-                    is ExpressionGutterMark -> sourceMark.getPsiElement().putUserData(SourceKey.GutterMark, sourceMark)
-                    is ExpressionInlayMark -> sourceMark.getPsiElement().putUserData(SourceKey.InlayMark, sourceMark)
-                    is ExpressionGuideMark -> sourceMark.getPsiElement().putUserData(SourceKey.GuideMark, sourceMark)
-                }
-
-                if (autoRefresh) refresh()
-                log.trace("Applied source mark for artifact: $sourceMark")
-                return true
+        log.trace("Applying source mark for artifact: $sourceMark")
+        sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.MARK_BEFORE_ADDED))
+        if (sourceMarks.add(sourceMark)) {
+            when (sourceMark) {
+                is ClassGutterMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GutterMark, sourceMark)
+                is ClassGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
+                is MethodGutterMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GutterMark, sourceMark)
+                is MethodInlayMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.InlayMark, sourceMark)
+                is MethodGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
+                is ExpressionGutterMark -> sourceMark.getPsiElement().putUserData(SourceKey.GutterMark, sourceMark)
+                is ExpressionInlayMark -> sourceMark.getPsiElement().putUserData(SourceKey.InlayMark, sourceMark)
+                is ExpressionGuideMark -> sourceMark.getPsiElement().putUserData(SourceKey.GuideMark, sourceMark)
             }
+
+            if (autoRefresh) refresh()
+            log.trace("Applied source mark for artifact: $sourceMark")
+            return true
         }
         return false
     }
@@ -255,12 +252,8 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.GUTTER
         ) as MethodGutterMark
         return if (autoApply) {
-            if (gutterMark.canApply()) {
-                gutterMark.apply(true)
-                gutterMark
-            } else {
-                error("Could not apply gutter mark: $gutterMark")
-            }
+            gutterMark.apply(true)
+            gutterMark
         } else {
             gutterMark
         }
@@ -276,12 +269,8 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.INLAY
         ) as MethodInlayMark
         return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                error("Could not apply inlay mark: $inlayMark")
-            }
+            inlayMark.apply(true)
+            inlayMark
         } else {
             inlayMark
         }
@@ -297,12 +286,8 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.GUTTER
         ) as ExpressionGutterMark
         return if (autoApply) {
-            if (gutterMark.canApply()) {
-                gutterMark.apply(true)
-                gutterMark
-            } else {
-                error("Could not apply gutter mark: $gutterMark")
-            }
+            gutterMark.apply(true)
+            gutterMark
         } else {
             gutterMark
         }
@@ -318,12 +303,8 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
             SourceMark.Type.INLAY
         ) as ExpressionInlayMark
         return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                error("Could not apply inlay mark: $inlayMark")
-            }
+            inlayMark.apply(true)
+            inlayMark
         } else {
             inlayMark
         }
