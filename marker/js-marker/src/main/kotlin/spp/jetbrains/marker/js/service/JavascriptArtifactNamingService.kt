@@ -92,7 +92,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
 
-            is JSStatement -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
+            is JSStatement, is JSStatementList -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
             else -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
         }
     }
