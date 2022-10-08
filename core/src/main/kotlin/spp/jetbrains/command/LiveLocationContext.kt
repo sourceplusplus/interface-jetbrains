@@ -21,7 +21,6 @@ import spp.jetbrains.marker.source.SourceFileMarker
 import spp.protocol.artifact.ArtifactQualifiedName
 
 data class LiveLocationContext(
-    val lineNumber: Int,
     val qualifiedName: ArtifactQualifiedName,
     val fileMarker: SourceFileMarker,
     val element: PsiElement,

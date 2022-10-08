@@ -73,12 +73,8 @@ class JVMArtifactCreationService : IArtifactCreationService {
                 SourceMark.Type.GUTTER
             ) as MethodGutterMark
             return if (autoApply) {
-                if (gutterMark.canApply()) {
-                    gutterMark.apply(true)
-                    gutterMark
-                } else {
-                    null
-                }
+                gutterMark.apply(true)
+                gutterMark
             } else {
                 gutterMark
             }

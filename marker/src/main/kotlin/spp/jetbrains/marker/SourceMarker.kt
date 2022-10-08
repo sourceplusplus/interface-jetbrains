@@ -60,6 +60,10 @@ class SourceMarker {
             }
             return project.getUserData(KEY)!!
         }
+
+        fun getSourceFileMarker(psiFile: PsiFile): SourceFileMarker? {
+            return getInstance(psiFile.project).getSourceFileMarker(psiFile)
+        }
     }
 
     @Volatile

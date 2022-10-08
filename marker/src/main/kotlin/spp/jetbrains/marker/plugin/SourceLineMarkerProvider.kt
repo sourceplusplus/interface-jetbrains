@@ -87,7 +87,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         }
 
         elements.stream().map { it.containingFile }.distinct().forEach {
-            SourceMarker.getInstance(it.project).getSourceFileMarker(it)?.removeInvalidSourceMarks()
+            SourceMarker.getSourceFileMarker(it)?.removeInvalidSourceMarks()
         }
     }
 

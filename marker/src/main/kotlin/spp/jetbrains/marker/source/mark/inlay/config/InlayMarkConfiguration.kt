@@ -21,7 +21,6 @@ import com.intellij.openapi.util.Ref
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
-import spp.jetbrains.marker.source.mark.api.filter.ApplySourceMarkFilter
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 
 /**
@@ -31,7 +30,6 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class InlayMarkConfiguration(
-    override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.NONE,
     var strictlyManualCreation: Boolean = false,
     var virtualText: InlayMarkVirtualText? = null,
     var showComponentInlay: Boolean = false,

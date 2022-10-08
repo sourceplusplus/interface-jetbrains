@@ -65,7 +65,7 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
 
     private fun doTest(extension: String) {
         val psiFile = myFixture.configureByFile(getTestName(false) + ".$extension")
-        val fileMarker = SourceMarker.getInstance(myFixture.project).getSourceFileMarker(psiFile)
+        val fileMarker = SourceMarker.getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
         runBlocking {

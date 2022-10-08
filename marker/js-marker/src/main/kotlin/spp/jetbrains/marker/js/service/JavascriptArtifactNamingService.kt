@@ -79,15 +79,18 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         return when (element) {
-            is JSClass -> {
-                ArtifactQualifiedName(element.qualifiedName!!, null, ArtifactType.CLASS)
-            }
+            is JSClass -> ArtifactQualifiedName(
+                element.qualifiedName!!,
+                type = ArtifactType.CLASS,
+                lineNumber = SourceMarkerUtils.getLineNumber(element)
+            )
 
             is JSFunctionExpression -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
-
-            is JSFunction -> {
-                ArtifactQualifiedName(element.qualifiedName!!, null, ArtifactType.METHOD)
-            }
+            is JSFunction -> ArtifactQualifiedName(
+                element.qualifiedName!!,
+                type = ArtifactType.METHOD,
+                lineNumber = SourceMarkerUtils.getLineNumber(element)
+            )
 
             is JSStatement, is JSStatementList -> getStatementOrExpressionQualifiedName(element, ArtifactType.STATEMENT)
             else -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
@@ -104,12 +107,14 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         val parentElement = element.parentOfType<JSNamedElement>()
         return if (parentElement != null) {
             ArtifactQualifiedName(
-                "${getFullyQualifiedName(parentElement).identifier}.${name}", null, type,
+                "${getFullyQualifiedName(parentElement).identifier}.${name}",
+                type = type,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
         } else {
             ArtifactQualifiedName(
-                "${element.containingFile.virtualFile.path}#$name", null, type,
+                "${element.containingFile.virtualFile.path}#$name",
+                type = type,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
         }
@@ -120,7 +125,13 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         psiFile.acceptChildren(object : JSRecursiveWalkingElementVisitor() {
             override fun visitJSClass(node: JSClass) { // TODO: check this also works for typescript classes, otherwise use visitTypescriptClass
                 super.visitJSClass(node)
-                classQualifiedNames.add(ArtifactQualifiedName(node.qualifiedName!!, type = ArtifactType.CLASS))
+                classQualifiedNames.add(
+                    ArtifactQualifiedName(
+                        node.qualifiedName!!,
+                        type = ArtifactType.CLASS,
+                        lineNumber = SourceMarkerUtils.getLineNumber(node)
+                    )
+                )
             }
         })
         return classQualifiedNames

@@ -136,7 +136,7 @@ open class LiveTooltip(val guideMark: GuideMark, var panel: JPanel? = null) {
         private fun getLiveDisplays(editor: Editor): List<LiveTooltip> {
             val project = editor.project ?: return emptyList()
             val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document) ?: return emptyList()
-            return SourceMarker.getInstance(project).getSourceFileMarker(psiFile)
+            return SourceMarker.getSourceFileMarker(psiFile)
                 ?.getSourceMarks()?.filterIsInstance<GuideMark>()?.mapNotNull { it.configuration.liveTooltip }
                 ?: emptyList()
         }

@@ -21,7 +21,6 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.ClassUtil
-import org.jetbrains.uast.*
 import spp.jetbrains.marker.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
@@ -84,14 +83,7 @@ class JVMArtifactNamingService : IArtifactNamingService {
     }
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
-        return when (val uElement = element.toUElement()) {
-            is UClass -> JVMMarkerUtils.getFullyQualifiedName(uElement)
-            is UMethod -> JVMMarkerUtils.getFullyQualifiedName(uElement)
-            is UExpression -> JVMMarkerUtils.getFullyQualifiedName(element)
-            is UDeclaration -> JVMMarkerUtils.getFullyQualifiedName(element)
-            is UIdentifier -> JVMMarkerUtils.getFullyQualifiedName(element)
-            else -> TODO("Not yet implemented")
-        }
+        return JVMMarkerUtils.getFullyQualifiedName(element)
     }
 
     override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {

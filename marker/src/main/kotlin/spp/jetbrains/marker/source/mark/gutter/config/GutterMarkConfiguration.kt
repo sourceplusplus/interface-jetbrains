@@ -19,7 +19,6 @@ package spp.jetbrains.marker.source.mark.gutter.config
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
-import spp.jetbrains.marker.source.mark.api.filter.ApplySourceMarkFilter
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import javax.swing.Icon
 
@@ -30,7 +29,6 @@ import javax.swing.Icon
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class GutterMarkConfiguration(
-    override var applySourceMarkFilter: ApplySourceMarkFilter = ApplySourceMarkFilter.ALL,
     var tooltipText: (() -> String)? = null,
     var icon: Icon? = null,
     var activateOnMouseHover: Boolean = true,
