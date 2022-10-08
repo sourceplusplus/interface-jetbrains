@@ -23,8 +23,8 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiStatement
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
+import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 
@@ -41,17 +41,11 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
         if ((parent is PsiMethod && element === parent.nameIdentifier)
             || (JVMMarkerUtils.getNameIdentifier(parent) === element)
         ) {
-            val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)!!
-            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(parent)
-            return if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
-                JVMMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
-            }
+            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
+            return JVMMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
         } else if (element is PsiStatement) {
-            val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)!!
-            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(element)
-            return if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
-                JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
-            }
+            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
+            return JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
         }
         return null
     }

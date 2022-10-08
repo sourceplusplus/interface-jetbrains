@@ -88,12 +88,8 @@ object JVMMarkerUtils {
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark
             return if (autoApply) {
-                if (inlayMark.canApply()) {
-                    inlayMark.apply(true)
-                    inlayMark
-                } else {
-                    null
-                }
+                inlayMark.apply(true)
+                inlayMark
             } else {
                 inlayMark
             }
@@ -146,12 +142,8 @@ object JVMMarkerUtils {
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark
             return if (autoApply) {
-                if (inlayMark.canApply()) {
-                    inlayMark.apply(true)
-                    inlayMark
-                } else {
-                    null
-                }
+                inlayMark.apply(true)
+                inlayMark
             } else {
                 inlayMark
             }
@@ -184,12 +176,8 @@ object JVMMarkerUtils {
             SourceMark.Type.INLAY
         ) as ExpressionInlayMark
         return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                error("Could not apply inlay mark: $inlayMark")
-            }
+            inlayMark.apply(true)
+            inlayMark
         } else {
             inlayMark
         }
@@ -214,12 +202,8 @@ object JVMMarkerUtils {
             SourceMark.Type.INLAY
         ) as ExpressionInlayMark
         return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                error("Could not apply inlay mark: $inlayMark")
-            }
+            inlayMark.apply(true)
+            inlayMark
         } else {
             inlayMark
         }
@@ -266,12 +250,8 @@ object JVMMarkerUtils {
                 SourceMark.Type.GUTTER
             ) as ExpressionGutterMark
             return if (autoApply) {
-                if (gutterMark.canApply()) {
-                    gutterMark.apply(true)
-                    gutterMark
-                } else {
-                    null
-                }
+                gutterMark.apply(true)
+                gutterMark
             } else {
                 gutterMark
             }
@@ -316,12 +296,8 @@ object JVMMarkerUtils {
                 SourceMark.Type.INLAY
             ) as MethodInlayMark
             return if (autoApply) {
-                if (inlayMark.canApply()) {
-                    inlayMark.apply(true)
-                    inlayMark
-                } else {
-                    null
-                }
+                inlayMark.apply(true)
+                inlayMark
             } else {
                 inlayMark
             }
@@ -371,12 +347,8 @@ object JVMMarkerUtils {
                 SourceMark.Type.GUTTER
             ) as ClassGutterMark
             return if (autoApply) {
-                if (gutterMark.canApply()) {
-                    gutterMark.apply(true)
-                    gutterMark
-                } else {
-                    null
-                }
+                gutterMark.apply(true)
+                gutterMark
             } else {
                 gutterMark
             }

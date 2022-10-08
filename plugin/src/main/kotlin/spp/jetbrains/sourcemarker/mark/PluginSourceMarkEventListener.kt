@@ -87,7 +87,7 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
                 FileEditorManager.getInstance(project).allEditors.forEach {
                     ApplicationManager.getApplication().runReadAction {
                         PsiManager.getInstance(project).findFile(it.file)?.let {
-                            SourceMarker.getInstance(project).getSourceFileMarker(it)
+                            SourceMarker.getSourceFileMarker(it)
                             DaemonCodeAnalyzer.getInstance(project).restart(it)
                         }
                     }

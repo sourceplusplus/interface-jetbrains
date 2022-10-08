@@ -19,7 +19,6 @@ package spp.jetbrains.marker.js
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.lang.javascript.psi.JSFile
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceLineMarkerProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
@@ -40,7 +39,6 @@ class JavascriptLineMarkerProvider : SourceLineMarkerProvider() {
     }
 
     override fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>? {
-        val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)
         return null //todo: this
     }
 

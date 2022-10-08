@@ -146,14 +146,13 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
         return object : FactoryInlayHintsCollector(editor) {
             override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
-                val fileMarker = SourceMarker.getInstance(editor.project!!).getSourceFileMarker(element.containingFile) ?: return true
+                val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return true
                 var inlayMark = element.getUserData(SourceKey.InlayMark)
                 if (inlayMark == null) {
                     if (SourceMarker.getInstance(editor.project!!).configuration.inlayMarkConfiguration.strictlyManualCreation) return true else {
                         inlayMark = createInlayMarkIfNecessary(element) ?: return true
                     }
                 }
-                if (!fileMarker.containsSourceMark(inlayMark) && !inlayMark.canApply()) return true
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()
                 if (!inlayMark.isVisible()) {
                     return true

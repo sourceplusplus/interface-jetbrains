@@ -84,12 +84,8 @@ class PythonArtifactCreationService : IArtifactCreationService {
                 SourceMark.Type.GUTTER
             ) as ExpressionGutterMark
             return if (autoApply) {
-                if (gutterMark.canApply()) {
-                    gutterMark.apply(true)
-                    gutterMark
-                } else {
-                    null
-                }
+                gutterMark.apply(true)
+                gutterMark
             } else {
                 gutterMark
             }
@@ -151,12 +147,8 @@ class PythonArtifactCreationService : IArtifactCreationService {
             SourceMark.Type.INLAY
         ) as ExpressionInlayMark
         return if (autoApply) {
-            if (inlayMark.canApply()) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                error("Could not apply inlay mark: $inlayMark")
-            }
+            inlayMark.apply(true)
+            inlayMark
         } else {
             inlayMark
         }
@@ -188,12 +180,8 @@ class PythonArtifactCreationService : IArtifactCreationService {
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark
             return if (autoApply) {
-                if (inlayMark.canApply()) {
-                    inlayMark.apply(true)
-                    inlayMark
-                } else {
-                    null
-                }
+                inlayMark.apply(true)
+                inlayMark
             } else {
                 inlayMark
             }
