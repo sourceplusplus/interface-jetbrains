@@ -31,4 +31,5 @@ interface IArtifactScopeService : ISourceMarkerService {
     fun isInsideFunction(element: PsiElement): Boolean
     fun isInsideEndlessLoop(element: PsiElement): Boolean = false
     fun isJVM(element: PsiElement): Boolean = false
+    fun canShowControlBar(psiElement: PsiElement): Boolean = true
 }

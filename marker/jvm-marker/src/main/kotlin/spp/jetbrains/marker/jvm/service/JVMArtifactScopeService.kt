@@ -22,6 +22,7 @@ import com.intellij.psi.scope.util.PsiScopesUtil
 import com.intellij.psi.util.parentOfTypes
 import com.siyeh.ig.psiutils.ControlFlowUtils
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.joor.Reflect
 import spp.jetbrains.marker.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -33,14 +34,6 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactScopeService : IArtifactScopeService {
-
-    fun isMethodAtLine(psiFile: PsiFile, lineNumber: Int): Boolean {
-        var el = SourceMarkerUtils.getElementAtLine(psiFile, lineNumber)
-        while (el is PsiKeyword || el is PsiModifierList) {
-            el = el.parent
-        }
-        return el is PsiMethod
-    }
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         //determine available vars
@@ -73,4 +66,15 @@ class JVMArtifactScopeService : IArtifactScopeService {
     }
 
     override fun isJVM(element: PsiElement): Boolean = true
+
+    override fun canShowControlBar(psiElement: PsiElement): Boolean {
+        return when (psiElement::class.java.name) {
+            "org.jetbrains.kotlin.psi.KtObjectDeclaration" -> false
+            "org.jetbrains.kotlin.psi.KtProperty" -> {
+                Reflect.on(psiElement).call("isLocal").get<Boolean>() == true
+            }
+
+            else -> super.canShowControlBar(psiElement)
+        }
+    }
 }

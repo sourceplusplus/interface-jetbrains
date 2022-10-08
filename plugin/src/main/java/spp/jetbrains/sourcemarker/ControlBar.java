@@ -60,7 +60,6 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         this.inlayMark = inlayMark;
 
         LiveLocationContext context = new LiveLocationContext(
-                inlayMark.getLineNumber(),
                 inlayMark.getArtifactQualifiedName(),
                 inlayMark.getSourceFileMarker(),
                 inlayMark.getPsiElement()
@@ -94,9 +93,9 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1.addSaveListener(() -> {
             String autoCompleteText = textField1.getSelectedText();
             if (autoCompleteText != null) {
-                ControlBarController.INSTANCE.handleCommandInput(autoCompleteText, editor);
+                ControlBarController.handleCommandInput(autoCompleteText, editor);
             } else {
-                ControlBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+                ControlBarController.handleCommandInput(textField1.getText(), editor);
             }
         });
     }
@@ -119,22 +118,16 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                     //ignore tab; handled by auto-complete
                     e.consume();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP && !textField1.isPopupVisible()) {
-                    int lineNumber = inlayMark.getLineNumber();
-                    while (--lineNumber > 0) {
-                        if (ControlBarController.INSTANCE.canShowControlBar(inlayMark.getSourceFileMarker(), lineNumber)) {
-                            dispose();
-                            ControlBarController.INSTANCE.showControlBar(editor, lineNumber, true);
-                            break;
-                        }
+                    Integer nextLine = ControlBarController.getNextAvailableControlBarLine(editor, inlayMark, true);
+                    if (nextLine != null) {
+                        dispose();
+                        ControlBarController.showControlBar(editor, nextLine);
                     }
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN && !textField1.isPopupVisible()) {
-                    int lineNumber = inlayMark.getLineNumber();
-                    while (++lineNumber < editor.getDocument().getLineCount()) {
-                        if (ControlBarController.INSTANCE.canShowControlBar(inlayMark.getSourceFileMarker(), lineNumber)) {
-                            dispose();
-                            ControlBarController.INSTANCE.showControlBar(editor, lineNumber, true);
-                            break;
-                        }
+                    Integer nextLine = ControlBarController.getNextAvailableControlBarLine(editor, inlayMark, false);
+                    if (nextLine != null) {
+                        dispose();
+                        ControlBarController.showControlBar(editor, nextLine);
                     }
                 }
             }
@@ -147,13 +140,13 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                     if (!textField1.getReady()) return;
                     String autoCompleteText = textField1.getSelectedText();
                     if (autoCompleteText != null) {
-                        ControlBarController.INSTANCE.handleCommandInput(autoCompleteText, textField1.getActualText(), editor);
+                        ControlBarController.handleCommandInput(autoCompleteText, textField1.getActualText(), editor);
                     } else if (!textField1.getText().isEmpty()) {
                         List<LiveCommandFieldRow> commands = lookup.apply(textField1.getText());
                         if (commands.isEmpty()) {
-                            ControlBarController.INSTANCE.handleCommandInput(textField1.getText(), editor);
+                            ControlBarController.handleCommandInput(textField1.getText(), editor);
                         } else {
-                            ControlBarController.INSTANCE.handleCommandInput(commands.get(0).getText(), editor);
+                            ControlBarController.handleCommandInput(commands.get(0).getText(), editor);
                         }
                     }
                 }
@@ -222,9 +215,13 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                 inlayMark.getLanguage(),
                 inlayMark.getArtifactQualifiedName()
         );
-        textField1 = new AutocompleteField(
+        location = message("location") + ": " + location;
+        if (inlayMark.getArtifactQualifiedName().getType().showLineNumber()) {
+            location += "#" + inlayMark.getLineNumber();
+        }
+        textField1 = new AutocompleteField<>(
                 inlayMark.getProject(),
-                message("location") + ": " + location + "#" + inlayMark.getLineNumber(),
+                location,
                 availableCommands, lookup, inlayMark.getArtifactQualifiedName(), true);
         textField1.setReplaceCommandOnTab(true);
         textField1.setAutocompleteAndFinishOnEnter(true);

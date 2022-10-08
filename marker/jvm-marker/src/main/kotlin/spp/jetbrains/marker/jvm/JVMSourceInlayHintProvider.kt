@@ -22,9 +22,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiStatement
-import org.jetbrains.uast.UExpression
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.toUElement
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
@@ -45,15 +42,13 @@ class JVMSourceInlayHintProvider : SourceInlayHintProvider() {
             || (JVMMarkerUtils.getNameIdentifier(parent) === element)
         ) {
             val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)!!
-            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(parent.toUElement() as UMethod)
+            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(parent)
             return if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
                 JVMMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
             }
         } else if (element is PsiStatement) {
             val fileMarker = SourceMarker.getInstance(element.project).getSourceFileMarker(element.containingFile)!!
-            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(
-                JVMMarkerUtils.getUniversalExpression(element).toUElement() as UExpression
-            )
+            val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(element)
             return if (!SourceMarker.getInstance(element.project).configuration.createSourceMarkFilter.test(artifactQualifiedName)) null else {
                 JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
             }

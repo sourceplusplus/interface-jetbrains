@@ -17,9 +17,8 @@
 package spp.jetbrains.marker
 
 import com.intellij.openapi.editor.Document
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
+import com.intellij.psi.*
+import com.intellij.psi.util.parentOfType
 import spp.jetbrains.marker.source.mark.api.SourceMark
 
 /**
@@ -29,20 +28,6 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkerUtils {
-
-    /**
-     * todo: description.
-     *
-     * @since 0.3.0
-     */
-    @JvmStatic
-    fun isBlankLine(psiFile: PsiFile, lineNumber: Int): Boolean {
-        val element = getElementAtLine(psiFile, lineNumber)
-        if (element != null) {
-            return getLineNumber(element) != lineNumber
-        }
-        return true
-    }
 
     /**
      * todo: description.
@@ -61,6 +46,20 @@ object SourceMarkerUtils {
         val offset = document.getLineStartOffset(line - 1)
         var element = file.viewProvider.findElementAt(offset)
         if (element != null) {
+            //check for name identifier on same line (e.g. class/method name)
+            val nameIdentifierOwner = element.parentOfType<PsiNameIdentifierOwner>()
+            if (nameIdentifierOwner != null && nameIdentifierOwner.nameIdentifier?.let { getLineNumber(it) } == line) {
+                return nameIdentifierOwner
+            }
+
+            //check for annotation on same line
+            val annotation = element.parentOfType<PsiAnnotation>()
+            if (annotation != null && getLineNumber(annotation) == line) {
+                if (annotation.owner is PsiModifierList) {
+                    return (annotation.owner as PsiModifierList).parent
+                }
+            }
+
             if (document.getLineNumber(element.textOffset) != line - 1) {
                 element = element.nextSibling
             }
