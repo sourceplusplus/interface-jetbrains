@@ -22,8 +22,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiRecursiveElementVisitor
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.path.GrMethodCallExpression
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
@@ -58,11 +62,15 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
     }
 
     override fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger> {
-        val uMethod = ApplicationManager.getApplication().runReadAction(Computable {
-            guideMark.getPsiMethod().toUElementOfType<UMethod>()
-        })
-        if (uMethod != null) {
-            determineLoggerStatements(uMethod, guideMark.sourceFileMarker)
+        if (guideMark.language.id == "Groovy") {
+            determineLoggerStatements(guideMark.getPsiMethod() as GrMethod, guideMark.sourceFileMarker)
+        } else {
+            val uMethod = ApplicationManager.getApplication().runReadAction(Computable {
+                guideMark.getPsiMethod().toUElementOfType<UMethod>()
+            })
+            if (uMethod != null) {
+                determineLoggerStatements(uMethod, guideMark.sourceFileMarker)
+            }
         }
         return guideMark.getChildren().mapNotNull { it.getUserData(DETECTED_LOGGER) }
     }
@@ -105,6 +113,54 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
                         }
                     }
                     return super.visitCallExpression(node)
+                }
+            })
+        }
+        return loggerStatements
+    }
+
+    /**
+     * Unsure why, but Groovy UAST visitors don't work here. Have to use Groovy PSI.
+     */
+    fun determineLoggerStatements(grMethod: GrMethod, fileMarker: SourceFileMarker): List<DetectedLogger> {
+        val loggerStatements = mutableListOf<DetectedLogger>()
+        ApplicationManager.getApplication().runReadAction {
+            grMethod.acceptChildren(object : PsiRecursiveElementVisitor() {
+                override fun visitElement(element: PsiElement) {
+                    if (element is GrMethodCallExpression) {
+                        val loggerClass = element.resolveMethod()?.containingClass?.qualifiedName
+                        if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
+                            val methodName = element.resolveMethod()?.name
+                            if (methodName != null && LOGGER_METHODS.contains(methodName)) {
+                                val logTemplate = element.argumentList.expressionArguments.firstOrNull()?.run {
+                                    (this as? GrLiteral)?.value as? String
+                                }
+
+                                if (logTemplate != null) {
+                                    log.debug("Found log statement: $logTemplate")
+                                    val detectedLogger = DetectedLogger(
+                                        logTemplate, methodName, getLineNumber(element) + 1
+                                    )
+                                    loggerStatements.add(detectedLogger)
+
+                                    //create expression guide mark for the log statement
+                                    val guideMark = fileMarker.createExpressionSourceMark(
+                                        element, SourceMark.Type.GUIDE
+                                    )
+                                    if (!fileMarker.containsSourceMark(guideMark)) {
+                                        guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
+                                        guideMark.apply(true)
+                                    } else {
+                                        fileMarker.getSourceMark(guideMark.artifactQualifiedName, SourceMark.Type.GUIDE)
+                                            ?.putUserData(DETECTED_LOGGER, detectedLogger)
+                                    }
+                                } else {
+                                    log.warn("No log template argument available for expression: $element")
+                                }
+                            }
+                        }
+                    }
+                    super.visitElement(element)
                 }
             })
         }
