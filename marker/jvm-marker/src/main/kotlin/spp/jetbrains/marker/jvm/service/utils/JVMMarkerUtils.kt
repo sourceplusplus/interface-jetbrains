@@ -133,7 +133,7 @@ object JVMMarkerUtils {
         }
 
         return if (inlayMark == null) {
-            if (element.text != "}") {
+            if (element.language.id != "Groovy" && element.text != "}") {
                 val uExpression = element.toUElement()
                 if (uExpression !is UExpression && uExpression !is UDeclaration) return null
             }
@@ -404,7 +404,7 @@ object JVMMarkerUtils {
             }
         }
         if (parentIdentifier == null) {
-            error("Could not determine parent of element: $element") //todo: extension function, see SourceMarkerConfig, make test
+            error("Could not determine parent of element: $element") //todo: extension function, see SourceMarkerConfig, make test, groovy import statements
         }
 
         element.textRange.startOffset.let {

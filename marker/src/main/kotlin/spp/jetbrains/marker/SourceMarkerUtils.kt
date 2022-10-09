@@ -18,6 +18,9 @@ package spp.jetbrains.marker
 
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.*
+import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.javadoc.PsiDocComment
+import com.intellij.psi.javadoc.PsiDocToken
 import com.intellij.psi.util.parentOfType
 import spp.jetbrains.marker.source.mark.api.SourceMark
 
@@ -35,7 +38,7 @@ object SourceMarkerUtils {
      * @since 0.1.0
      */
     @JvmStatic
-    fun getElementAtLine(file: PsiFile, line: Int): PsiElement? {
+    fun getElementAtLine(file: PsiFile, line: Int, ignoreComments: Boolean = true): PsiElement? {
         val document: Document = PsiDocumentManager.getInstance(file.project).getDocument(file)!!
         if (document.lineCount == line - 1) {
             return null
@@ -67,9 +70,20 @@ object SourceMarkerUtils {
 
         if (element != null && getLineNumber(element) != line) {
             return null
+        } else if (element != null && ignoreComments && isComment(element)) {
+            return null
         }
 
         return element
+    }
+
+    private fun isComment(element: PsiElement): Boolean {
+        val comment = element is PsiDocToken || element is PsiComment || element is PsiDocComment
+        if (comment) return true
+
+        return if (element is LeafPsiElement) {
+            isComment(element.parent)
+        } else false
     }
 
     /**

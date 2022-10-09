@@ -19,6 +19,9 @@ package spp.jetbrains.marker.jvm.service
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiStatement
+import com.intellij.psi.impl.source.tree.LeafPsiElement
+import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.imports.GrImportStatement
+import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.packaging.GrPackageDefinition
 import spp.jetbrains.marker.IArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
@@ -102,6 +105,12 @@ class JVMArtifactCreationService : IArtifactCreationService {
         autoApply: Boolean
     ): Optional<ExpressionInlayMark> {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
+        if (element is LeafPsiElement && element.parent is GrImportStatement) {
+            return Optional.empty()
+        } else if (element is LeafPsiElement && element.parent is GrPackageDefinition) {
+            return Optional.empty()
+        }
+
         return if (element is PsiStatement) {
             Optional.ofNullable(JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         } else if (element is PsiElement) {
