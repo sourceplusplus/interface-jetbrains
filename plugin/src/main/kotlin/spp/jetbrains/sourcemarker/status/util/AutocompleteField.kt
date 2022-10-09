@@ -401,14 +401,14 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         if (text.isEmpty() && placeHolderText != null) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
-            val textLength = pG.getFontMetrics().stringWidth(placeHolderText)
+            val textLength = g.fontMetrics.stringWidth(placeHolderText)
             val fieldLength = width
 
             g.color = placeHolderTextColor ?: PluginUI.getPlaceholderForeground()
             g.drawString(
                 placeHolderText,
                 insets.left + (fieldLength / 2) - (textLength / 2),
-                pG.getFontMetrics().maxAscent + insets.top
+                g.fontMetrics.maxAscent + insets.top
             )
         }
 
