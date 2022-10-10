@@ -25,6 +25,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiManager
 import io.vertx.core.Vertx
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.detect.endpoint.UrlResolverEndpointDetector
 import spp.jetbrains.marker.js.detect.JavascriptEndpointDetector
 import spp.jetbrains.marker.js.detect.JavascriptLoggerDetector
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector
@@ -32,6 +33,7 @@ import spp.jetbrains.marker.jvm.detect.JVMLoggerDetector
 import spp.jetbrains.marker.py.detect.PythonEndpointDetector
 import spp.jetbrains.marker.py.detect.PythonLoggerDetector
 import spp.jetbrains.marker.source.info.EndpointDetector
+import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -58,14 +60,41 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
 
     private val endpointDetectors = mutableMapOf<String, EndpointDetector<*>>()
         .apply {
-            JVMEndpointDetector(project).let {
-                put("JAVA", it)
-                put("kotlin", it)
-                put("Scala", it)
-                put("Groovy", it)
+            //JVM endpoint detectors
+            AggregateEndpointDetector(
+                project,
+                listOf(
+                    UrlResolverEndpointDetector(project),
+                    JVMEndpointDetector(project)
+                )
+            ).apply {
+                put("JAVA", this)
+                put("kotlin", this)
+                put("Scala", this)
+                put("Groovy", this)
             }
-            put("Python", PythonEndpointDetector(project))
-            put("ECMAScript 6", JavascriptEndpointDetector(project))
+
+            //Python endpoint detectors
+            AggregateEndpointDetector(
+                project,
+                listOf(
+                    UrlResolverEndpointDetector(project),
+                    PythonEndpointDetector(project)
+                )
+            ).apply {
+                put("Python", this)
+            }
+
+            //JavaScript endpoint detectors
+            AggregateEndpointDetector(
+                project,
+                listOf(
+                    UrlResolverEndpointDetector(project),
+                    JavascriptEndpointDetector(project)
+                )
+            ).apply {
+                put("ECMAScript 6", this)
+            }
         }.toMap()
     private val loggerDetectors = mutableMapOf<String, LoggerDetector>()
         .apply {
@@ -125,5 +154,12 @@ class PluginSourceMarkEventListener(val project: Project, val vertx: Vertx) : Sy
                 }
             }
         }
+    }
+
+    private class AggregateEndpointDetector(
+        project: Project,
+        endpointDetectors: List<EndpointDetector<*>>
+    ) : EndpointDetector<EndpointNameDeterminer>(project) {
+        override val detectorSet = endpointDetectors.flatMap { it.detectorSet }.toSet()
     }
 }
