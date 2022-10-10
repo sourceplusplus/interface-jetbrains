@@ -22,7 +22,6 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
@@ -57,16 +56,9 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
     lateinit var eventsWindow: EventsWindow
 
     init {
-        try {
-            _toolWindow = ToolWindowManager.getInstance(project) //2019.3+
-                .registerToolWindow(LIVE_BREAKPOINT_NAME, true, ToolWindowAnchor.BOTTOM, this, true)
-            _toolWindow!!.setIcon(PluginIcons.Breakpoint.disabled)
-        } catch (ignored: Throwable) {
-            _toolWindow = ToolWindowManager.getInstance(project) //2020+
-                .registerToolWindow(
-                    RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, PluginIcons.Breakpoint.disabled)
-                )
-        }
+        _toolWindow = ToolWindowManager.getInstance(project).registerToolWindow(
+            RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, PluginIcons.Breakpoint.disabled)
+        )
 
         _toolWindow!!.contentManager.addContentManagerListener(object : ContentManagerListener {
             override fun contentAdded(contentManagerEvent: ContentManagerEvent) = Unit
