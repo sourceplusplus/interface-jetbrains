@@ -24,7 +24,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.LiveBreakpointConstants
-import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.swing.JComponent
 
@@ -36,7 +35,6 @@ import javax.swing.JComponent
  */
 class EventsWindow(val project: Project) : Disposable {
 
-    lateinit var stackFrameManager: StackFrameManager
     private val listeners: MutableList<DebugStackFrameListener>
     private val layoutUi: RunnerLayoutUi
     lateinit var eventsTab: EventsTab
