@@ -22,6 +22,7 @@ import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDeterminer
+import spp.jetbrains.marker.jvm.detect.endpoint.MicronautEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SkywalkingTraceEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
@@ -37,7 +38,8 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
 
     override val detectorSet: Set<JVMEndpointNameDeterminer> = setOf(
         SkywalkingTraceEndpoint(),
-        SpringMVCEndpoint()
+        SpringMVCEndpoint(),
+        MicronautEndpoint()
     )
 
     fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
