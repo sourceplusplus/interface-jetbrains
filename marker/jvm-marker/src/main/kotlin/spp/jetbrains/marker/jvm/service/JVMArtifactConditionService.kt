@@ -20,8 +20,8 @@ import com.intellij.debugger.engine.evaluation.TextWithImportsImpl
 import com.intellij.debugger.impl.DebuggerUtilsEx
 import com.intellij.psi.*
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
-import spp.jetbrains.marker.IArtifactConditionService
-import spp.jetbrains.marker.IArtifactConditionService.ParseRange
+import spp.jetbrains.marker.service.define.IArtifactConditionService
+import spp.jetbrains.marker.service.define.IArtifactConditionService.ParseRange
 
 /**
  * todo: description.

@@ -10,8 +10,9 @@ intellij {
 }
 
 dependencies {
-    compileOnly(projectDependency(":marker"))
-    compileOnly("plus.sourceplus:protocol:$projectVersion")
+    implementation(projectDependency(":common"))
+    implementation(projectDependency(":marker"))
+    implementation("plus.sourceplus:protocol:$projectVersion")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

@@ -25,9 +25,15 @@ import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Vertx
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.marker.impl.ArtifactCreationService
-import spp.jetbrains.marker.impl.ArtifactNamingService
-import spp.jetbrains.marker.impl.ArtifactScopeService
+import spp.jetbrains.marker.SourceMarkerKeys
+import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS
+import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_ID
+import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_TYPE
+import spp.jetbrains.marker.SourceMarkerKeys.VIEW_EVENT_LISTENERS
+import spp.jetbrains.marker.SourceMarkerKeys.VIEW_SUBSCRIPTION_ID
+import spp.jetbrains.marker.service.ArtifactCreationService
+import spp.jetbrains.marker.service.ArtifactNamingService
+import spp.jetbrains.marker.service.ArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
@@ -39,12 +45,6 @@ import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_ID
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.INSTRUMENT_TYPE
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_EVENT_LISTENERS
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.sourcemarker.status.util.CircularList
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
@@ -149,7 +149,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
-            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -197,7 +197,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 inlayMark
             )
 
-            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -240,7 +240,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                 ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
                 inlayMark
             )
-            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -279,7 +279,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
             ) ?: return
 
             val statusBar = SpanStatusBar(location, inlayMark)
-            inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+            inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
             statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -314,7 +314,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                         emptyList(),
                         inlayMark
                     )
-                    inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+                    inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     statusBar.setEditor(editor)
@@ -352,7 +352,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                         ArtifactScopeService.getScopeVariables(fileMarker, liveLog.location.line),
                         inlayMark
                     )
-                    inlayMark.putUserData(SourceMarkKeys.STATUS_BAR, statusBar)
+                    inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
                     statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     statusBar.setEditor(editor)
@@ -365,7 +365,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                     }
                     inlayMark.apply()
 
-                    val detector = inlayMark.getUserData(SourceMarkKeys.LOGGER_DETECTOR)!!
+                    val detector = inlayMark.getUserData(SourceMarkerKeys.LOGGER_DETECTOR)!!
                     detector.addLiveLog(editor, inlayMark, liveLog.logFormat, liveLog.location.line)
                 }
             } else {

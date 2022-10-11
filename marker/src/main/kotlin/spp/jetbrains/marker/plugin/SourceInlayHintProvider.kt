@@ -35,6 +35,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.ui.paint.EffectPainter
 import org.joor.Reflect
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.service.ArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.MARK_REMOVED
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -56,7 +57,7 @@ import javax.swing.JPanel
  */
 @Suppress("UnstableApiUsage")
 @JvmDefaultWithoutCompatibility
-abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
+class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
         private val log = logger<SourceInlayHintProvider>()
@@ -150,7 +151,7 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 var inlayMark = element.getUserData(SourceKey.InlayMark)
                 if (inlayMark == null) {
                     if (SourceMarker.getInstance(editor.project!!).configuration.inlayMarkConfiguration.strictlyManualCreation) return true else {
-                        inlayMark = createInlayMarkIfNecessary(element) ?: return true
+                        inlayMark = ArtifactMarkService.createInlayMarkIfNecessary(element) ?: return true
                     }
                 }
                 if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()
@@ -172,21 +173,12 @@ abstract class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                     }
                 }
 
-                displayVirtualText(element, virtualText, sink, representation)
+                ArtifactMarkService.displayVirtualText(element, virtualText, sink, representation)
                 latestInlayMarkAddedAt = System.currentTimeMillis()
                 return true
             }
         }
     }
-
-    abstract fun createInlayMarkIfNecessary(element: PsiElement): InlayMark?
-
-    abstract fun displayVirtualText(
-        element: PsiElement,
-        virtualText: InlayMarkVirtualText,
-        sink: InlayHintsSink,
-        representation: InlayPresentation
-    )
 
     private inner class DynamicTextInlayPresentation(
         val editor: Editor,

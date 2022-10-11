@@ -20,7 +20,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyRecursiveElementVisitor
-import spp.jetbrains.marker.AbstractSourceGuideProvider
+import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 

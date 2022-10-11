@@ -21,7 +21,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.ClassUtil
-import spp.jetbrains.marker.IArtifactNamingService
+import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark

@@ -26,7 +26,7 @@ import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.command.LiveCommand;
 import spp.jetbrains.command.LiveLocationContext;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.ArtifactNamingService;
+import spp.jetbrains.marker.service.ArtifactNamingService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.ControlBarController;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;

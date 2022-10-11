@@ -61,11 +61,9 @@ import org.apache.commons.text.CaseUtils
 import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
+import spp.jetbrains.marker.LanguageMarker
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.js.JavascriptMarker
-import spp.jetbrains.marker.jvm.JVMMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.py.PythonMarker
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
@@ -91,6 +89,7 @@ import spp.protocol.service.LiveManagementService
 import spp.protocol.service.LiveViewService
 import java.io.File
 import java.net.ConnectException
+import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import javax.net.ssl.SSLHandshakeException
 
@@ -111,7 +110,9 @@ class SourceMarkerPlugin(val project: Project) {
         @Synchronized
         fun getInstance(project: Project): SourceMarkerPlugin {
             if (project.getUserData(KEY) == null) {
-                project.putUserData(KEY, SourceMarkerPlugin(project))
+                val plugin = SourceMarkerPlugin(project)
+                project.putUserData(SourceStatusService.KEY, SourceStatusServiceImpl(project))
+                project.putUserData(KEY, plugin)
             }
             return project.getUserData(KEY)!!
         }
@@ -122,23 +123,6 @@ class SourceMarkerPlugin(val project: Project) {
     private var discovery: ServiceDiscovery? = null
     private var addedConfigListener = false
     private var vertx: Vertx? = null
-
-    init {
-        if (JVMMarker.canSetup()) {
-            log.info("Setting up JVM marker")
-            JVMMarker.setup()
-        }
-        if (PythonMarker.canSetup()) {
-            log.info("Setting up Python marker")
-            PythonMarker.setup()
-        }
-        if (JavascriptMarker.canSetup()) {
-            log.info("Setting up JavaScript marker")
-            JavascriptMarker.setup()
-        }
-
-        project.putUserData(SourceStatusService.KEY, SourceStatusServiceImpl(project))
-    }
 
     suspend fun init(configInput: SourceMarkerConfig? = null) {
         log.info("Initializing SourceMarkerPlugin on project: $project")
@@ -570,6 +554,16 @@ class SourceMarkerPlugin(val project: Project) {
 
     private fun initMarker(vertx: Vertx) {
         log.info("Initializing marker")
+        val originalClassLoader = Thread.currentThread().contextClassLoader
+        try {
+            Thread.currentThread().contextClassLoader = javaClass.classLoader
+            ServiceLoader.load(LanguageMarker::class.java).forEach {
+                if (it.canSetup()) it.setup(project)
+            }
+        } finally {
+            Thread.currentThread().contextClassLoader = originalClassLoader
+        }
+
         SourceMarker.getInstance(project).apply {
             addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
             addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(project, vertx))

@@ -12,6 +12,7 @@ intellij {
 }
 
 dependencies {
+    implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
     implementation("plus.sourceplus:protocol:$projectVersion")
 
@@ -21,8 +22,8 @@ dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 
-    testImplementation("io.vertx:vertx-core:$vertxVersion")
     testImplementation(projectDependency(":common"))
+    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }
 

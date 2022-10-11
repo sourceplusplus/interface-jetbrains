@@ -19,7 +19,7 @@ package spp.jetbrains.marker.source.mark.api
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.impl.ArtifactNamingService
+import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent

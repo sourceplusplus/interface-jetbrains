@@ -22,7 +22,7 @@ import com.intellij.psi.PsiStatement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.imports.GrImportStatement
 import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.packaging.GrPackageDefinition
-import spp.jetbrains.marker.IArtifactCreationService
+import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker

@@ -34,14 +34,15 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.ArtifactConditionService;
+import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
+import spp.jetbrains.marker.SourceMarkerKeys;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
+import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.LiveSpan;
@@ -65,7 +66,7 @@ import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListener {
+public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -400,7 +401,7 @@ public class SpanStatusBar extends JPanel implements StatusBar, VisibleAreaListe
             popup = null;
         }
         inlayMark.dispose(true);
-        List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkKeys.INSTANCE.getGROUPED_MARKS());
+        List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkerKeys.getGROUPED_MARKS());
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveSpan != null) {
