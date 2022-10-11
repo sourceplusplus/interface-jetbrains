@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.service
 
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactTypeService
@@ -28,6 +29,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     }
 
     override fun isComment(element: PsiElement): Boolean {
+        //language-agnostic check
+        if (element is PsiComment) return true
+
+        //language-specific check
         return getService(element.language).isComment(element)
     }
 
