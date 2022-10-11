@@ -70,6 +70,7 @@ dependencies {
     runtimeOnly(projectDependency(":marker:js-marker"))
     runtimeOnly(projectDependency(":marker:jvm-marker"))
     runtimeOnly(projectDependency(":marker:py-marker"))
+    runtimeOnly(projectDependency(":marker:ult-marker"))
     implementation(projectDependency(":monitor"))
     implementation("plus.sourceplus.interface:interface-booster-ui:$projectVersion")
     implementation("plus.sourceplus:protocol:$projectVersion")

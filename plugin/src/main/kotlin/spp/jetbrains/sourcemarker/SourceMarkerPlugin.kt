@@ -61,7 +61,7 @@ import org.apache.commons.text.CaseUtils
 import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
-import spp.jetbrains.marker.LanguageMarker
+import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
@@ -557,7 +557,7 @@ class SourceMarkerPlugin(val project: Project) {
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
             Thread.currentThread().contextClassLoader = javaClass.classLoader
-            ServiceLoader.load(LanguageMarker::class.java).forEach {
+            ServiceLoader.load(LanguageProvider::class.java).forEach {
                 if (it.canSetup()) it.setup(project)
             }
         } finally {

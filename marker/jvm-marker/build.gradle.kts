@@ -27,6 +27,7 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
 
+    testRuntimeOnly(projectDependency(":marker:ult-marker"))
     testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }

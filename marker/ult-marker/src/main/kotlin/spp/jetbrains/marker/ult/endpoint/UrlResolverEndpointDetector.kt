@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.detect.endpoint
+package spp.jetbrains.marker.ult.endpoint
 
 import com.intellij.microservices.url.UrlPath
 import com.intellij.microservices.url.UrlResolveRequest
@@ -35,13 +35,26 @@ import java.util.*
 /**
  * Detects endpoints using IntelliJ's [UrlResolverManager] experimental functionality.
  *
- * Note: IntelliJ Ultimate only.
+ * @since 0.7.2
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class UrlResolverEndpointDetector(
     project: Project
 ) : EndpointDetector<EndpointNameDeterminer>(project), EndpointNameDeterminer {
 
-    private val log = logger<UrlResolverEndpointDetector>()
+    companion object {
+        private val log = logger<UrlResolverEndpointDetector>()
+
+        fun isAvailable(): Boolean {
+            return try {
+                Class.forName("com.intellij.microservices.url.UrlResolverManager")
+                true
+            } catch (e: ClassNotFoundException) {
+                false
+            }
+        }
+    }
+
     override val detectorSet = setOf(this)
 
     override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {

@@ -18,6 +18,8 @@ dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.1-jre")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
+
+    testRuntimeOnly(projectDependency(":marker:ult-marker"))
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

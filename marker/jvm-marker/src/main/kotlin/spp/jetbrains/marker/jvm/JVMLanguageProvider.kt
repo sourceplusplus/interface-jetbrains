@@ -21,7 +21,7 @@ import com.intellij.psi.PsiJavaFile
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.UserData
-import spp.jetbrains.marker.LanguageMarker
+import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys.ENDPOINT_DETECTOR
 import spp.jetbrains.marker.SourceMarkerKeys.LOGGER_DETECTOR
@@ -31,6 +31,8 @@ import spp.jetbrains.marker.jvm.detect.JVMLoggerDetector
 import spp.jetbrains.marker.jvm.service.*
 import spp.jetbrains.marker.service.*
 import spp.jetbrains.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
+import spp.jetbrains.marker.source.info.EndpointDetector
+import spp.jetbrains.marker.source.info.EndpointDetector.AggregateEndpointDetector
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
@@ -39,12 +41,12 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.safeLaunch
 
 /**
- * todo: description.
+ * Provides JVM support for the Marker API.
  *
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMLanguageMarker : LanguageMarker {
+class JVMLanguageProvider : LanguageProvider {
 
     override fun canSetup(): Boolean {
         return try {
@@ -60,7 +62,13 @@ class JVMLanguageMarker : LanguageMarker {
         SUPPORTED_FILE_TYPES.add(KtFile::class.java)
         SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
 
-        val endpointDetector = JVMEndpointDetector(project)
+        val endpointDetector = AggregateEndpointDetector(
+            project,
+            mutableListOf<EndpointDetector<*>>().apply {
+                addAll(getUltimateProvider(project).getEndpointDetectors(project))
+                add(JVMEndpointDetector(project))
+            }
+        )
         val loggerDetector = JVMLoggerDetector(project)
 
         SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {

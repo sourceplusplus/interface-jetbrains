@@ -181,4 +181,11 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
     interface EndpointNameDeterminer {
         fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>>
     }
+
+    class AggregateEndpointDetector(
+        project: Project,
+        endpointDetectors: List<EndpointDetector<*>>
+    ) : EndpointDetector<EndpointNameDeterminer>(project) {
+        override val detectorSet = endpointDetectors.flatMap { it.detectorSet }.toSet()
+    }
 }

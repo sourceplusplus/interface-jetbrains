@@ -41,7 +41,7 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
         })
 
         UserData.vertx(project, Vertx.vertx())
-        PythonLanguageMarker().setup(project)
+        PythonLanguageProvider().setup(project)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PyFile::class.java)
     }
 
