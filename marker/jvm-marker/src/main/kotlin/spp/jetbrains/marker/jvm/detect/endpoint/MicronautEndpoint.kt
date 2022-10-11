@@ -47,7 +47,8 @@ class MicronautEndpoint : JVMEndpointNameDeterminer {
             val annotation = uMethod.annotations.find {
                 it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
             }.toUElementOfType<UAnnotation>()
-            if (annotation != null) {
+            if (annotation?.qualifiedName != null) {
+                val endpointType = annotation.qualifiedName!!.substringAfterLast(".").uppercase()
                 val endpointValue = annotation.attributeValues.find { it.name == null }
                 val value = if (endpointValue is UInjectionHost) {
                     endpointValue.evaluateToString()
@@ -68,8 +69,9 @@ class MicronautEndpoint : JVMEndpointNameDeterminer {
 
                 val endpoint = if (controller != null) "$controller$value" else value
                 if (endpoint?.isNotBlank() == true) {
-                    log.info("Detected Micronaut endpoint: $endpoint")
-                    promise.complete(Optional.of(DetectedEndpoint(endpoint, false)))
+                    val endpointName = "$endpointType:$endpoint"
+                    log.info("Detected Micronaut endpoint: $endpointName")
+                    promise.complete(Optional.of(DetectedEndpoint(endpointName, false)))
                 }
             }
 
