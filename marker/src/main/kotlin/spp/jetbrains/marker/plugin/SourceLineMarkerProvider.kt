@@ -35,10 +35,6 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
  */
 class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
-    override fun getName(): String? {
-        TODO("Not yet implemented")
-    }
-
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
         if (!SourceMarker.getInstance(element.project).enabled) {
             return null
@@ -93,4 +89,6 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             SourceMarker.getSourceFileMarker(it)?.removeInvalidSourceMarks()
         }
     }
+
+    override fun getName(): String = "Source++ line markers"
 }
