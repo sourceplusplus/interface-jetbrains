@@ -21,7 +21,6 @@ import com.intellij.xdebugger.impl.ui.DebuggerUIUtil
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import org.apache.commons.lang3.EnumUtils
-import spp.jetbrains.marker.ErrorVariableSimpleNode
 import spp.protocol.instrument.variable.LiveVariable
 import spp.protocol.instrument.variable.LiveVariableScope
 

@@ -12,6 +12,7 @@ intellij {
 }
 
 dependencies {
+    implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
     implementation("plus.sourceplus:protocol:$projectVersion")
 

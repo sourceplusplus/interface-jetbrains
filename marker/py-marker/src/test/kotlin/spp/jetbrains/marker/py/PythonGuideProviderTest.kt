@@ -38,7 +38,7 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
             }
         })
 
-        PythonMarker.setup()
+        PythonLanguageMarker.setup()
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PyFile::class.java)
     }
 

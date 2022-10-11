@@ -20,7 +20,7 @@ import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyClass
 import com.jetbrains.python.psi.PyExpression
 import com.jetbrains.python.psi.PyFunction
-import spp.jetbrains.marker.IArtifactTypeService
+import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 class PythonArtifactTypeService : IArtifactTypeService {

@@ -23,7 +23,7 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFunction
-import spp.jetbrains.marker.IArtifactTypeService
+import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 class JVMArtifactTypeService : IArtifactTypeService {

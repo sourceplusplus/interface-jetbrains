@@ -24,9 +24,9 @@ import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.command.LiveLocationContext
-import spp.jetbrains.marker.impl.ArtifactCreationService
-import spp.jetbrains.marker.impl.ArtifactNamingService
-import spp.jetbrains.marker.impl.ArtifactScopeService
+import spp.jetbrains.marker.service.ArtifactCreationService
+import spp.jetbrains.marker.service.ArtifactNamingService
+import spp.jetbrains.marker.service.ArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider

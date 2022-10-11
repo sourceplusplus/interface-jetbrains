@@ -41,7 +41,7 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
             }
         })
 
-        JVMMarker.setup()
+        JVMLanguageMarker.setup()
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)

@@ -372,6 +372,7 @@ object JVMMarkerUtils {
         }
     }
 
+    @Deprecated("Do real class instance check")
     fun getNameIdentifier(element: PsiElement?): PsiElement? {
         if (element?.javaClass?.simpleName?.equals("GrMethod") == true) {
             return Reflect.on(element).call("getNameIdentifierGroovy").get()

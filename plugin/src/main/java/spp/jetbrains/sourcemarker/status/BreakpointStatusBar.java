@@ -36,16 +36,17 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.ArtifactConditionService;
+import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
+import spp.jetbrains.marker.SourceMarkerKeys;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService;
 import spp.jetbrains.sourcemarker.settings.LiveBreakpointConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
+import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.instrument.LiveBreakpoint;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveSourceLocation;
@@ -76,7 +77,7 @@ import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
-public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstrumentListener, VisibleAreaListener {
+public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveInstrumentListener, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -488,7 +489,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
         UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveBreakpoint = (LiveBreakpoint) it.result();
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), liveBreakpoint.getId());
+                inlayMark.putUserData(SourceMarkerKeys.getINSTRUMENT_ID(), liveBreakpoint.getId());
                 LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveBreakpoint);
             } else {
                 it.cause().printStackTrace();
@@ -505,7 +506,7 @@ public class BreakpointStatusBar extends JPanel implements StatusBar, LiveInstru
             popup = null;
         }
         inlayMark.dispose(true);
-        List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkKeys.INSTANCE.getGROUPED_MARKS());
+        List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkerKeys.getGROUPED_MARKS());
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveBreakpoint != null) {

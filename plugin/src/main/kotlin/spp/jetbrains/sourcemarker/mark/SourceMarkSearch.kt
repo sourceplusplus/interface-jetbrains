@@ -20,6 +20,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
@@ -60,13 +61,13 @@ object SourceMarkSearch {
 
     fun findByInstrumentId(project: Project, instrumentId: String): SourceMark? {
         return SourceMarker.getInstance(project).getSourceMarks().firstOrNull {
-            it.getUserData(SourceMarkKeys.INSTRUMENT_ID) == instrumentId
+            it.getUserData(SourceMarkerKeys.INSTRUMENT_ID) == instrumentId
         }
     }
 
     fun findBySubscriptionId(project: Project, subscriptionId: String): SourceMark? {
         return SourceMarker.getInstance(project).getSourceMarks().firstOrNull {
-            it.getUserData(SourceMarkKeys.VIEW_SUBSCRIPTION_ID) == subscriptionId
+            it.getUserData(SourceMarkerKeys.VIEW_SUBSCRIPTION_ID) == subscriptionId
         }
     }
 }

@@ -24,8 +24,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
-import spp.jetbrains.marker.impl.ArtifactNamingService
-import spp.jetbrains.marker.impl.SourceGuideProvider
+import spp.jetbrains.marker.service.ArtifactNamingService
+import spp.jetbrains.marker.service.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener

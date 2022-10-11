@@ -23,7 +23,7 @@ import com.intellij.psi.util.parentOfTypes
 import com.siyeh.ig.psiutils.ControlFlowUtils
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.joor.Reflect
-import spp.jetbrains.marker.IArtifactScopeService
+import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 

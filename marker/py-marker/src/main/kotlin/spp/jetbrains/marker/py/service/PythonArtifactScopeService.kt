@@ -20,7 +20,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfTypes
 import com.jetbrains.python.psi.PyFunction
-import spp.jetbrains.marker.IArtifactScopeService
+import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 

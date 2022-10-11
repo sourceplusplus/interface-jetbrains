@@ -24,7 +24,7 @@ import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
@@ -56,7 +56,7 @@ class LiveViewManager(
 
             //todo: remove in favor of sending events to individual subscribers
             SourceMarkSearch.findBySubscriptionId(project, event.subscriptionId)
-                ?.getUserData(SourceMarkKeys.VIEW_EVENT_LISTENERS)?.forEach { it.accept(event) }
+                ?.getUserData(SourceMarkerKeys.VIEW_EVENT_LISTENERS)?.forEach { it.accept(event) }
 
             vertx.eventBus().publish(toLiveViewSubscriberAddress(event.subscriptionId), it.body())
         }

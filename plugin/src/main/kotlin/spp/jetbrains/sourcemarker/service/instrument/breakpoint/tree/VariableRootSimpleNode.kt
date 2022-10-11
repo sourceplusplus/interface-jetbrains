@@ -17,13 +17,8 @@
 package spp.jetbrains.sourcemarker.service.instrument.breakpoint.tree
 
 import com.intellij.ui.treeStructure.SimpleNode
-import com.intellij.util.containers.hash.LinkedHashMap
-import spp.jetbrains.marker.js.presentation.JavascriptVariableRootNode
-import spp.jetbrains.marker.jvm.presentation.JVMVariableNode
-import spp.jetbrains.marker.py.presentation.PythonVariableRootNode
+import spp.jetbrains.marker.service.ArtifactMarkService
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
-import spp.protocol.artifact.ArtifactLanguage
-import spp.protocol.instrument.variable.LiveVariableScope
 
 /**
  * todo: description.
@@ -48,50 +43,7 @@ class VariableRootSimpleNode : SimpleNode() {
             NO_CHILDREN
         } else {
             val vars = stackFrameManager.currentFrame!!.variables
-            when (stackFrameManager.stackTrace.language) {
-                ArtifactLanguage.NODEJS -> {
-                    return arrayOf(
-                        JavascriptVariableRootNode(
-                            vars.filter { it.scope == LiveVariableScope.LOCAL_VARIABLE },
-                            LiveVariableScope.LOCAL_VARIABLE
-                        ),
-                        JavascriptVariableRootNode(
-                            vars.filter { it.scope == LiveVariableScope.GLOBAL_VARIABLE },
-                            LiveVariableScope.GLOBAL_VARIABLE
-                        )
-                    )
-                }
-
-                ArtifactLanguage.PYTHON -> {
-                    return arrayOf(
-                        PythonVariableRootNode(
-                            vars.filter { it.scope == LiveVariableScope.GLOBAL_VARIABLE },
-                            LiveVariableScope.GLOBAL_VARIABLE
-                        ),
-                        PythonVariableRootNode(
-                            vars.filter { it.scope == LiveVariableScope.LOCAL_VARIABLE },
-                            LiveVariableScope.LOCAL_VARIABLE
-                        )
-                    )
-                }
-
-                else -> {
-                    val simpleNodeMap: MutableMap<String, JVMVariableNode> = LinkedHashMap()
-                    val nodeReferenceMap = mutableMapOf<String, Array<SimpleNode>>()
-                    vars.forEach {
-                        if (it.name.isNotEmpty()) {
-                            simpleNodeMap[it.name] = JVMVariableNode(it, nodeReferenceMap)
-                        }
-                    }
-                    simpleNodeMap.values.sortedWith { p0, p1 ->
-                        when {
-                            p0.variable.name == "this" -> -1
-                            p1.variable.name == "this" -> 1
-                            else -> 0
-                        }
-                    }.toTypedArray()
-                }
-            }
+            ArtifactMarkService.toPresentationNodes(stackFrameManager.stackTrace.language!!, vars)
         }
     }
 }
