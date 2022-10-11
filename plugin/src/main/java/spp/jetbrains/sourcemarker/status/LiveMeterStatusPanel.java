@@ -41,8 +41,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListener, LiveViewEventListener {

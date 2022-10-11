@@ -62,8 +62,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
 public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener {

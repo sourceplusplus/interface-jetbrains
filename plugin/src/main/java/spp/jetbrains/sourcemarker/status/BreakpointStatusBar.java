@@ -72,8 +72,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
-import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
