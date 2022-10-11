@@ -26,8 +26,8 @@ import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.marker.SourceMarkerKeys
+import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService

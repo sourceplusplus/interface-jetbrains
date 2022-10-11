@@ -61,9 +61,9 @@ import org.apache.commons.text.CaseUtils
 import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
+import spp.jetbrains.marker.LanguageMarker
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.LanguageMarker
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
