@@ -17,8 +17,9 @@
 package spp.jetbrains.marker
 
 import com.intellij.openapi.project.Project
+import spp.jetbrains.marker.source.info.EndpointDetector
 
-interface LanguageMarker {
-    fun canSetup(): Boolean
-    fun setup(project: Project)
+interface UltimateProvider {
+
+    fun getEndpointDetectors(project: Project): List<EndpointDetector<*>>
 }

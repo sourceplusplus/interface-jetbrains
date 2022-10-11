@@ -44,7 +44,7 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
         })
 
         UserData.vertx(project, Vertx.vertx())
-        JVMLanguageMarker().setup(project)
+        JVMLanguageProvider().setup(project)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
