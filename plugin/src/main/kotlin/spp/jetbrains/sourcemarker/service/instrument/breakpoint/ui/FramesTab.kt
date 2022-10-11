@@ -24,7 +24,7 @@ import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
-import spp.jetbrains.marker.impl.ArtifactNamingService
+import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.StackFrameManager
 import spp.protocol.artifact.exception.LiveStackTraceElement

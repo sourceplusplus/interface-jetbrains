@@ -17,7 +17,7 @@
 package spp.jetbrains.marker.py.service
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.IArtifactConditionService
+import spp.jetbrains.marker.service.define.IArtifactConditionService
 
 /**
  * todo: description.

@@ -43,7 +43,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
             }
         })
 
-        JVMMarker.setup()
+        JVMLanguageMarker().setup(project)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)

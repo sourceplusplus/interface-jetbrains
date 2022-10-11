@@ -25,7 +25,7 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import spp.jetbrains.marker.impl.ArtifactNamingService
+import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.protocol.artifact.exception.sourceAsLineNumber
 
 /**

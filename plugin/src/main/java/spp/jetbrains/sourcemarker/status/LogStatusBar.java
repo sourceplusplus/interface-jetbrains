@@ -34,15 +34,16 @@ import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
-import spp.jetbrains.marker.impl.ArtifactConditionService;
+import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys;
+import spp.jetbrains.marker.SourceMarkerKeys;
 import spp.jetbrains.sourcemarker.service.instrument.log.LogHitColumnInfo;
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser;
 import spp.jetbrains.sourcemarker.settings.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
+import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.artifact.log.Log;
 import spp.protocol.artifact.log.LogOrderType;
 import spp.protocol.artifact.log.LogResult;
@@ -82,7 +83,7 @@ import static spp.jetbrains.sourcemarker.PluginBundle.message;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 
-public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListener,
+public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener,
         LiveInstrumentListener, LiveViewEventListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
@@ -670,10 +671,10 @@ public class LogStatusBar extends JPanel implements StatusBar, VisibleAreaListen
         UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
-                inlayMark.putUserData(SourceMarkKeys.INSTANCE.getINSTRUMENT_ID(), it.result().getId());
+                inlayMark.putUserData(SourceMarkerKeys.getINSTRUMENT_ID(), it.result().getId());
                 LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveLog);
 
-                inlayMark.getUserData(SourceMarkKeys.INSTANCE.getLOGGER_DETECTOR())
+                inlayMark.getUserData(SourceMarkerKeys.INSTANCE.getLOGGER_DETECTOR())
                         .addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
             } else {
                 it.cause().printStackTrace();

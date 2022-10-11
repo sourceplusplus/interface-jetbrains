@@ -16,14 +16,34 @@
  */
 package spp.jetbrains.marker.py.service
 
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.jetbrains.python.psi.PyClass
+import com.jetbrains.python.psi.PyDecorator
 import com.jetbrains.python.psi.PyExpression
 import com.jetbrains.python.psi.PyFunction
-import spp.jetbrains.marker.IArtifactTypeService
+import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
+import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 class PythonArtifactTypeService : IArtifactTypeService {
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
+        if (element is PyDecorator && getLineNumber(element) == line) {
+            return element.target
+        }
+        return null
+    }
+
+    override fun isComment(element: PsiElement): Boolean {
+        val comment = element is PsiComment
+        if (comment) return true
+
+        return if (element is LeafPsiElement) {
+            isComment(element.parent)
+        } else false
+    }
 
     override fun getType(element: PsiElement): ArtifactType? {
         return when (element) {

@@ -18,9 +18,9 @@ package spp.jetbrains.marker.js.service
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
-import spp.jetbrains.marker.IArtifactCreationService
+import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.impl.ArtifactNamingService
+import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey

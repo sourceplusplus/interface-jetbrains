@@ -39,7 +39,7 @@ import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.jvm.JVMMarker
+import spp.jetbrains.marker.jvm.JVMLanguageMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import java.io.File
 
@@ -146,7 +146,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            JVMMarker.setup()
+            JVMLanguageMarker().setup(project)
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
             val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
@@ -182,7 +182,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes.size)
             assertEquals(3, uFile.classes[0].methods.size)
 
-            JVMMarker.setup()
+            JVMLanguageMarker().setup(project)
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
             val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
@@ -218,7 +218,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            JVMMarker.setup()
+            JVMLanguageMarker().setup(project)
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
             val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)

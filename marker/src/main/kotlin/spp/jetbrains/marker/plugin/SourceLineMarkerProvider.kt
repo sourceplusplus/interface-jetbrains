@@ -23,6 +23,7 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment.CENTER
 import com.intellij.psi.PsiElement
 import com.intellij.util.Function
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.service.ArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 
@@ -32,9 +33,7 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
-
-    abstract fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>?
+class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
         if (!SourceMarker.getInstance(element.project).enabled) {
@@ -42,7 +41,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         }
 
         val parent = element.parent
-        val el = getLineMarkerInfo(parent, element)
+        val el = ArtifactMarkService.getLineMarkerInfo(parent, element)
         if (el == null) {
             //expression gutter marks
             //todo: only works for manually created expression gutter marks atm
@@ -59,7 +58,7 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                     }
                 }
                 return LineMarkerInfo(
-                    getFirstLeaf(element),
+                    ArtifactMarkService.getFirstLeaf(element),
                     element.textRange,
                     gutterMark.configuration.icon,
                     gutterMark.configuration.tooltipText.let { tooltipText ->
@@ -91,11 +90,5 @@ abstract class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         }
     }
 
-    fun getFirstLeaf(element: PsiElement): PsiElement {
-        var e = element
-        while (e.children.isNotEmpty()) {
-            e = e.firstChild
-        }
-        return e
-    }
+    override fun getName(): String = "Source++ line markers"
 }

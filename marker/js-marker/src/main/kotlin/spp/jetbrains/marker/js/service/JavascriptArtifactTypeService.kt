@@ -20,7 +20,7 @@ import com.intellij.lang.javascript.psi.JSExpression
 import com.intellij.lang.javascript.psi.JSFunction
 import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.IArtifactTypeService
+import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 /**
@@ -30,6 +30,13 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptArtifactTypeService : IArtifactTypeService {
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
+        return null //todo: implement
+    }
+
+    override fun isComment(element: PsiElement): Boolean = false
+
     override fun getType(element: PsiElement): ArtifactType? {
         return when (element) {
             is JSClass -> ArtifactType.CLASS

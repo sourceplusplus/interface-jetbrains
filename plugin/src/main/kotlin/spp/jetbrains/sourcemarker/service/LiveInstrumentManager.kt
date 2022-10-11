@@ -26,8 +26,8 @@ import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.plugin.LiveStatusManager
-import spp.jetbrains.sourcemarker.mark.SourceMarkKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
@@ -95,8 +95,8 @@ class LiveInstrumentManager(
             if (fileMarker != null) {
                 val smId = event.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkKeys.INSTRUMENT_ID, event.id)
-                inlayMark.getUserData(SourceMarkKeys.STATUS_BAR)!!.setLiveInstrument(event)
+                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.id)
+                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event)
             } else {
                 LiveStatusManager.getInstance(project).addActiveLiveInstrument(event)
             }
@@ -109,8 +109,8 @@ class LiveInstrumentManager(
             if (fileMarker != null) {
                 val smId = event.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkKeys.INSTRUMENT_ID, event.id)
-                inlayMark.getUserData(SourceMarkKeys.STATUS_BAR)!!.setLiveInstrument(event)
+                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.id)
+                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event)
             }
         }
     }
@@ -119,7 +119,7 @@ class LiveInstrumentManager(
         ApplicationManager.getApplication().invokeLater {
             val inlayMark = SourceMarkSearch.findByInstrumentId(project, event.liveInstrument.id!!)
             if (inlayMark != null) {
-                val eventListeners = inlayMark.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)
+                val eventListeners = inlayMark.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
                     eventListeners.forEach { it.onInstrumentRemovedEvent(event) }
                 }
@@ -137,7 +137,7 @@ class LiveInstrumentManager(
             BreakpointHitWindowService.getInstance(project).addBreakpointHit(event)
 
             SourceMarkSearch.findByInstrumentId(project, event.breakpointId)
-                ?.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onBreakpointHitEvent(event) }
+                ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onBreakpointHitEvent(event) }
         }
     }
 
@@ -148,6 +148,6 @@ class LiveInstrumentManager(
         }
 
         SourceMarkSearch.findByInstrumentId(project, event.logId)
-            ?.getUserData(SourceMarkKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
+            ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
     }
 }
