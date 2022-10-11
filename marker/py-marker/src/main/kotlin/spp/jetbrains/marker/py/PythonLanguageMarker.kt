@@ -19,20 +19,20 @@ package spp.jetbrains.marker.py
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.psi.PyFile
 import spp.jetbrains.UserData
+import spp.jetbrains.marker.LanguageMarker
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.py.detect.PythonEndpointDetector
 import spp.jetbrains.marker.py.detect.PythonLoggerDetector
 import spp.jetbrains.marker.py.service.*
-import spp.jetbrains.marker.LanguageMarker
+import spp.jetbrains.marker.service.*
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.marker.SourceMarkerKeys
-import spp.jetbrains.marker.service.*
 
 /**
  * todo: description.
@@ -57,11 +57,11 @@ class PythonLanguageMarker : LanguageMarker {
         val endpointDetector = PythonEndpointDetector(project)
         val loggerDetector = PythonLoggerDetector(project)
 
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener {
+        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
                 val mark = it.sourceMark
-                if (!SourceMarkerUtils.getJvmLanguages().contains(it.sourceMark.language.id)) {
-                    return@addGlobalSourceMarkEventListener //non-jvm language
+                if (it.sourceMark.language.id != "Python") {
+                    return@SynchronousSourceMarkEventListener
                 }
 
                 //setup endpoint detector and attempt detection
@@ -81,7 +81,7 @@ class PythonLanguageMarker : LanguageMarker {
                     UserData.vertx(project).safeLaunch { loggerDetector.determineLoggerStatements(mark) }
                 }
             }
-        }
+        })
 
         ArtifactMarkService.addService(PythonArtifactMarkService(), "Python")
         ArtifactCreationService.addService(PythonArtifactCreationService(), "Python")

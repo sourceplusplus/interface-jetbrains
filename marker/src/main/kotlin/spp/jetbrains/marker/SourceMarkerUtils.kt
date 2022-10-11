@@ -17,11 +17,12 @@
 package spp.jetbrains.marker
 
 import com.intellij.openapi.editor.Document
-import com.intellij.psi.*
-import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.intellij.psi.javadoc.PsiDocComment
-import com.intellij.psi.javadoc.PsiDocToken
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.util.parentOfType
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 
 /**
@@ -56,11 +57,9 @@ object SourceMarkerUtils {
             }
 
             //check for annotation on same line
-            val annotation = element.parentOfType<PsiAnnotation>()
-            if (annotation != null && getLineNumber(annotation) == line) {
-                if (annotation.owner is PsiModifierList) {
-                    return (annotation.owner as PsiModifierList).parent
-                }
+            val annotationOwner = ArtifactTypeService.getAnnotationOwnerIfAnnotation(element, line)
+            if (annotationOwner != null) {
+                return annotationOwner
             }
 
             if (document.getLineNumber(element.textOffset) != line - 1) {
@@ -70,20 +69,11 @@ object SourceMarkerUtils {
 
         if (element != null && getLineNumber(element) != line) {
             return null
-        } else if (element != null && ignoreComments && isComment(element)) {
+        } else if (element != null && ignoreComments && ArtifactTypeService.isComment(element)) {
             return null
         }
 
         return element
-    }
-
-    private fun isComment(element: PsiElement): Boolean {
-        val comment = element is PsiDocToken || element is PsiComment || element is PsiDocComment
-        if (comment) return true
-
-        return if (element is LeafPsiElement) {
-            isComment(element.parent)
-        } else false
     }
 
     /**

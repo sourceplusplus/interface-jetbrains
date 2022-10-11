@@ -21,21 +21,22 @@ import com.intellij.psi.PsiJavaFile
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.UserData
+import spp.jetbrains.marker.LanguageMarker
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerKeys.ENDPOINT_DETECTOR
+import spp.jetbrains.marker.SourceMarkerKeys.LOGGER_DETECTOR
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.detect.JVMLoggerDetector
 import spp.jetbrains.marker.jvm.service.*
-import spp.jetbrains.marker.LanguageMarker
+import spp.jetbrains.marker.service.*
 import spp.jetbrains.marker.source.SourceFileMarker.Companion.SUPPORTED_FILE_TYPES
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.marker.SourceMarkerKeys.ENDPOINT_DETECTOR
-import spp.jetbrains.marker.SourceMarkerKeys.LOGGER_DETECTOR
-import spp.jetbrains.marker.service.*
 
 /**
  * todo: description.
@@ -45,21 +46,28 @@ import spp.jetbrains.marker.service.*
  */
 class JVMLanguageMarker : LanguageMarker {
 
-    override fun canSetup(): Boolean = true
+    override fun canSetup(): Boolean {
+        return try {
+            Class.forName("com.intellij.psi.PsiJavaFile")
+            true
+        } catch (ignore: ClassNotFoundException) {
+            false
+        }
+    }
 
     override fun setup(project: Project) {
         SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
-        SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
         SUPPORTED_FILE_TYPES.add(KtFile::class.java)
+        SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
 
         val endpointDetector = JVMEndpointDetector(project)
         val loggerDetector = JVMLoggerDetector(project)
 
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener {
+        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
                 val mark = it.sourceMark
                 if (!SourceMarkerUtils.getJvmLanguages().contains(it.sourceMark.language.id)) {
-                    return@addGlobalSourceMarkEventListener //non-jvm language
+                    return@SynchronousSourceMarkEventListener //non-jvm language
                 }
 
                 //setup endpoint detector and attempt detection
@@ -79,7 +87,7 @@ class JVMLanguageMarker : LanguageMarker {
                     UserData.vertx(project).safeLaunch { loggerDetector.determineLoggerStatements(mark) }
                 }
             }
-        }
+        })
 
         ArtifactMarkService.addService(JVMArtifactMarkService(), SourceMarkerUtils.getJvmLanguages())
         ArtifactCreationService.addService(JVMArtifactCreationService(), SourceMarkerUtils.getJvmLanguages())

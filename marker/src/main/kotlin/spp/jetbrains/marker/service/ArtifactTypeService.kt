@@ -23,6 +23,14 @@ import spp.protocol.artifact.ArtifactType
 
 object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>(), IArtifactTypeService {
 
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
+        return getService(element.language).getAnnotationOwnerIfAnnotation(element, line)
+    }
+
+    override fun isComment(element: PsiElement): Boolean {
+        return getService(element.language).isComment(element)
+    }
+
     override fun getType(element: PsiElement): ArtifactType? {
         return getService(element.language).getType(element)
     }

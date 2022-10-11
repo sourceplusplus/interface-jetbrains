@@ -19,20 +19,21 @@ package spp.jetbrains.marker.js
 import com.intellij.lang.javascript.psi.JSFile
 import com.intellij.openapi.project.Project
 import spp.jetbrains.UserData
+import spp.jetbrains.marker.LanguageMarker
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.js.detect.JavascriptEndpointDetector
 import spp.jetbrains.marker.js.detect.JavascriptLoggerDetector
 import spp.jetbrains.marker.js.service.*
-import spp.jetbrains.marker.LanguageMarker
+import spp.jetbrains.marker.service.*
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
+import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.marker.SourceMarkerKeys
-import spp.jetbrains.marker.service.*
 
 /**
  * Provides JavaScript support for the Marker API.
@@ -57,11 +58,11 @@ class JavascriptLanguageMarker : LanguageMarker {
         val endpointDetector = JavascriptEndpointDetector(project)
         val loggerDetector = JavascriptLoggerDetector(project)
 
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener {
+        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
                 val mark = it.sourceMark
-                if (!SourceMarkerUtils.getJvmLanguages().contains(it.sourceMark.language.id)) {
-                    return@addGlobalSourceMarkEventListener //non-jvm language
+                if (!SourceMarkerUtils.getJavaScriptLanguages().contains(it.sourceMark.language.id)) {
+                    return@SynchronousSourceMarkEventListener //non-javascript language
                 }
 
                 //setup endpoint detector and attempt detection
@@ -81,7 +82,7 @@ class JavascriptLanguageMarker : LanguageMarker {
                     UserData.vertx(project).safeLaunch { loggerDetector.determineLoggerStatements(mark) }
                 }
             }
-        }
+        })
 
         ArtifactMarkService.addService(JavascriptArtifactMarkService(), SourceMarkerUtils.getJavaScriptLanguages())
         ArtifactCreationService.addService(JavascriptArtifactCreationService(), SourceMarkerUtils.getJavaScriptLanguages())

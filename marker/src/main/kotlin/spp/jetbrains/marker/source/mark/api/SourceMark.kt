@@ -175,6 +175,9 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                             displayLineIndex--
                         }
                     }
+                    if (displayLineIndex < 0) {
+                        displayLineIndex = 0
+                    }
 
                     if (isVisible()) {
                         val inlay = provider.insertAfter(

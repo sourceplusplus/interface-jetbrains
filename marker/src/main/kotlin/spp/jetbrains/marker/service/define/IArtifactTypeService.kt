@@ -20,5 +20,8 @@ import com.intellij.psi.PsiElement
 import spp.protocol.artifact.ArtifactType
 
 interface IArtifactTypeService : ISourceMarkerService {
+
+    fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement?
+    fun isComment(element: PsiElement): Boolean
     fun getType(element: PsiElement): ArtifactType?
 }

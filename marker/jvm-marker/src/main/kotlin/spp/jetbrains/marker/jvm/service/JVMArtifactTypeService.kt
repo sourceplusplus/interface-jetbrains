@@ -16,17 +16,38 @@
  */
 package spp.jetbrains.marker.jvm.service
 
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiExpression
-import com.intellij.psi.PsiMethod
+import com.intellij.psi.*
+import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.javadoc.PsiDocComment
+import com.intellij.psi.javadoc.PsiDocToken
+import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFunction
+import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
 import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 class JVMArtifactTypeService : IArtifactTypeService {
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
+        val annotation = element.parentOfType<PsiAnnotation>()
+        if (annotation != null && getLineNumber(annotation) == line) {
+            if (annotation.owner is PsiModifierList) {
+                return (annotation.owner as PsiModifierList).parent
+            }
+        }
+        return null
+    }
+
+    override fun isComment(element: PsiElement): Boolean {
+        val comment = element is PsiDocToken || element is PsiComment || element is PsiDocComment
+        if (comment) return true
+
+        return if (element is LeafPsiElement) {
+            isComment(element.parent)
+        } else false
+    }
 
     override fun getType(element: PsiElement): ArtifactType? {
         return when (element) {
