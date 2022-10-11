@@ -33,7 +33,7 @@ import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.instrument.LiveSourceLocation
 
 /**
- * todo: description.
+ * Used to determine the naming/location of JVM artifacts.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

@@ -35,7 +35,7 @@ import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import java.util.*
 
 /**
- * todo: description.
+ * Used to create Java [SourceMark]s.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

@@ -23,7 +23,14 @@ import com.jetbrains.python.psi.PyRecursiveElementVisitor
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 
+/**
+ * Used to create Python [GuideMark]s for high-level code constructs.
+ *
+ * @since 0.4.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class PythonGuideProvider : AbstractSourceGuideProvider {
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {

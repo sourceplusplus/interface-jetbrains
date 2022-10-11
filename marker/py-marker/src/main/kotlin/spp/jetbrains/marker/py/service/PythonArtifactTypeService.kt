@@ -27,6 +27,12 @@ import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
 import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
+/**
+ * Used to determine the type of Python artifacts.
+ *
+ * @since 0.4.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class PythonArtifactTypeService : IArtifactTypeService {
 
     override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {

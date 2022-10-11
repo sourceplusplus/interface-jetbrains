@@ -26,7 +26,7 @@ import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
- * todo: description.
+ * Used to determine the scope of JavaScript artifacts.
  *
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

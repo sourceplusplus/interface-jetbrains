@@ -23,7 +23,13 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 
+/**
+ * Used to create JVM [GuideMark]s for high-level code constructs.
+ *
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class JVMGuideProvider : AbstractSourceGuideProvider {
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {

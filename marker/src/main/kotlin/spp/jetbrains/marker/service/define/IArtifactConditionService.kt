@@ -20,7 +20,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 
 /**
- * todo: description.
+ * Used to parse/format instrument conditions.
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

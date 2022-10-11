@@ -25,11 +25,18 @@ import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyStatement
 import spp.jetbrains.marker.py.presentation.PythonVariableRootNode
 import spp.jetbrains.marker.service.define.IArtifactMarkService
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.instrument.variable.LiveVariable
 import spp.protocol.instrument.variable.LiveVariableScope
 
+/**
+ * Used to display Python [SourceMark]s & [LiveVariable]s.
+ *
+ * @since 0.4.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class PythonArtifactMarkService : IArtifactMarkService {
 
     override fun displayVirtualText(

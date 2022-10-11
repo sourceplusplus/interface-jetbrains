@@ -20,7 +20,7 @@ import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.service.define.IArtifactConditionService
 
 /**
- * todo: description.
+ * Used to parse/format Python instrument conditions.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

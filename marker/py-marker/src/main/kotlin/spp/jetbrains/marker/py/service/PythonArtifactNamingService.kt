@@ -22,8 +22,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import com.jetbrains.python.psi.*
-import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -32,7 +32,7 @@ import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.LiveSourceLocation
 
 /**
- * todo: description.
+ * Used to determine the naming/location of Python artifacts.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

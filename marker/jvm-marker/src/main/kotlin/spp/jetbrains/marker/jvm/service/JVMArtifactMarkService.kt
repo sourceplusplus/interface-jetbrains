@@ -43,7 +43,7 @@ import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.instrument.variable.LiveVariable
 
 /**
- * todo: description.
+ * Used to display JVM [SourceMark]s & [LiveVariable]s.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

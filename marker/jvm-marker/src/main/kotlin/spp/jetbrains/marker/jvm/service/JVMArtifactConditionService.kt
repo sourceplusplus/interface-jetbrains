@@ -24,7 +24,7 @@ import spp.jetbrains.marker.service.define.IArtifactConditionService
 import spp.jetbrains.marker.service.define.IArtifactConditionService.ParseRange
 
 /**
- * todo: description.
+ * Used to parse/format JVM instrument conditions.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

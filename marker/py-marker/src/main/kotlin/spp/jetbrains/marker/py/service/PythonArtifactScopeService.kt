@@ -17,34 +17,26 @@
 package spp.jetbrains.marker.py.service
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfTypes
+import com.jetbrains.python.codeInsight.controlflow.ControlFlowCache
+import com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil
 import com.jetbrains.python.psi.PyFunction
-import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
- * todo: description.
+ * Used to determine the scope of Python artifacts.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class PythonArtifactScopeService : IArtifactScopeService {
 
-    //todo: shouldn't need to use reflection
-    private val getScopeOwnerMethod = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil")
-        .getMethod("getScopeOwner", PsiElement::class.java)
-    private val getScopeMethod = Class.forName("com.jetbrains.python.codeInsight.controlflow.ControlFlowCache")
-        .getMethod("getScope", Class.forName("com.jetbrains.python.codeInsight.controlflow.ScopeOwner"))
-
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
-        val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
-        val scope = getScopeOwnerMethod.invoke(null, position)
-        val els = getScopeMethod.invoke(null, scope)
-        val vars = Class.forName("com.jetbrains.python.codeInsight.dataflow.scope.Scope")
-            .getMethod("getNamedElements").invoke(els) as Collection<PsiNamedElement>
-        return vars.mapNotNull { it.name }
+        val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) ?: return emptyList()
+        val scope = ScopeUtil.getScopeOwner(position) ?: return emptyList()
+        return ControlFlowCache.getScope(scope).namedElements.mapNotNull { it.name }
     }
 
     override fun isInsideFunction(element: PsiElement): Boolean {
@@ -54,6 +46,4 @@ class PythonArtifactScopeService : IArtifactScopeService {
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {
         return false
     }
-
-    override fun isJVM(element: PsiElement): Boolean = false
 }

@@ -25,11 +25,18 @@ import com.intellij.psi.PsiElement
 import com.intellij.ui.treeStructure.SimpleNode
 import spp.jetbrains.marker.js.presentation.JavascriptVariableRootNode
 import spp.jetbrains.marker.service.define.IArtifactMarkService
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.instrument.variable.LiveVariable
 import spp.protocol.instrument.variable.LiveVariableScope
 
+/**
+ * Used to display JavaScript [SourceMark]s & [LiveVariable]s.
+ *
+ * @since 0.7.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 class JavascriptArtifactMarkService : IArtifactMarkService {
 
     override fun displayVirtualText(

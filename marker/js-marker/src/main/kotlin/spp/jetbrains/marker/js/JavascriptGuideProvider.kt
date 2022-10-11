@@ -28,7 +28,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 
 /**
- * Locates [GuideMark]s for the given [SourceFileMarker].
+ * Used to create JavaScript [GuideMark]s for high-level code constructs.
  *
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

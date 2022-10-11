@@ -36,7 +36,7 @@ import java.io.File
 import java.util.*
 
 /**
- * todo: description.
+ * Used to determine the naming/location of Javascript artifacts.
  *
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

@@ -24,7 +24,7 @@ import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 /**
- * todo: description.
+ * Used to determine the type of JavaScript artifacts.
  *
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
