@@ -21,10 +21,12 @@ import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiJavaFile
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import io.vertx.core.Vertx
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
+import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
@@ -41,7 +43,8 @@ class JVMGuideProviderTest : BasePlatformTestCase() {
             }
         })
 
-        JVMLanguageMarker.setup()
+        UserData.vertx(project, Vertx.vertx())
+        JVMLanguageMarker().setup(project)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)

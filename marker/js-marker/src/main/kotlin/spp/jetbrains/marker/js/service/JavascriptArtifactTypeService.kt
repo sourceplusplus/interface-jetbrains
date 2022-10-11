@@ -30,6 +30,15 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptArtifactTypeService : IArtifactTypeService {
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
+        TODO("Not yet implemented")
+    }
+
+    override fun isComment(element: PsiElement): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun getType(element: PsiElement): ArtifactType? {
         return when (element) {
             is JSClass -> ArtifactType.CLASS

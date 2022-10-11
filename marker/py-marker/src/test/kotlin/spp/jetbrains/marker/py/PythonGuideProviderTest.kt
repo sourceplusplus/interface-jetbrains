@@ -21,8 +21,10 @@ import com.intellij.openapi.util.Computable
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyFile
+import io.vertx.core.Vertx
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
@@ -38,7 +40,8 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
             }
         })
 
-        PythonLanguageMarker.setup()
+        UserData.vertx(project, Vertx.vertx())
+        PythonLanguageMarker().setup(project)
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PyFile::class.java)
     }
 

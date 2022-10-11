@@ -146,7 +146,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            JVMLanguageMarker.setup()
+            JVMLanguageMarker().setup(project)
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
             val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
@@ -182,7 +182,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes.size)
             assertEquals(3, uFile.classes[0].methods.size)
 
-            JVMLanguageMarker.setup()
+            JVMLanguageMarker().setup(project)
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
             val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
@@ -218,7 +218,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             assertEquals(1, uFile.classes.size)
             assertEquals(1, uFile.classes[0].methods.size)
 
-            JVMLanguageMarker.setup()
+            JVMLanguageMarker().setup(project)
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
             val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
             assertNotNull(fileMarker)
