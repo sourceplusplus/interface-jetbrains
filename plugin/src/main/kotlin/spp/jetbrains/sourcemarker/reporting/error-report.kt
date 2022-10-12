@@ -38,9 +38,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
-import com.intellij.util.io.decodeBase64
 import org.eclipse.egit.github.core.Issue
-import org.eclipse.egit.github.core.Label
 import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
@@ -61,7 +59,7 @@ private object AnonymousFeedback {
 
     private val log = logger<AnonymousFeedback>()
     private const val gitRepoUser = "sourceplusplus"
-    private const val gitRepo = "interface-jetbrains"
+    private const val gitRepo = "sourceplusplus"
 
     /**
      * Makes a connection to GitHub. Checks if there is an issue that is a duplicate and based on this, creates either a
@@ -73,23 +71,24 @@ private object AnonymousFeedback {
      */
     fun sendFeedback(environmentDetails: MutableMap<String, String>): SubmittedReportInfo {
         try {
-            val client = GitHubClient()
-                .setOAuth2Token(String("OTcwM2I4Mjg5N2IyMmExNWM5YWNlNTU2Mjc1M2Y2MTlmMGZhMmY4Yg==".decodeBase64()))
+            val client = GitHubClient("github.sourceplus.plus")
             val repoID = RepositoryId(gitRepoUser, gitRepo)
             val issueService = IssueService(client)
-            var newGibHubIssue = createNewGibHubIssue(environmentDetails)
-            val duplicate = findFirstDuplicate(newGibHubIssue.title, issueService, repoID)
+            var newGitHubIssue = createNewGibHubIssue(environmentDetails)
+            val duplicate = findFirstDuplicate(newGitHubIssue.title, issueService, repoID)
             var isNewIssue = true
             if (duplicate != null) {
                 issueService.createComment(repoID, duplicate.number, generateGitHubIssueBody(environmentDetails, false))
-                newGibHubIssue = duplicate
+                newGitHubIssue = duplicate
                 isNewIssue = false
-            } else newGibHubIssue = issueService.createIssue(repoID, newGibHubIssue)
+            } else {
+                newGitHubIssue = issueService.createIssue(repoID, newGitHubIssue)
+            }
             return SubmittedReportInfo(
-                newGibHubIssue.htmlUrl, PluginBundle.message(
+                newGitHubIssue.htmlUrl, PluginBundle.message(
                     if (isNewIssue) "git.issue.text" else "git.issue.duplicate.text",
-                    newGibHubIssue.htmlUrl,
-                    newGibHubIssue.number.toLong()
+                    newGitHubIssue.htmlUrl,
+                    newGitHubIssue.number.toLong()
                 ),
                 if (isNewIssue) SubmissionStatus.NEW_ISSUE else SubmissionStatus.DUPLICATE
             )
@@ -114,7 +113,6 @@ private object AnonymousFeedback {
         title = PluginBundle.message("git.issue.title", details.remove("error.hash").orEmpty(), errorMessage)
         details["title"] = title
         body = generateGitHubIssueBody(details, true)
-        labels = listOf(Label().apply { name = "generated-bug" }) //todo: figure out why labels aren't working
     }
 
     private fun generateGitHubIssueBody(details: MutableMap<String, String>, includeStacktrace: Boolean) =
