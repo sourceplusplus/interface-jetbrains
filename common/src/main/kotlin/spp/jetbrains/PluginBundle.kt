@@ -17,6 +17,7 @@
 package spp.jetbrains
 
 import com.intellij.AbstractBundle
+import com.intellij.BundleBase
 import com.intellij.ide.plugins.PluginManager
 import com.intellij.openapi.extensions.PluginId
 import org.jetbrains.annotations.NonNls
@@ -27,7 +28,7 @@ import java.util.*
 private const val BUNDLE = "messages.PluginBundle"
 
 /**
- * todo: description.
+ * Provides access to the plugin's localized messages.
  *
  * @since 0.2.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -43,18 +44,8 @@ object PluginBundle : AbstractBundle(BUNDLE) {
         }
     }
 
-    //todo: shouldn't need to manually load bundle.
-    val LOCALE_BUNDLE: ResourceBundle by lazy {
-        ResourceBundle.getBundle(BUNDLE, LOCALE, PluginBundle::class.java.classLoader)
-    }
-
-    @Suppress("SpreadOperator")
     @JvmStatic
     fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String {
-        return try {
-            LOCALE_BUNDLE.getString(key) ?: getMessage(key, *params)
-        } catch (ignore: MissingResourceException) {
-            key // no translation found
-        }
+        return BundleBase.messageOrDefault(resourceBundle, key, key, *params)
     }
 }
