@@ -28,7 +28,7 @@ import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.protocol.SourceServices.Subscribe.toLiveViewSubscriberAddress
+import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveViewEvent
 
 class LiveViewManager(

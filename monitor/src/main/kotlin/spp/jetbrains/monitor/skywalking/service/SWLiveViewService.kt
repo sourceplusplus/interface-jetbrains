@@ -32,10 +32,10 @@ import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
-import spp.protocol.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
+import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
 import java.time.ZoneOffset

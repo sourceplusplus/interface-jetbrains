@@ -43,12 +43,12 @@ import spp.jetbrains.sourcemarker.settings.isSsl
 import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
-import spp.protocol.SourceServices.LIVE_INSTRUMENT
-import spp.protocol.SourceServices.LIVE_MANAGEMENT_SERVICE
-import spp.protocol.SourceServices.LIVE_VIEW
-import spp.protocol.extend.TCPServiceFrameParser
 import spp.protocol.platform.PlatformAddress
 import spp.protocol.platform.status.InstanceConnection
+import spp.protocol.service.SourceServices.LIVE_INSTRUMENT
+import spp.protocol.service.SourceServices.LIVE_MANAGEMENT_SERVICE
+import spp.protocol.service.SourceServices.LIVE_VIEW
+import spp.protocol.service.extend.TCPServiceFrameParser
 import java.util.*
 
 /**

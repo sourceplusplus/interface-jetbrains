@@ -83,10 +83,10 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatusService
-import spp.protocol.SourceServices
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveManagementService
 import spp.protocol.service.LiveViewService
+import spp.protocol.service.SourceServices
 import java.io.File
 import java.net.ConnectException
 import java.util.*
