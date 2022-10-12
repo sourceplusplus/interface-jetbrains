@@ -105,12 +105,15 @@ class LiveInstrumentManager(
 
     override fun onBreakpointAddedEvent(event: LiveBreakpoint) {
         ApplicationManager.getApplication().invokeLater {
+            log.debug("Breakpoint added: $event")
             val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.location.source)
             if (fileMarker != null) {
                 val smId = event.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
                 inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.id)
                 inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event)
+            } else {
+                log.debug("No file marker found for ${event.location.source}")
             }
         }
     }
