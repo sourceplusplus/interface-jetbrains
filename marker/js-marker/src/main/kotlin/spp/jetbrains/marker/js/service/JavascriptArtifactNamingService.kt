@@ -115,10 +115,10 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
             Base64.getEncoder().encodeToString(element.toString().toByteArray())
         }
 
-        val parentElement = element.parentOfType<JSNamedElement>()
+        val parentElement = element.parentOfType<JSFunction>()
         return if (parentElement != null) {
             ArtifactQualifiedName(
-                "${getFullyQualifiedName(parentElement).identifier}.${name}",
+                "${getFullyQualifiedName(parentElement).identifier}#${name}",
                 type = type,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
