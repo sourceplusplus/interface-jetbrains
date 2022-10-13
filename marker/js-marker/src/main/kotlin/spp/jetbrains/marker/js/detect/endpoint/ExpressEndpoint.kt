@@ -89,7 +89,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
                         DetectedEndpoint(
                             basePath + endpointName,
                             false,
-                            type = endpointType.toUpperCase()
+                            type = endpointType.uppercase()
                         )
                     )
                 )
