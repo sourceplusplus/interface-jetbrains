@@ -73,8 +73,8 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         }
 
         if (shorten) {
-            if (location.length > 75 ) {
-                location = ".../" + location.substringAfterLast("/")
+            if (location.length > 75) {
+                location = location.substringAfterLast("/")
             }
         }
         return location
