@@ -44,8 +44,12 @@ object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingServic
         return getService(sourceMark.language).getLiveSourceLocation(sourceMark, lineNumber, serviceName)
     }
 
-    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
-        return getService(language).getLocation(language, artifactQualifiedName)
+    override fun getLocation(
+        language: Language,
+        artifactQualifiedName: ArtifactQualifiedName,
+        shorten: Boolean
+    ): String {
+        return getService(language).getLocation(language, artifactQualifiedName, shorten)
     }
 
     override fun getVariableName(element: PsiElement): String? {

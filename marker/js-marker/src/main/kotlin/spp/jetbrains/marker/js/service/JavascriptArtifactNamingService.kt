@@ -24,15 +24,14 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.parentOfType
-import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.LiveSourceLocation
-import java.io.File
 import java.util.*
 
 /**
@@ -61,12 +60,24 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
-        return if (artifactQualifiedName.identifier.contains("(")) {
+    override fun getLocation(
+        language: Language,
+        artifactQualifiedName: ArtifactQualifiedName,
+        shorten: Boolean
+    ): String {
+        // JS identifiers use virtualFile.path, which is always /-separated
+        var location =  if (artifactQualifiedName.identifier.contains("(")) {
             artifactQualifiedName.identifier
         } else {
-            artifactQualifiedName.identifier.substringAfterLast(File.separatorChar).substringBefore("#")
+            artifactQualifiedName.identifier.substringAfterLast("/").substringBefore("#")
         }
+
+        if (shorten) {
+            if (location.length > 75 ) {
+                location = ".../" + location.substringAfterLast("/")
+            }
+        }
+        return location
     }
 
     override fun getVariableName(element: PsiElement): String? {
