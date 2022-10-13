@@ -111,7 +111,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
         val initializer = routerVariable.initializer as JSCallExpression
 
         val initializerMethod = initializer.firstChild
-        if (initializerMethod.children[2].text != "Router") { // TODO: Is this the only thing we want out of express?
+        if (initializerMethod.children.getOrNull(2)?.text != "Router") { // TODO: Is this the only thing we want out of express?
             return null
         }
 
