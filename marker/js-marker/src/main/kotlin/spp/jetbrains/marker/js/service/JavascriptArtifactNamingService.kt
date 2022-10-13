@@ -66,7 +66,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         shorten: Boolean
     ): String {
         // JS identifiers use virtualFile.path, which is always /-separated
-        var location =  if (artifactQualifiedName.identifier.contains("(")) {
+        var location = if (artifactQualifiedName.identifier.contains("(")) {
             artifactQualifiedName.identifier
         } else {
             artifactQualifiedName.identifier.substringAfterLast("/").substringBefore("#")
