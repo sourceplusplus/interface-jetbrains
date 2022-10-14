@@ -44,7 +44,7 @@ object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingServic
         return getService(sourceMark.language).getLiveSourceLocation(sourceMark, lineNumber, serviceName)
     }
 
-    override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName, ): String {
+    override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
         return getService(language).getDisplayLocation(language, artifactQualifiedName)
     }
 
