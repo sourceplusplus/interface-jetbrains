@@ -23,7 +23,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
-import com.intellij.psi.util.parentOfType
+import com.intellij.psi.util.findTopmostParentInFile
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -104,7 +104,9 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
             Base64.getEncoder().encodeToString(element.toString().toByteArray())
         }
 
-        val parentElement = element.parentOfType<JSFunction>()
+        val parentElement = element.findTopmostParentInFile {
+            it is JSClass || (it is JSFunction && it !is JSFunctionExpression)
+        }
         return if (parentElement != null) {
             ArtifactQualifiedName(
                 "${getFullyQualifiedName(parentElement).identifier}#${name}",
