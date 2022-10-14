@@ -28,6 +28,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMe
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.toUElement
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.presentation.JVMVariableNode
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.service.ArtifactCreationService
@@ -164,8 +165,7 @@ class JVMArtifactMarkService : IArtifactMarkService {
             }
         } else {
             if (statement.parent is PsiMethod) {
-                virtualText.spacingTillMethodText = statement.parent.prevSibling.text
-                    .replace("\n", "").count { it == ' ' }
+                virtualText.spacingTillMethodText = SourceMarkerUtils.getPrefixSpacingCount(statement.parent)
             }
 
             var startOffset = statement.textRange.startOffset

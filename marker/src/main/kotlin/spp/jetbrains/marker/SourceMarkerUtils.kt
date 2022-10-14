@@ -87,6 +87,12 @@ object SourceMarkerUtils {
         return document!!.getLineNumber(element.textRange.startOffset) + 1
     }
 
+    fun getPrefixSpacingCount(method: PsiElement): Int {
+        val document = method.containingFile.viewProvider.document!!
+        val lineStartOffset = document.getLineStartOffset(document.getLineNumber(method.textRange.startOffset))
+        return method.textRange.startOffset - lineStartOffset
+    }
+
     fun getJvmLanguages(): List<String> {
         return listOf("JAVA", "kotlin", "Groovy", "Scala")
     }

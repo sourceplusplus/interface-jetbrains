@@ -23,6 +23,7 @@ import com.intellij.ui.treeStructure.SimpleNode
 import com.jetbrains.python.psi.PyCallExpression
 import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyStatement
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.py.presentation.PythonVariableRootNode
 import spp.jetbrains.marker.service.define.IArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -65,8 +66,7 @@ class PythonArtifactMarkService : IArtifactMarkService {
             }
         } else {
             if (statement.parent is PyFunction) {
-                virtualText.spacingTillMethodText = statement.parent.prevSibling.text
-                    .replace("\n", "").count { it == ' ' }
+                virtualText.spacingTillMethodText = SourceMarkerUtils.getPrefixSpacingCount(statement.parent)
             }
 
             var startOffset = statement.textRange.startOffset

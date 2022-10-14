@@ -23,6 +23,7 @@ import com.intellij.lang.javascript.psi.JSFunction
 import com.intellij.lang.javascript.psi.JSStatement
 import com.intellij.psi.PsiElement
 import com.intellij.ui.treeStructure.SimpleNode
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.js.presentation.JavascriptVariableRootNode
 import spp.jetbrains.marker.service.define.IArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -65,8 +66,7 @@ class JavascriptArtifactMarkService : IArtifactMarkService {
             }
         } else {
             if (statement.parent is JSFunction) {
-                virtualText.spacingTillMethodText = statement.parent.prevSibling.text
-                    .replace("\n", "").count { it == ' ' }
+                virtualText.spacingTillMethodText = SourceMarkerUtils.getPrefixSpacingCount(statement.parent)
             }
 
             var startOffset = statement.textRange.startOffset
