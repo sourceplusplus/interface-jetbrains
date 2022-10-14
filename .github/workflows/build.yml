@@ -36,10 +36,12 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     outputs:
       version: ${{ steps.properties.outputs.version }}
       release_version: ${{ steps.properties.outputs.release_version }}
       changelog: ${{ steps.properties.outputs.changelog }}
+
     steps:
 
       # Check out current repository
@@ -96,7 +98,7 @@ jobs:
 
       # Cache Plugin Verifier IDEs
       - name: Setup Plugin Verifier IDEs Cache
-        uses: actions/cache@v3.0.10
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.properties.outputs.pluginVerifierHomeDir }}/ides
           key: plugin-verifier-${{ hashFiles('plugin/build/listProductsReleases.txt') }}
