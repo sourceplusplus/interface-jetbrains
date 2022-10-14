@@ -60,22 +60,11 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(
-        language: Language,
-        artifactQualifiedName: ArtifactQualifiedName,
-        shorten: Boolean
-    ): String {
-        // JS identifiers use virtualFile.path, which is always /-separated
-        var location = if (artifactQualifiedName.identifier.contains("(")) {
-            artifactQualifiedName.identifier
-        } else {
-            artifactQualifiedName.identifier.substringAfterLast("/").substringBefore("#")
-        }
-
-        if (shorten) {
-            if (location.length > 75) {
-                location = location.substringAfterLast("/")
-            }
+    override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
+        var location = artifactQualifiedName.identifier.substringBefore("#")
+        if (location.length > 75) {
+            // JS identifiers use virtualFile.path, which is always /-separated
+            location = location.substringAfterLast("/")
         }
         return location
     }
