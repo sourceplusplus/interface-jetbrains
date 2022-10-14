@@ -98,24 +98,30 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
     }
 
     private fun getStatementOrExpressionQualifiedName(element: PsiElement, type: ArtifactType): ArtifactQualifiedName {
-        val name = if (element is PsiNamedElement) {
-            element.name
+        //todo: each element needs a unique name but encoding the literal text and appending the offset is not unique enough
+        // - will need to get a unique hash from PSI or generate a unique name and store it in the PSI
+        var expressionString = if (element is PsiNamedElement) {
+            element.name ?: ""
         } else {
-            Base64.getEncoder().encodeToString(element.toString().toByteArray())
+            element.text ?: ""
         }
+        element.textRange.startOffset.let {
+            expressionString = "$expressionString:$it"
+        }
+        expressionString = Base64.getEncoder().encodeToString(expressionString.toByteArray())
 
         val parentElement = element.findTopmostParentInFile {
             it is JSClass || (it is JSFunction && it !is JSFunctionExpression)
         }
         return if (parentElement != null) {
             ArtifactQualifiedName(
-                "${getFullyQualifiedName(parentElement).identifier}#${name}",
+                "${getFullyQualifiedName(parentElement).identifier}#${expressionString}",
                 type = type,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
         } else {
             ArtifactQualifiedName(
-                "${element.containingFile.virtualFile.path}#$name",
+                "${element.containingFile.virtualFile.path}#$expressionString",
                 type = type,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
