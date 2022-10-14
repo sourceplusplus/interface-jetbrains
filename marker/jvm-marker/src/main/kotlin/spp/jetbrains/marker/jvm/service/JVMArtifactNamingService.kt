@@ -21,9 +21,9 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.ClassUtil
-import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
+import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactNameUtils
@@ -57,13 +57,13 @@ class JVMArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
+    override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
         var fullyQualified = artifactQualifiedName.identifier
         if (fullyQualified.contains("#")) {
             fullyQualified = fullyQualified.substring(0, fullyQualified.indexOf("#"))
         }
         val className = ArtifactNameUtils.getClassName(fullyQualified)!!
-        return if (fullyQualified.contains("(")) {
+        var location = if (fullyQualified.contains("(")) {
             val shortFuncName = ArtifactNameUtils.getShortFunctionSignature(
                 ArtifactNameUtils.removePackageNames(fullyQualified)!!
             )
@@ -71,6 +71,17 @@ class JVMArtifactNamingService : IArtifactNamingService {
         } else {
             className
         }
+
+        //remove method params if location is too long
+        if (location.length > 75 && location.contains("(") && !location.contains("()")) {
+            location = location.substring(0, location.indexOf("(")) + "(...)"
+        }
+
+        //remove class name if location is still too long
+        if (location.length > 75 && location.contains(".")) {
+            location = location.substring(location.indexOf(".") + 1)
+        }
+        return location
     }
 
     override fun getVariableName(element: PsiElement): String? {

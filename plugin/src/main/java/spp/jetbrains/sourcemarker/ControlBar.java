@@ -211,19 +211,10 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
         label1 = new JLabel();
-        String location = ArtifactNamingService.INSTANCE.getLocation(
+        String location = ArtifactNamingService.INSTANCE.getDisplayLocation(
                 inlayMark.getLanguage(),
                 inlayMark.getArtifactQualifiedName()
         );
-
-        //remove method params if location is too long
-        if (location.length() > 75 && !location.contains("()")) {
-            location = location.substring(0, location.indexOf("(")) + "(...)";
-        }
-        //remove class name if location is still too long
-        if (location.length() > 75 && location.contains(".")) {
-            location = location.substring(location.indexOf(".") + 1);
-        }
 
         location = message("location") + ": " + location;
         if (inlayMark.getArtifactQualifiedName().getType().showLineNumber()) {

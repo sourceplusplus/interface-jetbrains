@@ -40,7 +40,7 @@ interface IArtifactNamingService : ISourceMarkerService {
         serviceName: String?
     ): LiveSourceLocation?
 
-    fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String
+    fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String
     fun getVariableName(element: PsiElement): String?
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
     fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>
