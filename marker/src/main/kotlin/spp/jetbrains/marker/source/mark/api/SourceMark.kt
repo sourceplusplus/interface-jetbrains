@@ -255,10 +255,8 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         removeMarkFromUserData()
 
         if (this is InlayMark) {
-            ApplicationManager.getApplication().invokeAndWait {
-                configuration.inlayRef?.get()?.dispose()
-                configuration.inlayRef = null
-            }
+            configuration.inlayRef?.get()?.let { Disposer.dispose(it) }
+            configuration.inlayRef = null
         }
         closePopup()
 
