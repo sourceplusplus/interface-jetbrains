@@ -48,7 +48,7 @@ class PythonArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
+    override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
         return artifactQualifiedName.identifier
     }
 

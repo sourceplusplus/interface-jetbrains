@@ -19,6 +19,7 @@ package spp.jetbrains.marker.js.detect.endpoint
 import com.intellij.lang.javascript.psi.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.util.Computable
@@ -38,6 +39,9 @@ import java.util.*
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
+
+    private val log = logger<ExpressEndpoint>()
+
     override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
         if (!guideMark.isExpressionMark) {
             return Future.succeededFuture(Optional.empty())
@@ -84,12 +88,13 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
                     return@runReadAction
                 }
 
+                log.info("Detected Express endpoint: $basePath$endpointName")
                 promise.complete(
                     Optional.of(
                         DetectedEndpoint(
                             basePath + endpointName,
                             false,
-                            type = endpointType.toUpperCase()
+                            type = endpointType.uppercase()
                         )
                     )
                 )
@@ -111,7 +116,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
         val initializer = routerVariable.initializer as JSCallExpression
 
         val initializerMethod = initializer.firstChild
-        if (initializerMethod.children[2].text != "Router") { // TODO: Is this the only thing we want out of express?
+        if (initializerMethod.children.getOrNull(2)?.text != "Router") { // TODO: Is this the only thing we want out of express?
             return null
         }
 

@@ -23,16 +23,15 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
-import com.intellij.psi.util.parentOfType
-import spp.jetbrains.marker.service.define.IArtifactNamingService
+import com.intellij.psi.util.findTopmostParentInFile
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.LiveSourceLocation
-import java.io.File
 import java.util.*
 
 /**
@@ -61,12 +60,13 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
-    override fun getLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
-        return if (artifactQualifiedName.identifier.contains("(")) {
-            artifactQualifiedName.identifier
-        } else {
-            artifactQualifiedName.identifier.substringAfterLast(File.separatorChar).substringBefore("#")
+    override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
+        var location = artifactQualifiedName.identifier.substringBefore("#")
+        if (location.length > 75) {
+            // JS identifiers use virtualFile.path, which is always /-separated
+            location = location.substringAfterLast("/")
         }
+        return location
     }
 
     override fun getVariableName(element: PsiElement): String? {
@@ -87,7 +87,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
 
             is JSFunctionExpression -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
             is JSFunction -> ArtifactQualifiedName(
-                element.qualifiedName!!,
+                element.containingFile.virtualFile.path + ":" + element.qualifiedName!! + "()",
                 type = ArtifactType.METHOD,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
@@ -104,10 +104,12 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
             Base64.getEncoder().encodeToString(element.toString().toByteArray())
         }
 
-        val parentElement = element.parentOfType<JSNamedElement>()
+        val parentElement = element.findTopmostParentInFile {
+            it is JSClass || (it is JSFunction && it !is JSFunctionExpression)
+        }
         return if (parentElement != null) {
             ArtifactQualifiedName(
-                "${getFullyQualifiedName(parentElement).identifier}.${name}",
+                "${getFullyQualifiedName(parentElement).identifier}#${name}",
                 type = type,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
