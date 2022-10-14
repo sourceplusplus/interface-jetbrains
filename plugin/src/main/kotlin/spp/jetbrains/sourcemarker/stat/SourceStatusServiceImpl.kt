@@ -75,7 +75,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
     private suspend fun onStatusChanged(status: SourceStatus) = when (status) {
         ConnectionError -> {
-            SourceMarkerPlugin.getInstance(project).restartIfNecessary()
+            SourceMarkerPlugin.getInstance(project).disposePlugin()
 
             //start reconnection loop
             synchronized(reconnectionLock) {
@@ -88,7 +88,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
         }
 
         Disabled -> {
-            SourceMarkerPlugin.getInstance(project).restartIfNecessary()
+            SourceMarkerPlugin.getInstance(project).disposePlugin()
             stopReconnectionLoop()
         }
 

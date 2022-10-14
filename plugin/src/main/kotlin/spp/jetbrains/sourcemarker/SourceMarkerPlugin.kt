@@ -32,6 +32,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -122,11 +123,19 @@ class SourceMarkerPlugin(val project: Project) {
     private var connectionJob: Job? = null
     private var discovery: ServiceDiscovery? = null
     private var addedConfigListener = false
-    private var vertx: Vertx? = null
 
     suspend fun init(configInput: SourceMarkerConfig? = null) {
         log.info("Initializing SourceMarkerPlugin on project: $project")
-        restartIfNecessary()
+        disposePlugin()
+        Disposer.register(project) {
+            safeRunBlocking {
+                try {
+                    disposePlugin()
+                } catch (e: Throwable) {
+                    log.error("Error disposing plugin", e)
+                }
+            }
+        }
 
         val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
             log.info("Removed blocked thread checker")
@@ -135,7 +144,6 @@ class SourceMarkerPlugin(val project: Project) {
             VertxOptions()
         }
         val vertx = UserData.vertx(project, Vertx.vertx(options))
-        this.vertx = vertx
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig()
@@ -378,7 +386,8 @@ class SourceMarkerPlugin(val project: Project) {
         }
     }
 
-    suspend fun restartIfNecessary() {
+    suspend fun disposePlugin() {
+        log.info("Disposing Source++ plugin. Project: ${project.name}")
         if (SourceMarker.getInstance(project).enabled) {
             SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
             SourceMarker.getInstance(project).clearGlobalSourceMarkEventListeners()
@@ -391,7 +400,9 @@ class SourceMarkerPlugin(val project: Project) {
         discovery?.close()
         discovery = null
 
-        vertx?.close()?.await()
+        if (UserData.hasVertx(project)) {
+            UserData.vertx(project).close().await()
+        }
         UserData.clear(project)
     }
 

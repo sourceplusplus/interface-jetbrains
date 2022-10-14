@@ -42,6 +42,10 @@ object UserData {
         return vertx
     }
 
+    fun hasVertx(project: Project): Boolean {
+        return project.getUserData(VERTX) != null
+    }
+
     fun skywalkingMonitorService(project: Project): SkywalkingMonitorService {
         return project.getUserData(SkywalkingMonitorService.KEY)!!
     }
