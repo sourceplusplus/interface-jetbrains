@@ -74,7 +74,7 @@ class JVMLanguageProvider : LanguageProvider {
         SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
                 val mark = it.sourceMark
-                if (!SourceMarkerUtils.getJvmLanguages().contains(it.sourceMark.language.id)) {
+                if (!SourceMarkerUtils.isJvm(it.sourceMark.language)) {
                     return@SynchronousSourceMarkEventListener //non-jvm language
                 }
 

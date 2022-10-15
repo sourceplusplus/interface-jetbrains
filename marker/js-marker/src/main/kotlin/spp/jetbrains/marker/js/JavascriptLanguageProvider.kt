@@ -69,7 +69,7 @@ class JavascriptLanguageProvider : LanguageProvider {
         SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
             if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
                 val mark = it.sourceMark
-                if (!SourceMarkerUtils.getJavaScriptLanguages().contains(it.sourceMark.language.id)) {
+                if (!SourceMarkerUtils.isJavaScript(it.sourceMark.language)) {
                     return@SynchronousSourceMarkEventListener //non-javascript language
                 }
 

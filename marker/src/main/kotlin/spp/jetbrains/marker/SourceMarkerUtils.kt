@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker
 
+import com.intellij.lang.Language
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
@@ -99,5 +100,20 @@ object SourceMarkerUtils {
 
     fun getJavaScriptLanguages(): List<String> {
         return listOf("JavaScript", "ECMAScript 6")
+    }
+
+    @JvmStatic
+    fun isPython(language: Language): Boolean {
+        return language.id == "Python"
+    }
+
+    @JvmStatic
+    fun isJvm(language: Language): Boolean {
+        return getJvmLanguages().contains(language.id)
+    }
+
+    @JvmStatic
+    fun isJavaScript(language: Language): Boolean {
+        return getJavaScriptLanguages().contains(language.id)
     }
 }
