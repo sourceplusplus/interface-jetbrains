@@ -1,0 +1,6 @@
+<idea-plugin>
+    <!--
+    This empty dependency is included to ensure JSDebuggerEditorsProvider is resolvable.
+    Without it, JSDebuggerEditorsProvider is not resolvable in WebStorm.
+    -->
+</idea-plugin>
