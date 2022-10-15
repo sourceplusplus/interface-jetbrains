@@ -16,13 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.activities
 
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import spp.jetbrains.PluginBundle
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
@@ -38,27 +33,11 @@ class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
     companion object {
         @JvmField
         val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
-
-        @JvmField
-        val INTELLIJ_PRODUCT_CODES = setOf("IC", "IU")
-        val SUPPORTED_PRODUCT_CODES = PYCHARM_PRODUCT_CODES + INTELLIJ_PRODUCT_CODES
     }
 
     override fun runActivity(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode) {
             return //tests manually set up necessary components
-        } else if (!SUPPORTED_PRODUCT_CODES.contains(ApplicationInfo.getInstance().build.productCode)) {
-            val pluginName = PluginBundle.message("plugin_name")
-            Notifications.Bus.notify(
-                Notification(
-                    pluginName,
-                    "Unsupported product code",
-                    "Unsupported product code: ${ApplicationInfo.getInstance().build.productCode}",
-                    NotificationType.ERROR
-                ),
-                project
-            )
-            return
         }
 
         //setup plugin

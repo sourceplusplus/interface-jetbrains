@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.settings;
 
-import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
@@ -30,6 +29,7 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.marker.SourceMarkerUtils;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
@@ -40,8 +40,6 @@ import java.util.Objects;
 
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
-import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.INTELLIJ_PRODUCT_CODES;
-import static spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES;
 
 public class LiveMeterConfigurationPanel extends JPanel {
 
@@ -56,8 +54,7 @@ public class LiveMeterConfigurationPanel extends JPanel {
         );
 
         XDebuggerEditorsProvider editorsProvider;
-        String productCode = ApplicationInfo.getInstance().getBuild().getProductCode();
-        if (PYCHARM_PRODUCT_CODES.contains(productCode)) {
+        if (SourceMarkerUtils.isPython(inlayMark.getLanguage())) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
@@ -65,7 +62,7 @@ public class LiveMeterConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        } else if (INTELLIJ_PRODUCT_CODES.contains(productCode)) {
+        } else if (SourceMarkerUtils.isJvm(inlayMark.getLanguage())) {
             try {
                 editorsProvider = (XDebuggerEditorsProvider) Class.forName(
                         "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"
@@ -73,8 +70,16 @@ public class LiveMeterConfigurationPanel extends JPanel {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
+        } else if (SourceMarkerUtils.isJavaScript(inlayMark.getLanguage())) {
+            try {
+                editorsProvider = (XDebuggerEditorsProvider) Class.forName(
+                        "com.intellij.javascript.debugger.JSDebuggerEditorsProvider"
+                ).getDeclaredConstructor().newInstance();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         } else {
-            throw new UnsupportedOperationException("Unsupported product code: " + productCode);
+            throw new UnsupportedOperationException("Unsupported language: " + inlayMark.getLanguage());
         }
         comboBox = new XDebuggerExpressionComboBox(
                 psiFile.getProject(), editorsProvider, "LiveMeterCondition",
