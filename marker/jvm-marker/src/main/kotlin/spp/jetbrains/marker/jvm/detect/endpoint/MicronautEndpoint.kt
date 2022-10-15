@@ -49,7 +49,9 @@ class MicronautEndpoint : JVMEndpointNameDeterminer {
             }.toUElementOfType<UAnnotation>()
             if (annotation?.qualifiedName != null) {
                 val endpointType = annotation.qualifiedName!!.substringAfterLast(".").uppercase()
-                val endpointValue = annotation.attributeValues.find { it.name == null }
+                val endpointValue = annotation.attributeValues.find {
+                    it.name == null || it.name == "value"
+                }
                 val value = if (endpointValue is UInjectionHost) {
                     endpointValue.evaluateToString()
                 } else {
@@ -60,7 +62,9 @@ class MicronautEndpoint : JVMEndpointNameDeterminer {
                 val controllerAnnotation = uMethod.containingClass?.annotations?.find {
                     it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
                 }?.toUElementOfType<UAnnotation>()
-                val controllerValue = controllerAnnotation?.attributeValues?.find { it.name == null }
+                val controllerValue = controllerAnnotation?.attributeValues?.find {
+                    it.name == null || it.name == "value"
+                }
                 val controller = if (controllerValue is UInjectionHost) {
                     controllerValue.evaluateToString()
                 } else {
