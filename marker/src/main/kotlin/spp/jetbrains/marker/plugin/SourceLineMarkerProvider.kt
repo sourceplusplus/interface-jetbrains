@@ -40,41 +40,31 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             return null
         }
 
-        val parent = element.parent
-        val el = ArtifactMarkService.getLineMarkerInfo(parent, element)
-        if (el == null) {
-            //expression gutter marks
-            //todo: only works for manually created expression gutter marks atm
-            if (element.getUserData(SourceKey.GutterMark) != null) {
-                val gutterMark = element.getUserData(SourceKey.GutterMark)!!
-                if (!gutterMark.isVisible()) {
-                    return null
-                }
-
-                var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
-                if (gutterMark.configuration.activateOnMouseClick) {
-                    navigationHandler = GutterIconNavigationHandler { _, _ ->
-                        element.getUserData(SourceKey.GutterMark)!!.displayPopup()
-                    }
-                }
-                return LineMarkerInfo(
-                    ArtifactMarkService.getFirstLeaf(element),
-                    element.textRange,
-                    gutterMark.configuration.icon,
-                    gutterMark.configuration.tooltipText.let { tooltipText ->
-                        if (tooltipText != null) {
-                            Function { tooltipText.invoke() }
-                        } else {
-                            null
-                        }
-                    },
-                    navigationHandler,
-                    CENTER
-                )
-            }
+        val gutterMark = element.getUserData(SourceKey.GutterMark) ?: return null
+        if (!gutterMark.isVisible()) {
+            return null
         }
 
-        return el
+        var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
+        if (gutterMark.configuration.activateOnMouseClick) {
+            navigationHandler = GutterIconNavigationHandler { _, _ ->
+                element.getUserData(SourceKey.GutterMark)!!.displayPopup()
+            }
+        }
+        return LineMarkerInfo(
+            ArtifactMarkService.getFirstLeaf(element),
+            element.textRange,
+            gutterMark.configuration.icon,
+            gutterMark.configuration.tooltipText.let { tooltipText ->
+                if (tooltipText != null) {
+                    Function { tooltipText.invoke() }
+                } else {
+                    null
+                }
+            },
+            navigationHandler,
+            CENTER
+        )
     }
 
     override fun collectSlowLineMarkers(
