@@ -47,7 +47,7 @@ public class LiveMeterConfigurationPanel extends JPanel {
     private XExpression condition;
     private int expirationInMinutes = 15;
 
-    public LiveMeterConfigurationPanel(AutocompleteField autocompleteField, InlayMark inlayMark) {
+    public LiveMeterConfigurationPanel(AutocompleteField<?> autocompleteField, InlayMark inlayMark) {
         PsiFile psiFile = inlayMark.getSourceFileMarker().getPsiFile();
         XSourcePosition sourcePosition = XDebuggerUtil.getInstance().createPosition(
                 psiFile.getVirtualFile(), inlayMark.getLineNumber()
