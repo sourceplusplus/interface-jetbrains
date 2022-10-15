@@ -30,11 +30,6 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
  */
 class PluginSourceMarkerStartupActivity : SourceMarkerStartupActivity() {
 
-    companion object {
-        @JvmField
-        val PYCHARM_PRODUCT_CODES = setOf("PY", "PC", "PE")
-    }
-
     override fun runActivity(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode) {
             return //tests manually set up necessary components

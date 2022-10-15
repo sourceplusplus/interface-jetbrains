@@ -17,7 +17,6 @@
 package spp.jetbrains.sourcemarker.service.instrument.breakpoint.ui
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
@@ -25,7 +24,6 @@ import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointEventColumnInfo
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.protocol.instrument.event.LiveBreakpointHit
@@ -51,14 +49,7 @@ class EventsTab(val project: Project) : Disposable {
             BreakpointEventColumnInfo("Time"),
             BreakpointEventColumnInfo("Host Name"),
             BreakpointEventColumnInfo("Service"),
-            let {
-                val productCode = ApplicationInfo.getInstance().build.productCode
-                if (PluginSourceMarkerStartupActivity.PYCHARM_PRODUCT_CODES.contains(productCode)) {
-                    BreakpointEventColumnInfo("File Name")
-                } else {
-                    BreakpointEventColumnInfo("Class Name")
-                }
-            },
+            BreakpointEventColumnInfo("Class/File Name"),
             BreakpointEventColumnInfo("Method Name"),
             BreakpointEventColumnInfo("Line No"),
             BreakpointEventColumnInfo("Breakpoint Data")
