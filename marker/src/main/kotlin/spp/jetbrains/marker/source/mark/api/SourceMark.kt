@@ -118,8 +118,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     val valid: Boolean
         get() = try {
-            val psiElement = getPsiElement()
-            psiElement.isValid && artifactQualifiedName == ArtifactNamingService.getFullyQualifiedName(psiElement)
+            getPsiElement().isValid
         } catch (ignore: PsiInvalidElementAccessException) {
             false
         }
