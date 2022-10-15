@@ -248,26 +248,26 @@ public class LiveLogConfigurationPanel extends JPanel {
         //======== this ========
         setBorder(getPanelBorder());
         setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "[grow,fill]" +
-                        "[fill]" +
-                        "[100,fill]",
-                // rows
-                "[]" +
-                        "[]" +
-                        "[]"));
+            "hidemode 3",
+            // columns
+            "[grow,fill]" +
+            "[fill]" +
+            "[100,fill]",
+            // rows
+            "[]" +
+            "[]" +
+            "[]"));
 
         //======== panel4 ========
         {
             panel4.setBackground(null);
             panel4.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[100,grow,fill]",
-                    // rows
-                    "[]" +
-                            "[]"));
+                "hidemode 3",
+                // columns
+                "[100,grow,fill]",
+                // rows
+                "[]" +
+                "[]"));
 
             //---- lblCondition ----
             lblCondition.setText(message("condition"));
@@ -292,12 +292,12 @@ public class LiveLogConfigurationPanel extends JPanel {
         {
             panel6.setBackground(null);
             panel6.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[grow,fill]",
-                    // rows
-                    "[]" +
-                            "[grow]"));
+                "hidemode 3",
+                // columns
+                "[grow,fill]",
+                // rows
+                "[]" +
+                "[grow]"));
 
             //---- lblHint ----
             lblHint.setText(message("hit_limit"));
@@ -316,14 +316,14 @@ public class LiveLogConfigurationPanel extends JPanel {
         {
             panel3.setBackground(null);
             panel3.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[150,fill]" +
-                            "[fill]" +
-                            "[150,fill]",
-                    // rows
-                    "[]" +
-                            "[]"));
+                "hidemode 3",
+                // columns
+                "[150,fill]" +
+                "[fill]" +
+                "[150,fill]",
+                // rows
+                "[]" +
+                "[]"));
 
             //---- lblExpirationDate ----
             lblExpirationDate.setText(message("expiration_date"));
@@ -334,18 +334,18 @@ public class LiveLogConfigurationPanel extends JPanel {
             {
                 panel1.setBackground(null);
                 panel1.setLayout(new MigLayout(
-                        "hidemode 3",
-                        // columns
-                        "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]" +
-                                "[fill]",
-                        // rows
-                        "[]"));
+                    "hidemode 3",
+                    // columns
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]" +
+                    "[fill]",
+                    // rows
+                    "[]"));
 
                 //---- expiration15MinButton ----
                 expiration15MinButton.setText("15 " + message("minutes"));
@@ -403,12 +403,12 @@ public class LiveLogConfigurationPanel extends JPanel {
         {
             panel5.setBackground(null);
             panel5.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[fill]",
-                    // rows
-                    "[]" +
-                            "[grow]"));
+                "hidemode 3",
+                // columns
+                "[fill]",
+                // rows
+                "[]" +
+                "[grow]"));
 
             //---- label6 ----
             label6.setText(message("hit_throttle"));
@@ -419,13 +419,13 @@ public class LiveLogConfigurationPanel extends JPanel {
             {
                 panel2.setBackground(null);
                 panel2.setLayout(new MigLayout(
-                        "hidemode 3",
-                        // columns
-                        "0[fill]" +
-                                "[fill]" +
-                                "[fill]",
-                        // rows
-                        "[]"));
+                    "hidemode 3",
+                    // columns
+                    "0[fill]" +
+                    "[fill]" +
+                    "[fill]",
+                    // rows
+                    "[]"));
 
                 //---- rateLimitCountSpinner ----
                 rateLimitCountSpinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
@@ -437,10 +437,10 @@ public class LiveLogConfigurationPanel extends JPanel {
                 panel2.add(label7, "cell 1 0");
 
                 //---- rateLimitStepCombobox ----
-                rateLimitStepCombobox.setModel(new DefaultComboBoxModel<>(new String[]{
-                        message("second"),
-                        message("minute"),
-                        message("hour")
+                rateLimitStepCombobox.setModel(new DefaultComboBoxModel<>(new String[] {
+                    message("second"),
+                    message("minute"),
+                    message("hour")
                 }));
                 panel2.add(rateLimitStepCombobox, "cell 2 0");
             }
