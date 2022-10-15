@@ -169,7 +169,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
             // TODO: Handle multiple routes
         }
 
-        return routes[0]
+        return routes.getOrNull(0)
     }
 
     private fun isExpressApp(element: PsiElement): Boolean {
