@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.marker.service
 
-import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
 import com.intellij.psi.PsiElement
@@ -30,12 +29,8 @@ import spp.protocol.instrument.variable.LiveVariable
 
 object ArtifactMarkService : AbstractSourceMarkerService<IArtifactMarkService>(), IArtifactMarkService {
 
-    override fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>? {
-        return getService(element.language)?.getLineMarkerInfo(parent, element)
-    }
-
     override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
-        return getService(element.language)?.createInlayMarkIfNecessary(element)
+        return getService(element.language).createInlayMarkIfNecessary(element)
     }
 
     override fun displayVirtualText(
@@ -44,7 +39,7 @@ object ArtifactMarkService : AbstractSourceMarkerService<IArtifactMarkService>()
         sink: InlayHintsSink,
         representation: InlayPresentation
     ) {
-        getService(element.language)?.displayVirtualText(element, virtualText, sink, representation)
+        getService(element.language).displayVirtualText(element, virtualText, sink, representation)
     }
 
     override fun toPresentationNodes(language: ArtifactLanguage, vars: List<LiveVariable>): Array<SimpleNode> {

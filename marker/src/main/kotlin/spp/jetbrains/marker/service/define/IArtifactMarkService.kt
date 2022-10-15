@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.marker.service.define
 
-import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
 import com.intellij.psi.PsiElement
@@ -27,8 +26,6 @@ import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.instrument.variable.LiveVariable
 
 interface IArtifactMarkService : ISourceMarkerService {
-
-    fun getLineMarkerInfo(parent: PsiElement?, element: PsiElement): LineMarkerInfo<PsiElement>? = null
 
     fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? = null
 

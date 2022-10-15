@@ -16,28 +16,19 @@
  */
 package spp.jetbrains.marker.jvm.service
 
-import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
-import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
-import com.intellij.openapi.editor.markup.GutterIconRenderer
-import com.intellij.psi.*
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.PsiStatement
 import com.intellij.ui.treeStructure.SimpleNode
-import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
-import org.jetbrains.uast.UClass
-import org.jetbrains.uast.toUElement
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.presentation.JVMVariableNode
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
-import spp.jetbrains.marker.service.ArtifactCreationService
-import spp.jetbrains.marker.service.ArtifactMarkService
 import spp.jetbrains.marker.service.define.IArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
-import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.protocol.artifact.ArtifactLanguage
@@ -50,80 +41,6 @@ import spp.protocol.instrument.variable.LiveVariable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactMarkService : IArtifactMarkService {
-
-    override fun getLineMarkerInfo(
-        parent: PsiElement?,
-        element: PsiElement
-    ): LineMarkerInfo<PsiElement>? {
-        return when {
-            parent is PsiClass && element === parent.nameIdentifier -> getClassGutterMark(element)
-            parent is PsiMethod && element === parent.nameIdentifier -> getMethodGutterMark(element)
-            parent is GrMethod && element === parent.nameIdentifier -> getMethodGutterMark(element)
-            parent is KtFunction && element === parent.nameIdentifier -> getMethodGutterMark(element)
-            else -> null
-        }
-    }
-
-    private fun getClassGutterMark(element: PsiIdentifier): LineMarkerInfo<PsiElement>? {
-        val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
-        val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(element.parent.toUElement() as UClass)
-
-        //check by artifact name first due to user can erroneously name same class twice
-        var gutterMark = fileMarker.getSourceMark(artifactQualifiedName, SourceMark.Type.GUTTER) as ClassGutterMark?
-        if (gutterMark == null) {
-            gutterMark = JVMMarkerUtils.getOrCreateClassGutterMark(fileMarker, element) ?: return null
-        }
-        if (!gutterMark.isVisible()) {
-            return null
-        }
-
-        var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
-        if (gutterMark.configuration.activateOnMouseClick) {
-            navigationHandler = GutterIconNavigationHandler { _, _ ->
-                element.getUserData(SourceKey.GutterMark)!!.displayPopup()
-            }
-        }
-        return LineMarkerInfo(
-            ArtifactMarkService.getFirstLeaf(element),
-            element.textRange,
-            gutterMark.configuration.icon,
-            null,
-            navigationHandler,
-            GutterIconRenderer.Alignment.CENTER
-        )
-    }
-
-    private fun getMethodGutterMark(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return null
-        val artifactQualifiedName = JVMMarkerUtils.getFullyQualifiedName(element)
-
-        //check by artifact name first due to user can erroneously name same method twice
-        var gutterMark = fileMarker.getSourceMark(
-            artifactQualifiedName,
-            SourceMark.Type.GUTTER
-        ) as MethodGutterMark?
-        if (gutterMark == null) {
-            gutterMark = ArtifactCreationService.getOrCreateMethodGutterMark(fileMarker, element) ?: return null
-        }
-        if (!gutterMark.isVisible()) {
-            return null
-        }
-
-        var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
-        if (gutterMark.configuration.activateOnMouseClick) {
-            navigationHandler = GutterIconNavigationHandler { _, _ ->
-                element.getUserData(SourceKey.GutterMark)!!.displayPopup()
-            }
-        }
-        return LineMarkerInfo(
-            ArtifactMarkService.getFirstLeaf(element),
-            element.textRange,
-            gutterMark.configuration.icon,
-            null,
-            navigationHandler,
-            GutterIconRenderer.Alignment.CENTER
-        )
-    }
 
     override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
         val parent = element.parent
