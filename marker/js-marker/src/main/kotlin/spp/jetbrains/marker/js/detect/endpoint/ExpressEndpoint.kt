@@ -138,24 +138,10 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
         val indicator = EmptyProgressIndicator(ModalityState.defaultModalityState())
         val routes = ProgressManager.getInstance().runProcess(Computable {
             ReferencesSearch.search(routerVariable).map {
-                if (it.element.parent !is JSArgumentList) {
+                if (it.element.parent !is JSElement) {
                     return@map null
                 }
-                val argumentList = it.element.parent as JSArgumentList
-                if (argumentList.arguments.size != 2) { // TODO: Is there any situation where this isn't the case?
-                    return@map null
-                }
-                if (argumentList.arguments[1] != it.element) {
-                    return@map null
-                }
-
-                val callExpression = it.element.parent.parent
-                val useReference = callExpression.firstChild as JSReferenceExpression
-                val superRouter = (useReference.firstChild as JSReferenceExpression).resolve() as JSVariable
-                val superPath = locateRouter(superRouter) ?: return@map null
-                val path = getArgumentValue(argumentList.arguments[0])
-
-                return@map superPath + path
+                return@map resolveRouterPath(it.element as JSElement);
             }.filterNotNull().map { it }
         }, indicator)
 
@@ -229,5 +215,51 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
             return element
         }
         return null
+    }
+
+    private fun resolveRouterPath(router: JSElement): String? {
+        // Handle direct require statement
+        if (router.parent is JSAssignmentExpression) {
+            val assignment = router.parent as JSAssignmentExpression
+            if (assignment.firstChild.text != "module.exports") { // TODO: Is this the best way to detect exports?
+                return null
+            }
+
+            if (assignment.children[1] == router) { // Search for direct require
+                val jsFile = router.containingFile as? JSFile ?: return null
+                return ReferencesSearch.search(jsFile).map {
+                    val requireArgumentList = it.element.parent as? JSArgumentList ?: return@map null
+                    val requireCall = requireArgumentList.parent as? JSCallExpression ?: return@map null
+                    if (!requireCall.isRequireCall) {
+                        return@map null
+                    }
+
+                    return@map resolveRouterPath(requireCall)
+                }.filterNotNull().getOrNull(0)
+            }
+        }
+        if (router.parent is JSProperty) {
+            val property = router.parent as JSProperty
+            return ReferencesSearch.search(property).map {
+                return@map resolveRouterPath(it.element as JSElement)
+            }.filterNotNull().getOrNull(0)
+        }
+
+        // Check if this variable is indeed being used as a router
+        val argumentList = router.parent as? JSArgumentList ?: return null
+        if (argumentList.arguments.size != 2) { // TODO: Is there any situation where this isn't the case?
+            return null
+        }
+        if (argumentList.arguments[1] != router) {
+            return null
+        }
+
+        val callExpression = argumentList.parent
+        val useReference = callExpression.firstChild as JSReferenceExpression
+        val superRouter = (useReference.firstChild as JSReferenceExpression).resolve() as JSVariable
+        val superPath = locateRouter(superRouter) ?: return null
+        val path = getArgumentValue(argumentList.arguments[0])
+
+        return superPath + path
     }
 }
