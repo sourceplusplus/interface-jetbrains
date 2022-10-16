@@ -122,16 +122,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
             return null
         }
 
-        val expressInitializer = resolveVariableSource(initializerMethod.firstChild) as? JSCallExpression ?: return null
-        if (!expressInitializer.isRequireCall) {
-            return null
-        }
-        if (expressInitializer.arguments[0] !is JSLiteralExpression) { // TODO: How would we support require with a variable?
-            return null
-        }
-
-        val expressRequire = expressInitializer.arguments[0] as JSLiteralExpression
-        if (expressRequire.value != "express") { // TODO: Is this the only way to get express?
+        if (!isExpress(initializerMethod.firstChild)) {
             return null
         }
 
@@ -168,28 +159,16 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
     }
 
     private fun isExpress(element: PsiElement): Boolean {
-        if (element is JSVariable) {
-            val initializer = element.initializer
-            if (initializer !is JSCallExpression) {
-                return false
-            }
-
-            if (initializer.arguments[0] !is JSLiteralExpression) { // TODO: How would we support require with a variable?
-                return false
-            }
-
-            val require = initializer.arguments[0] as JSLiteralExpression
-            if (require.value != "express") {
-                return false
-            }
-
-            return true
+        val expressInitializer = resolveVariableSource(element) as? JSCallExpression ?: return false
+        if (!expressInitializer.isRequireCall) {
+            return false
         }
-        if (element is JSReferenceExpression) {
-            val resolved = element.resolve() ?: return false
-            return isExpress(resolved)
+        if (expressInitializer.arguments[0] !is JSLiteralExpression) { // TODO: How would we support require with a variable?
+            return false
         }
-        return false
+
+        val expressRequire = expressInitializer.arguments[0] as JSLiteralExpression
+        return expressRequire.value == "express" // TODO: Is this the only way to get express?
     }
 
     private fun getArgumentValue(element: PsiElement): Any? {
