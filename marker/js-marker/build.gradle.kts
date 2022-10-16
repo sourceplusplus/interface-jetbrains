@@ -20,6 +20,7 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
+    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
