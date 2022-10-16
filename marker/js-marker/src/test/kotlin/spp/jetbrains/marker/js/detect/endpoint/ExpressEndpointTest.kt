@@ -21,10 +21,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.Computable
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
-import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.js.JavascriptGuideProvider
@@ -44,7 +42,6 @@ class ExpressEndpointTest : BasePlatformTestCase() {
             }
         })
 
-        UserData.vertx(project, Vertx.vertx())
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(JSFile::class.java)
         ArtifactNamingService.addService(JavascriptArtifactNamingService(), SourceMarkerUtils.getJavaScriptLanguages())
         SourceGuideProvider.addProvider(JavascriptGuideProvider(), SourceMarkerUtils.getJavaScriptLanguages())
