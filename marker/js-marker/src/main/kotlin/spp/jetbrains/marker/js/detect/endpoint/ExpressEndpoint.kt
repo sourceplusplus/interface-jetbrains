@@ -122,13 +122,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
             return null
         }
 
-        val expressReference = initializerMethod.children[0] as JSReferenceExpression
-        val expressVariable = expressReference.resolve() as JSVariable
-        if (expressVariable.initializer !is JSCallExpression) {
-            return null
-        }
-
-        val expressInitializer = expressVariable.initializer as JSCallExpression
+        val expressInitializer = resolveVariableSource(initializerMethod.firstChild) as? JSCallExpression ?: return null
         if (!expressInitializer.isRequireCall) {
             return null
         }
@@ -219,6 +213,20 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
         if (element is JSReferenceExpression) {
             val resolved = element.resolve() ?: return element
             return getArgumentValue(resolved)
+        }
+        return null
+    }
+
+    private fun resolveVariableSource(element: PsiElement): JSExpression? {
+        if (element is JSReferenceExpression) {
+            val resolved = element.resolve() ?: return null
+            return resolveVariableSource(resolved)
+        }
+        if (element is JSVariable) {
+            return element.initializer
+        }
+        if (element is JSExpression) {
+            return element
         }
         return null
     }
