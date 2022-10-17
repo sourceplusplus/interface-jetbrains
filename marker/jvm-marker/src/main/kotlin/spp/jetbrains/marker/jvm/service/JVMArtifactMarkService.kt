@@ -81,14 +81,14 @@ class JVMArtifactMarkService : IArtifactMarkService {
                 )
             }
         } else {
-            if (statement.parent is PsiMethod) {
+            if (JVMMarkerUtils.isJvmMethod(statement.parent)) {
                 virtualText.spacingTillMethodText = SourceMarkerUtils.getPrefixSpacingCount(statement.parent)
             }
 
             var startOffset = statement.textRange.startOffset
             if (virtualText.showBeforeAnnotationsWhenBlock) {
-                if (statement.parent is PsiMethod) {
-                    val annotations = (statement.parent as PsiMethod).annotations
+                if (JVMMarkerUtils.isJvmMethod(statement.parent)) {
+                    val annotations = JVMMarkerUtils.getMethodAnnotations(statement.parent)
                     if (annotations.isNotEmpty()) {
                         startOffset = annotations[0].textRange.startOffset
                     }

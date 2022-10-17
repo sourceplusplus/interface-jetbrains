@@ -478,6 +478,20 @@ object JVMMarkerUtils {
         )
     }
 
+    fun isJvmMethod(element: PsiElement): Boolean {
+        return element is PsiMethod || element is KtFunction
+    }
+
+    fun getMethodAnnotations(element: PsiElement): List<PsiElement> {
+        require(isJvmMethod(element)) { "Element is not a JVM method: $element" }
+
+        return when (element) {
+            is PsiMethod -> element.annotations.toList()
+            is KtFunction -> element.annotationEntries
+            else -> emptyList()
+        }
+    }
+
     @JvmStatic
     private fun getQualifiedName(method: PsiMethod): String {
         val methodName = method.nameIdentifier!!.text
