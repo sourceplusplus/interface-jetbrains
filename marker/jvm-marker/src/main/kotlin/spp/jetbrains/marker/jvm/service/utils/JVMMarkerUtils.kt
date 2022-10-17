@@ -433,7 +433,7 @@ object JVMMarkerUtils {
         return ArtifactQualifiedName(
             "$classQualifiedName.${getQualifiedName(method)}",
             type = ArtifactType.METHOD,
-            lineNumber = method.sourcePsi?.let { SourceMarkerUtils.getLineNumber(it) }
+            lineNumber = method.identifyingElement?.let { SourceMarkerUtils.getLineNumber(it) }
         )
     }
 
