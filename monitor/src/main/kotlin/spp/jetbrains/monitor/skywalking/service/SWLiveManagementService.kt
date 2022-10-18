@@ -112,7 +112,24 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
         return promise.future()
     }
 
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
     override fun getActiveProbes(): Future<List<InstanceConnection>> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun getActiveProbe(id: String): Future<InstanceConnection?> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun updateActiveProbeMetadata(id: String, metadata: JsonObject): Future<InstanceConnection> {
+        return Future.failedFuture("Illegal operation")
     }
 }
