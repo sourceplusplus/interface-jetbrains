@@ -127,7 +127,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
             endpoint.id = endpointId
             guideMark.putUserData(ENDPOINT_FOUND, true)
         } else {
-            if (guideMark.getUserData(ENDPOINT_FOUND) != false) {
+            if (guideMark.getUserData(ENDPOINT_FOUND) == null) {
                 guideMark.putUserData(ENDPOINT_FOUND, false)
             }
             log.trace("Could not find endpoint id for: ${endpoint.name}")
