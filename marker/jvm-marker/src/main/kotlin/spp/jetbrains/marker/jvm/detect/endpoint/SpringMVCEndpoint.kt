@@ -30,6 +30,7 @@ import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
 import org.joor.Reflect
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
+import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 
@@ -178,17 +179,17 @@ class SpringMVCEndpoint : JVMEndpointNameDetector {
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
             var value = if (endpointNameExpr == null) "" else (endpointNameExpr as UInjectionHost).evaluateToString()
-            val method = if (methodExpr is UQualifiedReferenceExpression) {
-                methodExpr.selector.toString()
+            val methodTypes = if (methodExpr is UQualifiedReferenceExpression) {
+                listOf(methodExpr.selector.toString())
             } else {
                 when (methodExpr) {
-                    is JavaUSimpleNameReferenceExpression -> methodExpr.resolvedName.toString()
-                    is GrUReferenceExpression -> methodExpr.resolvedName.toString()
-                    else -> "GET" //todo: is actually all method types
+                    is JavaUSimpleNameReferenceExpression -> listOf(methodExpr.resolvedName.toString())
+                    is GrUReferenceExpression -> listOf(methodExpr.resolvedName.toString())
+                    else -> EndpointDetector.httpMethods
                 }
             }
             if (value.isNullOrEmpty()) value = "/"
-            return listOf(DetectedEndpoint("$method:$value", false, value, method))
+            return methodTypes.map { DetectedEndpoint("$it:$value", false, value, it) }
         } else {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }
             if (endpointNameExpr == null) endpointNameExpr = annotation.attributeValues.find { it.name == "path" }
@@ -233,13 +234,13 @@ class SpringMVCEndpoint : JVMEndpointNameDetector {
                 endpointNameExpr?.evaluate() ?: ""
             }
             val valueArg = methodExpr?.let { getField<List<Any>>(it, "valueArguments")[0] }
-            val method = when (valueArg) {
-                is KotlinUSimpleReferenceExpression -> valueArg.resolvedName
-                is KotlinUQualifiedReferenceExpression -> valueArg.selector.asSourceString()
-                else -> "GET" //todo: is actually all method types
+            val methodTypes = when (valueArg) {
+                is KotlinUSimpleReferenceExpression -> listOf(valueArg.resolvedName)
+                is KotlinUQualifiedReferenceExpression -> listOf(valueArg.selector.asSourceString())
+                else -> EndpointDetector.httpMethods
             }
             if (value?.toString().isNullOrEmpty()) value = "/"
-            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
+            return methodTypes.map { DetectedEndpoint("$it:$value", false, value.toString(), it) }
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
@@ -280,15 +281,15 @@ class SpringMVCEndpoint : JVMEndpointNameDetector {
             val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
             var value = endpointNameExpr.getUCallExpression()!!.valueArguments[0].evaluate()
             val valueArg = methodExpr?.let { (it as UCallExpressionAdapter).valueArguments[0] }
-            val method = if (valueArg is USimpleNameReferenceExpression) {
-                valueArg.resolvedName
+            val methodTypes = if (valueArg is USimpleNameReferenceExpression) {
+                listOf(valueArg.resolvedName)
             } else if (valueArg is UQualifiedReferenceExpressionAdapter) {
-                valueArg.selector.asSourceString().substringAfter("RequestMethod.")
+                listOf(valueArg.selector.asSourceString().substringAfter("RequestMethod."))
             } else {
-                "GET" //todo: is actually all method types
+                EndpointDetector.httpMethods
             }
             if (value?.toString().isNullOrEmpty()) value = "/"
-            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
+            return methodTypes.map { DetectedEndpoint("$it:$value", false, value.toString(), it) }
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")

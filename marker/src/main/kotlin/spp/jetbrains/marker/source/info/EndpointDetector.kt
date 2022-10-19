@@ -44,6 +44,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
         val DETECTED_ENDPOINTS = SourceKey<List<DetectedEndpoint>>("DETECTED_ENDPOINTS")
         val ENDPOINT_FOUND = SourceKey<Boolean>("ENDPOINT_FOUND")
         private val REDETECTOR_SETUP = Key.create<Boolean>("SPP_REDETECTOR_SETUP")
+        val httpMethods = setOf("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE")
     }
 
     abstract val detectorSet: Set<T>

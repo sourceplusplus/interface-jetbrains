@@ -55,7 +55,6 @@ class UrlResolverEndpointDetector(
     }
 
     override val detectorSet = setOf(this)
-    private val httpMethods = setOf("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE")
 
     override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         val detectedEndpointPromise = Promise.promise<List<DetectedEndpoint>>()
