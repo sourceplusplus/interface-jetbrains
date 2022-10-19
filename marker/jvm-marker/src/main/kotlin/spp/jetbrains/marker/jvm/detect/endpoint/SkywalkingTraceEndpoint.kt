@@ -23,10 +23,9 @@ import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.expressions.UInjectionHost
 import org.jetbrains.uast.toUElementOfType
-import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDeterminer
+import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import java.util.*
 
 /**
  * todo: description.
@@ -34,24 +33,24 @@ import java.util.*
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SkywalkingTraceEndpoint : JVMEndpointNameDeterminer {
+class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
 
     private val skywalkingTraceAnnotation = "org.apache.skywalking.apm.toolkit.trace.Trace"
 
-    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
+    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(Optional.empty())
+            return Future.succeededFuture(emptyList())
         }
 
         return ApplicationManager.getApplication().runReadAction(Computable {
             val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
-                ?: return@Computable Future.succeededFuture(Optional.empty())
+                ?: return@Computable Future.succeededFuture(emptyList())
             determineEndpointName(uMethod)
         })
     }
 
-    override fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
-        val promise = Promise.promise<Optional<DetectedEndpoint>>()
+    override fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+        val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             val annotation = uMethod.findAnnotation(skywalkingTraceAnnotation)
             if (annotation != null) {
@@ -63,16 +62,16 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDeterminer {
                 } as String?
                 if (value == null || value == "") {
                     promise.complete(
-                        Optional.of(
+                        listOf(
                             DetectedEndpoint("${uMethod.containingClass!!.qualifiedName}.${uMethod.name}", true)
                         )
                     )
                 } else {
-                    promise.complete(Optional.of(DetectedEndpoint(value, true)))
+                    promise.complete(listOf(DetectedEndpoint(value, true)))
                 }
             }
 
-            promise.tryComplete(Optional.empty())
+            promise.tryComplete(emptyList())
         }
         return promise.future()
     }

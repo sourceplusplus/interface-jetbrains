@@ -21,7 +21,7 @@ import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import org.jetbrains.uast.UMethod
-import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDeterminer
+import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.jvm.detect.endpoint.MicronautEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SkywalkingTraceEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
@@ -34,9 +34,9 @@ import java.util.*
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDeterminer>(project) {
+class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDetector>(project) {
 
-    override val detectorSet: Set<JVMEndpointNameDeterminer> = setOf(
+    override val detectorSet: Set<JVMEndpointNameDetector> = setOf(
         SkywalkingTraceEndpoint(),
         SpringMVCEndpoint(),
         MicronautEndpoint()
@@ -56,7 +56,7 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
         return promise.future()
     }
 
-    interface JVMEndpointNameDeterminer : EndpointNameDeterminer {
-        fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>>
+    interface JVMEndpointNameDetector : EndpointNameDetector {
+        fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>>
     }
 }

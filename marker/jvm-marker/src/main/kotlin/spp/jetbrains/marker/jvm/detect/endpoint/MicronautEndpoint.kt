@@ -25,10 +25,9 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.expressions.UInjectionHost
 import org.jetbrains.uast.toUElementOfType
-import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDeterminer
+import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import java.util.*
 
 /**
  * Detects Micronaut HTTP Server endpoints.
@@ -36,13 +35,13 @@ import java.util.*
  * @since 0.7.2
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class MicronautEndpoint : JVMEndpointNameDeterminer {
+class MicronautEndpoint : JVMEndpointNameDetector {
 
     private val log = logger<MicronautEndpoint>()
     private val endpointAnnotationPrefix = "io.micronaut.http.annotation."
 
-    override fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
-        val promise = Promise.promise<Optional<DetectedEndpoint>>()
+    override fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+        val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             val annotation = uMethod.annotations.find {
                 it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
@@ -75,23 +74,23 @@ class MicronautEndpoint : JVMEndpointNameDeterminer {
                 if (endpoint?.isNotBlank() == true) {
                     val endpointName = "$endpointType:$endpoint"
                     log.info("Detected Micronaut endpoint: $endpointName")
-                    promise.complete(Optional.of(DetectedEndpoint(endpointName, false)))
+                    promise.complete(listOf(DetectedEndpoint(endpointName, false)))
                 }
             }
 
-            promise.tryComplete(Optional.empty())
+            promise.tryComplete(emptyList())
         }
         return promise.future()
     }
 
-    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
+    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(Optional.empty())
+            return Future.succeededFuture(emptyList())
         }
 
         return ApplicationManager.getApplication().runReadAction(Computable {
             val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
-                ?: return@Computable Future.succeededFuture(Optional.empty())
+                ?: return@Computable Future.succeededFuture(emptyList())
             determineEndpointName(uMethod)
         })
     }

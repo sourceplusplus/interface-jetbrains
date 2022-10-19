@@ -29,10 +29,9 @@ import org.jetbrains.uast.kotlin.KotlinStringULiteralExpression
 import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
 import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
 import org.joor.Reflect
-import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDeterminer
+import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import java.util.*
 
 /**
  * todo: description.
@@ -40,7 +39,7 @@ import java.util.*
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SpringMVCEndpoint : JVMEndpointNameDeterminer {
+class SpringMVCEndpoint : JVMEndpointNameDetector {
 
     private val requestMappingAnnotation = "org.springframework.web.bind.annotation.RequestMapping"
     private val qualifiedNameSet = setOf(
@@ -52,20 +51,20 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
         "org.springframework.web.bind.annotation.PatchMapping"
     )
 
-    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
+    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(Optional.empty())
+            return Future.succeededFuture(emptyList())
         }
 
         return ApplicationManager.getApplication().runReadAction(Computable {
             val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
-                ?: return@Computable Future.succeededFuture(Optional.empty())
+                ?: return@Computable Future.succeededFuture(emptyList())
             determineEndpointName(uMethod)
         })
     }
 
-    override fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
-        val promise = Promise.promise<Optional<DetectedEndpoint>>()
+    override fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+        val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             for (annotationName in qualifiedNameSet) {
                 val annotation = uMethod.findAnnotation(annotationName)
@@ -85,6 +84,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                                 promise.complete(detectedEndpoint)
                             }
                         }
+
                         annotation.lang === Language.findLanguageByID("kotlin") -> {
                             val detectedEndpoint = handleKotlinAnnotation(false, annotation, annotationName)
                             val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
@@ -98,6 +98,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                                 promise.complete(detectedEndpoint)
                             }
                         }
+
                         annotation.lang === Language.findLanguageByID("Scala") -> {
                             val detectedEndpoint = handleScalaAnnotation(false, annotation, annotationName)
                             val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
@@ -111,6 +112,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                                 promise.complete(detectedEndpoint)
                             }
                         }
+
                         else -> throw UnsupportedOperationException(
                             "Language ${annotation.lang.displayName} is not currently supported"
                         )
@@ -118,33 +120,39 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 }
             }
 
-            promise.tryComplete(Optional.empty())
+            promise.tryComplete(emptyList())
         }
         return promise.future()
     }
 
     private fun handleEndpointDetection(
-        detectedEndpoint: Optional<DetectedEndpoint>,
-        classEndpoint: Optional<DetectedEndpoint>,
-        promise: Promise<Optional<DetectedEndpoint>>
+        detectedEndpoints: List<DetectedEndpoint>,
+        classEndpoints: List<DetectedEndpoint>,
+        promise: Promise<List<DetectedEndpoint>>
     ) {
-        if (detectedEndpoint.isPresent && classEndpoint.isPresent) {
-            var classEndpointPath = classEndpoint.get().path!!
-            if (classEndpointPath.endsWith("/")) {
-                classEndpointPath = classEndpointPath.substringBeforeLast("/")
-            }
+        if (detectedEndpoints.isNotEmpty() && classEndpoints.isNotEmpty()) {
+            val combinedEndpoints = mutableListOf<DetectedEndpoint>()
+            classEndpoints.forEach { classEndpoint ->
+                detectedEndpoints.forEach { endpoint ->
+                    var classEndpointPath = classEndpoint.path!!
+                    if (classEndpointPath.endsWith("/")) {
+                        classEndpointPath = classEndpointPath.substringBeforeLast("/")
+                    }
 
-            val endpointName = buildString {
-                append(detectedEndpoint.get().type)
-                append(":")
-                append(classEndpointPath)
-                if (detectedEndpoint.get().path != "/") {
-                    append(detectedEndpoint.get().path)
+                    val endpointName = buildString {
+                        append(endpoint.type)
+                        append(":")
+                        append(classEndpointPath)
+                        if (endpoint.path != "/") {
+                            append(endpoint.path)
+                        }
+                    }
+                    combinedEndpoints.add(DetectedEndpoint(endpointName, false))
                 }
             }
-            promise.complete(Optional.of(DetectedEndpoint(endpointName, false)))
+            promise.complete(combinedEndpoints)
         } else {
-            promise.complete(detectedEndpoint)
+            promise.complete(detectedEndpoints)
         }
     }
 
@@ -152,7 +160,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
         isClass: Boolean,
         annotation: UAnnotation,
         annotationName: String
-    ): Optional<DetectedEndpoint> {
+    ): List<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
             if (endpointNameExpr == null) {
@@ -165,7 +173,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 val value = if (endpointNameExpr == null) {
                     "/"
                 } else (endpointNameExpr as UInjectionHost).evaluateToString()
-                return Optional.of(DetectedEndpoint(value.toString(), false, value.toString()))
+                return listOf(DetectedEndpoint(value.toString(), false, value.toString()))
             }
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
@@ -180,7 +188,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 }
             }
             if (value.isNullOrEmpty()) value = "/"
-            return Optional.of(DetectedEndpoint("$method:$value", false, value, method))
+            return listOf(DetectedEndpoint("$method:$value", false, value, method))
         } else {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }
             if (endpointNameExpr == null) endpointNameExpr = annotation.attributeValues.find { it.name == "path" }
@@ -194,7 +202,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
             if (value.isNullOrEmpty()) value = "/"
-            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
+            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
         }
     }
 
@@ -202,7 +210,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
         isClass: Boolean,
         annotation: UAnnotation,
         annotationName: String
-    ): Optional<DetectedEndpoint> {
+    ): List<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
             if (endpointNameExpr == null) {
@@ -215,7 +223,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 val value = if (endpointNameExpr == null) {
                     "/"
                 } else (endpointNameExpr as KotlinStringULiteralExpression).value
-                return Optional.of(DetectedEndpoint(value, false, value))
+                return listOf(DetectedEndpoint(value, false, value))
             }
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
@@ -231,7 +239,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 else -> "GET" //todo: is actually all method types
             }
             if (value?.toString().isNullOrEmpty()) value = "/"
-            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
+            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
@@ -245,7 +253,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
             if (value?.toString().isNullOrEmpty()) value = "/"
-            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
+            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
         }
     }
 
@@ -253,7 +261,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
         isClass: Boolean,
         annotation: UAnnotation,
         annotationName: String
-    ): Optional<DetectedEndpoint> {
+    ): List<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
             var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
             if (endpointNameExpr == null) {
@@ -266,7 +274,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 val value = if (endpointNameExpr == null) {
                     "/"
                 } else (endpointNameExpr as KotlinStringULiteralExpression).value
-                return Optional.of(DetectedEndpoint(value, false, value))
+                return listOf(DetectedEndpoint(value, false, value))
             }
 
             val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
@@ -280,7 +288,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
                 "GET" //todo: is actually all method types
             }
             if (value?.toString().isNullOrEmpty()) value = "/"
-            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
+            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
         } else {
             var valueExpr = annotation.findAttributeValue("value")
             if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
@@ -297,7 +305,7 @@ class SpringMVCEndpoint : JVMEndpointNameDeterminer {
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
             if (value?.toString().isNullOrEmpty()) value = "/"
-            return Optional.of(DetectedEndpoint("$method:$value", false, value.toString(), method))
+            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
         }
     }
 

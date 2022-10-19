@@ -308,6 +308,14 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             propagateEventToParents(parentEvent)
         }
     }
+    fun <T> putUserDataIfAbsent(key: SourceKey<T>, value: T?): T? {
+        return if (userData.containsKey(key)) {
+            userData[key] as T?
+        } else {
+            putUserData(key, value)
+            value
+        }
+    }
 
     fun hasUserData(): Boolean = userData.isNotEmpty()
 

@@ -26,24 +26,22 @@ import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
 import spp.jetbrains.safeLaunch
-import java.util.*
 
 /**
- * todo: description.
+ * Base class for endpoint detectors. Concrete endpoint detectors are responsible for determining the endpoint name(s)
+ * for a given [GuideMark]. The base class will then use the endpoint name(s) to determine the endpoint id(s). The
+ * endpoint id(s) are then used to associate endpoint telemetry with the [GuideMark].
  *
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val project: Project) {
+abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val project: Project) {
 
     companion object {
         private val log = logger<EndpointDetector<*>>()
-        val ENDPOINT_ID = SourceKey<String>("ENDPOINT_ID")
-        val ENDPOINT_NAME = SourceKey<String>("ENDPOINT_NAME")
-        val ENDPOINT_INTERNAL = SourceKey<Boolean>("ENDPOINT_INTERNAL")
+        val DETECTED_ENDPOINTS = SourceKey<List<DetectedEndpoint>>("DETECTED_ENDPOINTS")
         val ENDPOINT_FOUND = SourceKey<Boolean>("ENDPOINT_FOUND")
         private val REDETECTOR_SETUP = Key.create<Boolean>("SPP_REDETECTOR_SETUP")
     }
@@ -71,121 +69,102 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDeterminer>(val
         }
     }
 
-    //todo: don't need to re-detect endpoint names, just need to re-detect endpoint ids
     private suspend fun redetectEndpoints() {
-        log.trace("Redetecting endpoints for project ${project.name}")
-        SourceMarker.getInstance(project).getSourceMarks().forEach {
-            if (it is MethodGuideMark && it.getUserData(ENDPOINT_FOUND) == false) {
-                getOrFindEndpoint(it)
+        val redetectIds = SourceMarker.getInstance(project).getGuideMarks().filter {
+            it.getUserData(DETECTED_ENDPOINTS)?.any { it.id == null } == true
+        }.ifEmpty { return }
+
+        log.trace("Redetecting endpoints ids for project ${project.name}")
+        redetectIds.forEach {
+            getOrFindEndpoints(it)
+        }
+    }
+
+    suspend fun getOrFindEndpointIds(sourceMark: GuideMark): List<String> {
+        val detectedEndpoints = sourceMark.getUserData(DETECTED_ENDPOINTS)
+        return if (detectedEndpoints != null) {
+            val cachedEndpointIds = detectedEndpoints.mapNotNull { it.id }
+            log.trace("Found cached endpoint ids: $cachedEndpointIds")
+            cachedEndpointIds
+        } else {
+            getOrFindEndpoints(sourceMark)
+            val cachedEndpointIds = sourceMark.getUserData(DETECTED_ENDPOINTS)?.mapNotNull { it.id }
+            cachedEndpointIds ?: emptyList()
+        }
+    }
+
+    private suspend fun getOrFindEndpoints(sourceMark: GuideMark) {
+        var detectedEndpoints = sourceMark.getUserData(DETECTED_ENDPOINTS)
+        if (detectedEndpoints == null) {
+            log.trace("Determining endpoint name(s)")
+            detectedEndpoints = determineEndpointNames(sourceMark)
+            sourceMark.putUserData(DETECTED_ENDPOINTS, detectedEndpoints)
+
+            detectedEndpoints.forEach {
+                log.trace("Detected endpoint name: ${it.name}")
+                determineEndpointId(it, sourceMark)
             }
-        }
-    }
-
-    fun getEndpointName(sourceMark: GuideMark): String? {
-        return sourceMark.getUserData(ENDPOINT_NAME)
-    }
-
-    fun getEndpointId(sourceMark: GuideMark): String? {
-        return sourceMark.getUserData(ENDPOINT_ID)
-    }
-
-    fun isExternalEndpoint(sourceMark: GuideMark): Boolean {
-        return sourceMark.getUserData(ENDPOINT_INTERNAL) == false
-    }
-
-    suspend fun getOrFindEndpointId(sourceMark: GuideMark): String? {
-        val cachedEndpointId = sourceMark.getUserData(ENDPOINT_ID)
-        return if (cachedEndpointId != null) {
-            log.trace("Found cached endpoint id: $cachedEndpointId")
-            cachedEndpointId
         } else {
-            getOrFindEndpoint(sourceMark)
-            sourceMark.getUserData(ENDPOINT_ID)
-        }
-    }
-
-    suspend fun getOrFindEndpointName(sourceMark: GuideMark): String? {
-        val cachedEndpointName = sourceMark.getUserData(ENDPOINT_NAME)
-        return if (cachedEndpointName != null) {
-            log.trace("Found cached endpoint name: $cachedEndpointName")
-            cachedEndpointName
-        } else if (sourceMark is MethodGuideMark) {
-            getOrFindEndpoint(sourceMark)
-            sourceMark.getUserData(ENDPOINT_NAME)
-        } else {
-            null
-        }
-    }
-
-    private suspend fun getOrFindEndpoint(sourceMark: GuideMark) {
-        if (sourceMark.getUserData(ENDPOINT_NAME) == null || sourceMark.getUserData(ENDPOINT_ID) == null) {
-            if (sourceMark.getUserData(ENDPOINT_NAME) == null) {
-                log.trace("Determining endpoint name")
-                val detectedEndpoint = determineEndpointName(sourceMark)
-                if (detectedEndpoint != null) {
-                    log.trace("Detected endpoint name: ${detectedEndpoint.name}")
-                    sourceMark.putUserData(ENDPOINT_NAME, detectedEndpoint.name)
-                    sourceMark.putUserData(ENDPOINT_INTERNAL, detectedEndpoint.internal)
-
-                    determineEndpointId(detectedEndpoint.name, sourceMark)
-                } else {
-                    log.trace("Could not find endpoint name for: ${sourceMark.artifactQualifiedName}")
+            detectedEndpoints.forEach {
+                if (it.id == null) {
+                    determineEndpointId(it, sourceMark)
                 }
-            } else {
-                determineEndpointId(sourceMark.getUserData(ENDPOINT_NAME)!!, sourceMark)
             }
         }
     }
 
-    private suspend fun determineEndpointId(endpointName: String, guideMark: GuideMark) {
-        if (guideMark.getUserData(ENDPOINT_INTERNAL) == true) {
+    private suspend fun determineEndpointId(endpoint: DetectedEndpoint, guideMark: GuideMark) {
+        if (endpoint.internal) {
             log.trace("Internal endpoint, skipping endpoint id lookup")
             return
         }
 
-        log.trace("Determining endpoint id for endpoint name: $endpointName")
-        val endpoint = skywalkingMonitor.searchExactEndpoint(endpointName)
-        if (endpoint != null) {
-            guideMark.putUserData(ENDPOINT_ID, endpoint.getString("id"))
+        log.trace("Determining endpoint id for endpoint name: ${endpoint.name}")
+        val foundEndpoint = skywalkingMonitor.searchExactEndpoint(endpoint.name)
+        if (foundEndpoint != null) {
+            val endpointId = foundEndpoint.getString("id")
+            log.trace("Found endpoint id: $endpointId")
+            endpoint.id = endpointId
             guideMark.putUserData(ENDPOINT_FOUND, true)
-            log.trace("Detected endpoint id: ${endpoint.getString("id")}")
         } else {
             if (guideMark.getUserData(ENDPOINT_FOUND) != false) {
                 guideMark.putUserData(ENDPOINT_FOUND, false)
             }
-            log.trace("Could not find endpoint id for: $endpointName")
+            log.trace("Could not find endpoint id for: ${endpoint.name}")
         }
     }
 
-    private suspend fun determineEndpointName(guideMark: GuideMark): DetectedEndpoint? {
+    private suspend fun determineEndpointNames(guideMark: GuideMark): List<DetectedEndpoint> {
         detectorSet.forEach {
-            val detectedEndpoint = it.determineEndpointName(guideMark).await()
-            if (detectedEndpoint.isPresent) return detectedEndpoint.get()
+            val detectedEndpoint = it.detectEndpointNames(guideMark).await()
+            if (detectedEndpoint.isNotEmpty()) return detectedEndpoint
         }
-        return null
+        return emptyList()
     }
 
     /**
-     * todo: description.
+     * Endpoint detectors are responsible for determining [name], [internal], [path], and [type]. [id] will be
+     * automatically determined once the endpoint is found.
      */
     data class DetectedEndpoint(
         val name: String,
         val internal: Boolean,
         val path: String? = null,
         val type: String? = null,
+        var id: String? = null
     )
 
     /**
-     * todo: description.
+     * Provides implementations for determining the endpoint name(s) for a given [GuideMark].
      */
-    interface EndpointNameDeterminer {
-        fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>>
+    interface EndpointNameDetector {
+        fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>>
     }
 
     class AggregateEndpointDetector(
         project: Project,
         endpointDetectors: List<EndpointDetector<*>>
-    ) : EndpointDetector<EndpointNameDeterminer>(project) {
+    ) : EndpointDetector<EndpointNameDetector>(project) {
         override val detectorSet = endpointDetectors.flatMap { it.detectorSet }.toSet()
     }
 }

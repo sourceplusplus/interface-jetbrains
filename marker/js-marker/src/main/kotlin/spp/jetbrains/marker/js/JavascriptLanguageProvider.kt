@@ -76,7 +76,7 @@ class JavascriptLanguageProvider : LanguageProvider {
                 //setup endpoint detector and attempt detection
                 if (mark is GuideMark) {
                     mark.putUserData(SourceMarkerKeys.ENDPOINT_DETECTOR, endpointDetector)
-                    UserData.vertx(project).safeLaunch { endpointDetector.getOrFindEndpointId(mark) }
+                    UserData.vertx(project).safeLaunch { endpointDetector.getOrFindEndpointIds(mark) }
                 }
 
                 //setup logger detector
