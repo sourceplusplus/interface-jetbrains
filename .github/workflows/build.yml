@@ -62,8 +62,6 @@ jobs:
           java-version: 11
           cache: gradle
 
-      - run: readlink -f $(which java)
-
       # Set environment variables
       - name: Export Properties
         id: properties
