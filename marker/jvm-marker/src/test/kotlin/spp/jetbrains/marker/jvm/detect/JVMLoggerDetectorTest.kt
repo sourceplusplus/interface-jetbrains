@@ -61,9 +61,9 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                         )
                     }
 
-                    File("/opt/hostedtoolcache/Java_Zulu_jdk/11.0.16-8/x64").exists() -> {
+                    File("/opt/hostedtoolcache/Java_Zulu_jdk/11.0.17-8/x64").exists() -> {
                         JavaSdk.getInstance().createJdk(
-                            "jdk-11", "/opt/hostedtoolcache/Java_Zulu_jdk/11.0.16-8/x64", false
+                            "jdk-11", "/opt/hostedtoolcache/Java_Zulu_jdk/11.0.17-8/x64", false
                         )
                     }
 
