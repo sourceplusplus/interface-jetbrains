@@ -26,7 +26,6 @@ import spp.jetbrains.marker.jvm.detect.endpoint.MicronautEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SkywalkingTraceEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
-import java.util.*
 
 /**
  * todo: description.
@@ -42,13 +41,12 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
         MicronautEndpoint()
     )
 
-    fun determineEndpointName(uMethod: UMethod): Future<Optional<DetectedEndpoint>> {
-        val promise = Promise.promise<Optional<DetectedEndpoint>>()
+    fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+        val promise = Promise.promise<List<DetectedEndpoint>>()
         CompositeFuture.all(detectorSet.map { it.determineEndpointName(uMethod) }).onComplete {
             if (it.succeeded()) {
-                it.result().list<Optional<DetectedEndpoint>>().find { it.isPresent }?.let {
-                    promise.complete(it)
-                } ?: promise.complete(Optional.empty())
+                val detectedEndpoints = it.result().list<List<DetectedEndpoint>>()
+                promise.complete(detectedEndpoints.firstOrNull { it.isNotEmpty() } ?: emptyList())
             } else {
                 promise.fail(it.cause())
             }
