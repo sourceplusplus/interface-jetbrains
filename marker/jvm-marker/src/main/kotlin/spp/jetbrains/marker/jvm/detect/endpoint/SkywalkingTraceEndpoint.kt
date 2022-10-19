@@ -61,11 +61,8 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
                     operationNameExpr?.evaluate()
                 } as String?
                 if (value == null || value == "") {
-                    promise.complete(
-                        listOf(
-                            DetectedEndpoint("${uMethod.containingClass!!.qualifiedName}.${uMethod.name}", true)
-                        )
-                    )
+                    val endpointName = "${uMethod.containingClass!!.qualifiedName}.${uMethod.name}"
+                    promise.complete(listOf(DetectedEndpoint(endpointName, true)))
                 } else {
                     promise.complete(listOf(DetectedEndpoint(value, true)))
                 }
