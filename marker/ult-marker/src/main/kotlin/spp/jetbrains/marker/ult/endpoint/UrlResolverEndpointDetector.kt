@@ -28,9 +28,8 @@ import com.intellij.openapi.util.ThrowableComputable
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import spp.jetbrains.marker.source.info.EndpointDetector
-import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
+import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDetector
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import java.util.*
 
 /**
  * Detects endpoints using IntelliJ's [UrlResolverManager] experimental functionality.
@@ -40,7 +39,7 @@ import java.util.*
  */
 class UrlResolverEndpointDetector(
     project: Project
-) : EndpointDetector<EndpointNameDeterminer>(project), EndpointNameDeterminer {
+) : EndpointDetector<EndpointNameDetector>(project), EndpointNameDetector {
 
     companion object {
         private val log = logger<UrlResolverEndpointDetector>()
@@ -57,8 +56,8 @@ class UrlResolverEndpointDetector(
 
     override val detectorSet = setOf(this)
 
-    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
-        val detectedEndpointPromise = Promise.promise<Optional<DetectedEndpoint>>()
+    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
+        val detectedEndpointPromise = Promise.promise<List<DetectedEndpoint>>()
         val targetPaths = ReadAction.compute(ThrowableComputable {
             UrlResolverManager.getInstance(guideMark.project).getVariants(
                 UrlResolveRequest(null, null, UrlPath.fromExactString(""), null)
@@ -69,15 +68,26 @@ class UrlResolverEndpointDetector(
                 for (targetPath in targetPaths) {
                     if (targetPath.resolveToPsiElement() == guideMark.getPsiElement()) {
                         val endpointName = getEndpointName(targetPath.path)
-                        val methodType = targetPath.methods.firstOrNull() ?: "GET" //todo: handle multiple methods
-                        val fullEndpointName = "$methodType:$endpointName"
-                        log.info("Detected endpoint: $fullEndpointName")
+                        val methodType = targetPath.methods.firstOrNull()
 
-                        detectedEndpointPromise.complete(Optional.of(DetectedEndpoint(fullEndpointName, false)))
+                        if (methodType == null) {
+                            //no method type means all HTTP methods are supported
+                            val detectedEndpoints = mutableListOf<DetectedEndpoint>()
+                            for (methodType in httpMethods) {
+                                val fullEndpointName = "$methodType:$endpointName"
+                                log.info("Detected endpoint: $fullEndpointName")
+                                detectedEndpoints.add(DetectedEndpoint(fullEndpointName, false))
+                            }
+                            detectedEndpointPromise.complete(detectedEndpoints)
+                        } else {
+                            val fullEndpointName = "$methodType:$endpointName"
+                            log.info("Detected endpoint: $fullEndpointName")
+                            detectedEndpointPromise.complete(listOf(DetectedEndpoint(fullEndpointName, false)))
+                        }
                         break
                     }
                 }
-                detectedEndpointPromise.tryComplete(Optional.empty())
+                detectedEndpointPromise.tryComplete(emptyList())
             }, null)
         }
         return detectedEndpointPromise.future()

@@ -42,8 +42,8 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
             safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
-                assertTrue(result.isPresent)
-                assertEquals("GET:/doGet", result.get().name)
+                assertEquals(1, result.size)
+                assertEquals("GET:/doGet", result.first().name)
             }
         }
     }
@@ -64,8 +64,8 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
             safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
-                assertTrue(result.isPresent)
-                assertEquals("GET:/", result.get().name)
+                assertEquals(1, result.size)
+                assertEquals("GET:/", result.first().name)
             }
         }
     }
@@ -86,8 +86,8 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
             safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
-                assertTrue(result.isPresent)
-                assertEquals("GET:/doGet", result.get().name)
+                assertEquals(1, result.size)
+                assertEquals("GET:/doGet", result.first().name)
             }
         }
     }
@@ -108,8 +108,8 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
             safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
-                assertTrue(result.isPresent)
-                assertEquals("GET:/doGet", result.get().name)
+                assertEquals(1, result.size)
+                assertEquals("GET:/doGet", result.first().name)
             }
         }
     }
@@ -130,8 +130,8 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
             safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
-                assertTrue(result.isPresent)
-                assertEquals("doGet", result.get().name)
+                assertEquals(1, result.size)
+                assertEquals("doGet", result.first().name)
             }
         }
     }
@@ -152,8 +152,8 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
             safeRunBlocking {
                 val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
-                assertTrue(result.isPresent)
-                assertEquals("TestController.doGet", result.get().name)
+                assertEquals(1, result.size)
+                assertEquals("TestController.doGet", result.first().name)
             }
         }
     }
