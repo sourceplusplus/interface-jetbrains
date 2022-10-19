@@ -97,7 +97,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
         var detectedEndpoints = sourceMark.getUserData(DETECTED_ENDPOINTS)
         if (detectedEndpoints == null) {
             log.trace("Determining endpoint name(s)")
-            detectedEndpoints = determineEndpointNames(sourceMark)
+            detectedEndpoints = determineEndpointNames(sourceMark).ifEmpty { return }
             sourceMark.putUserData(DETECTED_ENDPOINTS, detectedEndpoints)
 
             detectedEndpoints.forEach {
