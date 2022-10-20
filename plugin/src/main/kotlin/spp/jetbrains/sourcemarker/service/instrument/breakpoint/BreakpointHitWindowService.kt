@@ -88,7 +88,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
 
     fun showEventsWindow() {
         eventsWindow = EventsWindow(project)
-        val content = ContentFactory.getInstance().createContent(eventsWindow.layoutComponent, "Events", true)
+        val content = ContentFactory.SERVICE.getInstance().createContent(eventsWindow.layoutComponent, "Events", true)
         content.setDisposer(eventsWindow)
         content.isCloseable = false
         contentManager!!.addContent(content)
@@ -118,7 +118,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
 
         breakpointWindow.showFrames(hit.stackTrace, firstNonSkyWalkingFrame)
-        val content = ContentFactory.getInstance().createContent(
+        val content = ContentFactory.SERVICE.getInstance().createContent(
             breakpointWindow.layoutComponent, firstNonSkyWalkingFrame.source + " at #0", false
         )
         content.setDisposer(breakpointWindow)
