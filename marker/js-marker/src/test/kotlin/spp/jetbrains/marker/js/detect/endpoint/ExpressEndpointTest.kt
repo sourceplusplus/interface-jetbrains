@@ -59,6 +59,21 @@ class ExpressEndpointTest : BasePlatformTestCase() {
         doTest()
     }
 
+    fun testExpressMultipleRouter(): Unit = runBlocking {
+        myFixture.configureByFile("ExpressMultipleRouter.js")
+        val testEndpointFile = myFixture.configureByFile("test-endpoint.js")
+        val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(testEndpointFile)
+        assertNotNull(fileMarker)
+
+        SourceGuideProvider.determineGuideMarks(fileMarker!!)
+
+        val endpointGuideMark = fileMarker.getGuideMarks().find { it.lineNumber == 4 }
+        assertNotNull(endpointGuideMark)
+
+        val detectedEndpoint = ExpressEndpoint().detectEndpointNames(endpointGuideMark!!).await()
+        assertEquals(2, detectedEndpoint.size)
+    }
+
     private suspend fun doTest() {
         myFixture.configureByFile(getTestName(false) + ".js")
         val testEndpointFile = myFixture.configureByFile("test-endpoint.js")
