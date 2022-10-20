@@ -32,12 +32,12 @@ open class SourceMarkerStartupActivity : StartupActivity {
 
     override fun runActivity(project: Project) {
         DumbService.getInstance(project).runReadActionInSmartMode {
-            ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater({
                 val editorManager = FileEditorManager.getInstance(project)
                 editorManager.allEditors.forEach { editor ->
                     FileActivityListener.triggerFileOpened(editorManager, editor.file!!)
                 }
-            }
+            }, project.disposed)
         }
     }
 }
