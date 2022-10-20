@@ -46,7 +46,6 @@ import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
