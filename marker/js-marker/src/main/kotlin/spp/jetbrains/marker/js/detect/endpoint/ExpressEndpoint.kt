@@ -82,23 +82,23 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
                 endpointType == "delete"
             ) {
                 var basePath = locateRouter(routerVariable)
-                if (basePath == null) {
-                    promise.complete(emptyList())
-                    return@runReadAction
-                } else if (basePath == "/") {
-                    basePath = ""
-                }
 
                 log.info("Detected Express endpoint: $basePath$endpointName")
-                promise.complete(
-                    listOf(
+                promise.complete(basePath.map {
+                    if (it == "/") {
                         DetectedEndpoint(
-                            basePath + endpointName,
+                            it,
                             false,
                             type = endpointType.uppercase()
                         )
+                    }
+
+                    DetectedEndpoint(
+                        it + endpointName,
+                        false,
+                        type = endpointType.uppercase()
                     )
-                )
+                })
             } else {
                 promise.complete(emptyList())
             }
@@ -106,40 +106,40 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
         return promise.future()
     }
 
-    private fun locateRouter(routerVariable: JSInitializerOwner): String? {
+    private fun locateRouter(routerVariable: JSInitializerOwner): List<String> {
         if (isExpressApp(routerVariable)) {
-            return ""
+            return listOf("")
         }
 
         if (routerVariable.initializer !is JSCallExpression) {
-            return null
+            return emptyList()
         }
         val initializer = routerVariable.initializer as JSCallExpression
 
         val initializerMethod = initializer.firstChild
         if (initializerMethod.children.getOrNull(2)?.text != "Router") { // TODO: Is this the only thing we want out of express?
-            return null
+            return emptyList()
         }
 
         if (!isExpress(initializerMethod.firstChild)) {
-            return null
+            return emptyList()
         }
 
         val indicator = EmptyProgressIndicator(ModalityState.defaultModalityState())
         val routes = ProgressManager.getInstance().runProcess(Computable {
-            ReferencesSearch.search(routerVariable).map {
+            ReferencesSearch.search(routerVariable).flatMap {
                 if (it.element.parent !is JSElement) {
-                    return@map null
+                    return@flatMap emptyList()
                 }
-                return@map resolveRouterPath(it.element as JSElement);
-            }.filterNotNull().map { it }
+                return@flatMap resolveRouterPath(it.element as JSElement);
+            }.map { it }
         }, indicator)
 
         if (routes.size > 1) {
             // TODO: Handle multiple routes
         }
 
-        return routes.getOrNull(0)
+        return routes
     }
 
     private fun isExpressApp(element: PsiElement): Boolean {
@@ -195,49 +195,49 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
         return null
     }
 
-    private fun resolveRouterPath(router: JSElement): String? {
+    private fun resolveRouterPath(router: JSElement): List<String> {
         // Handle direct require statement
         if (router.parent is JSAssignmentExpression) {
             val assignment = router.parent as JSAssignmentExpression
             if (assignment.firstChild.text != "module.exports") { // TODO: Is this the best way to detect exports?
-                return null
+                return emptyList()
             }
 
             if (assignment.children[1] == router) { // Search for direct require
-                val jsFile = router.containingFile as? JSFile ?: return null
-                return ReferencesSearch.search(jsFile).map {
-                    val requireArgumentList = it.element.parent as? JSArgumentList ?: return@map null
-                    val requireCall = requireArgumentList.parent as? JSCallExpression ?: return@map null
+                val jsFile = router.containingFile as? JSFile ?: return emptyList()
+                return ReferencesSearch.search(jsFile).flatMap {
+                    val requireArgumentList = it.element.parent as? JSArgumentList ?: return@flatMap emptyList()
+                    val requireCall = requireArgumentList.parent as? JSCallExpression ?: return@flatMap emptyList()
                     if (!requireCall.isRequireCall) {
-                        return@map null
+                        return@flatMap emptyList()
                     }
 
-                    return@map resolveRouterPath(requireCall)
-                }.filterNotNull().getOrNull(0)
+                    return@flatMap resolveRouterPath(requireCall)
+                }
             }
         }
         if (router.parent is JSProperty) {
             val property = router.parent as JSProperty
-            return ReferencesSearch.search(property).map {
-                return@map resolveRouterPath(it.element as JSElement)
-            }.filterNotNull().getOrNull(0)
+            return ReferencesSearch.search(property).flatMap {
+                return@flatMap resolveRouterPath(it.element as JSElement)
+            }
         }
 
         // Check if this variable is indeed being used as a router
-        val argumentList = router.parent as? JSArgumentList ?: return null
+        val argumentList = router.parent as? JSArgumentList ?: return emptyList()
         if (argumentList.arguments.size != 2) { // TODO: Is there any situation where this isn't the case?
-            return null
+            return emptyList()
         }
         if (argumentList.arguments[1] != router) {
-            return null
+            return emptyList()
         }
 
         val callExpression = argumentList.parent
         val useReference = callExpression.firstChild as JSReferenceExpression
         val superRouter = (useReference.firstChild as JSReferenceExpression).resolve() as JSVariable
-        val superPath = locateRouter(superRouter) ?: return null
+        val superPath = locateRouter(superRouter)
         val path = getArgumentValue(argumentList.arguments[0])
 
-        return superPath + path
+        return superPath.map { it + path }
     }
 }
