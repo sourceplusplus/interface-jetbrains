@@ -76,11 +76,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
             }
             val endpointName = getArgumentValue(expression.arguments[0])
 
-            if (endpointType == "get" ||
-                endpointType == "post" ||
-                endpointType == "put" ||
-                endpointType == "delete"
-            ) {
+            if (EndpointDetector.httpMethods.contains(endpointType.uppercase())) {
                 val basePath = locateRouter(routerVariable)
 
                 log.info("Detected Express endpoint: $basePath$endpointName")
@@ -93,12 +89,35 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
                         )
                     }
 
-                    DetectedEndpoint(
+                    return@map DetectedEndpoint(
                         it + endpointName,
                         false,
                         type = endpointType.uppercase()
                     )
                 })
+            } else if (endpointType == "all") {
+                val detectedEndpoints = mutableListOf<DetectedEndpoint>()
+                val basePath = locateRouter(routerVariable)
+
+                EndpointDetector.httpMethods.forEach { endpointType ->
+                    log.info("Detected Express endpoint: $basePath$endpointName")
+                    detectedEndpoints.addAll(basePath.map {
+                        if (it == "/") {
+                            return@map DetectedEndpoint(
+                                "" + endpointName,
+                                false,
+                                type = endpointType.uppercase()
+                            )
+                        }
+
+                        return@map DetectedEndpoint(
+                            it + endpointName,
+                            false,
+                            type = endpointType.uppercase()
+                        )
+                    })
+                }
+                promise.complete(detectedEndpoints)
             } else {
                 promise.complete(emptyList())
             }

@@ -30,6 +30,7 @@ import spp.jetbrains.marker.js.service.JavascriptArtifactNamingService
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.service.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.info.EndpointDetector
 
 @TestDataPath("\$CONTENT_ROOT/testData/endpoint/express")
 class ExpressEndpointTest : BasePlatformTestCase() {
@@ -70,8 +71,29 @@ class ExpressEndpointTest : BasePlatformTestCase() {
         val endpointGuideMark = fileMarker.getGuideMarks().find { it.lineNumber == 4 }
         assertNotNull(endpointGuideMark)
 
-        val detectedEndpoint = ExpressEndpoint().detectEndpointNames(endpointGuideMark!!).await()
-        assertEquals(2, detectedEndpoint.size)
+        val detectedEndpoints = ExpressEndpoint().detectEndpointNames(endpointGuideMark!!).await()
+        assertEquals(2, detectedEndpoints.size)
+        assertTrue(detectedEndpoints.any { it.name == "/test/hello-world" })
+        assertTrue(detectedEndpoints.any { it.name == "/test2/hello-world" })
+    }
+
+    fun testExpressAllEndpoint(): Unit = runBlocking {
+        myFixture.configureByFile("ExpressAllRouter.js")
+        val testEndpointFile = myFixture.configureByFile("all-endpoint.js")
+        val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(testEndpointFile)
+        assertNotNull(fileMarker)
+
+        SourceGuideProvider.determineGuideMarks(fileMarker!!)
+
+        val endpointGuideMark = fileMarker.getGuideMarks().find { it.lineNumber == 4 }
+        assertNotNull(endpointGuideMark)
+
+        val detectedEndpoints = ExpressEndpoint().detectEndpointNames(endpointGuideMark!!).await()
+        assertEquals(16, detectedEndpoints.size)
+        EndpointDetector.httpMethods.forEach { httpType ->
+            assertTrue(detectedEndpoints.any { it.name == "/test/hello-world" && it.type == httpType })
+            assertTrue(detectedEndpoints.any { it.name == "/test2/hello-world" && it.type == httpType })
+        }
     }
 
     private suspend fun doTest() {
