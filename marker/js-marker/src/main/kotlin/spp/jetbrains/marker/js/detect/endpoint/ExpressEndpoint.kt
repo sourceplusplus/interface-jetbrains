@@ -81,13 +81,13 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
                 endpointType == "put" ||
                 endpointType == "delete"
             ) {
-                var basePath = locateRouter(routerVariable)
+                val basePath = locateRouter(routerVariable)
 
                 log.info("Detected Express endpoint: $basePath$endpointName")
                 promise.complete(basePath.map {
                     if (it == "/") {
-                        DetectedEndpoint(
-                            it,
+                        return@map DetectedEndpoint(
+                            "" + endpointName,
                             false,
                             type = endpointType.uppercase()
                         )
