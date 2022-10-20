@@ -30,49 +30,48 @@ import io.vertx.core.Promise
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import java.util.*
 
 /**
- * todo: description.
+ * Endpoint detector for Express.js endpoints.
  *
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
+class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
 
     private val log = logger<ExpressEndpoint>()
 
-    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
+    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         if (!guideMark.isExpressionMark) {
-            return Future.succeededFuture(Optional.empty())
+            return Future.succeededFuture(emptyList())
         }
 
-        val promise = Promise.promise<Optional<DetectedEndpoint>>()
+        val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             if (guideMark.getPsiElement() !is JSCallExpression) {
-                promise.complete(Optional.empty())
+                promise.complete(emptyList())
                 return@runReadAction
             }
 
             val expression = guideMark.getPsiElement() as JSCallExpression
             val method = expression.firstChild as JSReferenceExpression
             if (method.firstChild !is JSReferenceExpression) {
-                promise.complete(Optional.empty())
+                promise.complete(emptyList())
                 return@runReadAction
             }
             val router = method.firstChild as JSReferenceExpression
             val routerVariable = router.resolve() as JSInitializerOwner? ?: run {
-                promise.complete(Optional.empty())
+                promise.complete(emptyList())
                 return@runReadAction
             }
 
             if (method.children.size < 3) {
-                promise.complete(Optional.empty())
+                promise.complete(emptyList())
                 return@runReadAction
             }
             val endpointType = method.children[2].text
             if (expression.arguments.isEmpty()) {
-                promise.complete(Optional.empty())
+                promise.complete(emptyList())
                 return@runReadAction
             }
             val endpointName = getArgumentValue(expression.arguments[0])
@@ -84,7 +83,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
             ) {
                 var basePath = locateRouter(routerVariable)
                 if (basePath == null) {
-                    promise.complete(Optional.empty())
+                    promise.complete(emptyList())
                     return@runReadAction
                 } else if (basePath == "/") {
                     basePath = ""
@@ -92,7 +91,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
 
                 log.info("Detected Express endpoint: $basePath$endpointName")
                 promise.complete(
-                    Optional.of(
+                    listOf(
                         DetectedEndpoint(
                             basePath + endpointName,
                             false,
@@ -101,7 +100,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDeterminer {
                     )
                 )
             } else {
-                promise.complete(Optional.empty())
+                promise.complete(emptyList())
             }
         }
         return promise.future()

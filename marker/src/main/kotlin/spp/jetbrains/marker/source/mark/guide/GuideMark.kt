@@ -23,7 +23,8 @@ import spp.jetbrains.marker.source.mark.guide.config.GuideMarkConfiguration
 import javax.swing.JPanel
 
 /**
- * A [SourceMark] with no visual display used for internal purposes.
+ * A [SourceMark] with no visual display used to associating high-level structures with their underlying code.
+ * For example, a [GuideMark] can be used to associate a method with the REST endpoint(s) it provides.
  *
  * @since 0.4.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

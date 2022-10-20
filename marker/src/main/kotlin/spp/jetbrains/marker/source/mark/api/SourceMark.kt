@@ -46,7 +46,6 @@ import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
-import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
@@ -306,6 +305,14 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         triggerEvent(event) {
             val parentEvent = SourceMarkEvent(this, SourceMarkEventCode.CHILD_USER_DATA_UPDATED, key, value)
             propagateEventToParents(parentEvent)
+        }
+    }
+    fun <T> putUserDataIfAbsent(key: SourceKey<T>, value: T?): T? {
+        return if (userData.containsKey(key)) {
+            userData[key] as T?
+        } else {
+            putUserData(key, value)
+            value
         }
     }
 

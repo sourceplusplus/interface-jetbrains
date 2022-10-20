@@ -433,7 +433,7 @@ object JVMMarkerUtils {
         return ArtifactQualifiedName(
             "$classQualifiedName.${getQualifiedName(method)}",
             type = ArtifactType.METHOD,
-            lineNumber = method.sourcePsi?.let { SourceMarkerUtils.getLineNumber(it) }
+            lineNumber = method.identifyingElement?.let { SourceMarkerUtils.getLineNumber(it) }
         )
     }
 
@@ -476,6 +476,20 @@ object JVMMarkerUtils {
             type = ArtifactType.METHOD,
             lineNumber = method.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
         )
+    }
+
+    fun isJvmMethod(element: PsiElement): Boolean {
+        return element is PsiMethod || element is KtFunction
+    }
+
+    fun getMethodAnnotations(element: PsiElement): List<PsiElement> {
+        require(isJvmMethod(element)) { "Element is not a JVM method: $element" }
+
+        return when (element) {
+            is PsiMethod -> element.annotations.toList()
+            is KtFunction -> element.annotationEntries
+            else -> emptyList()
+        }
     }
 
     @JvmStatic

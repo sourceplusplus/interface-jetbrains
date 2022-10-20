@@ -34,14 +34,14 @@ import java.util.*
  * @since 0.5.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class FlaskEndpoint : EndpointDetector.EndpointNameDeterminer {
+class FlaskEndpoint : EndpointDetector.EndpointNameDetector {
 
-    override fun determineEndpointName(guideMark: GuideMark): Future<Optional<DetectedEndpoint>> {
+    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(Optional.empty())
+            return Future.succeededFuture(emptyList())
         }
 
-        val promise = Promise.promise<Optional<DetectedEndpoint>>()
+        val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             val decorators = (guideMark.getPsiElement() as PyFunction).decoratorList?.decorators
             decorators?.forEach {
@@ -66,12 +66,12 @@ class FlaskEndpoint : EndpointDetector.EndpointNameDeterminer {
                                 }
                             }
                         }
-                        promise.complete(Optional.of(DetectedEndpoint(endpointName, false, type = methodType)))
+                        promise.complete(listOf(DetectedEndpoint(endpointName, false, type = methodType)))
                         return@runReadAction
                     }
                 }
             }
-            promise.tryComplete(Optional.empty())
+            promise.tryComplete(emptyList())
         }
         return promise.future()
     }

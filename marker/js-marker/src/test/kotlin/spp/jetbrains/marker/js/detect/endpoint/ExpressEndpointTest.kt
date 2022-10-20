@@ -70,8 +70,8 @@ class ExpressEndpointTest : BasePlatformTestCase() {
         val endpointGuideMark = fileMarker.getGuideMarks().find { it.lineNumber == 4 }
         assertNotNull(endpointGuideMark)
 
-        val detectedEndpoint = ExpressEndpoint().determineEndpointName(endpointGuideMark!!).await()
-        assertTrue(detectedEndpoint.isPresent)
-        assertEquals("/test/hello-world", detectedEndpoint.get().name)
+        val detectedEndpoint = ExpressEndpoint().detectEndpointNames(endpointGuideMark!!).await()
+        assertEquals(1, detectedEndpoint.size)
+        assertEquals("/test/hello-world", detectedEndpoint[0].name)
     }
 }

@@ -55,34 +55,40 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
     lateinit var eventsWindow: EventsWindow
 
     init {
-        _toolWindow = ToolWindowManager.getInstance(project).registerToolWindow(
-            RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, PluginIcons.Breakpoint.disabled)
-        )
+        val toolWindowManager = ToolWindowManager.getInstance(project)
+        val toolWindow = toolWindowManager.getToolWindow(LIVE_BREAKPOINT_NAME)
+        if (toolWindow != null) {
+            _toolWindow = toolWindow
+        } else {
+            _toolWindow = toolWindowManager.registerToolWindow(
+                RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, PluginIcons.Breakpoint.disabled)
+            )
 
-        _toolWindow!!.contentManager.addContentManagerListener(object : ContentManagerListener {
-            override fun contentAdded(contentManagerEvent: ContentManagerEvent) = Unit
-            override fun contentRemoved(event: ContentManagerEvent) {
-                if (_toolWindow!!.contentManager.contentCount == 0) {
-                    _toolWindow!!.setAvailable(false, null)
-                }
-            }
-
-            override fun contentRemoveQuery(contentManagerEvent: ContentManagerEvent) = Unit
-            override fun selectionChanged(event: ContentManagerEvent) {
-                val disposable = event.content.disposer
-                if (disposable is BreakpointHitWindow) {
-                    if (event.operation == ContentManagerEvent.ContentOperation.add) {
-                        disposable.showExecutionLine()
+            _toolWindow!!.contentManager.addContentManagerListener(object : ContentManagerListener {
+                override fun contentAdded(contentManagerEvent: ContentManagerEvent) = Unit
+                override fun contentRemoved(event: ContentManagerEvent) {
+                    if (_toolWindow!!.contentManager.contentCount == 0) {
+                        _toolWindow!!.setAvailable(false, null)
                     }
                 }
-            }
-        })
+
+                override fun contentRemoveQuery(contentManagerEvent: ContentManagerEvent) = Unit
+                override fun selectionChanged(event: ContentManagerEvent) {
+                    val disposable = event.content.disposer
+                    if (disposable is BreakpointHitWindow) {
+                        if (event.operation == ContentManagerEvent.ContentOperation.add) {
+                            disposable.showExecutionLine()
+                        }
+                    }
+                }
+            })
+        }
         contentManager = _toolWindow!!.contentManager
     }
 
     fun showEventsWindow() {
         eventsWindow = EventsWindow(project)
-        val content = ContentFactory.SERVICE.getInstance().createContent(eventsWindow.layoutComponent, "Events", true)
+        val content = ContentFactory.getInstance().createContent(eventsWindow.layoutComponent, "Events", true)
         content.setDisposer(eventsWindow)
         content.isCloseable = false
         contentManager!!.addContent(content)
@@ -112,7 +118,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
         }
 
         breakpointWindow.showFrames(hit.stackTrace, firstNonSkyWalkingFrame)
-        val content = ContentFactory.SERVICE.getInstance().createContent(
+        val content = ContentFactory.getInstance().createContent(
             breakpointWindow.layoutComponent, firstNonSkyWalkingFrame.source + " at #0", false
         )
         content.setDisposer(breakpointWindow)

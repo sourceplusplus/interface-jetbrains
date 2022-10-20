@@ -19,7 +19,7 @@ package spp.jetbrains.marker.js.detect
 import com.intellij.openapi.project.Project
 import spp.jetbrains.marker.js.detect.endpoint.ExpressEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
-import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
+import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDetector
 
 /**
  * todo: description.
@@ -27,9 +27,9 @@ import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDeterminer
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class JavascriptEndpointDetector(project: Project) : EndpointDetector<EndpointNameDeterminer>(project) {
+class JavascriptEndpointDetector(project: Project) : EndpointDetector<EndpointNameDetector>(project) {
 
-    override val detectorSet: Set<EndpointNameDeterminer> = setOf(
+    override val detectorSet: Set<EndpointNameDetector> = setOf(
         ExpressEndpoint()
     )
 }

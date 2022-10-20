@@ -55,21 +55,15 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                         )
                     }
 
-                    File("/opt/hostedtoolcache/jdk/11.0.10/x64").exists() -> {
-                        JavaSdk.getInstance().createJdk(
-                            "jdk-11", "/opt/hostedtoolcache/jdk/11.0.10/x64", false
-                        )
-                    }
-
-                    File("/opt/hostedtoolcache/Java_Zulu_jdk/11.0.16-8/x64").exists() -> {
-                        JavaSdk.getInstance().createJdk(
-                            "jdk-11", "/opt/hostedtoolcache/Java_Zulu_jdk/11.0.16-8/x64", false
-                        )
-                    }
-
                     File("/opt/java/openjdk").exists() -> {
                         JavaSdk.getInstance().createJdk(
                             "jdk-11", "/opt/java/openjdk", false
+                        )
+                    }
+
+                    File(System.getenv("JAVA_HOME")).exists() -> {
+                        JavaSdk.getInstance().createJdk(
+                            "jdk-11", System.getenv("JAVA_HOME"), false
                         )
                     }
 
