@@ -30,7 +30,6 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class InlayMarkConfiguration(
-    var strictlyManualCreation: Boolean = false,
     var virtualText: InlayMarkVirtualText? = null,
     var showComponentInlay: Boolean = false,
     var inlayRef: Ref<Inlay<*>>? = null,
