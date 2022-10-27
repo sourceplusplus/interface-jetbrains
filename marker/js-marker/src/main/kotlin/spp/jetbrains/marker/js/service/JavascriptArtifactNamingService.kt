@@ -115,7 +115,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         }
         return if (parentElement != null) {
             ArtifactQualifiedName(
-                "${getFullyQualifiedName(parentElement).identifier}#${expressionString}",
+                "${getFullyQualifiedName(parentElement).identifier}#$expressionString",
                 type = type,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )

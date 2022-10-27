@@ -48,7 +48,7 @@ class UrlResolverEndpointDetector(
             return try {
                 Class.forName("com.intellij.microservices.url.UrlResolverManager")
                 true
-            } catch (e: ClassNotFoundException) {
+            } catch (ignore: ClassNotFoundException) {
                 false
             }
         }

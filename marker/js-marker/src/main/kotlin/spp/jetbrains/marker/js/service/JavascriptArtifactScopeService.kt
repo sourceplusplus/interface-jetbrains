@@ -21,8 +21,8 @@ import com.intellij.lang.javascript.psi.JSVariable
 import com.intellij.lang.javascript.psi.util.JSTreeUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfTypes
-import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 
 /**

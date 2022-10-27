@@ -150,7 +150,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
                 if (it.element.parent !is JSElement) {
                     return@flatMap emptyList()
                 }
-                return@flatMap resolveRouterPath(it.element as JSElement);
+                return@flatMap resolveRouterPath(it.element as JSElement)
             }.map { it }
         }, indicator)
 
