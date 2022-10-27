@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.protocol.platform.auth.ClientAccess
 import spp.protocol.platform.auth.CommandType
+import spp.protocol.platform.auth.DeveloperRole
 import spp.protocol.platform.auth.RolePermission
 import spp.protocol.platform.developer.Developer
 import spp.protocol.platform.developer.SelfInfo
@@ -36,6 +37,7 @@ import spp.protocol.service.LiveManagementService
  * Implements [LiveManagementService] for SkyWalking-only environments.
  */
 class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
+
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
@@ -62,6 +64,34 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
      */
     override fun addClientAccess(): Future<ClientAccess> {
         return Future.failedFuture("Illegal operation")
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun addDeveloper(id: String): Future<Developer> {
+        return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun addDeveloperRole(developerId: String, role: DeveloperRole): Future<Void> {
+        return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun addRole(role: DeveloperRole): Future<Boolean> {
+        return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun addRolePermission(role: DeveloperRole, permission: RolePermission): Future<Void> {
+        return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 
     /**
@@ -116,6 +146,13 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
     override fun getActiveProbes(): Future<List<InstanceConnection>> {
+        return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    /**
+     * Requires Source++ platform. Fails in SkyWalking-only environments.
+     */
+    override fun getAuthToken(accessToken: String): Future<String> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 
