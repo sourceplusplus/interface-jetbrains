@@ -65,20 +65,21 @@ import spp.jetbrains.UserData
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
+import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.safeLaunch
+import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.config.getServicePortNormalized
+import spp.jetbrains.sourcemarker.config.isSsl
+import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.portal.PortalController
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.config.getServicePortNormalized
-import spp.jetbrains.sourcemarker.config.isSsl
-import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
@@ -101,7 +102,7 @@ import javax.net.ssl.SSLHandshakeException
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("MagicNumber")
-class SourceMarkerPlugin(val project: Project) {
+class SourceMarkerPlugin : SourceMarkerStartupActivity() {
 
     companion object {
         private const val SPP_PLUGIN_YML_PATH = ".spp/spp-plugin.yml"
@@ -111,7 +112,8 @@ class SourceMarkerPlugin(val project: Project) {
         @Synchronized
         fun getInstance(project: Project): SourceMarkerPlugin {
             if (project.getUserData(KEY) == null) {
-                val plugin = SourceMarkerPlugin(project)
+                val plugin = SourceMarkerPlugin()
+                plugin.project = project
                 project.putUserData(SourceStatusService.KEY, SourceStatusServiceImpl(project))
                 project.putUserData(KEY, plugin)
             }
@@ -119,10 +121,21 @@ class SourceMarkerPlugin(val project: Project) {
         }
     }
 
+    private lateinit var project: Project
     private var loadLivePluginsLock = ReentrantLock()
     private var connectionJob: Job? = null
     private var discovery: ServiceDiscovery? = null
     private var addedConfigListener = false
+
+    override fun runActivity(project: Project) {
+        if (ApplicationManager.getApplication().isUnitTestMode) {
+            return //tests manually set up necessary components
+        }
+
+        //setup plugin
+        safeRunBlocking { getInstance(project).init() }
+        super.runActivity(project)
+    }
 
     suspend fun init(configInput: SourceMarkerConfig? = null) {
         log.info("Initializing SourceMarkerPlugin on project: $project")

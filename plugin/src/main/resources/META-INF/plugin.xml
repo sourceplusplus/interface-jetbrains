@@ -25,8 +25,7 @@
                 groupId="tools"
                 id="Source++"
                 displayName="Source++"/>
-        <postStartupActivity
-                implementation="spp.jetbrains.sourcemarker.activities.PluginSourceMarkerStartupActivity"/>
+        <postStartupActivity implementation="spp.jetbrains.sourcemarker.SourceMarkerPlugin"/>
 
         <errorHandler implementation="spp.jetbrains.sourcemarker.reporting.GitHubErrorReporter"/>
 
