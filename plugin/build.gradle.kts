@@ -53,6 +53,10 @@ tasks.getByName<JavaExec>("runIde") {
     systemProperty("idea.log.debug.categories", "#spp.jetbrains")
 }
 
+sourceSets.main {
+    java.srcDirs("src/main/kotlin")
+}
+
 changelog {
     version.set(projectVersion)
 }
