@@ -581,7 +581,6 @@ class SourceMarkerPlugin(val project: Project) {
         }
 
         SourceMarker.getInstance(project).configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
-        SourceMarker.getInstance(project).configuration.inlayMarkConfiguration.strictlyManualCreation = true
         SourceMarker.getInstance(project).enabled = true
         log.info("Source marker enabled")
 
