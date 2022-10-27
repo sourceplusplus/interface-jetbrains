@@ -475,6 +475,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         meta.put("original_source_mark", inlayMark.getId());
 
         LiveBreakpoint instrument = new LiveBreakpoint(
+                null,
                 sourceLocation,
                 condition,
                 expirationDate,
