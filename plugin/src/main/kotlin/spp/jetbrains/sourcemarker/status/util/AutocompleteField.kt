@@ -416,7 +416,8 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         if (list.selectedValue is LiveCommandFieldRow) {
             val liveCommand = (list.selectedValue as LiveCommandFieldRow).liveCommand
             if (!text.lowercase().startsWith(liveCommand.getTriggerName().lowercase())) return
-            val params = substringAfterIgnoreCase(text, liveCommand.getTriggerName()).split(" ").filter { it.isNotEmpty() }
+            val params = substringAfterIgnoreCase(text, liveCommand.getTriggerName())
+                .split(" ").filter { it.isNotEmpty() }
 
             var textOffset = 0
             for ((index, param) in liveCommand.params.withIndex()) {
