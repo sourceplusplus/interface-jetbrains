@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.settings;
+package spp.jetbrains.sourcemarker.config.ui;
 
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.project.Project;
@@ -28,6 +28,8 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.Nullable;
+import spp.jetbrains.sourcemarker.config.PortalConfig;
+import spp.jetbrains.sourcemarker.config.SourceMarkerConfig;
 import spp.protocol.platform.general.Service;
 
 import javax.swing.*;
@@ -94,7 +96,7 @@ public class PluginConfigurationPanel {
         return myWholePanel;
     }
 
-    boolean isModified() {
+    public boolean isModified() {
         if (config.getOverride()) return false;
 
         if (!Objects.equals(autoResolveEndpointNamesCheckBox.isSelected(), config.getAutoResolveEndpointNames())) {

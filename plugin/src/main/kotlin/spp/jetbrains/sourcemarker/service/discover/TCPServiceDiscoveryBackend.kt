@@ -38,9 +38,9 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.servicediscovery.Record
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.settings.isSsl
-import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
+import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.config.isSsl
+import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.PlatformAddress

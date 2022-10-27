@@ -34,10 +34,10 @@ import spp.jetbrains.marker.source.mark.api.component.jcef.config.BrowserLoading
 import spp.jetbrains.marker.source.mark.api.component.jcef.config.SourceMarkJcefComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
-import spp.jetbrains.sourcemarker.settings.isSsl
-import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
+import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.config.getServicePortNormalized
+import spp.jetbrains.sourcemarker.config.isSsl
+import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.UIManager

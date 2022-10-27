@@ -20,7 +20,7 @@ import spp.jetbrains.PluginUI.getBackgroundFocusColor
 import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
 import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.sourcemarker.element.LiveControlBarRow
+import spp.jetbrains.sourcemarker.command.ui.status.element.LiveControlBarRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer

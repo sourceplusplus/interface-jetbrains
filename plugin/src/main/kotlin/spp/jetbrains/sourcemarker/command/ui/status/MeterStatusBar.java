@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status;
+package spp.jetbrains.sourcemarker.command.ui.status;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
@@ -39,8 +39,8 @@ import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
 import spp.jetbrains.marker.SourceMarkerKeys;
+import spp.jetbrains.sourcemarker.command.ui.status.config.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
-import spp.jetbrains.sourcemarker.settings.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.state.LiveStateBar;

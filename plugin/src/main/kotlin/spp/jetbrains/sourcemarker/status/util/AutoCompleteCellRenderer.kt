@@ -18,7 +18,7 @@ package spp.jetbrains.sourcemarker.status.util
 
 import spp.jetbrains.PluginUI.getBackgroundFocusColor
 import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
-import spp.jetbrains.sourcemarker.element.AutocompleteRow
+import spp.jetbrains.sourcemarker.command.ui.status.element.AutocompleteRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.Component

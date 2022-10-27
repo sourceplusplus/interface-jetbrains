@@ -24,7 +24,7 @@ import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI
 import spp.jetbrains.PluginUI.SMALLEST_FONT
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.element.AutocompleteDropdown
+import spp.jetbrains.sourcemarker.command.ui.status.element.AutocompleteDropdown
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*

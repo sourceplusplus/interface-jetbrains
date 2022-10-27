@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.settings
+package spp.jetbrains.sourcemarker.config
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.options.Configurable
@@ -26,6 +26,7 @@ import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.config.ui.PluginConfigurationPanel
 import javax.swing.JComponent
 
 /**

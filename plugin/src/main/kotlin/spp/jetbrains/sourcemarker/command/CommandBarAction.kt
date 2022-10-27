@@ -27,7 +27,7 @@ import com.intellij.openapi.project.Project
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ControlBarAction : AnAction() {
+class CommandBarAction : AnAction() {
 
     override fun update(e: AnActionEvent) {
         val project: Project? = e.project
@@ -37,6 +37,6 @@ class ControlBarAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val editor = e.getData(PlatformDataKeys.EDITOR) ?: return
         val lineNumber = editor.document.getLineNumber(editor.caretModel.offset)
-        ControlBarController.showControlBar(editor, lineNumber + 1)
+        CommandBarController.showCommandBar(editor, lineNumber + 1)
     }
 }

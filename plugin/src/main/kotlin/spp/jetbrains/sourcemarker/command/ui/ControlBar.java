@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker;
+package spp.jetbrains.sourcemarker.command.ui;
 
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
@@ -28,7 +28,7 @@ import spp.jetbrains.command.LiveLocationContext;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.service.ArtifactNamingService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.command.ControlBarController;
+import spp.jetbrains.sourcemarker.command.CommandBarController;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
 import spp.jetbrains.sourcemarker.status.util.LiveCommandFieldRow;
@@ -93,9 +93,9 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1.addSaveListener(() -> {
             String autoCompleteText = textField1.getSelectedText();
             if (autoCompleteText != null) {
-                ControlBarController.handleCommandInput(autoCompleteText, editor);
+                CommandBarController.handleCommandInput(autoCompleteText, editor);
             } else {
-                ControlBarController.handleCommandInput(textField1.getText(), editor);
+                CommandBarController.handleCommandInput(textField1.getText(), editor);
             }
         });
     }
@@ -118,16 +118,16 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                     //ignore tab; handled by auto-complete
                     e.consume();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP && !textField1.isPopupVisible()) {
-                    Integer nextLine = ControlBarController.getNextAvailableControlBarLine(editor, inlayMark, true);
+                    Integer nextLine = CommandBarController.getNextAvailableCommandBarLine(editor, inlayMark, true);
                     if (nextLine != null) {
                         dispose();
-                        ControlBarController.showControlBar(editor, nextLine);
+                        CommandBarController.showCommandBar(editor, nextLine);
                     }
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN && !textField1.isPopupVisible()) {
-                    Integer nextLine = ControlBarController.getNextAvailableControlBarLine(editor, inlayMark, false);
+                    Integer nextLine = CommandBarController.getNextAvailableCommandBarLine(editor, inlayMark, false);
                     if (nextLine != null) {
                         dispose();
-                        ControlBarController.showControlBar(editor, nextLine);
+                        CommandBarController.showCommandBar(editor, nextLine);
                     }
                 }
             }
@@ -140,13 +140,13 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
                     if (!textField1.getReady()) return;
                     String autoCompleteText = textField1.getSelectedText();
                     if (autoCompleteText != null) {
-                        ControlBarController.handleCommandInput(autoCompleteText, textField1.getActualText(), editor);
+                        CommandBarController.handleCommandInput(autoCompleteText, textField1.getActualText(), editor);
                     } else if (!textField1.getText().isEmpty()) {
                         List<LiveCommandFieldRow> commands = lookup.apply(textField1.getText());
                         if (commands.isEmpty()) {
-                            ControlBarController.handleCommandInput(textField1.getText(), editor);
+                            CommandBarController.handleCommandInput(textField1.getText(), editor);
                         } else {
-                            ControlBarController.handleCommandInput(commands.get(0).getText(), editor);
+                            CommandBarController.handleCommandInput(commands.get(0).getText(), editor);
                         }
                     }
                 }

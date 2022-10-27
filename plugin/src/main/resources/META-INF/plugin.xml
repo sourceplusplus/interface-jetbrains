@@ -21,7 +21,7 @@
         <editor.linePainter
                 implementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.painter.VariableEditorLinePainter"/>
         <projectConfigurable
-                instance="spp.jetbrains.sourcemarker.settings.SourceMarkerConfigurable"
+                instance="spp.jetbrains.sourcemarker.config.SourceMarkerConfigurable"
                 groupId="tools"
                 id="Source++"
                 displayName="Source++"/>
@@ -67,8 +67,8 @@
     </projectListeners>
 
     <actions>
-        <action id="spp.jetbrains.sourcemarker.command.ControlBarAction"
-                class="spp.jetbrains.sourcemarker.command.ControlBarAction"
+        <action id="spp.jetbrains.sourcemarker.command.CommandBarAction"
+                class="spp.jetbrains.sourcemarker.command.CommandBarAction"
                 text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>

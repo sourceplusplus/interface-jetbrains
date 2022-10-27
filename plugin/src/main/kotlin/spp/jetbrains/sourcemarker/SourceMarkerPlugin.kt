@@ -75,10 +75,10 @@ import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.settings.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.settings.getServicePortNormalized
-import spp.jetbrains.sourcemarker.settings.isSsl
-import spp.jetbrains.sourcemarker.settings.serviceHostNormalized
+import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.config.getServicePortNormalized
+import spp.jetbrains.sourcemarker.config.isSsl
+import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
