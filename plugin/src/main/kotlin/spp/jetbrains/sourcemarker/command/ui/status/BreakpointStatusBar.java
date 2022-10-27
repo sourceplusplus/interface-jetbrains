@@ -55,6 +55,7 @@ import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.event.TrackedLiveEvent;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
+import spp.protocol.instrument.variable.LiveVariableControl;
 import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;
@@ -65,6 +66,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -457,6 +459,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
             );
         }
 
+        LiveVariableControl variableControl = null;
         long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
         InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
         JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();
@@ -468,6 +471,16 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
                     ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
             );
 
+            if (configurationPanel.isVariableControlChanged()) {
+                variableControl = new LiveVariableControl(
+                        configurationPanel.getMaxObjectDepth(),
+                        configurationPanel.getMaxObjectSize(),
+                        configurationPanel.getMaxCollectionLength(),
+                        Collections.emptyMap(),
+                        Collections.emptyMap()
+                );
+            }
+
             configurationPanel.setNewDefaults();
         }
 
@@ -475,7 +488,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         meta.put("original_source_mark", inlayMark.getId());
 
         LiveBreakpoint instrument = new LiveBreakpoint(
-                null,
+                variableControl,
                 sourceLocation,
                 condition,
                 expirationDate,
@@ -487,9 +500,9 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
                 throttle,
                 meta
         );
-        UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {
+        UserData.liveInstrumentService(inlayMark.getProject()).addLiveBreakpoint(instrument).onComplete(it -> {
             if (it.succeeded()) {
-                liveBreakpoint = (LiveBreakpoint) it.result();
+                liveBreakpoint = it.result();
                 inlayMark.putUserData(SourceMarkerKeys.getINSTRUMENT_ID(), liveBreakpoint.getId());
                 LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveBreakpoint);
             } else {
