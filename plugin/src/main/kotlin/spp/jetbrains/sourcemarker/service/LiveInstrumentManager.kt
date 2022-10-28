@@ -85,11 +85,6 @@ class LiveInstrumentManager(
     }
 
     override fun onLogAddedEvent(event: LiveLog) {
-        if (!SourceMarker.getInstance(project).enabled) {
-            log.debug("SourceMarker disabled. Ignored log added")
-            return
-        }
-
         ApplicationManager.getApplication().invokeLater {
             val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.location.source)
             if (fileMarker != null) {
@@ -131,11 +126,6 @@ class LiveInstrumentManager(
     }
 
     override fun onBreakpointHitEvent(event: LiveBreakpointHit) {
-        if (!SourceMarker.getInstance(project).enabled) {
-            log.debug("SourceMarker disabled. Ignored breakpoint hit")
-            return
-        }
-
         ApplicationManager.getApplication().invokeLater {
             BreakpointHitWindowService.getInstance(project).addBreakpointHit(event)
 
@@ -145,11 +135,6 @@ class LiveInstrumentManager(
     }
 
     override fun onLogHitEvent(event: LiveLogHit) {
-        if (!SourceMarker.getInstance(project).enabled) {
-            log.debug("SourceMarker disabled. Ignored log hit")
-            return
-        }
-
         SourceMarkSearch.findByInstrumentId(project, event.logId)
             ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
     }

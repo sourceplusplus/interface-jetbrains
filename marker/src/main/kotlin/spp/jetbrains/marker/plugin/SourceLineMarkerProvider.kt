@@ -36,10 +36,6 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        if (!SourceMarker.getInstance(element.project).enabled) {
-            return null
-        }
-
         val gutterMark = element.getUserData(SourceKey.GutterMark) ?: return null
         if (!gutterMark.isVisible()) {
             return null
@@ -71,7 +67,7 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         elements: MutableList<out PsiElement>,
         result: MutableCollection<in LineMarkerInfo<*>>
     ) {
-        if (elements.firstOrNull() == null || !SourceMarker.getInstance(elements.first().project).enabled) {
+        if (elements.firstOrNull() == null) {
             return
         }
 

@@ -66,15 +66,11 @@ class SourceMarker {
         }
     }
 
-    @Volatile
-    var enabled = true
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
 
     suspend fun clearAvailableSourceFileMarkers() {
-        check(enabled) { "SourceMarker disabled" }
-
         availableSourceFileMarkers.forEach {
             deactivateSourceFileMarker(it.value)
         }
@@ -82,8 +78,6 @@ class SourceMarker {
     }
 
     suspend fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
-        check(enabled) { "SourceMarker disabled" }
-
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
             sourceFileMarker.clearSourceMarks()
             sourceFileMarker.psiFile.putUserData(SourceFileMarker.KEY, null)
@@ -94,8 +88,6 @@ class SourceMarker {
     }
 
     fun getSourceFileMarker(psiFile: PsiFile): SourceFileMarker? {
-        check(enabled) { "SourceMarker disabled" }
-
         var fileMarker = psiFile.getUserData(SourceFileMarker.KEY)
         if (fileMarker != null) {
             return fileMarker
@@ -115,8 +107,6 @@ class SourceMarker {
     }
 
     fun getSourceFileMarker(qualifiedClassNameOrFilename: String): SourceFileMarker? {
-        check(enabled) { "SourceMarker disabled" }
-
         return availableSourceFileMarkers.values.find {
             ArtifactNamingService.getQualifiedClassNames(it.psiFile).find {
                 it.identifier.contains(qualifiedClassNameOrFilename)
@@ -125,8 +115,6 @@ class SourceMarker {
     }
 
     fun getSourceFileMarker(artifactQualifiedName: ArtifactQualifiedName): SourceFileMarker? {
-        check(enabled) { "SourceMarker disabled" }
-
         val classArtifactQualifiedName = artifactQualifiedName.copy(
             identifier = ArtifactNameUtils.getQualifiedClassName(artifactQualifiedName.identifier)!!,
             type = ArtifactType.CLASS
@@ -137,8 +125,6 @@ class SourceMarker {
     }
 
     fun getAvailableSourceFileMarkers(): List<SourceFileMarker> {
-        check(enabled) { "SourceMarker disabled" }
-
         return ImmutableList.copyOf(availableSourceFileMarkers.values)
     }
 
@@ -161,8 +147,6 @@ class SourceMarker {
     }
 
     fun getSourceMark(artifactQualifiedName: ArtifactQualifiedName, type: SourceMark.Type): SourceMark? {
-        check(enabled) { "SourceMarker disabled" }
-
         availableSourceFileMarkers.values.forEach {
             val sourceMark = it.getSourceMark(artifactQualifiedName, type)
             if (sourceMark != null) {
@@ -177,8 +161,6 @@ class SourceMarker {
     }
 
     fun getSourceMarks(artifactQualifiedName: ArtifactQualifiedName): List<SourceMark> {
-        check(enabled) { "SourceMarker disabled" }
-
         availableSourceFileMarkers.values.forEach {
             val sourceMarks = it.getSourceMarks(artifactQualifiedName)
             if (sourceMarks.isNotEmpty()) {
@@ -189,7 +171,6 @@ class SourceMarker {
     }
 
     fun getSourceMarks(): List<SourceMark> {
-        check(enabled) { "SourceMarker disabled" }
         return availableSourceFileMarkers.values.flatMap { it.getSourceMarks() }
     }
 

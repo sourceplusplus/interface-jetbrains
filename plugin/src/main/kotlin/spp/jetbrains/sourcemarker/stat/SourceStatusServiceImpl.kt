@@ -30,6 +30,7 @@ import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
+import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.status.SourceStatusService
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
@@ -65,6 +66,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                 log.info("Status changed from $oldStatus to $status")
                 safeGlobalLaunch {
                     onStatusChanged(status)
+                    project.messageBus.syncPublisher(SourceStatusListener.TOPIC).onStatusChanged(status)
                 }
             }
         }

@@ -46,4 +46,7 @@ enum class SourceStatus {
                 ConnectionError -> "Connection error"
             }
         }
+
+    val disposedPlugin: Boolean
+        get() = this == Disabled || this == ConnectionError
 }

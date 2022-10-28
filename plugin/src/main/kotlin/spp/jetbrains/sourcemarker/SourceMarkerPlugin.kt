@@ -401,11 +401,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
 
     suspend fun disposePlugin() {
         log.info("Disposing Source++ plugin. Project: ${project.name}")
-        if (SourceMarker.getInstance(project).enabled) {
-            SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
-            SourceMarker.getInstance(project).clearGlobalSourceMarkEventListeners()
-        }
-        SourceMarker.getInstance(project).enabled = false
+        SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
+        SourceMarker.getInstance(project).clearGlobalSourceMarkEventListeners()
 
         project.getUserData(LivePluginService.KEY)?.reset()
 
@@ -592,10 +589,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
             addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(project, vertx))
         }
-
-        SourceMarker.getInstance(project).configuration.guideMarkConfiguration.activateOnKeyboardShortcut = true
-        SourceMarker.getInstance(project).enabled = true
-        log.info("Source marker enabled")
 
         //force marker re-processing
         DaemonCodeAnalyzer.getInstance(project).restart()
