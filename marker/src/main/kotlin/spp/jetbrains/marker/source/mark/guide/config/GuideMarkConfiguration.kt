@@ -30,6 +30,6 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
  */
 data class GuideMarkConfiguration(
     var liveTooltip: LiveTooltip? = null,
-    override var activateOnKeyboardShortcut: Boolean = false,
+    override var activateOnKeyboardShortcut: Boolean = true,
     override var componentProvider: SourceMarkComponentProvider = SourceMarkJcefComponentProvider()
 ) : SourceMarkConfiguration

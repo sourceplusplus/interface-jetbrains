@@ -139,12 +139,7 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
         editor: Editor,
         settings: NoSettings,
         sink: InlayHintsSink
-    ): InlayHintsCollector? {
-        if (!SourceMarker.getInstance(editor.project!!).enabled) {
-            log.warn("SourceMarker is disabled. Skipping inlay hints.")
-            return null
-        }
-
+    ): InlayHintsCollector {
         return object : FactoryInlayHintsCollector(editor) {
             override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
                 val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return true

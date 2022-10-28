@@ -23,7 +23,6 @@ import io.vertx.ext.auth.impl.jose.JWT
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
@@ -49,10 +48,6 @@ class LiveViewManager(
         vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developer)) {
             val event = LiveViewEvent(it.body())
             if (log.isTraceEnabled) log.trace("Received live event: $event")
-            if (!SourceMarker.getInstance(project).enabled) {
-                log.warn("SourceMarker is not enabled, ignoring live event: $event")
-                return@consumer
-            }
 
             //todo: remove in favor of sending events to individual subscribers
             SourceMarkSearch.findBySubscriptionId(project, event.subscriptionId)

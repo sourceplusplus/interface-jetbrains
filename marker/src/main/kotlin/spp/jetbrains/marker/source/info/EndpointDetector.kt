@@ -28,6 +28,7 @@ import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
 import spp.jetbrains.safeLaunch
+import spp.jetbrains.status.SourceStatusListener
 
 /**
  * Base class for endpoint detectors. Concrete endpoint detectors are responsible for determining the endpoint name(s)
@@ -58,6 +59,9 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
 
     private fun setupRedetector() {
         if (project.getUserData(REDETECTOR_SETUP) != true) {
+            project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+                if (it.disposedPlugin) project.putUserData(REDETECTOR_SETUP, false)
+            })
             project.putUserData(REDETECTOR_SETUP, true)
             log.info("Setting up endpoint re-detector for project ${project.name}")
 

@@ -19,12 +19,10 @@ package spp.jetbrains.marker.source.mark
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import org.jetbrains.annotations.NotNull
-import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
@@ -40,14 +38,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
  */
 open class SourceMarkPopupAction : AnAction() {
 
-    private val log = logger<SourceMarkPopupAction>()
-
     override fun update(@NotNull e: AnActionEvent) {
-        if (!SourceMarker.getInstance(e.project!!).enabled) {
-            log.warn("SourceMarker disabled. Ignoring popup action.")
-            return
-        }
-
         val project: Project? = e.project
         e.presentation.isEnabledAndVisible = project != null
     }
