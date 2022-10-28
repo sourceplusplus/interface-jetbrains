@@ -21,6 +21,7 @@ import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.logger
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * todo: description.
@@ -31,7 +32,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
 object SourceGuideProvider : AbstractSourceGuideProvider {
 
     private val log = logger<SourceGuideProvider>()
-    private val providers = mutableMapOf<String, MutableList<AbstractSourceGuideProvider>>()
+    private val providers = ConcurrentHashMap<String, MutableList<AbstractSourceGuideProvider>>()
 
     fun addProvider(guideProvider: AbstractSourceGuideProvider, language: String, vararg languages: String) {
         providers.computeIfAbsent(language) { mutableListOf() }.add(guideProvider)
