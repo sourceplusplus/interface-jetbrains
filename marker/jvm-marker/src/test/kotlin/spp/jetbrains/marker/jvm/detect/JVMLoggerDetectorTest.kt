@@ -61,7 +61,7 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
                         )
                     }
 
-                    File(System.getenv("JAVA_HOME")).exists() -> {
+                    System.getenv("JAVA_HOME")?.let { File(it).exists() } == true -> {
                         JavaSdk.getInstance().createJdk(
                             "jdk-11", System.getenv("JAVA_HOME"), false
                         )
