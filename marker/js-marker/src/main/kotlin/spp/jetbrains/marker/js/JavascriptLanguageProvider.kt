@@ -92,12 +92,14 @@ class JavascriptLanguageProvider : LanguageProvider {
             }
         })
 
-        ArtifactMarkService.addService(JavascriptArtifactMarkService(), SourceMarkerUtils.getJavaScriptLanguages())
-        ArtifactCreationService.addService(JavascriptArtifactCreationService(), SourceMarkerUtils.getJavaScriptLanguages())
-        ArtifactNamingService.addService(JavascriptArtifactNamingService(), SourceMarkerUtils.getJavaScriptLanguages())
-        ArtifactScopeService.addService(JavascriptArtifactScopeService(), SourceMarkerUtils.getJavaScriptLanguages())
-        ArtifactConditionService.addService(JavascriptArtifactConditionService(), SourceMarkerUtils.getJavaScriptLanguages())
-        ArtifactTypeService.addService(JavascriptArtifactTypeService(), SourceMarkerUtils.getJavaScriptLanguages())
-        SourceGuideProvider.addProvider(JavascriptGuideProvider(), SourceMarkerUtils.getJavaScriptLanguages())
+        SourceMarkerUtils.getJavaScriptLanguages().let {
+            ArtifactMarkService.addService(JavascriptArtifactMarkService(), it)
+            ArtifactCreationService.addService(JavascriptArtifactCreationService(), it)
+            ArtifactNamingService.addService(JavascriptArtifactNamingService(), it)
+            ArtifactScopeService.addService(JavascriptArtifactScopeService(), it)
+            ArtifactConditionService.addService(JavascriptArtifactConditionService(), it)
+            ArtifactTypeService.addService(JavascriptArtifactTypeService(), it)
+            SourceGuideProvider.addProvider(JavascriptGuideProvider(), it)
+        }
     }
 }

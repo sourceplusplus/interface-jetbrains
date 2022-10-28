@@ -97,12 +97,14 @@ class JVMLanguageProvider : LanguageProvider {
             }
         })
 
-        ArtifactMarkService.addService(JVMArtifactMarkService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactCreationService.addService(JVMArtifactCreationService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactNamingService.addService(JVMArtifactNamingService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactScopeService.addService(JVMArtifactScopeService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactConditionService.addService(JVMArtifactConditionService(), SourceMarkerUtils.getJvmLanguages())
-        ArtifactTypeService.addService(JVMArtifactTypeService(), SourceMarkerUtils.getJvmLanguages())
-        SourceGuideProvider.addProvider(JVMGuideProvider(), SourceMarkerUtils.getJvmLanguages())
+        SourceMarkerUtils.getJvmLanguages().let {
+            ArtifactMarkService.addService(JVMArtifactMarkService(), it)
+            ArtifactCreationService.addService(JVMArtifactCreationService(), it)
+            ArtifactNamingService.addService(JVMArtifactNamingService(), it)
+            ArtifactScopeService.addService(JVMArtifactScopeService(), it)
+            ArtifactConditionService.addService(JVMArtifactConditionService(), it)
+            ArtifactTypeService.addService(JVMArtifactTypeService(), it)
+            SourceGuideProvider.addProvider(JVMGuideProvider(), it)
+        }
     }
 }
