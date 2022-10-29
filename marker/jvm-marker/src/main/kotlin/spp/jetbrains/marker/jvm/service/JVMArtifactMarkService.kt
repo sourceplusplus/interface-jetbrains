@@ -19,17 +19,14 @@ package spp.jetbrains.marker.jvm.service
 import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiStatement
 import com.intellij.ui.treeStructure.SimpleNode
-import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.presentation.JVMVariableNode
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.service.define.IArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.instrument.variable.LiveVariable
@@ -41,20 +38,6 @@ import spp.protocol.instrument.variable.LiveVariable
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactMarkService : IArtifactMarkService {
-
-    override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
-        val parent = element.parent
-        if ((parent is PsiMethod && element === parent.nameIdentifier)
-            || (JVMMarkerUtils.getNameIdentifier(parent) === element)
-        ) {
-            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
-            return JVMMarkerUtils.getOrCreateMethodInlayMark(fileMarker, element)
-        } else if (element is PsiStatement) {
-            val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile)!!
-            return JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element)
-        }
-        return null
-    }
 
     override fun displayVirtualText(
         element: PsiElement,

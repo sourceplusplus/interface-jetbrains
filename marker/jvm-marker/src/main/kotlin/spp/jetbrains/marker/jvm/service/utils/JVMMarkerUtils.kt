@@ -28,10 +28,8 @@ import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.gutter.ClassGutterMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
-import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import java.util.*
@@ -261,113 +259,6 @@ object JVMMarkerUtils {
                 null
             } else {
                 gutterMark
-            }
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun getOrCreateMethodInlayMark(
-        fileMarker: SourceFileMarker,
-        element: PsiElement,
-        autoApply: Boolean = false
-    ): MethodInlayMark? {
-        var inlayMark = element.getUserData(SourceKey.InlayMark) as MethodInlayMark?
-        if (inlayMark == null) {
-            inlayMark = fileMarker.getMethodSourceMark(element.parent, SourceMark.Type.INLAY) as MethodInlayMark?
-            if (inlayMark != null) {
-                if (inlayMark.updatePsiMethod(element.parent as PsiNameIdentifierOwner)) {
-                    element.putUserData(SourceKey.InlayMark, inlayMark)
-                } else {
-                    inlayMark = null
-                }
-            }
-        }
-
-        return if (inlayMark == null) {
-            inlayMark = fileMarker.createMethodSourceMark(
-                element.parent as PsiNameIdentifierOwner,
-                SourceMark.Type.INLAY
-            ) as MethodInlayMark
-            return if (autoApply) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                inlayMark
-            }
-        } else {
-            if (fileMarker.removeIfInvalid(inlayMark)) {
-                element.putUserData(SourceKey.InlayMark, null)
-                null
-            } else {
-                inlayMark
-            }
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun getOrCreateClassGutterMark(
-        fileMarker: SourceFileMarker,
-        element: PsiElement,
-        autoApply: Boolean = true
-    ): ClassGutterMark? {
-        var gutterMark = element.getUserData(SourceKey.GutterMark) as ClassGutterMark?
-        if (gutterMark == null) {
-            gutterMark = fileMarker.getClassSourceMark(element.parent, SourceMark.Type.GUTTER) as ClassGutterMark?
-            if (gutterMark != null) {
-                if (gutterMark.updatePsiClass(element.parent.toUElement() as UClass)) {
-                    element.putUserData(SourceKey.GutterMark, gutterMark)
-                } else {
-                    gutterMark = null
-                }
-            }
-        }
-
-        if (gutterMark == null) {
-            val uClass = element.parent.toUElement() as UClass
-            if (uClass.qualifiedName == null) {
-                log.warn("Could not determine qualified name of class: $uClass")
-                return null
-            }
-            gutterMark = fileMarker.createClassSourceMark(
-                element.parent as PsiNameIdentifierOwner,
-                SourceMark.Type.GUTTER
-            ) as ClassGutterMark
-            return if (autoApply) {
-                gutterMark.apply(true)
-                gutterMark
-            } else {
-                gutterMark
-            }
-        } else {
-            return when {
-                fileMarker.removeIfInvalid(gutterMark) -> {
-                    element.putUserData(SourceKey.GutterMark, null)
-                    null
-                }
-
-                gutterMark.configuration.icon != null -> {
-                    gutterMark.setVisible(true)
-                    gutterMark
-                }
-
-                else -> {
-                    gutterMark.setVisible(false)
-                    gutterMark
-                }
             }
         }
     }

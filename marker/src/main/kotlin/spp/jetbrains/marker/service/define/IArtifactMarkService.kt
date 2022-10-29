@@ -27,8 +27,6 @@ import spp.protocol.instrument.variable.LiveVariable
 
 interface IArtifactMarkService : ISourceMarkerService {
 
-    fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? = null
-
     fun displayVirtualText(
         element: PsiElement,
         virtualText: InlayMarkVirtualText,

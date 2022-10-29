@@ -22,16 +22,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.ui.treeStructure.SimpleNode
 import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactMarkService
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.instrument.variable.LiveVariable
 
 object ArtifactMarkService : AbstractSourceMarkerService<IArtifactMarkService>(), IArtifactMarkService {
-
-    override fun createInlayMarkIfNecessary(element: PsiElement): InlayMark? {
-        return getService(element.language).createInlayMarkIfNecessary(element)
-    }
 
     override fun displayVirtualText(
         element: PsiElement,
