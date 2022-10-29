@@ -43,14 +43,12 @@ object JVMMarkerUtils {
     private val log = logger<JVMMarkerUtils>()
 
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
-        if (element is KtClass) {
-            return getFullyQualifiedName(element)
-        } else if (element is KtFunction) {
-            return getFullyQualifiedName(element)
-        } else if (element is PsiClass) {
-            return getFullyQualifiedName(element)
-        } else if (element is PsiMethod) {
-            return getFullyQualifiedName(element)
+        when (element) {
+            is KtClass -> return getFullyQualifiedName(element)
+            is KtFunction -> return getFullyQualifiedName(element)
+            is PsiClass -> return getFullyQualifiedName(element)
+            is PsiMethod -> return getFullyQualifiedName(element)
+            else -> Unit
         }
 
         var expressionString = element.text
@@ -119,7 +117,7 @@ object JVMMarkerUtils {
         return getFullyQualifiedName(method.toUElementOfType<UMethod>()!!)
     }
 
-    fun getFullyQualifiedName(method: PsiMethod): ArtifactQualifiedName {
+    private fun getFullyQualifiedName(method: PsiMethod): ArtifactQualifiedName {
         val classQualifiedName = method.findAnyContainingStrict(PsiClass::class.java)?.let {
             getFullyQualifiedName(it).identifier
         }
