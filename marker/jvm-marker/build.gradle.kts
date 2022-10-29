@@ -7,6 +7,7 @@ val projectVersion: String by project
 val joorVersion: String by project
 val intellijVersion: String by project
 val jupiterVersion: String by project
+val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 intellij {
     plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13"))
@@ -15,7 +16,7 @@ intellij {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    implementation("plus.sourceplus:protocol:$projectVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion")
 
     implementation("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")

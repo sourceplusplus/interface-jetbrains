@@ -5,10 +5,11 @@ plugins {
 val projectVersion: String by project
 val joorVersion: String by project
 val vertxVersion: String by project
+val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 dependencies {
     compileOnly(projectDependency(":common"))
-    compileOnly("plus.sourceplus:protocol:$projectVersion")
+    compileOnly("plus.sourceplus:protocol:$protocolVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("io.vertx:vertx-core:$vertxVersion")

@@ -6,11 +6,12 @@ plugins {
 val vertxVersion: String by project
 val apolloVersion: String by project
 val projectVersion: String by project
+val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 dependencies {
     compileOnly(projectDependency(":common"))
 
-    compileOnly("plus.sourceplus:protocol:$projectVersion")
+    compileOnly("plus.sourceplus:protocol:$protocolVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
 

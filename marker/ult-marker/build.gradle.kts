@@ -4,6 +4,7 @@ plugins {
 
 val vertxVersion: String by project
 val projectVersion: String by project
+val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 intellij {
     type.set("IU")
@@ -12,7 +13,7 @@ intellij {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    implementation("plus.sourceplus:protocol:$projectVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion")
 
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 }

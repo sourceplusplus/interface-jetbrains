@@ -5,6 +5,7 @@ plugins {
 val vertxVersion: String by project
 val projectVersion: String by project
 val jupiterVersion: String by project
+val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 intellij {
     type.set("IC")
@@ -14,7 +15,7 @@ intellij {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    implementation("plus.sourceplus:protocol:$projectVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

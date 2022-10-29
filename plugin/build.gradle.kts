@@ -13,6 +13,7 @@ val vertxVersion: String by project
 val kotlinVersion: String by project
 val projectVersion: String by project
 val jupiterVersion: String by project
+val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
@@ -76,8 +77,8 @@ dependencies {
     runtimeOnly(projectDependency(":marker:py-marker"))
     runtimeOnly(projectDependency(":marker:ult-marker"))
     implementation(projectDependency(":monitor"))
-    implementation("plus.sourceplus.interface:interface-booster-ui:$projectVersion")
-    implementation("plus.sourceplus:protocol:$projectVersion")
+    implementation("plus.sourceplus.interface:interface-booster-ui:$protocolVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion")
 
     implementation("org.jooq:joor:$joorVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
