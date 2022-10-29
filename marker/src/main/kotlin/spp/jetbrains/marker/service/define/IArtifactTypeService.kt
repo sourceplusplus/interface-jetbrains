@@ -17,10 +17,15 @@
 package spp.jetbrains.marker.service.define
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.impl.light.LightIdentifier
 import spp.protocol.artifact.ArtifactType
 
 interface IArtifactTypeService : ISourceMarkerService {
 
+    /**
+     * Necessary because Groovy uses [LightIdentifier] for the name identifier.
+     */
+    fun getNameIdentifier(element: PsiElement): PsiElement = element
     fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement?
     fun isComment(element: PsiElement): Boolean
     fun getType(element: PsiElement): ArtifactType?

@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.jvm.service
 
 import com.intellij.psi.*
+import com.intellij.psi.impl.light.JavaIdentifier
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.javadoc.PsiDocComment
 import com.intellij.psi.javadoc.PsiDocToken
@@ -35,6 +36,12 @@ import spp.protocol.artifact.ArtifactType
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactTypeService : IArtifactTypeService {
+
+    override fun getNameIdentifier(element: PsiElement): PsiElement {
+        return if (element is JavaIdentifier) {
+            element.navigationElement
+        } else element
+    }
 
     override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
         val annotation = element.parentOfType<PsiAnnotation>()
