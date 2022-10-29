@@ -29,13 +29,8 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
  */
 data class SourceKey<T>(val name: String) {
     companion object {
-        @JvmField
         val GutterMark = Key.create<GutterMark>("sm.GutterMark")
-
-        @JvmField
         val InlayMark = Key.create<InlayMark>("sm.InlayMark")
-
-        @JvmField
         val GuideMark = Key.create<GuideMark>("sm.GuideMark")
     }
 }
