@@ -22,14 +22,12 @@ import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.uast.*
-import org.joor.Reflect
+import org.jetbrains.uast.UClass
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.getContainingUClass
+import org.jetbrains.uast.toUElementOfType
 import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
-import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import java.util.*
@@ -40,241 +38,10 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("TooManyFunctions")
 object JVMMarkerUtils {
 
     private val log = logger<JVMMarkerUtils>()
 
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun getOrCreateExpressionInlayMark(
-        fileMarker: SourceFileMarker,
-        element: PsiStatement,
-        autoApply: Boolean = false
-    ): ExpressionInlayMark? {
-        log.trace("getOrCreateExpressionInlayMark: $element")
-        var lookupExpression: PsiElement = element
-        if (lookupExpression is PsiDeclarationStatement) {
-            //todo: support for multi-declaration statements
-            lookupExpression = lookupExpression.firstChild
-        }
-
-        var inlayMark = lookupExpression.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
-        if (inlayMark == null) {
-            inlayMark = fileMarker.getExpressionSourceMark(
-                lookupExpression,
-                SourceMark.Type.INLAY
-            ) as ExpressionInlayMark?
-            if (inlayMark != null) {
-                if (inlayMark.updatePsiExpression(lookupExpression, getFullyQualifiedName(lookupExpression))) {
-                    lookupExpression.putUserData(SourceKey.InlayMark, inlayMark)
-                } else {
-                    inlayMark = null
-                }
-            }
-        }
-
-        return if (inlayMark == null) {
-            inlayMark = fileMarker.createExpressionSourceMark(
-                lookupExpression,
-                SourceMark.Type.INLAY
-            ) as ExpressionInlayMark
-            return if (autoApply) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                inlayMark
-            }
-        } else {
-            if (fileMarker.removeIfInvalid(inlayMark)) {
-                lookupExpression.putUserData(SourceKey.InlayMark, null)
-                null
-            } else {
-                inlayMark
-            }
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.3.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun getOrCreateExpressionInlayMark(
-        fileMarker: SourceFileMarker,
-        element: PsiElement,
-        autoApply: Boolean = false
-    ): ExpressionInlayMark? {
-        log.trace("getOrCreateExpressionInlayMark: $element")
-        var inlayMark = element.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
-        if (inlayMark == null) {
-            inlayMark = fileMarker.getExpressionSourceMark(
-                element,
-                SourceMark.Type.INLAY
-            ) as ExpressionInlayMark?
-            if (inlayMark != null) {
-                if (inlayMark.updatePsiExpression(element, getFullyQualifiedName(element))) {
-                    element.putUserData(SourceKey.InlayMark, inlayMark)
-                } else {
-                    inlayMark = null
-                }
-            }
-        }
-
-        return if (inlayMark == null) {
-            if (element.language.id != "Groovy" && element.text != "}") {
-                val uExpression = element.toUElement()
-                if (uExpression !is UExpression && uExpression !is UDeclaration) return null
-            }
-            inlayMark = fileMarker.createExpressionSourceMark(
-                element,
-                SourceMark.Type.INLAY
-            ) as ExpressionInlayMark
-            return if (autoApply) {
-                inlayMark.apply(true)
-                inlayMark
-            } else {
-                inlayMark
-            }
-        } else {
-            if (fileMarker.removeIfInvalid(inlayMark)) {
-                element.putUserData(SourceKey.InlayMark, null)
-                null
-            } else {
-                inlayMark
-            }
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.3.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun createExpressionInlayMark(
-        fileMarker: SourceFileMarker,
-        element: PsiStatement,
-        autoApply: Boolean = false
-    ): ExpressionInlayMark {
-        log.trace("createExpressionInlayMark: $element")
-        val inlayMark = fileMarker.createExpressionSourceMark(
-            element,
-            SourceMark.Type.INLAY
-        ) as ExpressionInlayMark
-        return if (autoApply) {
-            inlayMark.apply(true)
-            inlayMark
-        } else {
-            inlayMark
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.3.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun createExpressionInlayMark(
-        fileMarker: SourceFileMarker,
-        element: PsiElement,
-        autoApply: Boolean = false
-    ): ExpressionInlayMark {
-        log.trace("createExpressionInlayMark: $element")
-        val inlayMark = fileMarker.createExpressionSourceMark(
-            element,
-            SourceMark.Type.INLAY
-        ) as ExpressionInlayMark
-        return if (autoApply) {
-            inlayMark.apply(true)
-            inlayMark
-        } else {
-            inlayMark
-        }
-    }
-
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    @JvmStatic
-    @JvmOverloads
-    @Synchronized
-    fun getOrCreateExpressionGutterMark(
-        fileMarker: SourceFileMarker,
-        element: PsiStatement,
-        autoApply: Boolean = false
-    ): ExpressionGutterMark? {
-        log.trace("getOrCreateExpressionGutterMark: $element")
-        var lookupExpression: PsiElement = element
-        if (lookupExpression is PsiDeclarationStatement) {
-            //todo: support for multi-declaration statements
-            lookupExpression = lookupExpression.firstChild
-        }
-
-        var gutterMark = lookupExpression.getUserData(SourceKey.GutterMark) as ExpressionGutterMark?
-        if (gutterMark == null) {
-            gutterMark = fileMarker.getExpressionSourceMark(
-                lookupExpression,
-                SourceMark.Type.GUTTER
-            ) as ExpressionGutterMark?
-            if (gutterMark != null) {
-                if (gutterMark.updatePsiExpression(lookupExpression, getFullyQualifiedName(lookupExpression))) {
-                    lookupExpression.putUserData(SourceKey.GutterMark, gutterMark)
-                } else {
-                    gutterMark = null
-                }
-            }
-        }
-
-        return if (gutterMark == null) {
-            gutterMark = fileMarker.createExpressionSourceMark(
-                lookupExpression,
-                SourceMark.Type.GUTTER
-            ) as ExpressionGutterMark
-            return if (autoApply) {
-                gutterMark.apply(true)
-                gutterMark
-            } else {
-                gutterMark
-            }
-        } else {
-            if (fileMarker.removeIfInvalid(gutterMark)) {
-                lookupExpression.putUserData(SourceKey.InlayMark, null)
-                null
-            } else {
-                gutterMark
-            }
-        }
-    }
-
-    @Deprecated("Do real class instance check")
-    fun getNameIdentifier(element: PsiElement?): PsiElement? {
-        if (element?.javaClass?.simpleName?.equals("GrMethod") == true) {
-            return Reflect.on(element).call("getNameIdentifierGroovy").get()
-        }
-        if (element?.javaClass?.simpleName?.equals("KtNamedFunction") == true) {
-            return Reflect.on(element).call("getNameIdentifier").get()
-        }
-        return null
-    }
-
-    @JvmStatic
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         if (element is KtClass) {
             return getFullyQualifiedName(element)
@@ -316,8 +83,7 @@ object JVMMarkerUtils {
      *
      * @since 0.1.0
      */
-    @JvmStatic
-    fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
+    private fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
         val classQualifiedName = method.getContainingUClass()?.let {
             getFullyQualifiedName(it).identifier
         }
@@ -333,13 +99,11 @@ object JVMMarkerUtils {
      *
      * @since 0.1.0
      */
-    @JvmStatic
-    fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
+    private fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
         return getFullyQualifiedName(theClass as PsiClass)
     }
 
-    @JvmStatic
-    fun getFullyQualifiedName(clazz: PsiClass): ArtifactQualifiedName {
+    private fun getFullyQualifiedName(clazz: PsiClass): ArtifactQualifiedName {
         return ArtifactQualifiedName(
             "${JvmClassUtil.getJvmClassName(clazz)}",
             type = ArtifactType.CLASS,
@@ -347,17 +111,14 @@ object JVMMarkerUtils {
         )
     }
 
-    @JvmStatic
     private fun getFullyQualifiedName(theClass: KtClass): ArtifactQualifiedName {
         return getFullyQualifiedName(theClass.toUElementOfType<UClass>()!!)
     }
 
-    @JvmStatic
     private fun getFullyQualifiedName(method: KtFunction): ArtifactQualifiedName {
         return getFullyQualifiedName(method.toUElementOfType<UMethod>()!!)
     }
 
-    @JvmStatic
     fun getFullyQualifiedName(method: PsiMethod): ArtifactQualifiedName {
         val classQualifiedName = method.findAnyContainingStrict(PsiClass::class.java)?.let {
             getFullyQualifiedName(it).identifier
@@ -383,7 +144,6 @@ object JVMMarkerUtils {
         }
     }
 
-    @JvmStatic
     private fun getQualifiedName(method: PsiMethod): String {
         val methodName = method.nameIdentifier!!.text
         var methodParams = ""

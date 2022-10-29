@@ -16,12 +16,17 @@
  */
 package spp.jetbrains.marker.jvm.service
 
+import com.intellij.openapi.diagnostic.logger
+import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.imports.GrImportStatement
 import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.packaging.GrPackageDefinition
+import org.jetbrains.uast.UDeclaration
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.toUElement
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.service.define.IArtifactCreationService
@@ -42,6 +47,10 @@ import java.util.*
  */
 class JVMArtifactCreationService : IArtifactCreationService {
 
+    companion object {
+        private val log = logger<JVMArtifactCreationService>()
+    }
+
     override fun getOrCreateExpressionGutterMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,
@@ -49,7 +58,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
     ): Optional<ExpressionGutterMark> {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
         return if (element is PsiStatement) {
-            Optional.ofNullable(JVMMarkerUtils.getOrCreateExpressionGutterMark(fileMarker, element, autoApply))
+            Optional.ofNullable(getOrCreateExpressionGutterMark(fileMarker, element, autoApply))
         } else Optional.empty()
     }
 
@@ -114,9 +123,9 @@ class JVMArtifactCreationService : IArtifactCreationService {
         }
 
         return if (element is PsiStatement) {
-            Optional.ofNullable(JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
+            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         } else if (element is PsiElement) {
-            Optional.ofNullable(JVMMarkerUtils.getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
+            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
         } else {
             Optional.empty()
         }
@@ -154,9 +163,195 @@ class JVMArtifactCreationService : IArtifactCreationService {
     ): ExpressionInlayMark {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiElement
         return if (element is PsiStatement) {
-            JVMMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
+            createExpressionInlayMark(fileMarker, element, autoApply)
         } else {
-            JVMMarkerUtils.createExpressionInlayMark(fileMarker, element, autoApply)
+            createExpressionInlayMark(fileMarker, element, autoApply)
+        }
+    }
+
+    private fun getOrCreateExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiStatement,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark? {
+        log.trace("getOrCreateExpressionInlayMark: $element")
+        var lookupExpression: PsiElement = element
+        if (lookupExpression is PsiDeclarationStatement) {
+            //todo: support for multi-declaration statements
+            lookupExpression = lookupExpression.firstChild
+        }
+
+        var inlayMark = lookupExpression.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
+        if (inlayMark == null) {
+            inlayMark = fileMarker.getExpressionSourceMark(
+                lookupExpression,
+                SourceMark.Type.INLAY
+            ) as ExpressionInlayMark?
+            if (inlayMark != null) {
+                if (inlayMark.updatePsiExpression(
+                        lookupExpression,
+                        JVMMarkerUtils.getFullyQualifiedName(lookupExpression)
+                    )
+                ) {
+                    lookupExpression.putUserData(SourceKey.InlayMark, inlayMark)
+                } else {
+                    inlayMark = null
+                }
+            }
+        }
+
+        return if (inlayMark == null) {
+            inlayMark = fileMarker.createExpressionSourceMark(
+                lookupExpression,
+                SourceMark.Type.INLAY
+            ) as ExpressionInlayMark
+            return if (autoApply) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                inlayMark
+            }
+        } else {
+            if (fileMarker.removeIfInvalid(inlayMark)) {
+                lookupExpression.putUserData(SourceKey.InlayMark, null)
+                null
+            } else {
+                inlayMark
+            }
+        }
+    }
+
+    private fun getOrCreateExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark? {
+        log.trace("getOrCreateExpressionInlayMark: $element")
+        var inlayMark = element.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
+        if (inlayMark == null) {
+            inlayMark = fileMarker.getExpressionSourceMark(
+                element,
+                SourceMark.Type.INLAY
+            ) as ExpressionInlayMark?
+            if (inlayMark != null) {
+                if (inlayMark.updatePsiExpression(element, JVMMarkerUtils.getFullyQualifiedName(element))) {
+                    element.putUserData(SourceKey.InlayMark, inlayMark)
+                } else {
+                    inlayMark = null
+                }
+            }
+        }
+
+        return if (inlayMark == null) {
+            if (element.language.id != "Groovy" && element.text != "}") {
+                val uExpression = element.toUElement()
+                if (uExpression !is UExpression && uExpression !is UDeclaration) return null
+            }
+            inlayMark = fileMarker.createExpressionSourceMark(
+                element,
+                SourceMark.Type.INLAY
+            ) as ExpressionInlayMark
+            return if (autoApply) {
+                inlayMark.apply(true)
+                inlayMark
+            } else {
+                inlayMark
+            }
+        } else {
+            if (fileMarker.removeIfInvalid(inlayMark)) {
+                element.putUserData(SourceKey.InlayMark, null)
+                null
+            } else {
+                inlayMark
+            }
+        }
+    }
+
+    private fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiStatement,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark {
+        log.trace("createExpressionInlayMark: $element")
+        val inlayMark = fileMarker.createExpressionSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            inlayMark.apply(true)
+            inlayMark
+        } else {
+            inlayMark
+        }
+    }
+
+    private fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark {
+        log.trace("createExpressionInlayMark: $element")
+        val inlayMark = fileMarker.createExpressionSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            inlayMark.apply(true)
+            inlayMark
+        } else {
+            inlayMark
+        }
+    }
+
+    private fun getOrCreateExpressionGutterMark(
+        fileMarker: SourceFileMarker,
+        element: PsiStatement,
+        autoApply: Boolean = false
+    ): ExpressionGutterMark? {
+        log.trace("getOrCreateExpressionGutterMark: $element")
+        var lookupExpression: PsiElement = element
+        if (lookupExpression is PsiDeclarationStatement) {
+            //todo: support for multi-declaration statements
+            lookupExpression = lookupExpression.firstChild
+        }
+
+        var gutterMark = lookupExpression.getUserData(SourceKey.GutterMark) as ExpressionGutterMark?
+        if (gutterMark == null) {
+            gutterMark = fileMarker.getExpressionSourceMark(
+                lookupExpression,
+                SourceMark.Type.GUTTER
+            ) as ExpressionGutterMark?
+            if (gutterMark != null) {
+                if (gutterMark.updatePsiExpression(
+                        lookupExpression,
+                        JVMMarkerUtils.getFullyQualifiedName(lookupExpression)
+                    )
+                ) {
+                    lookupExpression.putUserData(SourceKey.GutterMark, gutterMark)
+                } else {
+                    gutterMark = null
+                }
+            }
+        }
+
+        return if (gutterMark == null) {
+            gutterMark = fileMarker.createExpressionSourceMark(
+                lookupExpression,
+                SourceMark.Type.GUTTER
+            ) as ExpressionGutterMark
+            return if (autoApply) {
+                gutterMark.apply(true)
+                gutterMark
+            } else {
+                gutterMark
+            }
+        } else {
+            if (fileMarker.removeIfInvalid(gutterMark)) {
+                lookupExpression.putUserData(SourceKey.InlayMark, null)
+                null
+            } else {
+                gutterMark
+            }
         }
     }
 }
