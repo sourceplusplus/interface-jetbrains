@@ -453,7 +453,8 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
         LiveMeter instrument = new LiveMeter(
                 MeterType.values()[meterTypeComboBox.getSelectedIndex()],
                 metricValue,
-                meterIdField.getText(),
+//                meterIdField.getText(),
+                new ArrayList<>(),
                 sourceLocation,
                 condition,
                 expirationDate,

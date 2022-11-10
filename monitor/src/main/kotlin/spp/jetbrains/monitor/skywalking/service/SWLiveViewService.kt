@@ -38,6 +38,7 @@ import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
+import spp.protocol.view.rule.LiveViewRule
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
@@ -242,6 +243,14 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         )
         vertx.eventBus().publish(toLiveViewSubscriberAddress(developerId), JsonObject.mapFrom(event))
         vertx.eventBus().send(toLiveViewSubscriberAddress(subscription.subscriptionId!!), JsonObject.mapFrom(event))
+    }
+
+    override fun saveRule(rule: LiveViewRule): Future<LiveViewRule> {
+        return Future.failedFuture(UnsupportedOperationException())
+    }
+
+    override fun deleteRule(ruleName: String): Future<LiveViewRule?> {
+        return Future.failedFuture(UnsupportedOperationException())
     }
 
     override fun addLiveView(subscription: LiveView): Future<LiveView> {
