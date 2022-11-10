@@ -32,9 +32,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 
 /**
  * todo: description.
@@ -42,7 +40,6 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("TooManyFunctions")
 class SourceMarker {
 
     companion object {
@@ -112,20 +109,6 @@ class SourceMarker {
                 it.identifier.contains(qualifiedClassNameOrFilename)
             } != null || it.psiFile.virtualFile?.path?.endsWith(qualifiedClassNameOrFilename) == true
         }
-    }
-
-    fun getSourceFileMarker(artifactQualifiedName: ArtifactQualifiedName): SourceFileMarker? {
-        val classArtifactQualifiedName = artifactQualifiedName.copy(
-            identifier = ArtifactNameUtils.getQualifiedClassName(artifactQualifiedName.identifier)!!,
-            type = ArtifactType.CLASS
-        )
-        return availableSourceFileMarkers.values.find {
-            ArtifactNamingService.getQualifiedClassNames(it.psiFile).contains(classArtifactQualifiedName)
-        }
-    }
-
-    fun getAvailableSourceFileMarkers(): List<SourceFileMarker> {
-        return ImmutableList.copyOf(availableSourceFileMarkers.values)
     }
 
     fun addGlobalSourceMarkEventListener(sourceMarkEventListener: SourceMarkEventListener) {
