@@ -110,7 +110,7 @@ class SourceMarker {
         return availableSourceFileMarkers.values.find {
             ArtifactNamingService.getQualifiedClassNames(it.psiFile).find {
                 it.identifier.contains(qualifiedClassNameOrFilename)
-            } != null || it.psiFile.virtualFile.path.endsWith(qualifiedClassNameOrFilename)
+            } != null || it.psiFile.virtualFile?.path?.endsWith(qualifiedClassNameOrFilename) == true
         }
     }
 
