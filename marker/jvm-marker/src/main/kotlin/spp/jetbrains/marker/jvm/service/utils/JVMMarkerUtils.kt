@@ -20,8 +20,10 @@ import com.intellij.lang.jvm.util.JvmClassUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
+import org.jetbrains.kotlin.idea.util.toJvmFqName
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.getContainingUClass
@@ -45,20 +47,20 @@ object JVMMarkerUtils {
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
         when (element) {
             is KtClass -> return getFullyQualifiedName(element)
-            is KtFunction -> return getFullyQualifiedName(element)
+            is KtNamedFunction -> return getFullyQualifiedName(element)
             is PsiClass -> return getFullyQualifiedName(element)
             is PsiMethod -> return getFullyQualifiedName(element)
             else -> Unit
         }
 
         var expressionString = element.text
-        var parentIdentifier = element.findAnyContainingStrict(PsiMethod::class.java, KtFunction::class.java)?.let {
-            getFullyQualifiedName(it)
-        }
+        var parentIdentifier = element.findAnyContainingStrict(
+            PsiMethod::class.java, KtNamedFunction::class.java
+        )?.let { getFullyQualifiedName(it) }
         if (parentIdentifier == null) {
-            parentIdentifier = element.findAnyContainingStrict(PsiClass::class.java, KtClass::class.java)?.let {
-                getFullyQualifiedName(it)
-            }
+            parentIdentifier = element.findAnyContainingStrict(
+                PsiClass::class.java, KtClass::class.java
+            )?.let { getFullyQualifiedName(it) }
         }
         if (parentIdentifier == null) {
             error("Could not determine parent of element: $element") //todo: extension function, see SourceMarkerConfig, make test, groovy import statements
@@ -110,10 +112,18 @@ object JVMMarkerUtils {
     }
 
     private fun getFullyQualifiedName(theClass: KtClass): ArtifactQualifiedName {
+        val fqName = theClass.fqName?.toJvmFqName?.replace(".", "$")
+        if (fqName != null) {
+            return ArtifactQualifiedName(
+                fqName,
+                type = ArtifactType.CLASS,
+                lineNumber = theClass.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
+            )
+        }
         return getFullyQualifiedName(theClass.toUElementOfType<UClass>()!!)
     }
 
-    private fun getFullyQualifiedName(method: KtFunction): ArtifactQualifiedName {
+    private fun getFullyQualifiedName(method: KtNamedFunction): ArtifactQualifiedName {
         return getFullyQualifiedName(method.toUElementOfType<UMethod>()!!)
     }
 

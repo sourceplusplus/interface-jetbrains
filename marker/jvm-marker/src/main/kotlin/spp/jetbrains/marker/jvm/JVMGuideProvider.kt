@@ -20,6 +20,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.*
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.psi.psiUtil.isExtensionDeclaration
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -46,7 +47,7 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
                 if (element.language.id == "kotlin") {
                     if (element is KtClass) {
                         makeClassGuideMark(fileMarker, element)
-                    } else if (element is KtNamedFunction) {
+                    } else if (element is KtNamedFunction && !element.isExtensionDeclaration()) {
                         makeMethodGuideMark(fileMarker, element)
                     }
                 }

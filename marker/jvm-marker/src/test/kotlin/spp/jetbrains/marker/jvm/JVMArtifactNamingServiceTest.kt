@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.service.JVMArtifactNamingService
+import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.protocol.artifact.ArtifactType
 
@@ -59,6 +60,17 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
     fun testKotlinClassName() {
         doTestClassName<KtClass>("kt")
+    }
+
+    fun testKotlinExpectOpenClassName() {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".kt")
+        val clazz = psiFile.findDescendantOfType<KtClass> { true }
+        assertNotNull(clazz)
+
+        val name = JVMMarkerUtils.getFullyQualifiedName(clazz!!)
+        assertEquals(getTestName(false) + "", name.identifier)
+        assertEquals(ArtifactType.CLASS, name.type)
+        assertNotNull(name.lineNumber)
     }
 
     fun testGroovyClassName() {

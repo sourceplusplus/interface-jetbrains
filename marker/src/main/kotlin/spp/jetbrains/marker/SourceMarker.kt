@@ -90,6 +90,8 @@ class SourceMarker {
             return fileMarker
         } else if (!SourceFileMarker.isFileSupported(psiFile)) {
             return null
+        } else if (psiFile.virtualFile == null || !psiFile.virtualFile.isInLocalFileSystem) {
+            return null //skip in-memory/non-local files
         }
 
         fileMarker = configuration.sourceFileMarkerProvider.createSourceFileMarker(psiFile)
