@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.sourcemarker.statusBar
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.logger
@@ -37,8 +38,9 @@ class SourceStatusItemAction : AnAction(), DumbAware {
         e.presentation.isEnabled = false
         val status = SourceStatusService.getInstance(e.project!!).getCurrentStatus()
         e.presentation.disabledIcon = status.first.icon
-        e.presentation.text = status.first.presentableText
+        e.presentation.text = status.second ?: status.first.name
     }
 
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
     override fun actionPerformed(e: AnActionEvent) = Unit
 }
