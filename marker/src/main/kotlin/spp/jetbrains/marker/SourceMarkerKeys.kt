@@ -32,13 +32,22 @@ import spp.protocol.service.listen.LiveViewEventListener
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object SourceMarkerKeys {
-    @JvmStatic val ENDPOINT_DETECTOR = SourceKey<EndpointDetector<*>>("ENDPOINT_DETECTOR")
-    @JvmStatic val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
-    @JvmStatic val INSTRUMENT_ID = SourceKey<String>("INSTRUMENT_ID")
-    @JvmStatic val VIEW_SUBSCRIPTION_ID = SourceKey<String>("VIEW_SUBSCRIPTION_ID")
-    @JvmStatic val GROUPED_MARKS = SourceKey<MutableList<SourceMark>>("GROUPED_MARKS")
-    @JvmStatic val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableSet<LiveInstrumentListener>>("INSTRUMENT_EVENT_LISTENERS")
-    @JvmStatic val VIEW_EVENT_LISTENERS = SourceKey<MutableSet<LiveViewEventListener>>("LIVE_VIEW_EVENT_LISTENERS")
-    @JvmStatic val STATE_BAR = SourceKey<LiveStateBar>("STATE_BAR")
-    @JvmStatic val INSTRUMENT_TYPE = SourceKey<LiveInstrumentType>("INSTRUMENT_TYPE")
+    @JvmStatic
+    val ENDPOINT_DETECTOR = SourceKey<EndpointDetector<*>>("ENDPOINT_DETECTOR")
+    @JvmStatic
+    val LOGGER_DETECTOR = SourceKey<LoggerDetector>("LOGGER_DETECTOR")
+    @JvmStatic
+    val INSTRUMENT_ID = SourceKey<String>("INSTRUMENT_ID")
+    @JvmStatic
+    val VIEW_SUBSCRIPTION_ID = SourceKey<String>("VIEW_SUBSCRIPTION_ID")
+    @JvmStatic
+    val GROUPED_MARKS = SourceKey<MutableList<SourceMark>>("GROUPED_MARKS")
+    @JvmStatic
+    val INSTRUMENT_EVENT_LISTENERS = SourceKey<MutableSet<LiveInstrumentListener>>("INSTRUMENT_EVENT_LISTENERS")
+    @JvmStatic
+    val VIEW_EVENT_LISTENERS = SourceKey<MutableSet<LiveViewEventListener>>("LIVE_VIEW_EVENT_LISTENERS")
+    @JvmStatic
+    val STATE_BAR = SourceKey<LiveStateBar>("STATE_BAR")
+    @JvmStatic
+    val INSTRUMENT_TYPE = SourceKey<LiveInstrumentType>("INSTRUMENT_TYPE")
 }

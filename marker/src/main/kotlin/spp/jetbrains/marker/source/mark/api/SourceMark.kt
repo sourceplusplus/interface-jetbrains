@@ -269,9 +269,18 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     private fun removeMarkFromUserData() {
         when (this) {
-            is ExpressionSourceMark -> removeMarkFromUserData(psiExpression)
-            is MethodSourceMark -> removeMarkFromUserData(ReadAction.compute(ThrowableComputable { getNameIdentifier() }))
-            is ClassSourceMark -> removeMarkFromUserData(ReadAction.compute(ThrowableComputable { getNameIdentifier() }))
+            is ExpressionSourceMark -> {
+                removeMarkFromUserData(psiExpression)
+            }
+
+            is MethodSourceMark -> {
+                removeMarkFromUserData(ReadAction.compute(ThrowableComputable { getNameIdentifier() }))
+            }
+
+            is ClassSourceMark -> {
+                removeMarkFromUserData(ReadAction.compute(ThrowableComputable { getNameIdentifier() }))
+            }
+
             else -> error("Unsupported source mark type: $this")
         }
     }
@@ -307,6 +316,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             propagateEventToParents(parentEvent)
         }
     }
+
     fun <T> putUserDataIfAbsent(key: SourceKey<T>, value: T?): T? {
         return if (userData.containsKey(key)) {
             userData[key] as T?

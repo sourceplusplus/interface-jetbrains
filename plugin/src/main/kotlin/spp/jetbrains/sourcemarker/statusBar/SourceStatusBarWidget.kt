@@ -82,7 +82,7 @@ class SourceStatusBarWidget(project: Project) : EditorBasedStatusBarPopup(projec
                 val statusGroup = DefaultActionGroup()
                 statusGroup.add(SourceStatusItemAction())
                 statusGroup.addSeparator()
-                statusGroup.addAll(*arrayOf<AnAction>(configuredGroup))
+                statusGroup.addAll(listOf(configuredGroup))
                 statusGroup
             } else {
                 configuredGroup

@@ -165,8 +165,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             val localConfigListener = object : BulkFileListener {
                 var lastUpdated = -1L
                 override fun after(events: MutableList<out VFileEvent>) {
-                    val event = events.firstOrNull() ?: return
-                    if (event is VFileContentChangeEvent && event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
+                    val event = events.firstOrNull() as? VFileContentChangeEvent ?: return
+                    if (event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
                         if (event.oldTimestamp <= lastUpdated) return else lastUpdated = event.oldTimestamp
                         DumbService.getInstance(project).smartInvokeLater {
                             val localConfig = loadSppPluginFileConfiguration()
@@ -526,7 +526,11 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             Notifications.Bus.notify(
                 Notification(
                     message("plugin_name"), "Connection auto-established",
-                    "You have successfully auto-connected to Live Platform. ${message("plugin_name")} is now fully activated.",
+                    buildString {
+                        append("You have successfully auto-connected to Live Platform. ")
+                        append(message("plugin_name"))
+                        append(" is now fully activated.")
+                    },
                     NotificationType.INFORMATION
                 ),
                 project
@@ -549,7 +553,11 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             Notifications.Bus.notify(
                 Notification(
                     message("plugin_name"), "Connection auto-established",
-                    "You have successfully auto-connected to Apache SkyWalking. ${message("plugin_name")} is now fully activated.",
+                    buildString {
+                        append("You have successfully auto-connected to Apache SkyWalking. ")
+                        append(message("plugin_name"))
+                        append(" is now fully activated.")
+                    },
                     NotificationType.INFORMATION
                 ),
                 project
