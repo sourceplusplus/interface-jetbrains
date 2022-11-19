@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.statusBar
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.logger
@@ -41,6 +40,6 @@ class SourceStatusItemAction : AnAction(), DumbAware {
         e.presentation.text = status.second ?: status.first.name
     }
 
-    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+    //override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
     override fun actionPerformed(e: AnActionEvent) = Unit
 }
