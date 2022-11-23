@@ -39,6 +39,7 @@ import io.vertx.servicediscovery.Record
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
+import spp.jetbrains.sourcemarker.config.getServicePortNormalized
 import spp.jetbrains.sourcemarker.config.isSsl
 import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.status.SourceStatus.ConnectionError
@@ -118,8 +119,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                         }
                     vertx.createNetClient(options)
                 }
-                //todo: should connect to getServicePortNormalized() but can't behind caddy. need tcp reverse proxy
-                socket = client.connect(SourceMarkerConfig.DEFAULT_SERVICE_PORT, serviceHost).await()
+                socket = client.connect(pluginConfig.getServicePortNormalized(), serviceHost).await()
             } catch (ex: Exception) {
                 log.warn("Failed to connect to service discovery server", ex)
                 setupPromise.fail(ex)
