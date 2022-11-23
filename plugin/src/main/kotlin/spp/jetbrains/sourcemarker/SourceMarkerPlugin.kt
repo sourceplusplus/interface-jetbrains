@@ -171,6 +171,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                         DumbService.getInstance(project).smartInvokeLater {
                             val localConfig = loadSppPluginFileConfiguration()
                             if (localConfig != null && localConfig.override) {
+                                log.info("Local config updated. Reloading plugin.")
                                 safeRunBlocking { init(localConfig) }
                             }
                         }
