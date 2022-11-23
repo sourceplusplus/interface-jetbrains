@@ -54,9 +54,9 @@ class VariableTab : DebugStackFrameListener, Disposable {
         component.add(JBScrollPane(tree), "Center")
 
         //todo: temporary fix for #575
-        val AUTO_EXPAND_ALLOWED = Reflect.onClass(DefaultTreeUI::class.java)
+        val autoExpandAllowedKey = Reflect.onClass(DefaultTreeUI::class.java)
             .get<Key<Boolean>>("AUTO_EXPAND_ALLOWED")
-        ClientProperty.put(tree, AUTO_EXPAND_ALLOWED, false)
+        ClientProperty.put(tree, autoExpandAllowedKey, false)
     }
 
     override fun onChanged(stackFrameManager: StackFrameManager) {

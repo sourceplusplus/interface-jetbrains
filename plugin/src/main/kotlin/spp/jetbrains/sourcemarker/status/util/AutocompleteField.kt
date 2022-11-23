@@ -468,7 +468,6 @@ class AutocompleteField<T : AutocompleteFieldRow>(
 
     override fun mouseClicked(e: MouseEvent) {
         if (showSaveButton && iconRect.contains(Point(e.x, e.y))) {
-
             listeners.forEach(SaveListener::onSave)
             repaint()
         }

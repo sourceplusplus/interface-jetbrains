@@ -2,7 +2,7 @@
 # https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
 
 build:
-  maxIssues: 23 #todo: zero out
+  maxIssues: 19 #todo: zero out
 
 formatting:
   Indentation:
@@ -14,6 +14,12 @@ formatting:
   ChainWrapping:
     active: false
   Wrapping:
+    active: false
+  ArgumentListWrapping:
+    active: false
+  MultiLineIfElse:
+    active: false
+  AnnotationOnSeparateLine:
     active: false
 
 style:

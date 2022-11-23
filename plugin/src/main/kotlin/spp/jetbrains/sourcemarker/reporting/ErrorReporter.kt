@@ -197,14 +197,17 @@ class GitHubErrorReporter : ErrorReportSubmitter() {
     ) : Consumer<SubmittedReportInfo> {
         override fun consume(reportInfo: SubmittedReportInfo) {
             consumer.consume(reportInfo)
-            if (reportInfo.status == SubmissionStatus.FAILED) ReportMessages.GROUP.createNotification(
-                ReportMessages.getErrorReport(),
-                reportInfo.linkText, NotificationType.ERROR, null
-            ).setImportant(false).notify(project)
-            else ReportMessages.GROUP.createNotification(
-                ReportMessages.getErrorReport(), reportInfo.linkText,
-                NotificationType.INFORMATION, NotificationListener.URL_OPENING_LISTENER
-            ).setImportant(false).notify(project)
+            if (reportInfo.status == SubmissionStatus.FAILED) {
+                ReportMessages.GROUP.createNotification(
+                    ReportMessages.getErrorReport(),
+                    reportInfo.linkText, NotificationType.ERROR, null
+                ).setImportant(false).notify(project)
+            } else {
+                ReportMessages.GROUP.createNotification(
+                    ReportMessages.getErrorReport(), reportInfo.linkText,
+                    NotificationType.INFORMATION, NotificationListener.URL_OPENING_LISTENER
+                ).setImportant(false).notify(project)
+            }
         }
     }
 }
