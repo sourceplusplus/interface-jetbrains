@@ -45,6 +45,7 @@ import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import javax.swing.SwingUtilities
 
 /**
  * Used to mark a source code file with SourceMarker artifact marks.
@@ -94,7 +95,12 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
     open fun refresh() {
         if (!psiFile.project.isDisposed && !ApplicationManager.getApplication().isUnitTestMode) {
             try {
-                DaemonCodeAnalyzer.getInstance(psiFile.project).restart(psiFile)
+                val analyzer = DaemonCodeAnalyzer.getInstance(project)
+                if (ApplicationManager.getApplication().isDispatchThread) {
+                    analyzer.restart()
+                } else {
+                    SwingUtilities.invokeLater { analyzer.restart() }
+                }
             } catch (ignored: ProcessCanceledException) {
             }
         }
