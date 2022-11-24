@@ -64,9 +64,9 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                 this.message = message
 
                 log.info("Status changed from $oldStatus to $status")
+                project.messageBus.syncPublisher(SourceStatusListener.TOPIC).onStatusChanged(status)
                 safeGlobalLaunch {
                     onStatusChanged(status)
-                    project.messageBus.syncPublisher(SourceStatusListener.TOPIC).onStatusChanged(status)
                 }
             }
         }
