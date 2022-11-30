@@ -7,7 +7,7 @@ val vertxVersion: String by project
 val projectVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
-group = "plus.sourceplus"
+group = "plus.sourceplus.interface"
 version = project.properties["projectVersion"] as String? ?: projectVersion
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {

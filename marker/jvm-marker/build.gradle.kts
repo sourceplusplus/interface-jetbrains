@@ -9,7 +9,7 @@ val joorVersion: String by project
 val jupiterVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
-group = "plus.sourceplus"
+group = "plus.sourceplus.interface"
 version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
