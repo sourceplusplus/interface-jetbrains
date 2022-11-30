@@ -29,7 +29,7 @@ import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.LiveSourceLocation
 
 /**
- * todo: description.
+ * Responsible for determining the naming/location of source code artifacts.
  *
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)

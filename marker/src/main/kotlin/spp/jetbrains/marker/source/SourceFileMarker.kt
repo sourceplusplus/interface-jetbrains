@@ -48,8 +48,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.swing.SwingUtilities
 
 /**
- * Used to mark a source code file with SourceMarker artifact marks.
- * SourceMarker artifact marks can be used to subscribe to and collect source code runtime information.
+ * Holds a collection of [SourceMark]s for a given [PsiFile].
  *
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
