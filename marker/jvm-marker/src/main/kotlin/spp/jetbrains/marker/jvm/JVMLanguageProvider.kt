@@ -51,9 +51,13 @@ class JVMLanguageProvider : LanguageProvider {
     override fun canSetup() = classExists("com.intellij.psi.PsiJavaFile")
 
     override fun setup(project: Project) {
-        SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
-        SUPPORTED_FILE_TYPES.add(KtFile::class.java)
         SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
+        if (classExists("org.jetbrains.plugins.groovy.lang.psi.GroovyFile")) {
+            SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
+        }
+        if (classExists("org.jetbrains.kotlin.psi.KtFile")) {
+            SUPPORTED_FILE_TYPES.add(KtFile::class.java)
+        }
 
         val endpointDetector = AggregateEndpointDetector(
             project,
