@@ -56,8 +56,15 @@ object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingServic
         return getService(element.language).getFullyQualifiedName(element)
     }
 
-    override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
-        return getService(psiFile.language).getQualifiedClassNames(psiFile)
+    override fun findPsiFile(language: ArtifactLanguage, project: Project, location: String): PsiFile? {
+        return getService(language).findPsiFile(language, project, location)
+    }
+
+    fun findPsiFile(project: Project, location: String): PsiFile? {
+        val availableLanguages = ArtifactLanguage.values().mapNotNull { lang ->
+            getServiceIfPresent(lang)?.let { Pair(lang, it) }
+        }
+        return availableLanguages.firstNotNullOfOrNull { it.second.findPsiFile(it.first, project, location) }
     }
 
     override fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile? {

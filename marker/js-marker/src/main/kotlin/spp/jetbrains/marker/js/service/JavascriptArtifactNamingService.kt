@@ -128,23 +128,6 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         }
     }
 
-    override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
-        val classQualifiedNames = mutableListOf<ArtifactQualifiedName>()
-        psiFile.acceptChildren(object : JSRecursiveWalkingElementVisitor() {
-            override fun visitJSClass(node: JSClass) { // TODO: check this also works for typescript classes, otherwise use visitTypescriptClass
-                super.visitJSClass(node)
-                classQualifiedNames.add(
-                    ArtifactQualifiedName(
-                        node.qualifiedName!!,
-                        type = ArtifactType.CLASS,
-                        lineNumber = SourceMarkerUtils.getLineNumber(node)
-                    )
-                )
-            }
-        })
-        return classQualifiedNames
-    }
-
     override fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile? {
         return null //todo: this
     }

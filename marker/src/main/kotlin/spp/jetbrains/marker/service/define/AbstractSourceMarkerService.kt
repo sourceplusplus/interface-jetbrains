@@ -41,10 +41,14 @@ abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
     }
 
     fun getService(language: ArtifactLanguage): T {
+        return getServiceIfPresent(language) ?: throw IllegalArgumentException("No service for language $language")
+    }
+
+    fun getServiceIfPresent(language: ArtifactLanguage): T? {
         return when (language) {
-            ArtifactLanguage.JVM -> getService("JAVA")
-            ArtifactLanguage.NODEJS -> getService("JavaScript")
-            ArtifactLanguage.PYTHON -> getService("Python")
+            ArtifactLanguage.JVM -> services["JAVA"]
+            ArtifactLanguage.NODEJS -> services["JavaScript"]
+            ArtifactLanguage.PYTHON -> services["Python"]
         }
     }
 }

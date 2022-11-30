@@ -40,7 +40,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class SourceMarker {
+class SourceMarker(private val project: Project) {
 
     companion object {
         var PLUGIN_NAME = "SourceMarker"
@@ -52,7 +52,7 @@ class SourceMarker {
         @Synchronized
         fun getInstance(project: Project): SourceMarker {
             if (project.getUserData(KEY) == null) {
-                val sourceMarker = SourceMarker()
+                val sourceMarker = SourceMarker(project)
                 project.putUserData(KEY, sourceMarker)
             }
             return project.getUserData(KEY)!!
@@ -106,11 +106,8 @@ class SourceMarker {
     }
 
     fun getSourceFileMarker(qualifiedClassNameOrFilename: String): SourceFileMarker? {
-        return availableSourceFileMarkers.values.find {
-            ArtifactNamingService.getQualifiedClassNames(it.psiFile).find {
-                it.identifier.contains(qualifiedClassNameOrFilename)
-            } != null || it.psiFile.virtualFile?.path?.endsWith(qualifiedClassNameOrFilename) == true
-        }
+        return ArtifactNamingService.findPsiFile(project, qualifiedClassNameOrFilename)
+            ?.let { getSourceFileMarker(it) }
     }
 
     fun addGlobalSourceMarkEventListener(sourceMarkEventListener: SourceMarkEventListener) {

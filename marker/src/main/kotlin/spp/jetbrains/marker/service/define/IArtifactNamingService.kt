@@ -20,6 +20,9 @@ import com.intellij.lang.Language
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
+import com.intellij.psi.search.FilenameIndex
+import com.intellij.psi.search.GlobalSearchScope
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -43,7 +46,23 @@ interface IArtifactNamingService : ISourceMarkerService {
     fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String
     fun getVariableName(element: PsiElement): String?
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName
-    fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName>
+
+    /**
+     * Find a [PsiFile] by its [location] in the given [project].
+     *
+     * @param language the language of the file
+     * @param project the project to search in
+     * @param location the location of the file (e.g. file path / qualified name)
+     */
+    fun findPsiFile(language: ArtifactLanguage, project: Project, location: String): PsiFile? {
+        val virtualFiles = FilenameIndex.getVirtualFilesByName(
+            location.substringAfterLast("/"),
+            GlobalSearchScope.projectScope(project)
+        )
+        return virtualFiles
+            .first { it.path.endsWith(location) }
+            .let { PsiManager.getInstance(project).findFile(it) }
+    }
 
     fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile?
 }

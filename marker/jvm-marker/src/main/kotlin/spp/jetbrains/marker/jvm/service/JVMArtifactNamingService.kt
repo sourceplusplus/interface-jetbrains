@@ -97,25 +97,15 @@ class JVMArtifactNamingService : IArtifactNamingService {
         return JVMMarkerUtils.getFullyQualifiedName(element)
     }
 
-    override fun getQualifiedClassNames(psiFile: PsiFile): List<ArtifactQualifiedName> {
-        return when (psiFile) {
-            is PsiClassOwner -> psiFile.classes.map {
-                getFullyQualifiedName(it)
-            }.toList() + psiFile.classes.flatMap { getInnerClassesRecursively(it) }.map {
-                getFullyQualifiedName(it)
-            }.toList()
-
-            else -> error("Unsupported file: $psiFile")
-        }
+    override fun findPsiFile(language: ArtifactLanguage, project: Project, location: String): PsiFile? {
+        val psiManager = PsiManager.getInstance(project)
+        val psiClass = ClassUtil.findPsiClassByJVMName(psiManager, location)
+        return psiClass?.containingFile ?: super.findPsiFile(language, project, location)
     }
 
     override fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile? {
         val psiManager = PsiManager.getInstance(project)
         val psiClass = ClassUtil.findPsiClassByJVMName(psiManager, frame.qualifiedClassName())
         return psiClass?.containingFile
-    }
-
-    private fun getInnerClassesRecursively(psiClass: PsiClass): List<PsiClass> {
-        return psiClass.innerClasses.toList() + psiClass.innerClasses.flatMap { getInnerClassesRecursively(it) }
     }
 }
