@@ -45,14 +45,7 @@ import spp.jetbrains.safeLaunch
  */
 class JavascriptLanguageProvider : LanguageProvider {
 
-    override fun canSetup(): Boolean {
-        return try {
-            Class.forName("com.intellij.lang.javascript.psi.impl.JSElementImpl")
-            true
-        } catch (ignore: ClassNotFoundException) {
-            false
-        }
-    }
+    override fun canSetup() = classExists("com.intellij.lang.javascript.psi.impl.JSElementImpl")
 
     override fun setup(project: Project) {
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(JSFile::class.java)

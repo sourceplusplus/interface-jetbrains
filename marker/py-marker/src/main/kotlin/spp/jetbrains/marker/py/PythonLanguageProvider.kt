@@ -44,14 +44,7 @@ import spp.jetbrains.safeLaunch
  */
 class PythonLanguageProvider : LanguageProvider {
 
-    override fun canSetup(): Boolean {
-        return try {
-            Class.forName("com.jetbrains.python.psi.PyElement")
-            true
-        } catch (ignore: ClassNotFoundException) {
-            false
-        }
-    }
+    override fun canSetup() = classExists("com.jetbrains.python.psi.PyElement")
 
     override fun setup(project: Project) {
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PyFile::class.java)

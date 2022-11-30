@@ -34,4 +34,13 @@ interface LanguageProvider {
         }
         return ultimateProvider!!
     }
+
+    fun classExists(className: String): Boolean {
+        return try {
+            Class.forName(className)
+            true
+        } catch (ignore: ClassNotFoundException) {
+            false
+        }
+    }
 }

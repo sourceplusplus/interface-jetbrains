@@ -48,14 +48,7 @@ import spp.jetbrains.safeLaunch
  */
 class JVMLanguageProvider : LanguageProvider {
 
-    override fun canSetup(): Boolean {
-        return try {
-            Class.forName("com.intellij.psi.PsiJavaFile")
-            true
-        } catch (ignore: ClassNotFoundException) {
-            false
-        }
-    }
+    override fun canSetup() = classExists("com.intellij.psi.PsiJavaFile")
 
     override fun setup(project: Project) {
         SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
