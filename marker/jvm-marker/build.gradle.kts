@@ -5,7 +5,6 @@ plugins {
 val vertxVersion: String by project
 val projectVersion: String by project
 val joorVersion: String by project
-val intellijVersion: String by project
 val jupiterVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
