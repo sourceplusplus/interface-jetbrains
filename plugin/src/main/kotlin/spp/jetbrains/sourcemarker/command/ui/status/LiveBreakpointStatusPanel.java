@@ -72,7 +72,12 @@ public class LiveBreakpointStatusPanel extends JPanel {
         rateValueLabel.setText(TimeUtilsKt.fromPerSecondToPrettyFrequency(rate));
     }
 
-    public void setExpires(long expiresAt) {
+    public void setExpires(Long expiresAt) {
+        if (expiresAt == null || expiresAt == -1) {
+            expiresValueLabel.setForeground(EXPIRY_FOREGROUND_COLOR);
+            expiresValueLabel.setText("n/a");
+            return;
+        }
         updateExpiresLabel(expiresAt);
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
