@@ -92,7 +92,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
                     val textRange = methodSourceMark.getPsiElement().textRange
                     val document = PsiDocumentManager.getInstance(methodSourceMark.project)
-                        .getDocument(methodSourceMark.sourceFileMarker.psiFile)!!
+                        .getDocument(methodSourceMark.sourceFileMarker.psiFile) ?: return@runReadAction
                     val startLine = document.getLineNumber(textRange.startOffset) + 1
                     val endLine = document.getLineNumber(textRange.endOffset) + 1
 
