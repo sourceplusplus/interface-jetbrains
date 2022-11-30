@@ -29,7 +29,7 @@ configure<PublishingExtension> {
         publications {
             create<MavenPublication>("maven") {
                 groupId = project.group.toString()
-                artifactId = "common"
+                artifactId = "core"
                 version = project.version.toString()
 
                 from(components["kotlin"])
