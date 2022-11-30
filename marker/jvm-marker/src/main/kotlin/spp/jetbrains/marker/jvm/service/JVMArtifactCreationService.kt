@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.jvm.service
 
+import com.intellij.lang.Language
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiElement
@@ -116,18 +117,18 @@ class JVMArtifactCreationService : IArtifactCreationService {
         autoApply: Boolean
     ): Optional<ExpressionInlayMark> {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
-        if (element is LeafPsiElement && element.parent is GrImportStatement) {
-            return Optional.empty()
-        } else if (element is LeafPsiElement && element.parent is GrPackageDefinition) {
-            return Optional.empty()
+        if (element is LeafPsiElement && element.language == Language.findLanguageByID("Groovy")) {
+            if (element.parent is GrImportStatement) {
+                return Optional.empty()
+            } else if (element.parent is GrPackageDefinition) {
+                return Optional.empty()
+            }
         }
 
-        return if (element is PsiStatement) {
-            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
-        } else if (element is PsiElement) {
-            Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
-        } else {
-            Optional.empty()
+        return when (element) {
+            is PsiStatement -> Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
+            is PsiElement -> Optional.ofNullable(getOrCreateExpressionInlayMark(fileMarker, element, autoApply))
+            else -> Optional.empty()
         }
     }
 
