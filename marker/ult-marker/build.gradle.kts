@@ -7,6 +7,9 @@ val vertxVersion: String by project
 val projectVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
+group = "plus.sourceplus.interface"
+version = project.properties["projectVersion"] as String? ?: projectVersion
+
 intellij {
     type.set("IU")
 }
