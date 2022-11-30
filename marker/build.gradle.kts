@@ -32,7 +32,7 @@ configure<PublishingExtension> {
         publications {
             create<MavenPublication>("maven") {
                 groupId = project.group.toString()
-                artifactId = "jetbrains-marker-jvm"
+                artifactId = "jetbrains-marker"
                 version = project.version.toString()
 
                 from(components["kotlin"])
