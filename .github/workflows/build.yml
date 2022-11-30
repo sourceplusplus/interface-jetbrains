@@ -37,6 +37,9 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     outputs:
       version: ${{ steps.properties.outputs.version }}
       release_version: ${{ steps.properties.outputs.release_version }}
