@@ -139,6 +139,25 @@ jobs:
           name: ${{ steps.artifact.outputs.filename }}
           path: ./plugin/build/distributions/content/*/*
 
+      - name: Remove Old Snapshot Packages
+        if: github.ref == 'refs/heads/master'
+        uses: smartsquaregmbh/delete-old-packages@v0.6.0
+        with:
+          keep: 0
+          version-pattern: "^\\d+\\.\\d+\\.\\d+-SNAPSHOT$"
+          names: |
+            plus.sourceplus.interface.common
+            plus.sourceplus.interface.core
+            plus.sourceplus.interface.marker
+            plus.sourceplus.interface.jvm-marker
+
+      - name: Publish New Snapshot Packages
+        if: github.ref == 'refs/heads/master'
+        run: ./gradlew publish
+        env:
+          GH_PUBLISH_USERNAME: $GITHUB_ACTOR
+          GH_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # Prepare a draft release for GitHub Releases page for the manual verification
   # If accepted and published, release workflow would be triggered
   releaseDraft:

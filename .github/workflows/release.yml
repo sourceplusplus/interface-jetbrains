@@ -48,3 +48,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} ./plugin/build/distributions/*
+
+      - name: Publish Release Package
+        run: ./gradlew publish -PprojectVersion=$SPP_RELEASE_VERSION
+        env:
+          GH_PUBLISH_USERNAME: $GITHUB_ACTOR
+          GH_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
