@@ -9,6 +9,9 @@ val joorVersion: String by project
 val jupiterVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
+group = "plus.sourceplus"
+version = project.properties["projectVersion"] as String? ?: projectVersion
+
 intellij {
     plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13"))
 }
@@ -34,7 +37,7 @@ configure<PublishingExtension> {
         publications {
             create<MavenPublication>("maven") {
                 groupId = project.group.toString()
-                artifactId = "marker"
+                artifactId = "jetbrains-marker"
                 version = project.version.toString()
 
                 from(components["kotlin"])

@@ -8,6 +8,9 @@ val joorVersion: String by project
 val vertxVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
+group = "plus.sourceplus"
+version = project.properties["projectVersion"] as String? ?: projectVersion
+
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
     from(project.the<SourceSetContainer>()["main"].allSource)
@@ -29,7 +32,7 @@ configure<PublishingExtension> {
         publications {
             create<MavenPublication>("maven") {
                 groupId = project.group.toString()
-                artifactId = "jvm-marker"
+                artifactId = "jetbrains-marker-jvm"
                 version = project.version.toString()
 
                 from(components["kotlin"])
