@@ -160,7 +160,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
         this.liveBreakpoint = (LiveBreakpoint) liveInstrument;
-        setupAsActive();
+        setupAsActive(liveBreakpoint);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -201,7 +201,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         });
     }
 
-    private void setupAsActive() {
+    private void setupAsActive(LiveBreakpoint liveBreakpoint) {
         LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, new LiveInstrumentListener() {
             @Override
             public void onBreakpointHitEvent(@NotNull LiveBreakpointHit event) {
