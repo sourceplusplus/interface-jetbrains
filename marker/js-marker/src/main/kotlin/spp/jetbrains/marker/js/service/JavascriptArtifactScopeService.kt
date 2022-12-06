@@ -16,10 +16,24 @@
  */
 package spp.jetbrains.marker.js.service
 
+import com.intellij.lang.javascript.psi.JSCallExpression
 import com.intellij.lang.javascript.psi.JSFunction
+import com.intellij.lang.javascript.psi.JSReferenceExpression
 import com.intellij.lang.javascript.psi.JSVariable
 import com.intellij.lang.javascript.psi.util.JSTreeUtil
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.util.Computable
+import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.util.descendantsOfType
+import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.parentOfTypes
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.define.IArtifactScopeService
@@ -32,6 +46,40 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JavascriptArtifactScopeService : IArtifactScopeService {
+
+    override fun getCalledFunctions(
+        element: PsiElement,
+        includeExternal: Boolean,
+        includeIndirect: Boolean
+    ): List<PsiNameIdentifierOwner> {
+        if (includeIndirect) {
+            val projectFileIndex = ProjectFileIndex.getInstance(element.project)
+            return ReadAction.compute(ThrowableComputable {
+                val calledFunctions = getResolvedCalls(element)
+                val filteredFunctions = calledFunctions.filter {
+                    includeExternal || projectFileIndex.isInSource(it.containingFile.virtualFile)
+                }
+                return@ThrowableComputable (filteredFunctions + filteredFunctions.flatMap {
+                    getCalledFunctions(it, includeExternal, true)
+                }).toList()
+            })
+        }
+
+        return ReadAction.compute(ThrowableComputable {
+            return@ThrowableComputable getResolvedCalls(element).toList()
+        })
+    }
+
+    override fun getCallerFunctions(element: PsiElement, includeIndirect: Boolean): List<PsiNameIdentifierOwner> {
+        val references = ProgressManager.getInstance().runProcess(Computable {
+            ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+        }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
+        return ReadAction.compute(ThrowableComputable {
+            references.mapNotNull {
+                it.element.parentOfType<JSFunction>()
+            }.filter { it.isWritable }
+        })
+    }
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         val vars = mutableListOf<JSVariable>()
@@ -47,5 +95,13 @@ class JavascriptArtifactScopeService : IArtifactScopeService {
 
     override fun isInsideFunction(element: PsiElement): Boolean {
         return element.parentOfTypes(JSFunction::class) != null
+    }
+
+    private fun getResolvedCalls(element: PsiElement): Sequence<JSFunction> {
+        return element.descendantsOfType<JSCallExpression>()
+            .mapNotNull { it.methodExpression }
+            .mapNotNull { it as? JSReferenceExpression }
+            .mapNotNull { it.resolve() }
+            .mapNotNull { it as? JSFunction }
     }
 }

@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.service
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -29,7 +30,20 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("MemberVisibilityCanBePrivate") // public API
 object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>(), IArtifactScopeService {
+
+    override fun getCalledFunctions(
+        element: PsiElement,
+        includeExternal: Boolean,
+        includeIndirect: Boolean
+    ): List<PsiNameIdentifierOwner> {
+        return getService(element.language).getCalledFunctions(element, includeExternal, includeIndirect)
+    }
+
+    override fun getCallerFunctions(element: PsiElement, includeIndirect: Boolean): List<PsiNameIdentifierOwner> {
+        return getService(element.language).getCallerFunctions(element, includeIndirect)
+    }
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         return getService(fileMarker.psiFile.language).getScopeVariables(fileMarker, lineNumber)

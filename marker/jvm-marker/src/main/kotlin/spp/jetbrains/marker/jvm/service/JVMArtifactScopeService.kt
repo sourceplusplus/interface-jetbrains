@@ -16,12 +16,27 @@
  */
 package spp.jetbrains.marker.jvm.service
 
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.util.Computable
+import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.*
 import com.intellij.psi.scope.processor.VariablesProcessor
 import com.intellij.psi.scope.util.PsiScopesUtil
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.util.descendantsOfType
+import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.parentOfTypes
 import com.siyeh.ig.psiutils.ControlFlowUtils
+import org.jetbrains.kotlin.backend.jvm.ir.psiElement
+import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
+import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.joor.Reflect
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.define.IArtifactScopeService
@@ -34,6 +49,41 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class JVMArtifactScopeService : IArtifactScopeService {
+
+    override fun getCalledFunctions(
+        element: PsiElement,
+        includeExternal: Boolean,
+        includeIndirect: Boolean
+    ): List<PsiNameIdentifierOwner> {
+        if (includeIndirect) {
+            return ReadAction.compute(ThrowableComputable {
+                val calledFunctions = getResolvedCalls(element)
+                val filteredFunctions = calledFunctions.filter { includeExternal || it.isWritable }
+                return@ThrowableComputable (filteredFunctions + filteredFunctions.flatMap {
+                    getCalledFunctions(it, includeExternal, true)
+                }).toList()
+            })
+        }
+
+        return ReadAction.compute(ThrowableComputable {
+            return@ThrowableComputable getResolvedCalls(element).filter { includeExternal || it.isWritable }.toList()
+        })
+    }
+
+    override fun getCallerFunctions(element: PsiElement, includeIndirect: Boolean): List<PsiNameIdentifierOwner> {
+        val references = ProgressManager.getInstance().runProcess(Computable {
+            ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+        }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
+        return ReadAction.compute(ThrowableComputable {
+            references.mapNotNull {
+                when (element.language.id) {
+                    "Groovy" -> it.element.parentOfType<GrMethod>()
+                    "kotlin" -> it.element.parentOfType<KtNamedFunction>()
+                    else -> it.element.parentOfType<PsiMethod>()
+                }
+            }.filter { it.isWritable() }
+        })
+    }
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         //determine available vars
@@ -75,6 +125,22 @@ class JVMArtifactScopeService : IArtifactScopeService {
             }
 
             else -> super.canShowControlBar(psiElement)
+        }
+    }
+
+    private fun getResolvedCalls(element: PsiElement): Sequence<PsiNameIdentifierOwner> {
+        return when (element.language.id) {
+            "Groovy" -> element.descendantsOfType<GrCall>().map {
+                it.resolveMethod()
+            }.filterNotNull()
+
+            "kotlin" -> element.descendantsOfType<KtCallExpression>().map {
+                it.resolveToCall()?.candidateDescriptor?.psiElement as? PsiNameIdentifierOwner
+            }.filterNotNull()
+
+            else -> element.descendantsOfType<PsiCall>().map { call ->
+                call.resolveMethod()
+            }.filterNotNull()
         }
     }
 }
