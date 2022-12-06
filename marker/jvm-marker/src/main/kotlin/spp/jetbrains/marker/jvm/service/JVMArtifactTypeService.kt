@@ -63,15 +63,13 @@ class JVMArtifactTypeService : IArtifactTypeService {
     }
 
     override fun getType(element: PsiElement): ArtifactType? {
-        return when (element) {
-            is PsiClass -> ArtifactType.CLASS
-            is PsiMethod -> ArtifactType.METHOD
-            is PsiExpression -> ArtifactType.EXPRESSION
-
-            is KtClass -> ArtifactType.CLASS
-            is KtFunction -> ArtifactType.METHOD
-            is KtExpression -> ArtifactType.EXPRESSION
-
+        return when {
+            element is PsiClass -> ArtifactType.CLASS
+            element is PsiMethod -> ArtifactType.METHOD
+            element is PsiExpression -> ArtifactType.EXPRESSION
+            element.language.id == "kotlin" && element is KtClass -> ArtifactType.CLASS
+            element.language.id == "kotlin" && element is KtFunction -> ArtifactType.METHOD
+            element.language.id == "kotlin" && element is KtExpression -> ArtifactType.EXPRESSION
             else -> null
         }
     }
