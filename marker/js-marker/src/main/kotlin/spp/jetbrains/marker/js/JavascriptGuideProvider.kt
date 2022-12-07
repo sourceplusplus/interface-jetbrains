@@ -20,7 +20,6 @@ import com.intellij.lang.javascript.psi.JSCallExpression
 import com.intellij.lang.javascript.psi.JSFunction
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiRecursiveElementVisitor
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -44,15 +43,15 @@ class JavascriptGuideProvider : AbstractSourceGuideProvider {
                     ApplicationManager.getApplication().runReadAction {
                         fileMarker.createExpressionSourceMark(
                             element, SourceMark.Type.GUIDE
-                        ).apply(true)
+                        ).applyIfMissing()
                     }
                 }
                 if (element is JSFunction) {
                     ApplicationManager.getApplication().runReadAction {
                         if (element.nameIdentifier != null) {
                             fileMarker.createMethodSourceMark(
-                                element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
-                            ).apply(true)
+                                element, SourceMark.Type.GUIDE
+                            ).applyIfMissing()
                         }
                     }
                 }

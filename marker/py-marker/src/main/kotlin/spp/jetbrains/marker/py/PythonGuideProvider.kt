@@ -17,7 +17,6 @@
 package spp.jetbrains.marker.py
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.psi.PsiNameIdentifierOwner
 import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyRecursiveElementVisitor
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
@@ -35,16 +34,13 @@ class PythonGuideProvider : AbstractSourceGuideProvider {
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
         fileMarker.psiFile.acceptChildren(object : PyRecursiveElementVisitor() {
-            override fun visitPyFunction(function: PyFunction) {
-                super.visitPyFunction(function)
+            override fun visitPyFunction(element: PyFunction) {
+                super.visitPyFunction(element)
 
                 ApplicationManager.getApplication().runReadAction {
-                    val guideMark = fileMarker.createMethodSourceMark(
-                        function as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
-                    )
-                    if (!fileMarker.containsSourceMark(guideMark)) {
-                        guideMark.apply(true)
-                    }
+                    fileMarker.createMethodSourceMark(
+                        element, SourceMark.Type.GUIDE
+                    ).applyIfMissing()
                 }
             }
         })

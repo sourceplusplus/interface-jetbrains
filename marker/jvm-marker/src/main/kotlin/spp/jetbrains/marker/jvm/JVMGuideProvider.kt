@@ -21,6 +21,7 @@ import com.intellij.psi.*
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.psiUtil.isExtensionDeclaration
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -44,7 +45,7 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
                     makeMethodGuideMark(fileMarker, element)
                 }
 
-                if (element.language.id == "kotlin") {
+                if (ArtifactTypeService.isKotlin(element)) {
                     if (element is KtClass) {
                         makeClassGuideMark(fileMarker, element)
                     } else if (element is KtNamedFunction && !element.isExtensionDeclaration()) {
@@ -62,23 +63,17 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
                 return@runReadAction //anonymous class
             }
 
-            val guideMark = fileMarker.createClassSourceMark(
+            fileMarker.createClassSourceMark(
                 nameIdentifierOwner, SourceMark.Type.GUIDE
-            )
-            if (!fileMarker.containsSourceMark(guideMark)) {
-                guideMark.apply(true)
-            }
+            ).applyIfMissing()
         }
     }
 
-    private fun makeMethodGuideMark(fileMarker: SourceFileMarker, element: PsiElement) {
+    private fun makeMethodGuideMark(fileMarker: SourceFileMarker, element: PsiNameIdentifierOwner) {
         ApplicationManager.getApplication().runReadAction {
-            val guideMark = fileMarker.createMethodSourceMark(
-                element as PsiNameIdentifierOwner, SourceMark.Type.GUIDE
-            )
-            if (!fileMarker.containsSourceMark(guideMark)) {
-                guideMark.apply(true)
-            }
+            fileMarker.createMethodSourceMark(
+                element, SourceMark.Type.GUIDE
+            ).applyIfMissing()
         }
     }
 }
