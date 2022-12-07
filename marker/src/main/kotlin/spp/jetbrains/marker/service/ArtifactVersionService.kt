@@ -39,10 +39,10 @@ object ArtifactVersionService {
 
     private val log = logger<ArtifactVersionService>()
 
-    fun getChangedFunctions(psiFile: PsiFile): List<PsiNamedElement> {
+    fun getChangedFunctions(psiFile: PsiFile): List<PsiNameIdentifierOwner> {
         log.info("Getting changed functions for file: $psiFile")
         val project = psiFile.project
-        val ref = FutureResult<List<PsiNamedElement>>()
+        val ref = FutureResult<List<PsiNameIdentifierOwner>>()
         ChangeListManager.getInstance(project).invokeAfterUpdate(false) {
             val changes = ChangeListManager.getInstance(project)
                 .getChangesIn(psiFile.virtualFile).toTypedArray()
@@ -57,7 +57,7 @@ object ArtifactVersionService {
                             return@getChangedElements emptyList()
                         }
 
-                        val physicalFunctions: List<PsiNamedElement> = SmartList()
+                        val physicalFunctions: List<PsiNameIdentifierOwner> = SmartList()
                         PsiManager.getInstance(project).findFile(it)
                             ?.accept(object : PsiRecursiveElementWalkingVisitor() {
                                 override fun visitElement(element: PsiElement) {

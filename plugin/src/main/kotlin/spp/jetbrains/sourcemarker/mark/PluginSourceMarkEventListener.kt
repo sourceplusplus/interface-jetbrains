@@ -129,7 +129,6 @@ class PluginSourceMarkEventListener(val project: Project) : CoroutineVerticle(),
         //detect changed guide marks
         val changedElements = ArtifactVersionService.getChangedFunctions(fileMarker.psiFile)
         val changedGuideMarks = changedElements
-            .mapNotNull { it as? PsiNameIdentifierOwner }
             .mapNotNull { it.nameIdentifier?.getUserData(SourceKey.GuideMark) }
         changedGuideMarks.forEach {
             it.putUserData(VCS_MODIFIED, true)
