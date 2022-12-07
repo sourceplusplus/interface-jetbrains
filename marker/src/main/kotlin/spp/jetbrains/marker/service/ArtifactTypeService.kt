@@ -18,6 +18,7 @@ package spp.jetbrains.marker.service
 
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
@@ -42,5 +43,25 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
 
     override fun getType(element: PsiElement): ArtifactType? {
         return getService(element.language).getType(element)
+    }
+
+    fun isFunction(element: PsiElement): Boolean {
+        return getType(element) == ArtifactType.METHOD
+    }
+
+    fun isPython(element: PsiElement): Boolean {
+        return element.language.id == "Python"
+    }
+
+    fun isJvm(element: PsiElement): Boolean {
+        return SourceMarkerUtils.getJvmLanguages().contains(element.language.id)
+    }
+
+    fun isKotlin(element: PsiElement): Boolean {
+        return element.language.id == "kotlin"
+    }
+
+    fun isJavaScript(element: PsiElement): Boolean {
+        return SourceMarkerUtils.getJavaScriptLanguages().contains(element.language.id)
     }
 }
