@@ -326,6 +326,12 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         }
     }
 
+    fun <T> removeUserData(key: SourceKey<T>): T? {
+        val cachedValue = getUserData(key)
+        putUserData(key, null)
+        return cachedValue
+    }
+
     fun hasUserData(): Boolean = userData.isNotEmpty()
 
     val eventListeners: ArrayList<SourceMarkEventListener>

@@ -67,6 +67,10 @@ class SourceMarker(private val project: Project) {
     private val availableSourceFileMarkers = Maps.newConcurrentMap<Int, SourceFileMarker>()
     private val globalSourceMarkEventListeners = Lists.newArrayList<SourceMarkEventListener>()
 
+    fun getSourceFileMarkers(): List<SourceFileMarker> {
+        return availableSourceFileMarkers.values.toList()
+    }
+
     suspend fun clearAvailableSourceFileMarkers() {
         availableSourceFileMarkers.forEach {
             deactivateSourceFileMarker(it.value)
