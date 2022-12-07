@@ -58,4 +58,7 @@ object SourceMarkerKeys {
 
     @JvmStatic
     val INSTRUMENT_TYPE = SourceKey<LiveInstrumentType>("INSTRUMENT_TYPE")
+
+    @JvmStatic
+    val VCS_MODIFIED = SourceKey<Boolean>("VCS_MODIFIED")
 }

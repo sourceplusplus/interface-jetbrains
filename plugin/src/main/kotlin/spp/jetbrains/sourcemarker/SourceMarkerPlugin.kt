@@ -582,7 +582,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         vertx.deployVerticle(PortalController(project, config)).await()
     }
 
-    private fun initMarker(vertx: Vertx) {
+    private suspend fun initMarker(vertx: Vertx) {
         log.info("Initializing marker")
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
@@ -594,9 +594,10 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
 
+        vertx.deployVerticle(PluginSourceMarkEventListener(project)).await()
+
         SourceMarker.getInstance(project).apply {
             addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
-            addGlobalSourceMarkEventListener(PluginSourceMarkEventListener(project, vertx))
         }
 
         //force marker re-processing
