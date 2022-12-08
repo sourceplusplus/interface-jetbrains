@@ -113,7 +113,7 @@ object ArtifactVersionService {
         for (change in changes) {
             if (change.type == Change.Type.DELETED) continue
             if (change.afterRevision !is CurrentContentRevision) continue
-            val file = (change.afterRevision as CurrentContentRevision?)!!.virtualFile ?: continue
+            val file = (change.afterRevision as CurrentContentRevision?)?.virtualFile ?: continue
             val document = FileDocumentManager.getInstance().getDocument(file) ?: continue
             val apply = elementsConvertor.`fun`(file)
             val elements = if (apply == null) null else ContainerUtil.skipNulls(apply)
