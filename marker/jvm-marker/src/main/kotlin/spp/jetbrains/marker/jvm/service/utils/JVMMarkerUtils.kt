@@ -24,7 +24,6 @@ import org.jetbrains.kotlin.idea.util.toJvmFqName
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.getContainingUClass
 import org.jetbrains.uast.toUElementOfType
@@ -94,15 +93,6 @@ object JVMMarkerUtils {
         )
     }
 
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    private fun getFullyQualifiedName(theClass: UClass): ArtifactQualifiedName {
-        return getFullyQualifiedName(theClass as PsiClass)
-    }
-
     private fun getFullyQualifiedName(clazz: PsiClass): ArtifactQualifiedName {
         return ArtifactQualifiedName(
             "${JvmClassUtil.getJvmClassName(clazz)}",
@@ -120,7 +110,16 @@ object JVMMarkerUtils {
                 lineNumber = theClass.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
             )
         }
-        return getFullyQualifiedName(theClass.toUElementOfType<UClass>()!!)
+
+        var packageName = theClass.containingKtFile.packageFqName.asString()
+        if (packageName.isNotEmpty()) {
+            packageName += "."
+        }
+        return ArtifactQualifiedName(
+            packageName + theClass.nameAsSafeName.identifier,
+            type = ArtifactType.CLASS,
+            lineNumber = theClass.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
+        )
     }
 
     private fun getFullyQualifiedName(method: KtNamedFunction): ArtifactQualifiedName {
