@@ -19,7 +19,6 @@ package spp.jetbrains.marker.jvm.service
 import com.intellij.psi.*
 import com.intellij.psi.impl.light.JavaIdentifier
 import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.intellij.psi.javadoc.PsiDocComment
 import com.intellij.psi.javadoc.PsiDocToken
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.psi.KtClass
@@ -55,7 +54,7 @@ class JVMArtifactTypeService : IArtifactTypeService {
     }
 
     override fun isComment(element: PsiElement): Boolean {
-        val comment = element is PsiDocToken || element is PsiComment || element is PsiDocComment
+        val comment = element is PsiDocToken || element is PsiComment
         if (comment) return true
 
         return if (element is LeafPsiElement) {
