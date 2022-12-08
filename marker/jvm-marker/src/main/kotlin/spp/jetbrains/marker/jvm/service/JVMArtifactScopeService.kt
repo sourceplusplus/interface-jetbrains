@@ -40,6 +40,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.joor.Reflect
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -83,9 +84,9 @@ class JVMArtifactScopeService : IArtifactScopeService {
         }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
         return ReadAction.compute(ThrowableComputable {
             references.mapNotNull {
-                when (element.language.id) {
-                    "Groovy" -> it.element.parentOfType<GrMethod>()
-                    "kotlin" -> it.element.parentOfType<KtNamedFunction>()
+                when {
+                    ArtifactTypeService.isGroovy(element) -> it.element.parentOfType<GrMethod>()
+                    ArtifactTypeService.isKotlin(element) -> it.element.parentOfType<KtNamedFunction>()
                     else -> it.element.parentOfType<PsiMethod>()
                 }
             }.filter { it.isWritable() }
@@ -111,7 +112,7 @@ class JVMArtifactScopeService : IArtifactScopeService {
     }
 
     override fun isInsideFunction(element: PsiElement): Boolean {
-        if (element.language.id == "kotlin") {
+        if (ArtifactTypeService.isKotlin(element)) {
             return element.parentOfTypes(KtNamedFunction::class) != null
         }
         return element.parentOfTypes(PsiMethod::class) != null
@@ -136,12 +137,12 @@ class JVMArtifactScopeService : IArtifactScopeService {
     }
 
     private fun getResolvedCalls(element: PsiElement): Sequence<PsiNameIdentifierOwner> {
-        return when (element.language.id) {
-            "Groovy" -> element.descendantsOfType<GrCall>().map {
+        return when {
+            ArtifactTypeService.isGroovy(element) -> element.descendantsOfType<GrCall>().map {
                 it.resolveMethod()
             }.filterNotNull()
 
-            "kotlin" -> element.descendantsOfType<KtCallExpression>().map {
+            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtCallExpression>().map {
                 it.resolveToCall()?.candidateDescriptor?.psiElement as? PsiNameIdentifierOwner
             }.filterNotNull()
 

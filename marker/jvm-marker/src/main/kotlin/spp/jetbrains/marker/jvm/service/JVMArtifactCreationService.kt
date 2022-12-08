@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.marker.jvm.service
 
-import com.intellij.lang.Language
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiElement
@@ -30,6 +29,7 @@ import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.toUElement
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -117,7 +117,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
         autoApply: Boolean
     ): Optional<ExpressionInlayMark> {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)
-        if (element is LeafPsiElement && element.language == Language.findLanguageByID("Groovy")) {
+        if (element is LeafPsiElement && ArtifactTypeService.isGroovy(element)) {
             if (element.parent is GrImportStatement) {
                 return Optional.empty()
             } else if (element.parent is GrPackageDefinition) {
@@ -244,7 +244,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
         }
 
         return if (inlayMark == null) {
-            if (element.language.id != "Groovy" && element.text != "}") {
+            if (ArtifactTypeService.isGroovy(element) && element.text != "}") {
                 val uExpression = element.toUElement()
                 if (uExpression !is UExpression && uExpression !is UDeclaration) return null
             }

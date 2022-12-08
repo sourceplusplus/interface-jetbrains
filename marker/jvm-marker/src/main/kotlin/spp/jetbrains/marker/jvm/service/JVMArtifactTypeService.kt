@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFunction
 import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
@@ -67,9 +68,9 @@ class JVMArtifactTypeService : IArtifactTypeService {
             element is PsiClass -> ArtifactType.CLASS
             element is PsiMethod -> ArtifactType.METHOD
             element is PsiExpression -> ArtifactType.EXPRESSION
-            element.language.id == "kotlin" && element is KtClass -> ArtifactType.CLASS
-            element.language.id == "kotlin" && element is KtFunction -> ArtifactType.METHOD
-            element.language.id == "kotlin" && element is KtExpression -> ArtifactType.EXPRESSION
+            ArtifactTypeService.isKotlin(element) && element is KtClass -> ArtifactType.CLASS
+            ArtifactTypeService.isKotlin(element) && element is KtFunction -> ArtifactType.METHOD
+            ArtifactTypeService.isKotlin(element) && element is KtExpression -> ArtifactType.EXPRESSION
             else -> null
         }
     }

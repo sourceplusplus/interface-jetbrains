@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.resolve.jvm.JvmPrimitiveType
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
@@ -164,7 +165,7 @@ object JVMMarkerUtils {
             } else if (it.typeElement != null) {
                 methodParams += it.typeElement!!.text
             } else if (it.type is PsiPrimitiveType) {
-                methodParams += if (it.language.id == "kotlin") {
+                methodParams += if (ArtifactTypeService.isKotlin(it)) {
                     (it.type as PsiPrimitiveType).boxedTypeName
                 } else {
                     it.type.canonicalText
