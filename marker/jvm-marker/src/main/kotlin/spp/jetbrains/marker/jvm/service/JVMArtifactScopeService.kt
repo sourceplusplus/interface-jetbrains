@@ -37,7 +37,6 @@ import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
 import org.joor.Reflect
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.ArtifactTypeService
@@ -84,10 +83,10 @@ class JVMArtifactScopeService : IArtifactScopeService {
         }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
         return ReadAction.compute(ThrowableComputable {
             references.mapNotNull {
-                when {
-                    ArtifactTypeService.isGroovy(element) -> it.element.parentOfType<GrMethod>()
-                    ArtifactTypeService.isKotlin(element) -> it.element.parentOfType<KtNamedFunction>()
-                    else -> it.element.parentOfType<PsiMethod>()
+                if (ArtifactTypeService.isKotlin(element)) {
+                    it.element.parentOfType<KtNamedFunction>()
+                } else {
+                    it.element.parentOfType<PsiMethod>()
                 }
             }.filter { it.isWritable() }
         })
