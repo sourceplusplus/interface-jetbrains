@@ -136,7 +136,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         val className = getTestName(false)
         val psiFile = myFixture.configureByFile("$className.$extension")
         val methods = psiFile.descendants().filterIsInstance<T>().toList()
-        assertEquals(4, methods.size)
+        assertEquals(5, methods.size)
 
         val foo1 = methods[0]
         val name = JVMArtifactNamingService().getFullyQualifiedName(foo1)
@@ -146,14 +146,14 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val foo2 = methods[1]
         val name2 = JVMArtifactNamingService().getFullyQualifiedName(foo2)
-        assertEquals(getTestName(false) + ".foo2(String)", name2.identifier)
+        assertEquals(getTestName(false) + ".foo2(java.lang.String)", name2.identifier)
         assertEquals(ArtifactType.METHOD, name2.type)
         assertNotNull(name2.lineNumber)
 
         val foo3 = methods[2]
         val name3 = JVMArtifactNamingService().getFullyQualifiedName(foo3)
         assertEquals(
-            getTestName(false) + ".foo3(String,int,long,double,float,boolean,char,byte,short)",
+            getTestName(false) + ".foo3(java.lang.String,int,long,double,float,boolean,char,byte,short)",
             name3.identifier
         )
         assertEquals(ArtifactType.METHOD, name3.type)
@@ -164,6 +164,15 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertEquals(getTestName(false) + ".foo4($className\$MyObject)", name4.identifier)
         assertEquals(ArtifactType.METHOD, name4.type)
         assertNotNull(name4.lineNumber)
+
+        val foo5 = methods[4]
+        val name5 = JVMArtifactNamingService().getFullyQualifiedName(foo5)
+        assertEquals(
+            getTestName(false) + ".foo5(java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[])",
+            name5.identifier
+        )
+        assertEquals(ArtifactType.METHOD, name5.type)
+        assertNotNull(name5.lineNumber)
     }
 
     fun testJavaInnerClassMethodName() {

@@ -21,5 +21,19 @@ public class JavaMethodName {
     public void foo4(MyObject myObject) {
     }
 
-    class MyObject {}
+    class MyObject {
+    }
+
+    public void foo5(
+            String[] Strings,
+            int[] Integers,
+            long[] Longs,
+            double[] Doubles,
+            float[] Floats,
+            boolean[] Booleans,
+            char[] Chars,
+            byte[] Bytes,
+            short[] Shorts
+    ) {
+    }
 }

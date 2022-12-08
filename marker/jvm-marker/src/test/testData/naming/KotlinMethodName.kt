@@ -22,4 +22,17 @@ class KotlinMethodName {
     }
 
     class MyObject {}
+
+    fun foo5(
+        strings: Array<String>,
+        ints: IntArray,
+        longs: LongArray,
+        doubles: DoubleArray,
+        floats: FloatArray,
+        booleans: BooleanArray,
+        chars: CharArray,
+        bytes: ByteArray,
+        shorts: ShortArray
+    ) {
+    }
 }

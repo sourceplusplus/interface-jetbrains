@@ -22,4 +22,17 @@ class GroovyMethodName {
     }
 
     class MyObject {}
+
+    void foo5(
+            String[] Strings,
+            int[] Integers,
+            long[] Longs,
+            double[] Doubles,
+            float[] Floats,
+            boolean[] Booleans,
+            char[] Chars,
+            byte[] Bytes,
+            short[] Shorts
+    ) {
+    }
 }

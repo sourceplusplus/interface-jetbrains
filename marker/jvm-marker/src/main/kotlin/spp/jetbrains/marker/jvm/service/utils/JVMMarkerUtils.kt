@@ -144,6 +144,7 @@ object JVMMarkerUtils {
         }
     }
 
+    //todo: better
     private fun getQualifiedName(method: PsiMethod): String {
         val methodName = method.nameIdentifier!!.text
         var methodParams = ""
@@ -163,7 +164,13 @@ object JVMMarkerUtils {
                     methodParams += "[]"
                 }
             } else if (it.typeElement != null) {
-                methodParams += it.typeElement!!.text
+                methodParams += if (it.typeElement!!.text == "String") {
+                    "java.lang.String"
+                } else if (it.typeElement!!.text == "String[]") {
+                    "java.lang.String[]"
+                } else {
+                    it.typeElement!!.text
+                }
             } else if (it.type is PsiPrimitiveType) {
                 methodParams += if (ArtifactTypeService.isKotlin(it)) {
                     (it.type as PsiPrimitiveType).boxedTypeName
@@ -177,6 +184,7 @@ object JVMMarkerUtils {
         return "$methodName($methodParams)"
     }
 
+    //todo: better
     private fun getQualifiedName(method: KtNamedFunction): String {
         val methodName = method.nameIdentifier!!.text
         var methodParams = ""
@@ -185,15 +193,21 @@ object JVMMarkerUtils {
                 methodParams += ","
             }
             val paramType = it.type()
-            val qualifiedPrimitiveType = paramType?.let {
-                KotlinBuiltIns.getPrimitiveType(it)?.let { JvmPrimitiveType.get(it) }?.javaKeywordName
-            }
-            val qualifiedType = if (qualifiedPrimitiveType != null) {
-                qualifiedPrimitiveType
-            } else if (paramType != null && KotlinBuiltIns.isString(paramType)) {
-                "String"
+            val qualifiedType = if (paramType != null && KotlinBuiltIns.isPrimitiveArray(paramType)) {
+                val arrayType = KotlinBuiltIns.getPrimitiveArrayElementType(paramType)
+                arrayType?.let { JvmPrimitiveType.get(it).javaKeywordName + "[]" }
+            } else if (paramType != null && KotlinBuiltIns.isArray(paramType)
+                && paramType.arguments.firstOrNull()?.type?.fqName?.asString() == "kotlin.String"
+            ) {
+                "java.lang.String[]"
             } else {
-                paramType?.fqName?.toJvmFqName?.replace(".", "$")
+                paramType?.let {
+                    KotlinBuiltIns.getPrimitiveType(it)?.let { JvmPrimitiveType.get(it) }?.javaKeywordName
+                } ?: if (paramType != null && KotlinBuiltIns.isString(paramType)) {
+                    "java.lang.String"
+                } else {
+                    paramType?.fqName?.toJvmFqName?.replace(".", "$")
+                }
             }
             if (qualifiedType != null) {
                 methodParams += qualifiedType
