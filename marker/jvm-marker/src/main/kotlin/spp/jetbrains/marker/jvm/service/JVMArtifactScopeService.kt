@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.jvm.service
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.progress.EmptyProgressIndicator
@@ -72,7 +73,13 @@ class JVMArtifactScopeService : IArtifactScopeService {
 
     override fun getCallerFunctions(element: PsiElement, includeIndirect: Boolean): List<PsiNameIdentifierOwner> {
         val references = ProgressManager.getInstance().runProcess(Computable {
-            ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+            if (ApplicationManager.getApplication().isReadAccessAllowed) {
+                ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+            } else {
+                ReadAction.compute(ThrowableComputable {
+                    ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+                })
+            }
         }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
         return ReadAction.compute(ThrowableComputable {
             references.mapNotNull {
