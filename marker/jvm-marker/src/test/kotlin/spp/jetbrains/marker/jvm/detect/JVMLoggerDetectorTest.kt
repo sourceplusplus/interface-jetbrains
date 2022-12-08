@@ -25,6 +25,7 @@ import com.intellij.openapi.roots.LanguageLevelModuleExtension
 import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.pom.java.LanguageLevel
 import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
@@ -34,8 +35,6 @@ import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.idea.core.util.toPsiFile
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
-import org.jetbrains.uast.UFile
 import org.jetbrains.uast.toUElement
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
@@ -136,17 +135,17 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             val sourceFile = myFixture.createFile("TestLogback.java", code).toPsiFile(project)
             assertNotNull(sourceFile)
 
-            val uFile = sourceFile.toUElement() as UFile
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            val psiFile = sourceFile as PsiJavaFile
+            assertEquals(1, psiFile.classes.size)
+            assertEquals(1, psiFile.classes[0].methods.size)
 
-            JVMLanguageProvider().setup(project)
+            JVMLanguageProvider().setup(project.apply { UserData.vertx(this, Vertx.vertx()) })
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
-            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
+            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile)
             assertNotNull(fileMarker)
 
-            val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
-                .determineLoggerStatements(uFile.classes[0].methods[0], fileMarker!!)
+            val result = JVMLoggerDetector(project)
+                .determineLoggerStatements(psiFile.classes[0].methods[0], fileMarker!!)
                 .map { it.logPattern }
             assertEquals(5, result.size)
             assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
@@ -172,17 +171,21 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             val sourceFile = myFixture.createFile("TestLogback.kt", code).toPsiFile(project)
             assertNotNull(sourceFile)
 
-            val uFile = sourceFile.toUElement() as UFile
-            assertEquals(1, uFile.classes.size)
-            assertEquals(3, uFile.classes[0].methods.size)
+            val ktFile = sourceFile as KtFile
+            assertEquals(1, ktFile.classes.size)
+            assertEquals(3, ktFile.classes[0].methods.size)
 
-            JVMLanguageProvider().setup(project)
+            JVMLanguageProvider().setup(project.apply { UserData.vertx(this, Vertx.vertx()) })
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
-            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
+            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile)
             assertNotNull(fileMarker)
 
-            val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
-                .determineLoggerStatements(uFile.classes[0].methods[1], fileMarker!!)
+            //todo: shouldn't need toUElement()
+            val result = JVMLoggerDetector(project)
+                .determineLoggerStatements(
+                    ktFile.classes[0].methods[1].toUElement()!!.sourcePsi as PsiNameIdentifierOwner,
+                    fileMarker!!
+                )
                 .map { it.logPattern }
             assertEquals(5, result.size)
             assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
@@ -208,17 +211,17 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
             val sourceFile = myFixture.createFile("TestLogback.groovy", code).toPsiFile(project)
             assertNotNull(sourceFile)
 
-            val uFile = sourceFile.toUElement() as UFile
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            val groovyFile = sourceFile as GroovyFile
+            assertEquals(1, groovyFile.classes.size)
+            assertEquals(3, groovyFile.classes[0].methods.size)
 
-            JVMLanguageProvider().setup(project)
+            JVMLanguageProvider().setup(project.apply { UserData.vertx(this, Vertx.vertx()) })
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
-            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile!!)
+            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile)
             assertNotNull(fileMarker)
 
-            val result = JVMLoggerDetector(project.apply { UserData.vertx(this, Vertx.vertx()) })
-                .determineLoggerStatements(uFile.classes[0].methods[0].sourcePsi as GrMethod, fileMarker!!)
+            val result = JVMLoggerDetector(project)
+                .determineLoggerStatements(groovyFile.classes[0].methods[0], fileMarker!!)
                 .map { it.logPattern }
             assertEquals(5, result.size)
             assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")

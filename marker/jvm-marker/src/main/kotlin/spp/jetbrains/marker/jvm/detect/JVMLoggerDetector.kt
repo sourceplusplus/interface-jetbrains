@@ -20,19 +20,18 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiRecursiveElementVisitor
+import com.intellij.psi.*
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import org.jetbrains.kotlin.idea.caches.resolve.analyze
+import org.jetbrains.kotlin.psi.KtCallExpression
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import org.jetbrains.kotlin.psi.psiUtil.plainContent
+import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.path.GrMethodCallExpression
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.typedef.members.GrMethod
-import org.jetbrains.uast.UCallExpression
-import org.jetbrains.uast.ULiteralExpression
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.toUElementOfType
-import org.jetbrains.uast.visitor.AbstractUastVisitor
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
@@ -62,109 +61,149 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
     }
 
     override fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger> {
-        if (guideMark.language.id == "Groovy") {
-            determineLoggerStatements(guideMark.getPsiMethod() as GrMethod, guideMark.sourceFileMarker)
-        } else {
-            val uMethod = ApplicationManager.getApplication().runReadAction(Computable {
-                guideMark.getPsiMethod().toUElementOfType<UMethod>()
-            })
-            if (uMethod != null) {
-                determineLoggerStatements(uMethod, guideMark.sourceFileMarker)
-            }
-        }
+        val psiMethod = ApplicationManager.getApplication().runReadAction(Computable {
+            guideMark.getPsiMethod()
+        })
+        determineLoggerStatements(psiMethod, guideMark.sourceFileMarker)
         return guideMark.getChildren().mapNotNull { it.getUserData(DETECTED_LOGGER) }
     }
 
-    fun determineLoggerStatements(uMethod: UMethod, fileMarker: SourceFileMarker): List<DetectedLogger> {
+    fun determineLoggerStatements(
+        function: PsiNameIdentifierOwner,
+        fileMarker: SourceFileMarker
+    ): List<DetectedLogger> {
         val loggerStatements = mutableListOf<DetectedLogger>()
         ApplicationManager.getApplication().runReadAction {
-            uMethod.accept(object : AbstractUastVisitor() {
-                override fun visitCallExpression(node: UCallExpression): Boolean {
-                    val expression = node.sourcePsi ?: return super.visitCallExpression(node)
-                    val loggerClass = node.resolve()?.containingClass?.qualifiedName
-                    if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
-                        val methodName = node.methodIdentifier?.name
-                        if (methodName != null && LOGGER_METHODS.contains(methodName)) {
-                            val logTemplate = node.valueArguments.firstOrNull()?.run {
-                                (this as? ULiteralExpression)?.value as? String
-                            }
-
-                            if (logTemplate != null) {
-                                log.debug("Found log statement: $logTemplate")
-                                val detectedLogger = DetectedLogger(
-                                    logTemplate, methodName, getLineNumber(expression) + 1
-                                )
-                                loggerStatements.add(detectedLogger)
-
-                                //create expression guide mark for the log statement
-                                val guideMark = fileMarker.createExpressionSourceMark(
-                                    expression.parent, SourceMark.Type.GUIDE
-                                )
-                                if (!fileMarker.containsSourceMark(guideMark)) {
-                                    guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
-                                    guideMark.apply(true)
-                                } else {
-                                    fileMarker.getSourceMark(guideMark.artifactQualifiedName, SourceMark.Type.GUIDE)
-                                        ?.putUserData(DETECTED_LOGGER, detectedLogger)
-                                }
-                            } else {
-                                log.warn("No log template argument available for expression: $expression")
-                            }
-                        }
-                    }
-                    return super.visitCallExpression(node)
-                }
-            })
-        }
-        return loggerStatements
-    }
-
-    /**
-     * Unsure why, but Groovy UAST visitors don't work here. Have to use Groovy PSI.
-     */
-    fun determineLoggerStatements(grMethod: GrMethod, fileMarker: SourceFileMarker): List<DetectedLogger> {
-        val loggerStatements = mutableListOf<DetectedLogger>()
-        ApplicationManager.getApplication().runReadAction {
-            grMethod.acceptChildren(object : PsiRecursiveElementVisitor() {
+            function.acceptChildren(object : PsiRecursiveElementVisitor() {
                 override fun visitElement(element: PsiElement) {
-                    if (element is GrMethodCallExpression) {
-                        val loggerClass = element.resolveMethod()?.containingClass?.qualifiedName
-                        if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
-                            val methodName = element.resolveMethod()?.name
-                            if (methodName != null && LOGGER_METHODS.contains(methodName)) {
-                                val logTemplate = element.argumentList.expressionArguments.firstOrNull()?.run {
-                                    (this as? GrLiteral)?.value as? String
-                                }
-
-                                if (logTemplate != null) {
-                                    log.debug("Found log statement: $logTemplate")
-                                    val detectedLogger = DetectedLogger(
-                                        logTemplate, methodName, getLineNumber(element) + 1
-                                    )
-                                    loggerStatements.add(detectedLogger)
-
-                                    //create expression guide mark for the log statement
-                                    val guideMark = fileMarker.createExpressionSourceMark(
-                                        element, SourceMark.Type.GUIDE
-                                    )
-                                    if (!fileMarker.containsSourceMark(guideMark)) {
-                                        guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
-                                        guideMark.apply(true)
-                                    } else {
-                                        fileMarker.getSourceMark(guideMark.artifactQualifiedName, SourceMark.Type.GUIDE)
-                                            ?.putUserData(DETECTED_LOGGER, detectedLogger)
-                                    }
-                                } else {
-                                    log.warn("No log template argument available for expression: $element")
-                                }
-                            }
-                        }
+                    if (element is PsiMethodCallExpression) {
+                        handleJavaCall(element, loggerStatements, fileMarker)
+                    } else if (ArtifactTypeService.isKotlin(element) && element is KtCallExpression) {
+                        handleKotlinCall(element, loggerStatements, fileMarker)
+                    } else if (ArtifactTypeService.isGroovy(element) && element is GrMethodCallExpression) {
+                        handleGroovyCall(element, loggerStatements, fileMarker)
                     }
                     super.visitElement(element)
                 }
             })
         }
         return loggerStatements
+    }
+
+    private fun handleJavaCall(
+        element: PsiMethodCallExpression,
+        loggerStatements: MutableList<DetectedLogger>,
+        fileMarker: SourceFileMarker
+    ) {
+        val loggerClass = element.resolveMethod()?.containingClass?.qualifiedName
+        if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
+            val methodName = element.resolveMethod()?.name
+            if (methodName != null && LOGGER_METHODS.contains(methodName)) {
+                val logTemplate = element.argumentList.expressions.firstOrNull()?.run {
+                    (this as? PsiLiteral)?.value as? String
+                }
+
+                if (logTemplate != null) {
+                    log.debug("Found log statement: $logTemplate")
+                    val detectedLogger = DetectedLogger(
+                        logTemplate, methodName, getLineNumber(element) + 1
+                    )
+                    loggerStatements.add(detectedLogger)
+
+                    //create expression guide mark for the log statement
+                    val guideMark = fileMarker.createExpressionSourceMark(
+                        element, SourceMark.Type.GUIDE
+                    )
+                    if (!fileMarker.containsSourceMark(guideMark)) {
+                        guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
+                        guideMark.apply(true)
+                    } else {
+                        fileMarker.getSourceMark(guideMark.artifactQualifiedName, SourceMark.Type.GUIDE)
+                            ?.putUserData(DETECTED_LOGGER, detectedLogger)
+                    }
+                } else {
+                    log.warn("No log template argument available for expression: $element")
+                }
+            }
+        }
+    }
+
+    private fun handleGroovyCall(
+        element: GrMethodCallExpression,
+        loggerStatements: MutableList<DetectedLogger>,
+        fileMarker: SourceFileMarker
+    ) {
+        val loggerClass = element.resolveMethod()?.containingClass?.qualifiedName
+        if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
+            val methodName = element.resolveMethod()?.name
+            if (methodName != null && LOGGER_METHODS.contains(methodName)) {
+                val logTemplate = element.argumentList.expressionArguments.firstOrNull()?.run {
+                    (this as? GrLiteral)?.value as? String
+                }
+
+                if (logTemplate != null) {
+                    log.debug("Found log statement: $logTemplate")
+                    val detectedLogger = DetectedLogger(
+                        logTemplate, methodName, getLineNumber(element) + 1
+                    )
+                    loggerStatements.add(detectedLogger)
+
+                    //create expression guide mark for the log statement
+                    val guideMark = fileMarker.createExpressionSourceMark(
+                        element, SourceMark.Type.GUIDE
+                    )
+                    if (!fileMarker.containsSourceMark(guideMark)) {
+                        guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
+                        guideMark.apply(true)
+                    } else {
+                        fileMarker.getSourceMark(guideMark.artifactQualifiedName, SourceMark.Type.GUIDE)
+                            ?.putUserData(DETECTED_LOGGER, detectedLogger)
+                    }
+                } else {
+                    log.warn("No log template argument available for expression: $element")
+                }
+            }
+        }
+    }
+
+    private fun handleKotlinCall(
+        element: KtCallExpression,
+        loggerStatements: MutableList<DetectedLogger>,
+        fileMarker: SourceFileMarker
+    ) {
+        val loggerClass = element.getResolvedCall(element.analyze())
+            ?.resultingDescriptor?.fqNameSafe?.parent()?.asString()
+        if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
+            val methodName = element.getResolvedCall(element.analyze())
+                ?.resultingDescriptor?.name?.asString()
+            if (methodName != null && LOGGER_METHODS.contains(methodName)) {
+                val logTemplate = element.valueArguments.firstOrNull()?.getArgumentExpression().run {
+                    (this as? KtStringTemplateExpression)?.plainContent
+                }
+
+                if (logTemplate != null) {
+                    log.debug("Found log statement: $logTemplate")
+                    val detectedLogger = DetectedLogger(
+                        logTemplate, methodName, getLineNumber(element) + 1
+                    )
+                    loggerStatements.add(detectedLogger)
+
+                    //create expression guide mark for the log statement
+                    val guideMark = fileMarker.createExpressionSourceMark(
+                        element, SourceMark.Type.GUIDE
+                    )
+                    if (!fileMarker.containsSourceMark(guideMark)) {
+                        guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
+                        guideMark.apply(true)
+                    } else {
+                        fileMarker.getSourceMark(guideMark.artifactQualifiedName, SourceMark.Type.GUIDE)
+                            ?.putUserData(DETECTED_LOGGER, detectedLogger)
+                    }
+                } else {
+                    log.warn("No log template argument available for expression: $element")
+                }
+            }
+        }
     }
 
     private fun getLineNumber(element: PsiElement, start: Boolean = true): Int {
