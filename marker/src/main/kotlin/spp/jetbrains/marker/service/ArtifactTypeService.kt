@@ -61,6 +61,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
         return element.language.id == "kotlin"
     }
 
+    fun isGroovy(element: PsiElement): Boolean {
+        return element.language.id == "Groovy"
+    }
+
     fun isJavaScript(element: PsiElement): Boolean {
         return SourceMarkerUtils.getJavaScriptLanguages().contains(element.language.id)
     }
