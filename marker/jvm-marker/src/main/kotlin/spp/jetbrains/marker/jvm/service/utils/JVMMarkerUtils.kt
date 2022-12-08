@@ -20,13 +20,14 @@ import com.intellij.lang.jvm.util.JvmClassUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
+import org.jetbrains.kotlin.builtins.KotlinBuiltIns
+import org.jetbrains.kotlin.idea.base.utils.fqname.fqName
 import org.jetbrains.kotlin.idea.util.toJvmFqName
+import org.jetbrains.kotlin.nj2k.postProcessing.type
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.getContainingUClass
-import org.jetbrains.uast.toUElementOfType
+import org.jetbrains.kotlin.resolve.jvm.JvmPrimitiveType
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -77,22 +78,6 @@ object JVMMarkerUtils {
         )
     }
 
-    /**
-     * todo: description.
-     *
-     * @since 0.1.0
-     */
-    private fun getFullyQualifiedName(method: UMethod): ArtifactQualifiedName {
-        val classQualifiedName = method.getContainingUClass()?.let {
-            getFullyQualifiedName(it).identifier
-        }
-        return ArtifactQualifiedName(
-            "$classQualifiedName.${getQualifiedName(method)}",
-            type = ArtifactType.METHOD,
-            lineNumber = method.identifyingElement?.let { SourceMarkerUtils.getLineNumber(it) }
-        )
-    }
-
     private fun getFullyQualifiedName(clazz: PsiClass): ArtifactQualifiedName {
         return ArtifactQualifiedName(
             "${JvmClassUtil.getJvmClassName(clazz)}",
@@ -122,12 +107,19 @@ object JVMMarkerUtils {
         )
     }
 
-    private fun getFullyQualifiedName(method: KtNamedFunction): ArtifactQualifiedName {
-        return getFullyQualifiedName(method.toUElementOfType<UMethod>()!!)
-    }
-
     private fun getFullyQualifiedName(method: PsiMethod): ArtifactQualifiedName {
         val classQualifiedName = method.findAnyContainingStrict(PsiClass::class.java)?.let {
+            getFullyQualifiedName(it).identifier
+        }
+        return ArtifactQualifiedName(
+            "$classQualifiedName.${getQualifiedName(method)}",
+            type = ArtifactType.METHOD,
+            lineNumber = method.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
+        )
+    }
+
+    private fun getFullyQualifiedName(method: KtNamedFunction): ArtifactQualifiedName {
+        val classQualifiedName = method.findAnyContainingStrict(KtClass::class.java)?.let {
             getFullyQualifiedName(it).identifier
         }
         return ArtifactQualifiedName(
@@ -177,6 +169,38 @@ object JVMMarkerUtils {
                 } else {
                     it.type.canonicalText
                 }
+            } else {
+                log.warn("Unable to detect element type: $it")
+            }
+        }
+        return "$methodName($methodParams)"
+    }
+
+    private fun getQualifiedName(method: KtNamedFunction): String {
+        val methodName = method.nameIdentifier!!.text
+        var methodParams = ""
+        method.valueParameters.forEach {
+            if (methodParams.isNotEmpty()) {
+                methodParams += ","
+            }
+            val paramType = it.type()
+            val qualifiedPrimitiveType = paramType?.let {
+                KotlinBuiltIns.getPrimitiveType(it)?.let { JvmPrimitiveType.get(it) }?.javaKeywordName
+            }
+            val qualifiedType = if (qualifiedPrimitiveType != null) {
+                qualifiedPrimitiveType
+            } else if (paramType != null && KotlinBuiltIns.isString(paramType)) {
+                "String"
+            } else {
+                paramType?.fqName?.toJvmFqName?.replace(".", "$")
+            }
+            if (qualifiedType != null) {
+                methodParams += qualifiedType
+                repeat(getArrayDimensions(it.text)) {
+                    methodParams += "[]"
+                }
+            } else if (it.typeReference != null) {
+                methodParams += it.typeReference!!.text
             } else {
                 log.warn("Unable to detect element type: $it")
             }
