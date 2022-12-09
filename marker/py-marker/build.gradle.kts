@@ -57,7 +57,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:31.1-jre")
-    compileOnly("org.jetbrains:annotations:23.0.0")
+    compileOnly("org.jetbrains:annotations:23.1.0")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
