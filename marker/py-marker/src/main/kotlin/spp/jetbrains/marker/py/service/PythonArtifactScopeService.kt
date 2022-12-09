@@ -24,18 +24,23 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.descendantsOfType
+import com.intellij.psi.util.findParentOfType
 import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.parentOfTypes
 import com.jetbrains.python.codeInsight.controlflow.ControlFlowCache
 import com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil
 import com.jetbrains.python.psi.PyCallExpression
 import com.jetbrains.python.psi.PyFunction
+import com.jetbrains.python.psi.PyIfStatement
 import com.jetbrains.python.psi.PyReferenceExpression
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -45,7 +50,33 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 class PythonArtifactScopeService : IArtifactScopeService {
+
+    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+        require(ArtifactTypeService.isPython(element))
+        return element.descendantsOfType<PyFunction>().toList()
+    }
+
+    override fun getChildIfs(element: PsiElement): List<PsiElement> {
+        require(ArtifactTypeService.isPython(element))
+        return element.descendantsOfType<PyIfStatement>().toList()
+    }
+
+    override fun getParentIf(element: PsiElement): PsiElement? {
+        require(ArtifactTypeService.isPython(element))
+        return element.findParentOfType<PyIfStatement>()
+    }
+
+    override fun getParentFunction(element: PsiElement): PsiNamedElement? {
+        require(ArtifactTypeService.isPython(element))
+        return element.findParentOfType<PyFunction>()
+    }
+
+    override fun getCalls(element: PsiElement): List<PsiElement> {
+        require(ArtifactTypeService.isPython(element))
+        return element.descendantsOfType<PyCallExpression>().toList()
+    }
 
     override fun getCalledFunctions(
         element: PsiElement,
@@ -80,7 +111,6 @@ class PythonArtifactScopeService : IArtifactScopeService {
             }.filter { it.isWritable }
         })
     }
-
 
     override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
         val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) ?: return emptyList()

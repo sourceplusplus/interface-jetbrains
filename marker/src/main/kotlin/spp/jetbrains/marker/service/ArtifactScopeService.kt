@@ -17,7 +17,9 @@
 package spp.jetbrains.marker.service
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.PsiNamedElement
 import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -30,8 +32,28 @@ import spp.protocol.artifact.ArtifactType
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("MemberVisibilityCanBePrivate") // public API
+@Suppress("MemberVisibilityCanBePrivate", "TooManyFunctions") // public API
 object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>(), IArtifactScopeService {
+
+    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+        return getService(element.language).getFunctions(element)
+    }
+
+    override fun getChildIfs(element: PsiElement): List<PsiElement> {
+        return getService(element.language).getChildIfs(element)
+    }
+
+    override fun getParentIf(element: PsiElement): PsiElement? {
+        return getService(element.language).getParentIf(element)
+    }
+
+    override fun getParentFunction(element: PsiElement): PsiNamedElement? {
+        return getService(element.language).getParentFunction(element)
+    }
+
+    override fun getCalls(element: PsiElement): List<PsiElement> {
+        return getService(element.language).getCalls(element)
+    }
 
     override fun getCalledFunctions(
         element: PsiElement,

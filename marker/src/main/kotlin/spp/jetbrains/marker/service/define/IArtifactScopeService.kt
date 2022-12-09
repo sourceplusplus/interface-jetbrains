@@ -17,7 +17,9 @@
 package spp.jetbrains.marker.service.define
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.PsiNamedElement
 import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
@@ -27,6 +29,12 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface IArtifactScopeService : ISourceMarkerService {
+
+    fun getFunctions(element: PsiFile): List<PsiNamedElement>
+    fun getChildIfs(element: PsiElement): List<PsiElement>
+    fun getParentIf(element: PsiElement): PsiElement?
+    fun getParentFunction(element: PsiElement): PsiNamedElement?
+    fun getCalls(element: PsiElement): List<PsiElement>
 
     fun getCalledFunctions(
         element: PsiElement,

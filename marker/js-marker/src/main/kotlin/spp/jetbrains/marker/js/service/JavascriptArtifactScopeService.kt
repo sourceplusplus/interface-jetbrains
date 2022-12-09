@@ -16,10 +16,7 @@
  */
 package spp.jetbrains.marker.js.service
 
-import com.intellij.lang.javascript.psi.JSCallExpression
-import com.intellij.lang.javascript.psi.JSFunction
-import com.intellij.lang.javascript.psi.JSReferenceExpression
-import com.intellij.lang.javascript.psi.JSVariable
+import com.intellij.lang.javascript.psi.*
 import com.intellij.lang.javascript.psi.util.JSTreeUtil
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
@@ -29,13 +26,17 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.descendantsOfType
+import com.intellij.psi.util.findParentOfType
 import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.parentOfTypes
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 
@@ -45,7 +46,33 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.7.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 class JavascriptArtifactScopeService : IArtifactScopeService {
+
+    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.descendantsOfType<JSFunction>().toList()
+    }
+
+    override fun getChildIfs(element: PsiElement): List<PsiElement> {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.descendantsOfType<JSIfStatement>().toList()
+    }
+
+    override fun getParentIf(element: PsiElement): PsiElement? {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.findParentOfType<JSIfStatement>()
+    }
+
+    override fun getParentFunction(element: PsiElement): PsiNamedElement? {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.findParentOfType<JSFunction>()
+    }
+
+    override fun getCalls(element: PsiElement): List<PsiElement> {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.descendantsOfType<JSCallExpression>().toList()
+    }
 
     override fun getCalledFunctions(
         element: PsiElement,
