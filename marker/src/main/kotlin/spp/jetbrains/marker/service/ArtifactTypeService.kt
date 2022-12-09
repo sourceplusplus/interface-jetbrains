@@ -23,6 +23,7 @@ import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
+@Suppress("TooManyFunctions")
 object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>(), IArtifactTypeService {
 
     override fun getNameIdentifier(element: PsiElement): PsiElement {
@@ -55,6 +56,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
 
     fun isJvm(element: PsiElement): Boolean {
         return SourceMarkerUtils.getJvmLanguages().contains(element.language.id)
+    }
+
+    fun isJava(element: PsiElement): Boolean {
+        return element.language.id == "JAVA"
     }
 
     fun isKotlin(element: PsiElement): Boolean {
