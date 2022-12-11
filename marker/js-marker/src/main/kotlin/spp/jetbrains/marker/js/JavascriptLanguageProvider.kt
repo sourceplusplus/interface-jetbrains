@@ -88,6 +88,7 @@ class JavascriptLanguageProvider : LanguageProvider {
         SourceMarkerUtils.getJavaScriptLanguages().let {
             ArtifactMarkService.addService(JavascriptArtifactMarkService(), it)
             ArtifactCreationService.addService(JavascriptArtifactCreationService(), it)
+            ArtifactModelService.addService(JavascriptArtifactModelService(), it)
             ArtifactNamingService.addService(JavascriptArtifactNamingService(), it)
             ArtifactScopeService.addService(JavascriptArtifactScopeService(), it)
             ArtifactConditionService.addService(JavascriptArtifactConditionService(), it)

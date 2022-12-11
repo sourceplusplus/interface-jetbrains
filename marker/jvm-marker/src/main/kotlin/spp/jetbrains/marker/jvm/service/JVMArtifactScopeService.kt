@@ -165,8 +165,6 @@ class JVMArtifactScopeService : IArtifactScopeService {
         return parentLoop != null && ControlFlowUtils.isEndlessLoop(parentLoop)
     }
 
-    override fun isJVM(element: PsiElement): Boolean = true
-
     override fun canShowControlBar(psiElement: PsiElement): Boolean {
         return when (psiElement::class.java.name) {
             "org.jetbrains.kotlin.psi.KtObjectDeclaration" -> false

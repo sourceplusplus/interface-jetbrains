@@ -22,11 +22,13 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.javadoc.PsiDocToken
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFunction
 import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactTypeService
+import spp.jetbrains.marker.service.isKotlin
 import spp.protocol.artifact.ArtifactType
 
 /**
@@ -71,6 +73,13 @@ class JVMArtifactTypeService : IArtifactTypeService {
             ArtifactTypeService.isKotlin(element) && element is KtFunction -> ArtifactType.METHOD
             ArtifactTypeService.isKotlin(element) && element is KtExpression -> ArtifactType.EXPRESSION
             else -> null
+        }
+    }
+
+    override fun isLiteral(element: PsiElement): Boolean {
+        return when {
+            element.isKotlin() && element is KtConstantExpression -> true
+            else -> super.isLiteral(element)
         }
     }
 }

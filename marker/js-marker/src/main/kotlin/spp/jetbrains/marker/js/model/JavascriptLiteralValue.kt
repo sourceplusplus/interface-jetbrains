@@ -14,25 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service.define
+package spp.jetbrains.marker.js.model
 
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
-import com.intellij.psi.impl.light.LightIdentifier
 import spp.jetbrains.marker.model.ArtifactLiteralValue
-import spp.protocol.artifact.ArtifactType
 
-interface IArtifactTypeService : ISourceMarkerService {
-
-    /**
-     * Necessary because Groovy uses [LightIdentifier] for the name identifier.
-     */
-    fun getNameIdentifier(element: PsiElement): PsiElement = element
-    fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement?
-    fun isComment(element: PsiElement): Boolean
-    fun getType(element: PsiElement): ArtifactType?
-
-    fun isLiteral(element: PsiElement): Boolean {
-        return element is PsiLiteralValue || element is ArtifactLiteralValue
-    }
+class JavascriptLiteralValue(private val psiElement: PsiLiteralValue) : ArtifactLiteralValue(psiElement) {
+    override val value: Any?
+        get() = psiElement.value
 }

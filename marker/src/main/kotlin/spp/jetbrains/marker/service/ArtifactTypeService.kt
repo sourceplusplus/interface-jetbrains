@@ -46,6 +46,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
         return getService(element.language).getType(element)
     }
 
+    override fun isLiteral(element: PsiElement): Boolean {
+        return getService(element.language).isLiteral(element)
+    }
+
     fun isFunction(element: PsiElement): Boolean {
         return getType(element) == ArtifactType.METHOD
     }
@@ -73,4 +77,46 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     fun isJavaScript(element: PsiElement): Boolean {
         return SourceMarkerUtils.getJavaScriptLanguages().contains(element.language.id)
     }
+}
+
+// Extensions
+
+fun PsiElement.isComment(): Boolean {
+    return ArtifactTypeService.isComment(this)
+}
+
+fun PsiElement.getType(): ArtifactType? {
+    return ArtifactTypeService.getType(this)
+}
+
+fun PsiElement?.isLiteral(): Boolean {
+    return this?.let { ArtifactTypeService.isLiteral(it) } ?: false
+}
+
+fun PsiElement.isFunction(): Boolean {
+    return ArtifactTypeService.isFunction(this)
+}
+
+fun PsiElement.isPython(): Boolean {
+    return ArtifactTypeService.isPython(this)
+}
+
+fun PsiElement.isJvm(): Boolean {
+    return ArtifactTypeService.isJvm(this)
+}
+
+fun PsiElement.isJava(): Boolean {
+    return ArtifactTypeService.isJava(this)
+}
+
+fun PsiElement.isKotlin(): Boolean {
+    return ArtifactTypeService.isKotlin(this)
+}
+
+fun PsiElement.isGroovy(): Boolean {
+    return ArtifactTypeService.isGroovy(this)
+}
+
+fun PsiElement.isJavaScript(): Boolean {
+    return ArtifactTypeService.isJavaScript(this)
 }

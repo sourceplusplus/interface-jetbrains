@@ -14,25 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service.define
+package spp.jetbrains.marker.jvm.model
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
-import com.intellij.psi.impl.light.LightIdentifier
+import org.jetbrains.kotlin.psi.KtConstantExpression
 import spp.jetbrains.marker.model.ArtifactLiteralValue
-import spp.protocol.artifact.ArtifactType
+import spp.jetbrains.marker.service.isKotlin
 
-interface IArtifactTypeService : ISourceMarkerService {
+class JVMLiteralValue(private val psiElement: PsiElement) : ArtifactLiteralValue(psiElement) {
+    override val value: Any?
+        get() {
+            return when {
+                psiElement is PsiLiteralValue -> psiElement.value
 
-    /**
-     * Necessary because Groovy uses [LightIdentifier] for the name identifier.
-     */
-    fun getNameIdentifier(element: PsiElement): PsiElement = element
-    fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement?
-    fun isComment(element: PsiElement): Boolean
-    fun getType(element: PsiElement): ArtifactType?
+                psiElement.isKotlin() && psiElement is KtConstantExpression -> {
+                    psiElement.text //todo:
+                }
 
-    fun isLiteral(element: PsiElement): Boolean {
-        return element is PsiLiteralValue || element is ArtifactLiteralValue
-    }
+                else -> TODO()
+            }
+        }
 }

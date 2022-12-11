@@ -17,22 +17,15 @@
 package spp.jetbrains.marker.service.define
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiLiteralValue
-import com.intellij.psi.impl.light.LightIdentifier
-import spp.jetbrains.marker.model.ArtifactLiteralValue
-import spp.protocol.artifact.ArtifactType
+import spp.jetbrains.marker.model.ArtifactElement
 
-interface IArtifactTypeService : ISourceMarkerService {
+/**
+ * Language-agnostic artifact model service.
+ *
+ * @since 0.7.5
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
+interface IArtifactModelService : ISourceMarkerService {
 
-    /**
-     * Necessary because Groovy uses [LightIdentifier] for the name identifier.
-     */
-    fun getNameIdentifier(element: PsiElement): PsiElement = element
-    fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement?
-    fun isComment(element: PsiElement): Boolean
-    fun getType(element: PsiElement): ArtifactType?
-
-    fun isLiteral(element: PsiElement): Boolean {
-        return element is PsiLiteralValue || element is ArtifactLiteralValue
-    }
+    fun toArtifact(element: PsiElement): ArtifactElement?
 }

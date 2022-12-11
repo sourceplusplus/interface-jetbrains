@@ -86,8 +86,26 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {
         return getService(element.language).isInsideEndlessLoop(element)
     }
+}
 
-    override fun isJVM(element: PsiElement): Boolean {
-        return getService(element.language).isJVM(element)
-    }
+// Extensions
+
+fun PsiFile.getFunctions(): List<PsiNamedElement> {
+    return ArtifactScopeService.getService(language).getFunctions(this)
+}
+
+fun PsiElement.getChildIfs(): List<PsiElement> {
+    return ArtifactScopeService.getService(language).getChildIfs(this)
+}
+
+fun PsiElement.getParentIf(): PsiElement? {
+    return ArtifactScopeService.getService(language).getParentIf(this)
+}
+
+fun PsiElement.getParentFunction(): PsiNamedElement? {
+    return ArtifactScopeService.getService(language).getParentFunction(this)
+}
+
+fun PsiElement.getCalls(): List<PsiElement> {
+    return ArtifactScopeService.getService(language).getCalls(this)
 }

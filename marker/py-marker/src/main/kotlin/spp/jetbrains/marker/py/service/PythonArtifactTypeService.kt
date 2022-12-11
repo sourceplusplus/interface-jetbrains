@@ -19,10 +19,7 @@ package spp.jetbrains.marker.py.service
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.jetbrains.python.psi.PyClass
-import com.jetbrains.python.psi.PyDecorator
-import com.jetbrains.python.psi.PyExpression
-import com.jetbrains.python.psi.PyFunction
+import com.jetbrains.python.psi.*
 import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
 import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
@@ -59,5 +56,9 @@ class PythonArtifactTypeService : IArtifactTypeService {
 
             else -> null
         }
+    }
+
+    override fun isLiteral(element: PsiElement): Boolean {
+        return element is PyLiteralExpression || super.isLiteral(element)
     }
 }

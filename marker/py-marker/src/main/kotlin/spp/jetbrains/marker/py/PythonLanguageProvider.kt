@@ -86,6 +86,7 @@ class PythonLanguageProvider : LanguageProvider {
 
         ArtifactMarkService.addService(PythonArtifactMarkService(), "Python")
         ArtifactCreationService.addService(PythonArtifactCreationService(), "Python")
+        ArtifactModelService.addService(PythonArtifactModelService(), "Python")
         ArtifactNamingService.addService(PythonArtifactNamingService(), "Python")
         ArtifactScopeService.addService(PythonArtifactScopeService(), "Python")
         ArtifactConditionService.addService(PythonArtifactConditionService(), "Python")

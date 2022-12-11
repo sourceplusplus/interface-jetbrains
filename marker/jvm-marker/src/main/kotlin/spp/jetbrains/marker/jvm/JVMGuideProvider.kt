@@ -21,8 +21,8 @@ import com.intellij.psi.*
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.psiUtil.isExtensionDeclaration
-import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
+import spp.jetbrains.marker.service.isKotlin
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.GuideMark
@@ -45,7 +45,7 @@ class JVMGuideProvider : AbstractSourceGuideProvider {
                     makeMethodGuideMark(fileMarker, element)
                 }
 
-                if (ArtifactTypeService.isKotlin(element)) {
+                if (element.isKotlin()) {
                     if (element is KtClass) {
                         makeClassGuideMark(fileMarker, element)
                     } else if (element is KtNamedFunction && !element.isExtensionDeclaration()) {

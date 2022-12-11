@@ -97,6 +97,7 @@ class JVMLanguageProvider : LanguageProvider {
         SourceMarkerUtils.getJvmLanguages().let {
             ArtifactMarkService.addService(JVMArtifactMarkService(), it)
             ArtifactCreationService.addService(JVMArtifactCreationService(), it)
+            ArtifactModelService.addService(JVMArtifactModelService(), it)
             ArtifactNamingService.addService(JVMArtifactNamingService(), it)
             ArtifactScopeService.addService(JVMArtifactScopeService(), it)
             ArtifactConditionService.addService(JVMArtifactConditionService(), it)

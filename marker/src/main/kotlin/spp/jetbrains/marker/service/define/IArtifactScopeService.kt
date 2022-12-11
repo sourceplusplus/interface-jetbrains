@@ -46,6 +46,5 @@ interface IArtifactScopeService : ISourceMarkerService {
     fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
     fun isInsideFunction(element: PsiElement): Boolean
     fun isInsideEndlessLoop(element: PsiElement): Boolean = false
-    fun isJVM(element: PsiElement): Boolean = false
     fun canShowControlBar(psiElement: PsiElement): Boolean = true
 }
