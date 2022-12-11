@@ -34,6 +34,7 @@ import spp.jetbrains.marker.SourceMarkerKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.service.ArtifactScopeService
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
@@ -96,7 +97,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
                     val startLine = document.getLineNumber(textRange.startOffset) + 1
                     val endLine = document.getLineNumber(textRange.endOffset) + 1
 
-                    val locationSource = if (ArtifactScopeService.isJVM(methodSourceMark.getPsiElement())) {
+                    val locationSource = if (ArtifactTypeService.isJvm(methodSourceMark.getPsiElement())) {
                         methodSourceMark.artifactQualifiedName.toClass()?.identifier
                     } else {
                         fileMarker.psiFile.virtualFile.name
