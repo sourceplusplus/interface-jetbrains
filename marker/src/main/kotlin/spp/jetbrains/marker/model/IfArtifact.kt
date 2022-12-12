@@ -23,4 +23,33 @@ abstract class IfArtifact(psiElement: PsiElement) : ArtifactElement(psiElement),
     abstract override val condition: ArtifactElement?
     abstract val thenBranch: ArtifactElement?
     abstract val elseBranch: ArtifactElement?
+
+    fun getStaticProbability(): Double {
+        if (condition == null) return Double.NaN
+        return when (val artifact = condition) {
+            is ArtifactLiteralValue -> constant(artifact)
+            is ArtifactBinaryExpression -> binary(artifact)
+            else -> Double.NaN
+        }
+    }
+
+    private fun binary(element: ArtifactBinaryExpression): Double {
+        if (element.getLeftExpression().isLiteral() && element.getRightExpression().isLiteral()) {
+            val left = element.getLeftExpression() as ArtifactLiteralValue?
+            val right = element.getRightExpression() as ArtifactLiteralValue?
+            if (left?.value == right?.value) {
+                return 1.0
+            }
+        }
+
+        return Double.NaN
+    }
+
+    private fun constant(element: ArtifactLiteralValue): Double {
+        return when (element.value?.toString()?.lowercase()) {
+            "true" -> 1.0
+            "false" -> 0.0
+            else -> Double.NaN
+        }
+    }
 }
