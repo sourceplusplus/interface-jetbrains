@@ -27,7 +27,7 @@ import spp.jetbrains.marker.service.toArtifact
 
 class JVMCallArtifact(private val psiElement: PsiElement) : CallArtifact(psiElement) {
 
-    override fun resolveMethod(): FunctionArtifact? {
+    override fun resolveFunction(): FunctionArtifact? {
         return when (psiElement) {
             is PsiCall -> psiElement.resolveMethod()?.toArtifact() as? FunctionArtifact
             is KtCallExpression -> {

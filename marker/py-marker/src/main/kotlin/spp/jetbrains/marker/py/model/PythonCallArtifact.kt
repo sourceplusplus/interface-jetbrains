@@ -24,7 +24,7 @@ import spp.jetbrains.marker.service.toArtifact
 
 class PythonCallArtifact(private val psiElement: PyCallExpression) : CallArtifact(psiElement) {
 
-    override fun resolveMethod(): FunctionArtifact? {
+    override fun resolveFunction(): FunctionArtifact? {
         return (psiElement.callee as? PyReferenceExpression)?.reference?.resolve().toArtifact() as? FunctionArtifact
     }
 }

@@ -24,7 +24,7 @@ import spp.jetbrains.marker.service.toArtifact
 
 class JavascriptCallArtifact(private val psiElement: JSCallExpression) : CallArtifact(psiElement) {
 
-    override fun resolveMethod(): FunctionArtifact? {
+    override fun resolveFunction(): FunctionArtifact? {
         return (psiElement.methodExpression as? PsiReference)?.resolve()?.toArtifact() as? FunctionArtifact
     }
 }

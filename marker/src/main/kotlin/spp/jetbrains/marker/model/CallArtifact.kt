@@ -19,5 +19,5 @@ package spp.jetbrains.marker.model
 import com.intellij.psi.PsiElement
 
 abstract class CallArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
-    abstract fun resolveMethod(): FunctionArtifact?
+    abstract fun resolveFunction(): FunctionArtifact?
 }
