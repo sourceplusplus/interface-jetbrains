@@ -51,7 +51,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions") // public API
 class JVMArtifactScopeService : IArtifactScopeService {
 
     override fun getFunctions(element: PsiFile): List<PsiNamedElement> {

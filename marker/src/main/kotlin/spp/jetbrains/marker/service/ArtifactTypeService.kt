@@ -23,7 +23,7 @@ import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions") // public API
 object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>(), IArtifactTypeService {
 
     override fun getNameIdentifier(element: PsiElement): PsiElement {
