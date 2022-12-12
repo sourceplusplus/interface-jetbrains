@@ -28,6 +28,7 @@ import spp.jetbrains.marker.source.SourceFileMarker
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions") // public API
 interface IArtifactScopeService : ISourceMarkerService {
 
     fun getFunctions(element: PsiFile): List<PsiNamedElement>
