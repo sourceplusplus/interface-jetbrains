@@ -22,6 +22,13 @@ import spp.jetbrains.marker.model.IfArtifact
 import spp.jetbrains.marker.service.toArtifact
 
 class JavascriptIfArtifact(private val psiElement: JSIfStatement) : IfArtifact(psiElement) {
+
     override val condition: ArtifactElement?
         get() = psiElement.condition?.toArtifact()
+
+    override val thenBranch: ArtifactElement?
+        get() = psiElement.thenBranch?.toArtifact()
+
+    override val elseBranch: ArtifactElement?
+        get() = psiElement.elseBranch?.toArtifact()
 }

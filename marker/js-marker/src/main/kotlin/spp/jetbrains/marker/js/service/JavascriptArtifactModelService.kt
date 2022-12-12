@@ -16,10 +16,7 @@
  */
 package spp.jetbrains.marker.js.service
 
-import com.intellij.lang.javascript.psi.JSBinaryExpression
-import com.intellij.lang.javascript.psi.JSCallExpression
-import com.intellij.lang.javascript.psi.JSFunction
-import com.intellij.lang.javascript.psi.JSIfStatement
+import com.intellij.lang.javascript.psi.*
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
 import spp.jetbrains.marker.js.model.*
@@ -41,6 +38,7 @@ class JavascriptArtifactModelService : IArtifactModelService {
             is PsiLiteralValue -> JavascriptLiteralValue(element)
             is JSFunction -> JavascriptFunctionArtifact(element)
             is JSCallExpression -> JavascriptCallArtifact(element)
+            is JSBlockStatement -> JavascriptBlockArtifact(element)
             else -> null
         }
     }

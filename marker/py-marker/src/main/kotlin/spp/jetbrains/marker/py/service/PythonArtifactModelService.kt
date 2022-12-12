@@ -37,6 +37,7 @@ class PythonArtifactModelService : IArtifactModelService {
             is PyLiteralExpression -> PythonLiteralValue(element)
             is PyFunction -> PythonFunctionArtifact(element)
             is PyCallExpression -> PythonCallArtifact(element)
+            is PyStatementList -> PythonBlockArtifact(element)
             else -> null
         }
     }

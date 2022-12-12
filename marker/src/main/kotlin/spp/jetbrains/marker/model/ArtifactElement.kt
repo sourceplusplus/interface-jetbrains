@@ -21,7 +21,10 @@ import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.getCalls
 import spp.jetbrains.marker.service.toArtifact
 
-open class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement
+open class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
+    fun isControlStructure(): Boolean = this is ControlStructureArtifact
+    fun isCall(): Boolean = this is CallArtifact
+}
 
 // Extensions
 

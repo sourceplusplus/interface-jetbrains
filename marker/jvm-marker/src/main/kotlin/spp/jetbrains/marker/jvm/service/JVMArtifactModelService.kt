@@ -33,7 +33,7 @@ class JVMArtifactModelService : IArtifactModelService {
 
     override fun toArtifact(element: PsiElement): ArtifactElement? {
         if (element.isKotlin()) {
-            return toArtifact(element as KtElement)
+            return fromKotlin(element)
         }
 
         return when (element) {
@@ -42,17 +42,20 @@ class JVMArtifactModelService : IArtifactModelService {
             is PsiBinaryExpression -> JVMBinaryExpression(element)
             is PsiMethod -> JVMFunctionArtifact(element)
             is PsiCall -> JVMCallArtifact(element)
+            is PsiCodeBlock -> JVMBlockArtifact(element)
+            is PsiBlockStatement -> JVMBlockArtifact(element.codeBlock)
             else -> null
         }
     }
 
-    private fun toArtifact(element: KtElement): ArtifactElement? {
+    private fun fromKotlin(element: PsiElement): ArtifactElement? {
         return when (element) {
             is KtIfExpression -> JVMIfArtifact(element)
             is KtConstantExpression -> JVMLiteralValue(element)
             is KtBinaryExpression -> JVMBinaryExpression(element)
             is KtNamedFunction -> JVMFunctionArtifact(element)
             is KtCallExpression -> JVMCallArtifact(element)
+            is KtBlockExpression -> JVMBlockArtifact(element)
             else -> null
         }
     }

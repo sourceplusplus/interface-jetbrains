@@ -16,19 +16,7 @@
  */
 package spp.jetbrains.marker.py.model
 
-import com.jetbrains.python.psi.PyIfStatement
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.service.toArtifact
+import com.intellij.psi.PsiElement
+import spp.jetbrains.marker.model.BlockArtifact
 
-class PythonIfArtifact(private val psiElement: PyIfStatement) : IfArtifact(psiElement) {
-
-    override val condition: ArtifactElement?
-        get() = psiElement.ifPart.condition?.toArtifact()
-
-    override val thenBranch: ArtifactElement?
-        get() = psiElement.ifPart.statementList.toArtifact()
-
-    override val elseBranch: ArtifactElement?
-        get() = psiElement.elsePart?.statementList?.toArtifact()
-}
+class PythonBlockArtifact(psiElement: PsiElement) : BlockArtifact(psiElement)

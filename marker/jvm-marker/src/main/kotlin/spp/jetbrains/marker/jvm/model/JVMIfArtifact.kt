@@ -24,11 +24,30 @@ import spp.jetbrains.marker.model.IfArtifact
 import spp.jetbrains.marker.service.toArtifact
 
 class JVMIfArtifact(private val psiElement: PsiElement) : IfArtifact(psiElement) {
+
     override val condition: ArtifactElement?
         get() {
             return when (psiElement) {
-                is KtIfExpression -> psiElement.condition?.toArtifact()
                 is PsiIfStatement -> psiElement.condition?.toArtifact()
+                is KtIfExpression -> psiElement.condition?.toArtifact()
+                else -> TODO()
+            }
+        }
+
+    override val thenBranch: ArtifactElement?
+        get() {
+            return when (psiElement) {
+                is PsiIfStatement -> psiElement.thenBranch?.toArtifact()
+                is KtIfExpression -> psiElement.then?.toArtifact()
+                else -> TODO()
+            }
+        }
+
+    override val elseBranch: ArtifactElement?
+        get() {
+            return when (psiElement) {
+                is PsiIfStatement -> psiElement.elseBranch?.toArtifact()
+                is KtIfExpression -> psiElement.`else`?.toArtifact()
                 else -> TODO()
             }
         }

@@ -18,7 +18,9 @@ package spp.jetbrains.marker.model
 
 import com.intellij.psi.PsiElement
 
-abstract class IfArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
+abstract class IfArtifact(psiElement: PsiElement) : ArtifactElement(psiElement), ControlStructureArtifact {
 
-    abstract val condition: ArtifactElement?
+    abstract override val condition: ArtifactElement?
+    abstract val thenBranch: ArtifactElement?
+    abstract val elseBranch: ArtifactElement?
 }
