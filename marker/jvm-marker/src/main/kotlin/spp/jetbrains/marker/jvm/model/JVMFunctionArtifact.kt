@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.marker.jvm.model
 
-import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.model.FunctionArtifact
 
-class JVMFunctionArtifact(psiElement: PsiElement) : FunctionArtifact(psiElement)
+class JVMFunctionArtifact(psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement)

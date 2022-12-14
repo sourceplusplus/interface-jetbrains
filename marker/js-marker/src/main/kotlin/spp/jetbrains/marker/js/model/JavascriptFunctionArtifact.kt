@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.marker.js.model
 
-import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.model.FunctionArtifact
 
-class JavascriptFunctionArtifact(psiElement: PsiElement) : FunctionArtifact(psiElement)
+class JavascriptFunctionArtifact(psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement)

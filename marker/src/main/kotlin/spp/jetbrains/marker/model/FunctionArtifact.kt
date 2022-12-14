@@ -17,5 +17,13 @@
 package spp.jetbrains.marker.model
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 
-open class FunctionArtifact(psiElement: PsiElement) : ArtifactElement(psiElement)
+open class FunctionArtifact(
+    private val psiElement: PsiNameIdentifierOwner
+) : ArtifactElement(psiElement), PsiNameIdentifierOwner {
+
+    override fun getName(): String? = psiElement.name
+    override fun setName(name: String): PsiElement = psiElement.setName(name)
+    override fun getNameIdentifier(): PsiElement? = psiElement.nameIdentifier
+}

@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.marker.py.model
 
-import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.model.FunctionArtifact
 
-class PythonFunctionArtifact(psiElement: PsiElement) : FunctionArtifact(psiElement)
+class PythonFunctionArtifact(psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement)
