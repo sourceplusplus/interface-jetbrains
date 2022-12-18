@@ -220,45 +220,22 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 if (effectColor != null) {
                     g.color = effectColor
                     when (virtualText.textAttributes.effectType) {
-                        EffectType.LINE_UNDERSCORE -> EffectPainter.LINE_UNDERSCORE.paint(
-                            g,
-                            0,
-                            ascent,
-                            width,
-                            descent,
-                            font
-                        )
+                        EffectType.LINE_UNDERSCORE -> EffectPainter.LINE_UNDERSCORE
+                            .paint(g, 0, ascent, width, descent, font)
 
-                        EffectType.BOLD_LINE_UNDERSCORE -> EffectPainter.BOLD_LINE_UNDERSCORE.paint(
-                            g,
-                            0,
-                            ascent,
-                            width,
-                            descent,
-                            font
-                        )
+                        EffectType.BOLD_LINE_UNDERSCORE -> EffectPainter.BOLD_LINE_UNDERSCORE
+                            .paint(g, 0, ascent, width, descent, font)
 
-                        EffectType.STRIKEOUT -> EffectPainter.STRIKE_THROUGH.paint(g, 0, ascent, width, height, font)
-                        EffectType.WAVE_UNDERSCORE -> EffectPainter.WAVE_UNDERSCORE.paint(
-                            g,
-                            0,
-                            ascent,
-                            width,
-                            descent,
-                            font
-                        )
+                        EffectType.STRIKEOUT -> EffectPainter.STRIKE_THROUGH
+                            .paint(g, 0, ascent, width, height, font)
 
-                        EffectType.BOLD_DOTTED_LINE -> EffectPainter.BOLD_DOTTED_UNDERSCORE.paint(
-                            g,
-                            0,
-                            ascent,
-                            width,
-                            descent,
-                            font
-                        )
+                        EffectType.WAVE_UNDERSCORE -> EffectPainter.WAVE_UNDERSCORE
+                            .paint(g, 0, ascent, width, descent, font)
 
-                        else -> {
-                        }
+                        EffectType.BOLD_DOTTED_LINE -> EffectPainter.BOLD_DOTTED_UNDERSCORE
+                            .paint(g, 0, ascent, width, descent, font)
+
+                        else -> Unit
                     }
                 }
             } finally {
