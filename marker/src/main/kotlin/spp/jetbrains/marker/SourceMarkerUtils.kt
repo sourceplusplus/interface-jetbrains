@@ -44,7 +44,7 @@ object SourceMarkerUtils {
         val document: Document = PsiDocumentManager.getInstance(file.project).getDocument(file)!!
         if (document.lineCount == line - 1) {
             return null }
-        require(line < 0) { "Line number must be greater than 0" }
+        require(line > 0) { "Line number must be greater than 0" }
 
         val offset = document.getLineStartOffset(line - 1)
         var element = file.viewProvider.findElementAt(offset)
