@@ -129,12 +129,12 @@ class PluginSourceMarkEventListener(val project: Project) : CoroutineVerticle(),
         val changedElements = ArtifactVersionService.getChangedFunctions(fileMarker.psiFile)
         val changedGuideMarks = changedElements
             .mapNotNull { it.nameIdentifier?.getUserData(SourceKey.GuideMark) }
-        changedGuideMarks.forEach {
-            it.putUserData(VCS_MODIFIED, true)
-        }
-        changedGuideMarks.forEach {
-            it.triggerEvent(CODE_CHANGED, listOf())
-        }
+        val noLongerChangedGuideMarks = fileMarker.getGuideMarks()
+            .filter { it.getUserData(VCS_MODIFIED) == true }
+            .filter { it !in changedGuideMarks }
+        changedGuideMarks.forEach { it.putUserData(VCS_MODIFIED, true) }
+        noLongerChangedGuideMarks.forEach { it.removeUserData(VCS_MODIFIED) }
+        (changedGuideMarks + noLongerChangedGuideMarks).forEach { it.triggerEvent(CODE_CHANGED, listOf()) }
     }
 
     override suspend fun stop() = Disposer.dispose(this)
