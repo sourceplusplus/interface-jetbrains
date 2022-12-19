@@ -287,9 +287,16 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     }
 
     private fun removeMarkFromUserData(element: PsiElement) {
-        element.putUserData(SourceKey.GutterMark, null)
-        element.putUserData(SourceKey.InlayMarks, null)
-        element.putUserData(SourceKey.GuideMark, null)
+        when (this) {
+            is GuideMark -> element.putUserData(SourceKey.GuideMark, null)
+            is GutterMark -> element.putUserData(SourceKey.GutterMark, null)
+            is InlayMark -> {
+                element.putUserData(
+                    SourceKey.InlayMarks,
+                    element.getUserData(SourceKey.InlayMarks)?.minus(this) ?: emptySet()
+                )
+            }
+        }
     }
 
     fun getParent(): GuideMark? {
