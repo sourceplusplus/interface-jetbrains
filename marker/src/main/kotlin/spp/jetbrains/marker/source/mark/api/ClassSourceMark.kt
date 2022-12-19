@@ -28,6 +28,7 @@ import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import java.util.*
 
 /**
@@ -112,7 +113,13 @@ abstract class ClassSourceMark(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(artifactQualifiedName, type)
+        if (this is GuideMark) {
+            //compare by artifactQualifiedName
+            return artifactQualifiedName.hashCode()
+        } else {
+            //compare by identity
+            return super.hashCode()
+        }
     }
 
     override fun toString(): String = "${javaClass.simpleName}: $artifactQualifiedName"

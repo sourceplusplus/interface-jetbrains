@@ -91,7 +91,7 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(gutterMark)) {
-                element.putUserData(SourceKey.InlayMark, null)
+                element.putUserData(SourceKey.InlayMarks, null)
                 null
             } else {
                 gutterMark
@@ -159,7 +159,7 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean = false
     ): ExpressionInlayMark? {
-        var inlayMark = element.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
+        var inlayMark = element.getUserData(SourceKey.InlayMarks)?.firstOrNull() as ExpressionInlayMark?
         if (inlayMark == null) {
             inlayMark = fileMarker.getExpressionSourceMark(
                 element,
@@ -167,7 +167,10 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
                 if (inlayMark.updatePsiExpression(element, ArtifactNamingService.getFullyQualifiedName(element))) {
-                    element.putUserData(SourceKey.InlayMark, inlayMark)
+                    element.putUserData(
+                        SourceKey.InlayMarks,
+                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: listOf(inlayMark)
+                    )
                 } else {
                     inlayMark = null
                 }
@@ -187,7 +190,7 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
-                element.putUserData(SourceKey.InlayMark, null)
+                element.putUserData(SourceKey.InlayMarks, null)
                 null
             } else {
                 inlayMark

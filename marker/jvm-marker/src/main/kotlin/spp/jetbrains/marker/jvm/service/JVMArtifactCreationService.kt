@@ -182,7 +182,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             lookupExpression = lookupExpression.firstChild
         }
 
-        var inlayMark = lookupExpression.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
+        var inlayMark = lookupExpression.getUserData(SourceKey.InlayMarks)?.firstOrNull() as ExpressionInlayMark?
         if (inlayMark == null) {
             inlayMark = fileMarker.getExpressionSourceMark(
                 lookupExpression,
@@ -194,7 +194,10 @@ class JVMArtifactCreationService : IArtifactCreationService {
                         JVMMarkerUtils.getFullyQualifiedName(lookupExpression)
                     )
                 ) {
-                    lookupExpression.putUserData(SourceKey.InlayMark, inlayMark)
+                    lookupExpression.putUserData(
+                        SourceKey.InlayMarks,
+                        lookupExpression.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: listOf(inlayMark)
+                    )
                 } else {
                     inlayMark = null
                 }
@@ -214,7 +217,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
-                lookupExpression.putUserData(SourceKey.InlayMark, null)
+                lookupExpression.putUserData(SourceKey.InlayMarks, null)
                 null
             } else {
                 inlayMark
@@ -228,7 +231,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
         autoApply: Boolean = false
     ): ExpressionInlayMark? {
         log.trace("getOrCreateExpressionInlayMark: $element")
-        var inlayMark = element.getUserData(SourceKey.InlayMark) as ExpressionInlayMark?
+        var inlayMark = element.getUserData(SourceKey.InlayMarks)?.firstOrNull() as ExpressionInlayMark?
         if (inlayMark == null) {
             inlayMark = fileMarker.getExpressionSourceMark(
                 element,
@@ -236,7 +239,10 @@ class JVMArtifactCreationService : IArtifactCreationService {
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
                 if (inlayMark.updatePsiExpression(element, JVMMarkerUtils.getFullyQualifiedName(element))) {
-                    element.putUserData(SourceKey.InlayMark, inlayMark)
+                    element.putUserData(
+                        SourceKey.InlayMarks,
+                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: listOf(inlayMark)
+                    )
                 } else {
                     inlayMark = null
                 }
@@ -260,7 +266,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
-                element.putUserData(SourceKey.InlayMark, null)
+                element.putUserData(SourceKey.InlayMarks, null)
                 null
             } else {
                 inlayMark
@@ -348,7 +354,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(gutterMark)) {
-                lookupExpression.putUserData(SourceKey.InlayMark, null)
+                lookupExpression.putUserData(SourceKey.InlayMarks, null)
                 null
             } else {
                 gutterMark

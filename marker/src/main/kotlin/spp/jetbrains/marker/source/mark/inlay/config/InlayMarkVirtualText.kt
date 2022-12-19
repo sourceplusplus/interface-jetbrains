@@ -51,6 +51,7 @@ open class InlayMarkVirtualText {
     var fontSize: Float? = null
     var relativeFontSize: Boolean = false
     var xOffset: Int = 0
+    var priority: Int = 0
 
     constructor(inlayMark: InlayMark, virtualText: String) {
         this.inlayMark = inlayMark

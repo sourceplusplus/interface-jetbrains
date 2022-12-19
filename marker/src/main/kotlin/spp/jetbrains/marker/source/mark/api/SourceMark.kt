@@ -287,7 +287,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     private fun removeMarkFromUserData(element: PsiElement) {
         element.putUserData(SourceKey.GutterMark, null)
-        element.putUserData(SourceKey.InlayMark, null)
+        element.putUserData(SourceKey.InlayMarks, null)
         element.putUserData(SourceKey.GuideMark, null)
     }
 

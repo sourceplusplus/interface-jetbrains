@@ -81,7 +81,7 @@ class JVMArtifactMarkService : IArtifactMarkService {
                 startOffset,
                 virtualText.relatesToPrecedingText,
                 virtualText.showAbove,
-                0,
+                virtualText.priority,
                 representation
             )
         }

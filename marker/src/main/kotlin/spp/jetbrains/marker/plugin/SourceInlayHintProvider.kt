@@ -142,14 +142,16 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
     ): InlayHintsCollector {
         return object : FactoryInlayHintsCollector(editor) {
             override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
-                val fileMarker = SourceMarker.getSourceFileMarker(element.containingFile) ?: return true
-                val inlayMark = element.getUserData(SourceKey.InlayMark) ?: return true
-                if (!fileMarker.containsSourceMark(inlayMark)) inlayMark.apply()
-                if (!inlayMark.isVisible()) {
-                    return true
+                element.getUserData(SourceKey.InlayMarks).orEmpty().forEach { inlayMark ->
+                    displayInlayMark(inlayMark, element)
                 }
+                latestInlayMarkAddedAt = System.currentTimeMillis()
+                return true
+            }
 
-                val virtualText = inlayMark.configuration.virtualText ?: return true
+            private fun displayInlayMark(inlayMark: InlayMark, element: PsiElement) {
+                if (!inlayMark.isVisible()) return
+                val virtualText = inlayMark.configuration.virtualText ?: return
                 virtualText.inlayMark = inlayMark
 
                 var representation = AttributesTransformerPresentation(
@@ -164,8 +166,6 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 }
 
                 ArtifactMarkService.displayVirtualText(element, virtualText, sink, representation)
-                latestInlayMarkAddedAt = System.currentTimeMillis()
-                return true
             }
         }
     }
