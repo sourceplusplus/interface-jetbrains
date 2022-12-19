@@ -169,12 +169,12 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
 
                 is MethodInlayMark -> sourceMark.getNameIdentifier().putUserData(
                     InlayMarks,
-                    sourceMark.getNameIdentifier().getUserData(InlayMarks)?.plus(sourceMark) ?: listOf(sourceMark)
+                    sourceMark.getNameIdentifier().getUserData(InlayMarks)?.plus(sourceMark) ?: setOf(sourceMark)
                 )
 
                 is ExpressionInlayMark -> sourceMark.getPsiElement().putUserData(
                     InlayMarks,
-                    sourceMark.getPsiElement().getUserData(InlayMarks)?.plus(sourceMark) ?: listOf(sourceMark)
+                    sourceMark.getPsiElement().getUserData(InlayMarks)?.plus(sourceMark) ?: setOf(sourceMark)
                 )
 
                 is ClassGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
