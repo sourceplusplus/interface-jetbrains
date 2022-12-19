@@ -14,6 +14,8 @@
     <depends optional="true" config-file="withJavascriptDebugger.xml">JavaScriptDebugger</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language=""
+                                        implementationClass="spp.jetbrains.marker.plugin.SourceLineMarkerProvider"/>
         <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.statusBar.SourceWidgetFactory"/>
 
         <projectService
