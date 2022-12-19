@@ -28,6 +28,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Represents a [SourceMark] associated to an expression artifact.
@@ -92,7 +93,7 @@ abstract class ExpressionSourceMark(
         return true
     }
 
-    override val eventListeners = ArrayList<SourceMarkEventListener>()
+    override val eventListeners = CopyOnWriteArrayList<SourceMarkEventListener>()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

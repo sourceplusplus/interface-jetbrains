@@ -63,6 +63,7 @@ import java.awt.event.ComponentEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.SwingUtilities
 import kotlin.concurrent.schedule
@@ -334,7 +335,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     fun hasUserData(): Boolean = userData.isNotEmpty()
 
-    val eventListeners: ArrayList<SourceMarkEventListener>
+    val eventListeners: CopyOnWriteArrayList<SourceMarkEventListener>
     fun clearEventListeners() = eventListeners.clear()
     fun getEventListeners(): List<SourceMarkEventListener> = eventListeners.toList()
     fun addEventListener(listener: SourceMarkEventListener) {
