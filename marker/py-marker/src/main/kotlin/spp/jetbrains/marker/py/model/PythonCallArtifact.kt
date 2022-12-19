@@ -18,6 +18,7 @@ package spp.jetbrains.marker.py.model
 
 import com.jetbrains.python.psi.PyCallExpression
 import com.jetbrains.python.psi.PyReferenceExpression
+import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.jetbrains.marker.service.toArtifact
@@ -26,5 +27,9 @@ class PythonCallArtifact(private val psiElement: PyCallExpression) : CallArtifac
 
     override fun resolveFunction(): FunctionArtifact? {
         return (psiElement.callee as? PyReferenceExpression)?.reference?.resolve().toArtifact() as? FunctionArtifact
+    }
+
+    override fun getArguments(): List<ArtifactElement> {
+        return psiElement.arguments.mapNotNull { it.toArtifact() }
     }
 }

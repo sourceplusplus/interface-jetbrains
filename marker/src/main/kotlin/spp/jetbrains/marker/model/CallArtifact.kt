@@ -20,4 +20,5 @@ import com.intellij.psi.PsiElement
 
 abstract class CallArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
     abstract fun resolveFunction(): FunctionArtifact?
+    abstract fun getArguments(): List<ArtifactElement>
 }
