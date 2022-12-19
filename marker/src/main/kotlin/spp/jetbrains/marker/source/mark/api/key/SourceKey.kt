@@ -32,5 +32,11 @@ data class SourceKey<T>(val name: String) {
         val GutterMark = Key.create<GutterMark>("sm.GutterMark")
         val InlayMark = Key.create<InlayMark>("sm.InlayMark")
         val GuideMark = Key.create<GuideMark>("sm.GuideMark")
+
+        private val keyCache = mutableMapOf<String, Key<*>>()
+    }
+
+    fun asPsiKey(): Key<T> {
+        return keyCache.computeIfAbsent(name) { Key.create<T>(it) } as Key<T>
     }
 }
