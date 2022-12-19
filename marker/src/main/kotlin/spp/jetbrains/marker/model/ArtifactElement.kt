@@ -16,15 +16,52 @@
  */
 package spp.jetbrains.marker.model
 
+import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.getCalls
 import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.protocol.insight.InsightValue
 
 open class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
 
     fun isControlStructure(): Boolean = this is ControlStructureArtifact
     fun isCall(): Boolean = this is CallArtifact
+
+    fun getInsights(): List<InsightValue<*>> {
+        return SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getUserData(it.asPsiKey()) }
+    }
+
+    fun getDuration(includingPredictions: Boolean = true): Long? {
+        if (includingPredictions) {
+            val durationPrediction = getUserData(SourceMarkerKeys.METHOD_DURATION_PREDICTION.asPsiKey())?.value
+            if (durationPrediction != null) {
+                return durationPrediction
+            }
+        }
+
+        return getUserData(SourceMarkerKeys.METHOD_DURATION.asPsiKey())?.value
+    }
+
+    fun getPathExecutionProbability(): InsightValue<Double> {
+        return getUserData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY.asPsiKey())!!
+    }
+
+    override fun <T : Any?> getUserData(key: Key<T>): T? {
+        //todo: rethink this
+        var guideMark = psiElement.getUserData(SourceKey.GuideMark)
+        if (guideMark == null && psiElement is PsiNameIdentifierOwner) {
+            guideMark = psiElement.nameIdentifier?.getUserData(SourceKey.GuideMark)
+        }
+        if (guideMark != null) {
+            return guideMark.getUserData(SourceKey<T>(key.toString()))
+        }
+
+        return psiElement.getUserData(key)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

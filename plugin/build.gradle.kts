@@ -71,6 +71,7 @@ dependencies {
     }
     implementation(projectDependency(":common"))
     implementation(projectDependency(":core"))
+    implementation(projectDependency(":insight"))
     implementation(projectDependency(":marker"))
     runtimeOnly(projectDependency(":marker:js-marker"))
     runtimeOnly(projectDependency(":marker:jvm-marker"))
