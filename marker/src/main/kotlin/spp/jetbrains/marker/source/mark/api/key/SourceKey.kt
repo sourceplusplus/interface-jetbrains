@@ -30,7 +30,7 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
 data class SourceKey<T>(val name: String) {
     companion object {
         val GutterMark = Key.create<GutterMark>("sm.GutterMark")
-        val InlayMarks = Key.create<List<InlayMark>>("sm.InlayMarks")
+        val InlayMarks = Key.create<Set<InlayMark>>("sm.InlayMarks")
         val GuideMark = Key.create<GuideMark>("sm.GuideMark")
 
         private val keyCache = mutableMapOf<String, Key<*>>()

@@ -167,7 +167,10 @@ class PythonArtifactCreationService : IArtifactCreationService {
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
                 if (inlayMark.updatePsiExpression(element, ArtifactNamingService.getFullyQualifiedName(element))) {
-                    element.putUserData(SourceKey.InlayMarks, element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark))
+                    element.putUserData(
+                        SourceKey.InlayMarks,
+                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: setOf(inlayMark)
+                    )
                 } else {
                     inlayMark = null
                 }

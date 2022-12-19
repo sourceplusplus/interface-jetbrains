@@ -196,7 +196,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
                 ) {
                     lookupExpression.putUserData(
                         SourceKey.InlayMarks,
-                        lookupExpression.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: listOf(inlayMark)
+                        lookupExpression.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: setOf(inlayMark)
                     )
                 } else {
                     inlayMark = null
@@ -241,7 +241,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
                 if (inlayMark.updatePsiExpression(element, JVMMarkerUtils.getFullyQualifiedName(element))) {
                     element.putUserData(
                         SourceKey.InlayMarks,
-                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: listOf(inlayMark)
+                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: setOf(inlayMark)
                     )
                 } else {
                     inlayMark = null

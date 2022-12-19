@@ -169,7 +169,7 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
                 if (inlayMark.updatePsiExpression(element, ArtifactNamingService.getFullyQualifiedName(element))) {
                     element.putUserData(
                         SourceKey.InlayMarks,
-                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: listOf(inlayMark)
+                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: setOf(inlayMark)
                     )
                 } else {
                     inlayMark = null
