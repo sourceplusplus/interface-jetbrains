@@ -21,4 +21,12 @@ import com.intellij.psi.PsiElement
 abstract class CallArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
     abstract fun resolveFunction(): FunctionArtifact?
     abstract fun getArguments(): List<ArtifactElement>
+
+    private var resolvedFunction: FunctionArtifact? = null
+    fun getResolvedFunction(): FunctionArtifact? {
+        if (resolvedFunction == null || resolvedFunction?.isValid == false) {
+            resolvedFunction = resolveFunction()
+        }
+        return resolvedFunction
+    }
 }
