@@ -56,7 +56,6 @@ import javax.swing.JPanel
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 @Suppress("UnstableApiUsage")
-@JvmDefaultWithoutCompatibility
 class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
@@ -86,6 +85,8 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                             ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
                                 it.update()
                             }
+
+                        InlayHintsPassFactory.forceHintsUpdateOnNextPass()
                     }
                 }
 
@@ -114,6 +115,8 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                                     }
                                 }
                             }
+
+                        InlayHintsPassFactory.forceHintsUpdateOnNextPass()
                     }
                 }
             }
@@ -181,7 +184,7 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
             get() = editor.contentComponent.getFontMetrics(font).stringWidth(virtualText.getRenderedVirtualText())
         override val height: Int
             get() {
-                if (virtualText.getVirtualText().isEmpty()) return 0
+                if (virtualText.getVirtualText().isEmpty() && virtualText.richText == null) return 0
                 return editor.lineHeight
             }
 
@@ -196,8 +199,18 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                     foreground = attributes.foregroundColor
                 }
 
+                var iconWidth = 0
                 if (virtualText.icon != null) {
-                    virtualText.icon!!.paintIcon(null, g, virtualText.iconLocation.x, virtualText.iconLocation.y)
+                    iconWidth = virtualText.icon!!.iconWidth + 4
+
+                    val stringWidth = editor.contentComponent.getFontMetrics(font)
+                        .stringWidth(" ".repeat(virtualText.spacingTillMethodText))
+                    virtualText.icon!!.paintIcon(
+                        null,
+                        g,
+                        virtualText.iconLocation.x + stringWidth,
+                        virtualText.iconLocation.y
+                    )
                 }
                 g.font = (virtualText.font ?: font).let {
                     if (virtualText.fontSize != null) {
@@ -215,7 +228,19 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                     AntialiasingType.getKeyForCurrentScope(false)
                 )
                 g.color = foreground
-                g.drawString(virtualText.getRenderedVirtualText(), virtualText.xOffset, ascent)
+
+                if (virtualText.richText != null) {
+                    var xOffset = editor.contentComponent.getFontMetrics(font)
+                        .stringWidth(" ".repeat(virtualText.spacingTillMethodText))
+                    virtualText.richText!!.parts.forEach {
+                        g.color = it.attributes.fgColor ?: foreground
+                        g.drawString(it.text, iconWidth + xOffset, ascent)
+                        xOffset += g.fontMetrics.stringWidth(it.text)
+                    }
+                } else {
+                    g.drawString(virtualText.getRenderedVirtualText(), virtualText.xOffset + iconWidth, ascent)
+                }
+
                 val effectColor = virtualText.textAttributes.effectColor
                 if (effectColor != null) {
                     g.color = effectColor
