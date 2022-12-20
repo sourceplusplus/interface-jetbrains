@@ -16,24 +16,34 @@
  */
 package spp.jetbrains.insight.pass
 
-import spp.jetbrains.insight.RuntimePathImpl
+import spp.jetbrains.insight.RuntimePath
 import spp.jetbrains.insight.pass.artifact.CallDurationPass
 import spp.jetbrains.insight.pass.artifact.ThreadSleepPass
 import spp.jetbrains.insight.pass.path.PathDurationPass
 import spp.jetbrains.insight.pass.path.PathProbabilityPass
+import spp.jetbrains.insight.pass.path.PruneArtifactsPass
+import spp.jetbrains.insight.pass.pathset.ReversePathSetPass
 import spp.jetbrains.marker.model.ArtifactElement
 
+/**
+ * Used to process passes over [RuntimePath] sets, [RuntimePath]s, and [ArtifactElement]s.
+ */
 class InsightPassProvider {
 
     companion object {
-        val DEFAULT = InsightPassProvider().apply {
+        val FULL = InsightPassProvider().apply {
             //artifact passes
             addArtifactPass(CallDurationPass())
             addArtifactPass(ThreadSleepPass())
 
             //path passes
+            addRuntimePathPass(PruneArtifactsPass())
             addRuntimePathPass(PathDurationPass())
             addRuntimePathPass(PathProbabilityPass())
+
+            //path set passes
+            addRuntimePathSetPass(ReversePathSetPass())
+            //addRuntimePathSetPass(SimplifyPathSetPass())
         }
     }
 
@@ -53,17 +63,27 @@ class InsightPassProvider {
         runtimePathSetPasses.add(pass)
     }
 
-    fun analyze(element: ArtifactElement) {
+    private fun analyze(element: ArtifactElement) {
         artifactPasses.forEach { it.analyze(element) }
     }
 
-    fun analyze(path: RuntimePathImpl) {
+    private fun analyze(path: RuntimePath): RuntimePath {
         path.forEach { analyze(it) }
-        runtimePathPasses.forEach { it.analyze(path) }
+        return runtimePathPasses.fold(path) { acc, pass ->
+            pass.analyze(acc)
+        }
     }
 
-    fun analyze(pathSet: Set<RuntimePathImpl>) {
-        pathSet.forEach { analyze(it) }
-        runtimePathSetPasses.forEach { it.analyze(pathSet) }
+    fun analyze(pathSet: Set<RuntimePath>): Set<RuntimePath> {
+        val preProcessedPathSet = runtimePathSetPasses.fold(pathSet) { acc, pass ->
+            pass.preProcess(acc)
+        }
+        val analyzedPathSet = preProcessedPathSet.map { analyze(it) }.toSet()
+        val analyzedPathSetSet = runtimePathSetPasses.fold(analyzedPathSet) { acc, pass ->
+            pass.analyze(acc)
+        }
+        return runtimePathSetPasses.fold(analyzedPathSetSet) { acc, pass ->
+            pass.postProcess(acc)
+        }
     }
 }

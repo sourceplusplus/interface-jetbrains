@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.insight.pass.path
 
-import spp.jetbrains.insight.RuntimePathImpl
+import spp.jetbrains.insight.RuntimePath
 import spp.jetbrains.insight.pass.RuntimePathPass
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
@@ -33,14 +33,16 @@ import spp.protocol.insight.InsightValue
  */
 class PathProbabilityPass : RuntimePathPass {
 
-    override fun analyze(path: RuntimePathImpl) {
+    override fun analyze(path: RuntimePath): RuntimePath {
         var probability = 1.0
+        val falseConditions = path.conditions.filter { !it.first }.map { it.second }
         path.forEach {
-            probability = calculateProbability(it, probability)
+            probability = calculateProbability(it, probability, !falseConditions.contains(it))
         }
+        return path
     }
 
-    private fun calculateProbability(element: ArtifactElement, baseProbability: Double): Double {
+    private fun calculateProbability(element: ArtifactElement, baseProbability: Double, condition: Boolean): Double {
         var selfProbability = 1.0
         if (element.getUserData(SourceMarkerKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey()) != null) {
             selfProbability = element.getUserData(SourceMarkerKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey())!!.value
@@ -54,10 +56,22 @@ class PathProbabilityPass : RuntimePathPass {
             }
         }
 
+        //flip self probability if condition is false
+        if (!condition) {
+            selfProbability = 1 - selfProbability
+        }
+
         element.putUserData(
             SourceMarkerKeys.PATH_EXECUTION_PROBABILITY.asPsiKey(),
             InsightValue.of(PATH_EXECUTION_PROBABILITY, baseProbability)
         )
-        return baseProbability * selfProbability
+
+        val childProbability = baseProbability * selfProbability
+        element.data.put(
+            SourceMarkerKeys.PATH_EXECUTION_PROBABILITY,
+            InsightValue.of(PATH_EXECUTION_PROBABILITY, childProbability)
+        )
+
+        return childProbability
     }
 }

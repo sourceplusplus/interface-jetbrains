@@ -23,7 +23,7 @@ import spp.jetbrains.marker.model.IfArtifact
 import spp.jetbrains.marker.model.analysis.IRuntimePath
 import spp.protocol.insight.InsightValue
 
-data class RuntimePathImpl(
+data class RuntimePath(
     private val evaluations: List<Boolean>,
     override val artifacts: List<ArtifactElement>,
     internal val insights: MutableList<InsightValue<*>> = mutableListOf()

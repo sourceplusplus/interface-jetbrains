@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.insight.pass.path
 
-import spp.jetbrains.insight.RuntimePathImpl
+import spp.jetbrains.insight.RuntimePath
 import spp.jetbrains.insight.pass.RuntimePathPass
 import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
@@ -26,7 +26,7 @@ import spp.protocol.insight.InsightValue
  */
 class PathDurationPass : RuntimePathPass {
 
-    override fun analyze(path: RuntimePathImpl) {
+    override fun analyze(path: RuntimePath): RuntimePath {
         var duration: Long? = null
         path.forEach {
             val artifactDuration = it.getDuration()
@@ -38,5 +38,6 @@ class PathDurationPass : RuntimePathPass {
         if (duration != null) {
             path.insights.add(InsightValue.of(PATH_DURATION, duration).asDerived())
         }
+        return path
     }
 }

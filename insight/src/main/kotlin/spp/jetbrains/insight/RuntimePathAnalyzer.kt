@@ -21,8 +21,6 @@ import com.intellij.psi.PsiRecursiveElementVisitor
 import spp.jetbrains.insight.pass.InsightPassProvider
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.CallArtifact
-import spp.jetbrains.marker.model.ControlStructureArtifact
 import spp.jetbrains.marker.model.IfArtifact
 import spp.jetbrains.marker.model.analysis.IRuntimePath
 import spp.jetbrains.marker.service.getParentFunction
@@ -32,8 +30,9 @@ import java.util.*
 class RuntimePathAnalyzer {
 
     private val queue: Queue<PathSplit> = LinkedList()
-    private val paths: MutableList<RuntimePathImpl> = mutableListOf()
+    private val paths: MutableList<RuntimePath> = mutableListOf()
     var savePathsToPsi: Boolean = true
+    var passProvider: InsightPassProvider = InsightPassProvider.FULL
 
     fun analyze(element: ArtifactElement): Set<IRuntimePath> {
         analyze(mutableListOf(), mutableListOf(), element)
@@ -47,9 +46,7 @@ class RuntimePathAnalyzer {
             )
         }
 
-        val paths = clean(paths)
-        InsightPassProvider.DEFAULT.analyze(paths)
-
+        val paths = passProvider.analyze(paths.toSet())
         if (savePathsToPsi) {
             element.putUserData(SourceMarkerKeys.RUNTIME_PATHS.asPsiKey(), paths)
         }
@@ -62,19 +59,6 @@ class RuntimePathAnalyzer {
         return paths.filter {
             it.artifacts.contains(psi)
         }.toSet()
-    }
-
-    /**
-     * Remove non-control structure, non-call artifacts from the paths.
-     */
-    private fun clean(paths: MutableList<RuntimePathImpl>): Set<RuntimePathImpl> {
-        return paths.map { path ->
-            path.copy(
-                artifacts = path.artifacts.filter { artifact ->
-                    artifact is ControlStructureArtifact || artifact is CallArtifact
-                }
-            )
-        }.reversed().toSet()
     }
 
     private fun analyze(
@@ -101,7 +85,7 @@ class RuntimePathAnalyzer {
                         //path terminated
                         val newConditions = conditions.toMutableList()
                         newConditions.add(true)
-                        paths.add(RuntimePathImpl(newConditions, artifacts))
+                        paths.add(RuntimePath(newConditions, artifacts.map { it.clone() }))
                     }
 
                     if (artifact.elseBranch != null) {
@@ -114,7 +98,7 @@ class RuntimePathAnalyzer {
                         //path terminated
                         val newConditions = conditions.toMutableList()
                         newConditions.add(false)
-                        paths.add(RuntimePathImpl(newConditions, artifacts))
+                        paths.add(RuntimePath(newConditions, artifacts.map { it.clone() }))
                     }
 
                     finished = false
@@ -125,7 +109,7 @@ class RuntimePathAnalyzer {
         })
 
         if (finished) {
-            paths.add(RuntimePathImpl(conditions.toList(), artifacts.toList()))
+            paths.add(RuntimePath(conditions.toList(), artifacts.map { it.clone() }))
         }
     }
 

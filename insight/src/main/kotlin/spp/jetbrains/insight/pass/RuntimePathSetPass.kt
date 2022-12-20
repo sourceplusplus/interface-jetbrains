@@ -16,8 +16,14 @@
  */
 package spp.jetbrains.insight.pass
 
+import spp.jetbrains.insight.RuntimePath
 import spp.jetbrains.marker.model.analysis.IRuntimePath
 
+/**
+ * A pass that analyzes a set of [IRuntimePath]s and adds data to them.
+ */
 interface RuntimePathSetPass {
-    fun analyze(pathSet: Set<IRuntimePath>)
+    fun preProcess(pathSet: Set<RuntimePath>): Set<RuntimePath> = pathSet
+    fun analyze(pathSet: Set<RuntimePath>): Set<RuntimePath> = pathSet
+    fun postProcess(pathSet: Set<RuntimePath>): Set<RuntimePath> = pathSet
 }

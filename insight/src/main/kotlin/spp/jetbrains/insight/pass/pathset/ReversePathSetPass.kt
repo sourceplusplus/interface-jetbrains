@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.pass
+package spp.jetbrains.insight.pass.pathset
 
-import spp.jetbrains.marker.model.ArtifactElement
+import spp.jetbrains.insight.RuntimePath
+import spp.jetbrains.insight.pass.RuntimePathSetPass
 
-/**
- * A pass that analyzes an [ArtifactElement] and adds data to it.
- */
-interface ArtifactPass {
-    fun analyze(element: ArtifactElement)
+class ReversePathSetPass : RuntimePathSetPass {
+
+    override fun analyze(pathSet: Set<RuntimePath>): Set<RuntimePath> {
+        return pathSet.reversed().toSet()
+    }
 }

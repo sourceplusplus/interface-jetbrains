@@ -14,13 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.pass
+package spp.jetbrains.insight.pass.path
 
-import spp.jetbrains.marker.model.ArtifactElement
+import spp.jetbrains.insight.RuntimePath
+import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.marker.model.CallArtifact
+import spp.jetbrains.marker.model.ControlStructureArtifact
 
 /**
- * A pass that analyzes an [ArtifactElement] and adds data to it.
+ * Remove non-control structure, non-call artifacts from the paths.
  */
-interface ArtifactPass {
-    fun analyze(element: ArtifactElement)
+class PruneArtifactsPass : RuntimePathPass {
+
+    override fun analyze(path: RuntimePath): RuntimePath {
+        return path.copy(
+            artifacts = path.artifacts.filter { artifact ->
+                artifact is ControlStructureArtifact || artifact is CallArtifact
+            }
+        )
+    }
 }
