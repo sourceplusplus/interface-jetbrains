@@ -40,10 +40,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
-import io.vertx.core.MultiMap
-import io.vertx.core.Promise
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
+import io.vertx.core.*
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.DecodeException
@@ -85,10 +82,7 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatusService
-import spp.protocol.service.LiveInstrumentService
-import spp.protocol.service.LiveManagementService
-import spp.protocol.service.LiveViewService
-import spp.protocol.service.SourceServices
+import spp.protocol.service.*
 import java.io.File
 import java.net.ConnectException
 import java.util.*
