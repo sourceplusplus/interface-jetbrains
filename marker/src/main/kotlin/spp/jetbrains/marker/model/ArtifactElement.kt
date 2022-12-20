@@ -25,8 +25,15 @@ import spp.jetbrains.marker.service.getCalls
 import spp.jetbrains.marker.service.toArtifact
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.protocol.insight.InsightValue
+import java.util.concurrent.ConcurrentHashMap
 
 abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
+
+    val data = ConcurrentHashMap<SourceKey<*>, Any>()
+
+    fun <T> getData(key: SourceKey<T>): T? {
+        return data[key] as T?
+    }
 
     fun isControlStructure(): Boolean = this is ControlStructureArtifact
     fun isCall(): Boolean = this is CallArtifact
