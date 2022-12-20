@@ -26,7 +26,7 @@ import spp.jetbrains.marker.service.toArtifact
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.protocol.insight.InsightValue
 
-open class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
+abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
 
     fun isControlStructure(): Boolean = this is ControlStructureArtifact
     fun isCall(): Boolean = this is CallArtifact
@@ -74,6 +74,8 @@ open class ArtifactElement(private val psiElement: PsiElement) : PsiElement by p
     override fun hashCode(): Int {
         return psiElement.hashCode()
     }
+
+    abstract fun clone(): ArtifactElement
 }
 
 // Extensions

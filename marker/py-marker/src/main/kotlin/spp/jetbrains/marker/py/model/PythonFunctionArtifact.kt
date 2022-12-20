@@ -19,4 +19,9 @@ package spp.jetbrains.marker.py.model
 import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.model.FunctionArtifact
 
-class PythonFunctionArtifact(psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement)
+class PythonFunctionArtifact(private val psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement) {
+
+    override fun clone(): PythonFunctionArtifact {
+        return PythonFunctionArtifact(psiElement)
+    }
+}

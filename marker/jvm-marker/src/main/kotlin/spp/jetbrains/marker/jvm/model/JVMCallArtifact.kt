@@ -47,4 +47,8 @@ class JVMCallArtifact(private val psiElement: PsiElement) : CallArtifact(psiElem
             else -> TODO()
         }
     }
+
+    override fun clone(): JVMCallArtifact {
+        return JVMCallArtifact(psiElement)
+    }
 }

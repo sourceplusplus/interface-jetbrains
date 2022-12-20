@@ -19,4 +19,9 @@ package spp.jetbrains.marker.js.model
 import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.marker.model.FunctionArtifact
 
-class JavascriptFunctionArtifact(psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement)
+class JavascriptFunctionArtifact(private val psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement) {
+
+    override fun clone(): JavascriptFunctionArtifact {
+        return JavascriptFunctionArtifact(psiElement)
+    }
+}

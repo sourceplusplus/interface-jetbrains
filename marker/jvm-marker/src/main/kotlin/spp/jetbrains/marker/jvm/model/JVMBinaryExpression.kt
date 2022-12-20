@@ -41,4 +41,8 @@ class JVMBinaryExpression(private val psiElement: PsiElement) : ArtifactBinaryEx
             else -> throw IllegalArgumentException("Unsupported binary expression type: ${psiElement.javaClass}")
         }
     }
+
+    override fun clone(): JVMBinaryExpression {
+        return JVMBinaryExpression(psiElement)
+    }
 }

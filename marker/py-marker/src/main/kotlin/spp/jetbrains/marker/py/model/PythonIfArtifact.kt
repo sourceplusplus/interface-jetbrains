@@ -31,4 +31,8 @@ class PythonIfArtifact(private val psiElement: PyIfStatement) : IfArtifact(psiEl
 
     override val elseBranch: ArtifactElement?
         get() = psiElement.elsePart?.statementList?.toArtifact()
+
+    override fun clone(): PythonIfArtifact {
+        return PythonIfArtifact(psiElement)
+    }
 }

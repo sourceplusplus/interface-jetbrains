@@ -30,4 +30,8 @@ class JavascriptBinaryExpression(private val psiElement: JSBinaryExpression) : A
     override fun getRightExpression(): ArtifactElement? {
         return psiElement.rOperand?.let { ArtifactModelService.toArtifact(it) }
     }
+
+    override fun clone(): JavascriptBinaryExpression {
+        return JavascriptBinaryExpression(psiElement)
+    }
 }

@@ -32,4 +32,8 @@ class JavascriptCallArtifact(private val psiElement: JSCallExpression) : CallArt
     override fun getArguments(): List<ArtifactElement> {
         return psiElement.argumentList?.arguments?.mapNotNull { it.toArtifact() } ?: emptyList()
     }
+
+    override fun clone(): JavascriptCallArtifact {
+        return JavascriptCallArtifact(psiElement)
+    }
 }

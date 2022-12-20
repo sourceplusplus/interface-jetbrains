@@ -26,6 +26,7 @@ import spp.jetbrains.marker.model.ArtifactLiteralValue
 import spp.jetbrains.marker.service.isKotlin
 
 class JVMLiteralValue(private val psiElement: PsiElement) : ArtifactLiteralValue(psiElement) {
+
     override val value: Any?
         get() {
             return when {
@@ -49,4 +50,8 @@ class JVMLiteralValue(private val psiElement: PsiElement) : ArtifactLiteralValue
                 else -> TODO()
             }
         }
+
+    override fun clone(): JVMLiteralValue {
+        return JVMLiteralValue(psiElement)
+    }
 }

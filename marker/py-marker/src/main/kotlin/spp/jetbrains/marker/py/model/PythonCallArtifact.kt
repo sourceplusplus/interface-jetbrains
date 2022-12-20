@@ -32,4 +32,8 @@ class PythonCallArtifact(private val psiElement: PyCallExpression) : CallArtifac
     override fun getArguments(): List<ArtifactElement> {
         return psiElement.arguments.mapNotNull { it.toArtifact() }
     }
+
+    override fun clone(): PythonCallArtifact {
+        return PythonCallArtifact(psiElement)
+    }
 }

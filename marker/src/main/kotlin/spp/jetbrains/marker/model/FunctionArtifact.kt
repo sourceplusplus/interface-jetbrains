@@ -19,7 +19,7 @@ package spp.jetbrains.marker.model
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 
-open class FunctionArtifact(
+abstract class FunctionArtifact(
     private val psiElement: PsiNameIdentifierOwner
 ) : ArtifactElement(psiElement), PsiNameIdentifierOwner {
 

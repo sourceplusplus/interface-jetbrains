@@ -51,4 +51,8 @@ class JVMIfArtifact(private val psiElement: PsiElement) : IfArtifact(psiElement)
                 else -> TODO()
             }
         }
+
+    override fun clone(): JVMIfArtifact {
+        return JVMIfArtifact(psiElement)
+    }
 }
