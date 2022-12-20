@@ -59,6 +59,7 @@ import org.apache.commons.text.CaseUtils
 import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
+import spp.jetbrains.insight.LiveInsightManager
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -391,6 +392,16 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             vertx.deployVerticle(viewListener).await()
         } else {
             log.warn("Live views unavailable")
+        }
+
+        //live insight
+        val insightServiceAvailable = availableRecords.any { it.name == SourceServices.LIVE_INSIGHT }
+        if (insightServiceAvailable || availableRecords.any { it.name == SourceServices.LIVE_VIEW }) {
+            val insightManager = LiveInsightManager(project, insightServiceAvailable)
+            vertx.deployVerticle(insightManager, DeploymentOptions().setWorker(true)).await()
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(insightManager)
+        } else {
+            log.warn("Live insights unavailable")
         }
     }
 
