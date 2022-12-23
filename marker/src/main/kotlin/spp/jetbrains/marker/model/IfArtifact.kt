@@ -24,6 +24,8 @@ abstract class IfArtifact(psiElement: PsiElement) : ArtifactElement(psiElement),
     abstract val thenBranch: ArtifactElement?
     abstract val elseBranch: ArtifactElement?
 
+    override val childArtifacts: MutableList<ArtifactElement> = mutableListOf()
+
     fun getStaticProbability(): Double {
         if (condition == null) return Double.NaN
         return when (val artifact = condition) {
@@ -52,4 +54,6 @@ abstract class IfArtifact(psiElement: PsiElement) : ArtifactElement(psiElement),
             else -> Double.NaN
         }
     }
+
+    abstract override fun clone(): IfArtifact
 }

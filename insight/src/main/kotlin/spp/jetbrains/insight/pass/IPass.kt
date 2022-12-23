@@ -14,11 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.model
+package spp.jetbrains.insight.pass
 
-import com.intellij.psi.PsiElement
-
-abstract class BlockArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
-
-    abstract override fun clone(): BlockArtifact
-}
+interface IPass

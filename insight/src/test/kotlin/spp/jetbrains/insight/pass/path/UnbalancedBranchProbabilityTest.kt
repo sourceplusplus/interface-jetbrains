@@ -66,13 +66,13 @@ class UnbalancedBranchProbabilityTest : BasePlatformTestCase() {
         assertEquals(2, paths.size)
 
         val truePath = paths.find { it.conditions.first().first }!!
-        val trueInsights = truePath.artifacts.find { it is CallArtifact }?.getInsights()!!
+        val trueInsights = truePath.find { it is CallArtifact }?.getInsights()!!
         assertEquals(1, trueInsights.size)
         assertEquals(InsightType.PATH_EXECUTION_PROBABILITY, trueInsights.first().type)
         assertEquals(0.75, trueInsights.first().value)
 
         val falsePath = paths.find { !it.conditions.first().first }!!
-        val falseInsights = falsePath.artifacts.find { it is CallArtifact }?.getInsights()!!
+        val falseInsights = falsePath.find { it is CallArtifact }?.getInsights()!!
         assertEquals(1, falseInsights.size)
         assertEquals(InsightType.PATH_EXECUTION_PROBABILITY, falseInsights.first().type)
         assertEquals(0.25, falseInsights.first().value)

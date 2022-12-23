@@ -19,7 +19,9 @@ package spp.jetbrains.insight.pass.pathset
 import spp.jetbrains.insight.RuntimePath
 import spp.jetbrains.insight.pass.RuntimePathSetPass
 import spp.jetbrains.marker.SourceMarkerKeys
+import spp.jetbrains.marker.model.ControlStructureArtifact
 import spp.jetbrains.marker.model.IfArtifact
+import java.util.*
 
 /**
  * Removes paths caused by conditional branches that are always or never taken.
@@ -34,13 +36,25 @@ class SimplifyPathSetPass : RuntimePathSetPass {
         val simplifiedPaths = mutableSetOf<RuntimePath>()
         for (path in pathSet) {
             //todo: smarter, more dynamic
-            if (path.artifacts.first() is IfArtifact) {
-                val ifArtifact = path.artifacts.first() as IfArtifact
-                val probability = ifArtifact.getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)
-                if (probability?.value == 0.0) continue
+            path.artifacts.removeIf {
+                if (it is IfArtifact) {
+                    val probability = it.getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)
+                    probability?.value == 0.0 || it.childArtifacts.isEmpty()
+                } else {
+                    false
+                }
             }
 
-            simplifiedPaths.add(path)
+            //sublist check
+            val pathArtifacts = path.artifacts
+            val dupePath = simplifiedPaths.any {
+                it !== path && pathArtifacts.none { it is ControlStructureArtifact }
+                        && Collections.indexOfSubList(it.artifacts, pathArtifacts) != -1
+            }
+
+            if (!dupePath) {
+                simplifiedPaths.add(path)
+            }
         }
         return simplifiedPaths
     }

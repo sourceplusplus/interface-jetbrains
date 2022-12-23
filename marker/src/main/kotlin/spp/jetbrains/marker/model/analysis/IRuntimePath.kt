@@ -27,4 +27,31 @@ interface IRuntimePath : Iterable<ArtifactElement> {
 
     fun getResolvedCallFunctions(): List<FunctionArtifact>
     fun getInsights(): List<InsightValue<*>>
+
+    private fun getDescendants(element: ArtifactElement): List<ArtifactElement> {
+        val descendants = mutableListOf<ArtifactElement>()
+        if (element is IfArtifact) {
+            val children = element.childArtifacts
+            for (child in children) {
+                descendants.add(child)
+                descendants.addAll(getDescendants(child))
+            }
+        } else {
+            for (child in element.descendantArtifacts) {
+                descendants.add(child)
+                descendants.addAll(getDescendants(child))
+            }
+        }
+        return descendants
+    }
+
+    val descendants: MutableList<ArtifactElement>
+        get() {
+            val descendants = mutableListOf<ArtifactElement>()
+            for (artifact in artifacts) {
+                descendants.add(artifact)
+                descendants.addAll(getDescendants(artifact))
+            }
+            return descendants
+        }
 }

@@ -26,7 +26,7 @@ import spp.protocol.insight.InsightValue
  */
 class PathDurationPass : RuntimePathPass {
 
-    override fun analyze(path: RuntimePath): RuntimePath {
+    override fun analyze(path: RuntimePath) {
         var duration: Long? = null
         path.forEach {
             val artifactDuration = it.getDuration()
@@ -38,6 +38,5 @@ class PathDurationPass : RuntimePathPass {
         if (duration != null) {
             path.insights.add(InsightValue.of(PATH_DURATION, duration).asDerived())
         }
-        return path
     }
 }

@@ -24,12 +24,12 @@ import spp.jetbrains.marker.model.analysis.IRuntimePath
 import spp.protocol.insight.InsightValue
 
 data class RuntimePath(
-    private val evaluations: List<Boolean>,
-    override val artifacts: List<ArtifactElement>,
+    val evaluations: List<Boolean>,
+    override val artifacts: MutableList<ArtifactElement>,
     internal val insights: MutableList<InsightValue<*>> = mutableListOf()
 ) : IRuntimePath {
 
-    override fun iterator(): Iterator<ArtifactElement> = artifacts.iterator()
+    override fun iterator(): Iterator<ArtifactElement> = descendants.iterator()
     override fun getInsights(): List<InsightValue<*>> = insights
 
     override fun getResolvedCallFunctions(): List<FunctionArtifact> {
@@ -40,7 +40,7 @@ data class RuntimePath(
 
     override val conditions: List<Pair<Boolean, IfArtifact>>
         get() {
-            val conditionals = artifacts.filterIsInstance<IfArtifact>()
+            val conditionals = descendants.filterIsInstance<IfArtifact>()
             val conditions = mutableListOf<Pair<Boolean, IfArtifact>>()
             for (i in conditionals.indices) {
                 conditions.add(Pair(this.evaluations[i], conditionals[i]))

@@ -19,6 +19,7 @@ package spp.jetbrains.insight
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -53,15 +54,18 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         val method = psi.getFunctions().first { it.name == "booleanConstant" }
         val ifExpression = method.getChildIfs().first()
 
-        val paths = RuntimePathAnalyzer().analyzeUp(ifExpression.toArtifact()!!)
+        val paths = RuntimePathAnalyzer().apply{
+            passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
+        }.analyzeUp(ifExpression.toArtifact()!!)
         assertEquals(2, paths.size)
 
         //todo: the false path is actually dead code, should add insight for that
         val truePath = paths.find { it.conditions.any { it.first } }!!
-        assertEquals(2, truePath.artifacts.size)
-        assertTrue(truePath.artifacts[0].isControlStructure())
-        assertTrue(truePath.artifacts[1].isCall())
-        assertEquals(1.0, truePath.artifacts[0].getPathExecutionProbability().value)
+        assertEquals(3, truePath.descendants.size)
+        assertTrue(truePath.descendants[0].isControlStructure())
+        assertTrue(truePath.descendants[1].isCall())
+        assertTrue(truePath.descendants[2].isLiteral())
+        assertEquals(1.0, truePath.descendants[0].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 
     @Test
@@ -78,14 +82,17 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         val method = psi.getFunctions().first { it.name == "numberCompare" }
         val ifExpression = method.getChildIfs().first()
 
-        val paths = RuntimePathAnalyzer().analyzeUp(ifExpression.toArtifact()!!)
+        val paths = RuntimePathAnalyzer().apply{
+            passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
+        }.analyzeUp(ifExpression.toArtifact()!!)
         assertEquals(2, paths.size)
 
         //todo: the false path is actually dead code, should add insight for that
         val truePath = paths.find { it.conditions.any { it.first } }!!
-        assertEquals(2, truePath.artifacts.size)
-        assertTrue(truePath.artifacts[0].isControlStructure())
-        assertTrue(truePath.artifacts[1].isCall())
-        assertEquals(1.0, truePath.artifacts[0].getPathExecutionProbability().value)
+        assertEquals(3, truePath.descendants.size)
+        assertTrue(truePath.descendants[0].isControlStructure())
+        assertTrue(truePath.descendants[1].isCall())
+        assertTrue(truePath.descendants[2].isLiteral())
+        assertEquals(1.0, truePath.descendants[0].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 }

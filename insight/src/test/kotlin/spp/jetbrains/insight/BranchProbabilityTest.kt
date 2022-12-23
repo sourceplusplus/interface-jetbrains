@@ -65,9 +65,11 @@ class BranchProbabilityTest : BasePlatformTestCase() {
         assertEquals(1, paths.size)
 
         val path = paths.first()
-        assertEquals(3, path.artifacts.size)
-        assertEquals(1.0, path.artifacts[0].getPathExecutionProbability().value)
-        assertEquals(0.5, path.artifacts[1].getPathExecutionProbability().value)
-        assertEquals(0.25, path.artifacts[2].getPathExecutionProbability().value)
+        assertEquals(4, path.descendants.size)
+        assertEquals(1.0, path.descendants[0].getPathExecutionProbability().value)
+        assertEquals(0.5, path.descendants[0].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.5, path.descendants[1].getPathExecutionProbability().value)
+        assertEquals(0.25, path.descendants[1].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.25, path.descendants[2].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 }

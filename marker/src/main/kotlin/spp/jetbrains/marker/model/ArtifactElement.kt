@@ -19,6 +19,7 @@ package spp.jetbrains.marker.model
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.util.descendants
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.getCalls
@@ -31,15 +32,31 @@ abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement 
 
     val data = ConcurrentHashMap<SourceKey<*>, Any>()
 
+    val descendantArtifacts: List<ArtifactElement> by lazy {
+        val descendants = mutableListOf<ArtifactElement>()
+        descendants {
+            val artifact = it.toArtifact()
+            var visitChildren = true
+            if (artifact != null) {
+                visitChildren = false
+                descendants.add(artifact)
+            }
+            visitChildren
+        }.toList()
+        descendants
+    }
+
     fun <T> getData(key: SourceKey<T>): T? {
         return data[key] as T?
     }
 
     fun isControlStructure(): Boolean = this is ControlStructureArtifact
     fun isCall(): Boolean = this is CallArtifact
+    fun isLiteral(): Boolean = this is ArtifactLiteralValue
 
     fun getInsights(): List<InsightValue<*>> {
-        return SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getUserData(it.asPsiKey()) }
+        return SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getUserData(it.asPsiKey()) } +
+                SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getData(it) }
     }
 
     fun getDuration(includingPredictions: Boolean = true): Long? {

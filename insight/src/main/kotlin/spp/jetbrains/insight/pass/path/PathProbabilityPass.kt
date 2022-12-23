@@ -33,13 +33,35 @@ import spp.protocol.insight.InsightValue
  */
 class PathProbabilityPass : RuntimePathPass {
 
-    override fun analyze(path: RuntimePath): RuntimePath {
-        var probability = 1.0
-        val falseConditions = path.conditions.filter { !it.first }.map { it.second }
-        path.forEach {
-            probability = calculateProbability(it, probability, !falseConditions.contains(it))
+    private lateinit var conditionOrder: Iterator<Boolean>
+
+    override fun analyze(path: RuntimePath) {
+        conditionOrder = path.evaluations.iterator()
+
+        path.artifacts.forEach {
+            if (it is IfArtifact) {
+                analyze(it, conditionOrder.next(), 1.0)
+            } else {
+                it.data.put(
+                    SourceMarkerKeys.PATH_EXECUTION_PROBABILITY,
+                    InsightValue.of(PATH_EXECUTION_PROBABILITY, 1.0)
+                )
+            }
         }
-        return path
+    }
+
+    private fun analyze(ifArtifact: IfArtifact, condition: Boolean, probability: Double) {
+        var probability = calculateProbability(ifArtifact, probability, condition)
+        ifArtifact.childArtifacts.forEach {
+            if (it is IfArtifact) {
+                analyze(it, conditionOrder.next(), probability)
+            } else {
+                it.data.put(
+                    SourceMarkerKeys.PATH_EXECUTION_PROBABILITY,
+                    InsightValue.of(PATH_EXECUTION_PROBABILITY, probability)
+                )
+            }
+        }
     }
 
     private fun calculateProbability(element: ArtifactElement, baseProbability: Double, condition: Boolean): Double {

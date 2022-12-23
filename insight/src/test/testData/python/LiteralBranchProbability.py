@@ -1,12 +1,12 @@
 def booleanConstant():
     if True:
-        print(true)
+        print(True)
     else:
-        print(false)
+        print(False)
 
 
 def numberCompare():
     if 1 == 1:
-        print(true)
+        print(True)
     else:
-        print(false)
+        print(False)

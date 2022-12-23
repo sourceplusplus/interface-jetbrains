@@ -14,15 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.pass
+package spp.jetbrains.insight
 
-import spp.jetbrains.insight.RuntimePath
+import spp.jetbrains.insight.pass.ArtifactPass
+import spp.jetbrains.insight.pass.IPass
+import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.insight.pass.RuntimePathSetPass
 import spp.jetbrains.insight.pass.artifact.CallDurationPass
 import spp.jetbrains.insight.pass.artifact.ThreadSleepPass
 import spp.jetbrains.insight.pass.path.PathDurationPass
 import spp.jetbrains.insight.pass.path.PathProbabilityPass
 import spp.jetbrains.insight.pass.path.PruneArtifactsPass
 import spp.jetbrains.insight.pass.pathset.ReversePathSetPass
+import spp.jetbrains.insight.pass.pathset.SimplifyPathSetPass
 import spp.jetbrains.marker.model.ArtifactElement
 
 /**
@@ -31,19 +35,26 @@ import spp.jetbrains.marker.model.ArtifactElement
 class InsightPassProvider {
 
     companion object {
-        val FULL = InsightPassProvider().apply {
+        val ALL_PASSES = listOf(
             //artifact passes
-            addArtifactPass(CallDurationPass())
-            addArtifactPass(ThreadSleepPass())
+            CallDurationPass(),
+            ThreadSleepPass(),
 
             //path passes
-            addRuntimePathPass(PruneArtifactsPass())
-            addRuntimePathPass(PathDurationPass())
-            addRuntimePathPass(PathProbabilityPass())
+            PruneArtifactsPass(),
+            PathDurationPass(),
+            PathProbabilityPass(),
 
             //path set passes
-            addRuntimePathSetPass(ReversePathSetPass())
-            //addRuntimePathSetPass(SimplifyPathSetPass())
+            ReversePathSetPass(),
+            SimplifyPathSetPass()
+        )
+
+        val FULL = InsightPassProvider().apply {
+            ALL_PASSES.forEach { registerPass(it) }
+        }
+        val FULL_NO_SIMPLIFY = InsightPassProvider().apply {
+            ALL_PASSES.filter { it !is SimplifyPathSetPass }.forEach { registerPass(it) }
         }
     }
 
@@ -51,35 +62,30 @@ class InsightPassProvider {
     private val runtimePathPasses = mutableListOf<RuntimePathPass>()
     private val runtimePathSetPasses = mutableListOf<RuntimePathSetPass>()
 
-    fun addArtifactPass(pass: ArtifactPass) {
-        artifactPasses.add(pass)
-    }
-
-    fun addRuntimePathPass(pass: RuntimePathPass) {
-        runtimePathPasses.add(pass)
-    }
-
-    fun addRuntimePathSetPass(pass: RuntimePathSetPass) {
-        runtimePathSetPasses.add(pass)
+    fun registerPass(pass: IPass) {
+        when (pass) {
+            is ArtifactPass -> artifactPasses.add(pass)
+            is RuntimePathPass -> runtimePathPasses.add(pass)
+            is RuntimePathSetPass -> runtimePathSetPasses.add(pass)
+            else -> throw IllegalArgumentException("Unknown pass type: ${pass::class}")
+        }
     }
 
     private fun analyze(element: ArtifactElement) {
         artifactPasses.forEach { it.analyze(element) }
     }
 
-    private fun analyze(path: RuntimePath): RuntimePath {
+    private fun analyze(path: RuntimePath) {
         path.forEach { analyze(it) }
-        return runtimePathPasses.fold(path) { acc, pass ->
-            pass.analyze(acc)
-        }
+        runtimePathPasses.forEach { it.analyze(path) }
     }
 
     fun analyze(pathSet: Set<RuntimePath>): Set<RuntimePath> {
         val preProcessedPathSet = runtimePathSetPasses.fold(pathSet) { acc, pass ->
             pass.preProcess(acc)
         }
-        val analyzedPathSet = preProcessedPathSet.map { analyze(it) }.toSet()
-        val analyzedPathSetSet = runtimePathSetPasses.fold(analyzedPathSet) { acc, pass ->
+        preProcessedPathSet.map { analyze(it) }.toSet()
+        val analyzedPathSetSet = runtimePathSetPasses.fold(preProcessedPathSet) { acc, pass ->
             pass.analyze(acc)
         }
         return runtimePathSetPasses.fold(analyzedPathSetSet) { acc, pass ->

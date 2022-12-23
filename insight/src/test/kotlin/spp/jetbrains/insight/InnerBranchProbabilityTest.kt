@@ -19,6 +19,7 @@ package spp.jetbrains.insight
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -51,11 +52,15 @@ class InnerBranchProbabilityTest : BasePlatformTestCase() {
         val psi = myFixture.configureByFile("$language/InnerBranchProbability.$extension")
 
         val callExpression1 = psi.getCalls().find { it.text.contains("true", true) }!!
-        val truePath = RuntimePathAnalyzer().analyzeUp(callExpression1.toArtifact()!!)
-        assertEquals(1.0, truePath.first().artifacts.first().getPathExecutionProbability().value)
+        val truePath = RuntimePathAnalyzer().apply{
+            passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
+        }.analyzeUp(callExpression1.toArtifact()!!)
+        assertEquals(1.0, truePath.first().artifacts.first().getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
 
         val callExpression2 = psi.getCalls().find { it.text.contains("false", true) }!!
-        val falsePath = RuntimePathAnalyzer().analyzeUp(callExpression2.toArtifact()!!)
-        assertEquals(0.0, falsePath.first().artifacts.last().getPathExecutionProbability().value)
+        val falsePath = RuntimePathAnalyzer().apply{
+            passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
+        }.analyzeUp(callExpression2.toArtifact()!!)
+        assertEquals(0.0, falsePath.first().artifacts.last().getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 }

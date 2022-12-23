@@ -18,6 +18,7 @@ package spp.jetbrains.insight.pass.path
 
 import spp.jetbrains.insight.RuntimePath
 import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.ControlStructureArtifact
 
@@ -26,11 +27,16 @@ import spp.jetbrains.marker.model.ControlStructureArtifact
  */
 class PruneArtifactsPass : RuntimePathPass {
 
-    override fun analyze(path: RuntimePath): RuntimePath {
-        return path.copy(
-            artifacts = path.artifacts.filter { artifact ->
-                artifact is ControlStructureArtifact || artifact is CallArtifact
+    override fun analyze(path: RuntimePath) {
+        removeArtifacts(path.artifacts)
+    }
+
+    private fun removeArtifacts(artifacts: MutableList<ArtifactElement>) {
+        artifacts.removeIf { artifact ->
+            if (artifact is ControlStructureArtifact) {
+                removeArtifacts(artifact.childArtifacts as MutableList<ArtifactElement>)
             }
-        )
+            artifact !is ControlStructureArtifact && artifact !is CallArtifact
+        }
     }
 }

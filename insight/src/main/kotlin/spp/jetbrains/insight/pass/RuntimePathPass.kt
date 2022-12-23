@@ -21,6 +21,6 @@ import spp.jetbrains.insight.RuntimePath
 /**
  * A pass that analyzes an [RuntimePath] and adds data to it.
  */
-interface RuntimePathPass {
-    fun analyze(path: RuntimePath): RuntimePath
+interface RuntimePathPass : IPass {
+    fun analyze(path: RuntimePath)
 }
