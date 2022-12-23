@@ -51,7 +51,7 @@ class PathProbabilityPass : RuntimePathPass {
     }
 
     private fun analyze(ifArtifact: IfArtifact, condition: Boolean, probability: Double) {
-        var probability = calculateProbability(ifArtifact, probability, condition)
+        val probability = calculateProbability(ifArtifact, probability, condition)
         ifArtifact.childArtifacts.forEach {
             if (it is IfArtifact) {
                 analyze(it, conditionOrder.next(), probability)

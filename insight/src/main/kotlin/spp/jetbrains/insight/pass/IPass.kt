@@ -16,4 +16,7 @@
  */
 package spp.jetbrains.insight.pass
 
+/**
+ * Interface for passes that analyze data.
+ */
 interface IPass

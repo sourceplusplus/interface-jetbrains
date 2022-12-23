@@ -80,74 +80,74 @@ class MultiInsightTest : BasePlatformTestCase() {
         val paths = RuntimePathAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
         assertEquals(4, paths.size)
 
-        //[true, true]
-        val path1 = paths.toList()[0]
-        assertEquals(1, path1.getInsights().size)
-        assertEquals(400L, path1.getInsights()[0].value) //InsightKeys.PATH_DURATION
-        assertEquals(4, path1.descendants.size)
-        assertEquals(2, path1.conditions.size)
-        assertTrue(path1.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
-        assertTrue(path1.conditions[0].first)
-        assertTrue(path1.conditions[1].second.condition?.text?.contains("random() > 0.5") == true)
-        assertTrue(path1.conditions[1].first)
-        assertTrue(path1.descendants[0].isControlStructure())
-        assertTrue(path1.descendants[1].isControlStructure())
-        assertTrue(path1.descendants[2].isCall())
-        assertTrue(path1.descendants[3].isLiteral())
-
-        val path1CallInsights = path1.descendants[2].getInsights()
-        assertEquals(2, path1CallInsights.size)
-        assertEquals(200L, path1CallInsights[0].value)
-        assertEquals(0.25, path1CallInsights[1].value)
-//        assertEquals(InsightType.METHOD_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
-
-        //[true, false]
-        val path2 = paths.toList()[1]
-        assertEquals(1, path2.getInsights().size)
-        assertEquals(200L, path2.getInsights()[0].value) //InsightKeys.PATH_DURATION
-        assertEquals(2, path2.descendants.size)
-        assertEquals(2, path2.conditions.size)
-        assertTrue(path2.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
-        assertTrue(path2.conditions[0].first)
-        assertTrue(path2.conditions[1].second.condition?.text?.contains("random() > 0.5") == true)
-        assertFalse(path2.conditions[1].first)
-        assertTrue(path2.descendants[0].isControlStructure())
-        assertTrue(path2.descendants[1].isControlStructure())
-
         //[false, false]
-        val path3 = paths.toList()[2]
-        assertEquals(1, path3.getInsights().size)
-        assertEquals(300L, path3.getInsights()[0].value) //InsightKeys.PATH_DURATION
-        assertEquals(3, path3.descendants.size)
-        assertEquals(1, path3.conditions.size)
-        assertTrue(path3.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
-        assertFalse(path3.conditions[0].first)
-        assertTrue(path3.descendants[0].isControlStructure())
-        assertTrue(path3.descendants[1].isCall())
-        assertTrue(path3.descendants[2].isLiteral())
+        val falseFalsePath = paths.toList()[0]
+        assertEquals(1, falseFalsePath.getInsights().size)
+        assertEquals(300L, falseFalsePath.getInsights()[0].value) //InsightKeys.PATH_DURATION
+        assertEquals(3, falseFalsePath.descendants.size)
+        assertEquals(1, falseFalsePath.conditions.size)
+        assertTrue(falseFalsePath.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
+        assertFalse(falseFalsePath.conditions[0].first)
+        assertTrue(falseFalsePath.descendants[0].isControlStructure())
+        assertTrue(falseFalsePath.descendants[1].isCall())
+        assertTrue(falseFalsePath.descendants[2].isLiteral())
 
-        val path3CallInsights = path3.descendants[1].getInsights()
-        assertEquals(2, path3CallInsights.size)
-        assertEquals(200L, path3CallInsights[0].value)
-        assertEquals(0.5, path3CallInsights[1].value)
+        val falseFalseCallInsights = falseFalsePath.descendants[1].getInsights()
+        assertEquals(2, falseFalseCallInsights.size)
+        assertEquals(200L, falseFalseCallInsights[0].value)
+        assertEquals(0.5, falseFalseCallInsights[1].value)
 //        assertEquals(InsightType.METHOD_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
 
         //[false, true]
-        val path4 = paths.toList()[3]
-        assertEquals(1, path4.getInsights().size)
-        assertEquals(300L, path4.getInsights()[0].value) //InsightKeys.PATH_DURATION
-        assertEquals(3, path4.descendants.size)
-        assertEquals(1, path4.conditions.size)
-        assertTrue(path4.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
-        assertFalse(path4.conditions[0].first)
-        assertTrue(path4.descendants[0].isControlStructure())
-        assertTrue(path4.descendants[1].isCall())
-        assertTrue(path4.descendants[2].isLiteral())
+        val falseTruePath = paths.toList()[1]
+        assertEquals(1, falseTruePath.getInsights().size)
+        assertEquals(300L, falseTruePath.getInsights()[0].value) //InsightKeys.PATH_DURATION
+        assertEquals(3, falseTruePath.descendants.size)
+        assertEquals(1, falseTruePath.conditions.size)
+        assertTrue(falseTruePath.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
+        assertFalse(falseTruePath.conditions[0].first)
+        assertTrue(falseTruePath.descendants[0].isControlStructure())
+        assertTrue(falseTruePath.descendants[1].isCall())
+        assertTrue(falseTruePath.descendants[2].isLiteral())
 
-        val path4CallInsights = path4.descendants[1].getInsights()
-        assertEquals(2, path4CallInsights.size)
-        assertEquals(200L, path4CallInsights[0].value)
-        assertEquals(0.5, path4CallInsights[1].value)
+        val falseTrueCallInsights = falseTruePath.descendants[1].getInsights()
+        assertEquals(2, falseTrueCallInsights.size)
+        assertEquals(200L, falseTrueCallInsights[0].value)
+        assertEquals(0.5, falseTrueCallInsights[1].value)
+//        assertEquals(InsightType.METHOD_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
+
+        //[true, false]
+        val trueFalsePath = paths.toList()[2]
+        assertEquals(1, trueFalsePath.getInsights().size)
+        assertEquals(200L, trueFalsePath.getInsights()[0].value) //InsightKeys.PATH_DURATION
+        assertEquals(2, trueFalsePath.descendants.size)
+        assertEquals(2, trueFalsePath.conditions.size)
+        assertTrue(trueFalsePath.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
+        assertTrue(trueFalsePath.conditions[0].first)
+        assertTrue(trueFalsePath.conditions[1].second.condition?.text?.contains("random() > 0.5") == true)
+        assertFalse(trueFalsePath.conditions[1].first)
+        assertTrue(trueFalsePath.descendants[0].isControlStructure())
+        assertTrue(trueFalsePath.descendants[1].isControlStructure())
+
+        //[true, true]
+        val trueTruePath = paths.toList()[3]
+        assertEquals(1, trueTruePath.getInsights().size)
+        assertEquals(400L, trueTruePath.getInsights()[0].value) //InsightKeys.PATH_DURATION
+        assertEquals(4, trueTruePath.descendants.size)
+        assertEquals(2, trueTruePath.conditions.size)
+        assertTrue(trueTruePath.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
+        assertTrue(trueTruePath.conditions[0].first)
+        assertTrue(trueTruePath.conditions[1].second.condition?.text?.contains("random() > 0.5") == true)
+        assertTrue(trueTruePath.conditions[1].first)
+        assertTrue(trueTruePath.descendants[0].isControlStructure())
+        assertTrue(trueTruePath.descendants[1].isControlStructure())
+        assertTrue(trueTruePath.descendants[2].isCall())
+        assertTrue(trueTruePath.descendants[3].isLiteral())
+
+        val trueTrueCallInsights = trueTruePath.descendants[2].getInsights()
+        assertEquals(2, trueTrueCallInsights.size)
+        assertEquals(200L, trueTrueCallInsights[0].value)
+        assertEquals(0.25, trueTrueCallInsights[1].value)
 //        assertEquals(InsightType.METHOD_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
     }
 }

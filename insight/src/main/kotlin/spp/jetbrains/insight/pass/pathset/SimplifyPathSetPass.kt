@@ -47,7 +47,7 @@ class SimplifyPathSetPass : RuntimePathSetPass {
 
             //sublist check
             val pathArtifacts = path.artifacts
-            val dupePath = simplifiedPaths.any {
+            val dupePath = pathSet.any {
                 it !== path && pathArtifacts.none { it is ControlStructureArtifact }
                         && Collections.indexOfSubList(it.artifacts, pathArtifacts) != -1
             }
