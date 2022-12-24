@@ -22,6 +22,7 @@ import spp.jetbrains.marker.model.IfArtifact
 import spp.protocol.insight.InsightValue
 
 interface IRuntimePath : Iterable<ArtifactElement> {
+    val rootArtifact: ArtifactElement
     val artifacts: List<ArtifactElement>
     val conditions: List<Pair<Boolean, IfArtifact>>
 

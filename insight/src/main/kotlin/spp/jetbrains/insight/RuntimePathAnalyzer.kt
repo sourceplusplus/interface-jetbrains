@@ -42,7 +42,7 @@ class RuntimePathAnalyzer {
         val boolPermutations = makeBoolPermutations(ifCount)
         val runtimePaths = mutableSetOf<RuntimePath>()
         for (boolSet in boolPermutations) {
-            val path = RuntimePath(boolSet.toList(), mutableListOf())
+            val path = RuntimePath(boolSet.toList(), element, mutableListOf())
             processRuntimePath(path, path.artifacts, parent, AtomicInteger(0))
             runtimePaths.add(path)
         }

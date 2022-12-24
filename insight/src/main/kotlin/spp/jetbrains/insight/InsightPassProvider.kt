@@ -25,6 +25,7 @@ import spp.jetbrains.insight.pass.artifact.ThreadSleepPass
 import spp.jetbrains.insight.pass.path.PathDurationPass
 import spp.jetbrains.insight.pass.path.PathProbabilityPass
 import spp.jetbrains.insight.pass.path.PruneArtifactsPass
+import spp.jetbrains.insight.pass.path.RecursivePathPass
 import spp.jetbrains.insight.pass.pathset.SimplifyPathSetPass
 import spp.jetbrains.marker.model.ArtifactElement
 
@@ -43,6 +44,7 @@ class InsightPassProvider {
             PruneArtifactsPass(),
             PathDurationPass(),
             PathProbabilityPass(),
+            RecursivePathPass(),
 
             //path set passes
             SimplifyPathSetPass()

@@ -25,6 +25,7 @@ import spp.protocol.insight.InsightValue
 
 data class RuntimePath(
     val evaluations: List<Boolean>,
+    override val rootArtifact: ArtifactElement,
     override val artifacts: MutableList<ArtifactElement>,
     internal val insights: MutableList<InsightValue<*>> = mutableListOf()
 ) : IRuntimePath {
