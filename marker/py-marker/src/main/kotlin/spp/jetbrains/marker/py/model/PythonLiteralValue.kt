@@ -22,4 +22,8 @@ import spp.jetbrains.marker.model.ArtifactLiteralValue
 class PythonLiteralValue(private val psiElement: PyLiteralExpression) : ArtifactLiteralValue(psiElement) {
     override val value: Any?
         get() = psiElement.text //todo: value
+
+    override fun clone(): PythonLiteralValue {
+        return PythonLiteralValue(psiElement)
+    }
 }

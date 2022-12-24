@@ -22,4 +22,8 @@ import spp.jetbrains.marker.model.ArtifactLiteralValue
 class JavascriptLiteralValue(private val psiElement: PsiLiteralValue) : ArtifactLiteralValue(psiElement) {
     override val value: Any?
         get() = psiElement.value
+
+    override fun clone(): JavascriptLiteralValue {
+        return JavascriptLiteralValue(psiElement)
+    }
 }

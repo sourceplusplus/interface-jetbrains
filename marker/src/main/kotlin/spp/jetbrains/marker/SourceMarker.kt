@@ -61,6 +61,10 @@ class SourceMarker(private val project: Project) {
         fun getSourceFileMarker(psiFile: PsiFile): SourceFileMarker? {
             return getInstance(psiFile.project).getSourceFileMarker(psiFile)
         }
+
+        fun getSourceFileMarkerIfExists(psiFile: PsiFile): SourceFileMarker? {
+            return getInstance(psiFile.project).getSourceFileMarkerIfExists(psiFile)
+        }
     }
 
     val configuration: SourceMarkerConfiguration = SourceMarkerConfiguration()
@@ -86,6 +90,10 @@ class SourceMarker(private val project: Project) {
             return true
         }
         return false
+    }
+
+    fun getSourceFileMarkerIfExists(psiFile: PsiFile): SourceFileMarker? {
+        return psiFile.getUserData(SourceFileMarker.KEY)
     }
 
     fun getSourceFileMarker(psiFile: PsiFile): SourceFileMarker? {

@@ -40,10 +40,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
-import io.vertx.core.MultiMap
-import io.vertx.core.Promise
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
+import io.vertx.core.*
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.RequestOptions
 import io.vertx.core.json.DecodeException
@@ -62,6 +59,7 @@ import org.apache.commons.text.CaseUtils
 import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
+import spp.jetbrains.insight.LiveInsightManager
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
@@ -85,10 +83,7 @@ import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatusService
-import spp.protocol.service.LiveInstrumentService
-import spp.protocol.service.LiveManagementService
-import spp.protocol.service.LiveViewService
-import spp.protocol.service.SourceServices
+import spp.protocol.service.*
 import java.io.File
 import java.net.ConnectException
 import java.util.*
@@ -397,6 +392,16 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             vertx.deployVerticle(viewListener).await()
         } else {
             log.warn("Live views unavailable")
+        }
+
+        //live insight
+        val insightServiceAvailable = availableRecords.any { it.name == SourceServices.LIVE_INSIGHT }
+        if (insightServiceAvailable || availableRecords.any { it.name == SourceServices.LIVE_VIEW }) {
+            val insightManager = LiveInsightManager(project, insightServiceAvailable)
+            vertx.deployVerticle(insightManager, DeploymentOptions().setWorker(true)).await()
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(insightManager)
+        } else {
+            log.warn("Live insights unavailable")
         }
     }
 

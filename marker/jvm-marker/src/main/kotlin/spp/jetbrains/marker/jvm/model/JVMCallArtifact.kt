@@ -21,6 +21,7 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.nj2k.postProcessing.resolve
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.jetbrains.marker.service.toArtifact
@@ -37,5 +38,17 @@ class JVMCallArtifact(private val psiElement: PsiElement) : CallArtifact(psiElem
 
             else -> TODO()
         }
+    }
+
+    override fun getArguments(): List<ArtifactElement> {
+        return when (psiElement) {
+            is PsiCall -> psiElement.argumentList?.expressions?.mapNotNull { it.toArtifact() } ?: emptyList()
+            is KtCallExpression -> psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
+            else -> TODO()
+        }
+    }
+
+    override fun clone(): JVMCallArtifact {
+        return JVMCallArtifact(psiElement)
     }
 }

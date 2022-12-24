@@ -19,4 +19,9 @@ package spp.jetbrains.marker.jvm.model
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.model.BlockArtifact
 
-class JVMBlockArtifact(psiElement: PsiElement) : BlockArtifact(psiElement)
+class JVMBlockArtifact(private val psiElement: PsiElement) : BlockArtifact(psiElement) {
+
+    override fun clone(): JVMBlockArtifact {
+        return JVMBlockArtifact(psiElement)
+    }
+}

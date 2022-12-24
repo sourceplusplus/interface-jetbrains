@@ -1,7 +1,5 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <codeInsight.lineMarkerProvider language="JavaScript"
-                                        implementationClass="spp.jetbrains.marker.plugin.SourceLineMarkerProvider"/>
         <codeInsight.inlayProvider language="JavaScript"
                                    implementationClass="spp.jetbrains.marker.plugin.SourceInlayHintProvider"/>
     </extensions>

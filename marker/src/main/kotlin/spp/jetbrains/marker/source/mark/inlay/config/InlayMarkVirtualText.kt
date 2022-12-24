@@ -16,8 +16,7 @@
  */
 package spp.jetbrains.marker.source.mark.inlay.config
 
-import com.intellij.codeInsight.hints.InlayHintsPassFactory
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.codeInsight.codeVision.ui.model.richText.RichText
 import com.intellij.openapi.editor.markup.TextAttributes
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
@@ -37,6 +36,7 @@ open class InlayMarkVirtualText {
 
     internal var inlayMark: InlayMark? = null
     private var virtualText: String
+    var richText: RichText? = null
     val textAttributes: TextAttributes = TextAttributes()
     var icon: Icon? = null
     val iconLocation: Point = Point(0, 3)
@@ -56,10 +56,6 @@ open class InlayMarkVirtualText {
     constructor(inlayMark: InlayMark, virtualText: String) {
         this.inlayMark = inlayMark
         this.virtualText = virtualText
-
-        ApplicationManager.getApplication().invokeLater {
-            InlayHintsPassFactory.forceHintsUpdateOnNextPass()
-        }
     }
 
     constructor(virtualText: String) {
@@ -92,5 +88,21 @@ open class InlayMarkVirtualText {
                 )
             )
         }
+    }
+
+    fun updateVirtualText(richText: RichText) {
+        require(inlayMark != null) { "InlayMark must be set before updating virtual text" }
+
+        val previousRichText = this.richText
+        this.richText = richText
+
+        inlayMark!!.triggerEvent(
+            SourceMarkEvent(
+                inlayMark!!,
+                InlayMarkEventCode.VIRTUAL_TEXT_UPDATED,
+                previousRichText,
+                richText
+            )
+        )
     }
 }

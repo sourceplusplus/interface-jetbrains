@@ -31,4 +31,8 @@ class JavascriptIfArtifact(private val psiElement: JSIfStatement) : IfArtifact(p
 
     override val elseBranch: ArtifactElement?
         get() = psiElement.elseBranch?.toArtifact()
+
+    override fun clone(): JavascriptIfArtifact {
+        return JavascriptIfArtifact(psiElement)
+    }
 }

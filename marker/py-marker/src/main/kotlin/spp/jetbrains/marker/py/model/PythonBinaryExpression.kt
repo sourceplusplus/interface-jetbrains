@@ -30,4 +30,8 @@ class PythonBinaryExpression(private val psiElement: PyBinaryExpression) : Artif
     override fun getRightExpression(): ArtifactElement? {
         return psiElement.rightExpression?.let { ArtifactModelService.toArtifact(it) }
     }
+
+    override fun clone(): PythonBinaryExpression {
+        return PythonBinaryExpression(psiElement)
+    }
 }

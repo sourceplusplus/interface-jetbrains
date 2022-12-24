@@ -19,4 +19,9 @@ package spp.jetbrains.marker.py.model
 import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.model.BlockArtifact
 
-class PythonBlockArtifact(psiElement: PsiElement) : BlockArtifact(psiElement)
+class PythonBlockArtifact(private val psiElement: PsiElement) : BlockArtifact(psiElement) {
+
+    override fun clone(): PythonBlockArtifact {
+        return PythonBlockArtifact(psiElement)
+    }
+}

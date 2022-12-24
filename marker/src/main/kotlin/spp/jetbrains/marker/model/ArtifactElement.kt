@@ -17,14 +17,63 @@
 package spp.jetbrains.marker.model
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.descendants
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.getCalls
 import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.protocol.insight.InsightValue
+import java.util.concurrent.ConcurrentHashMap
 
-open class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
+/**
+ * Represents a language-agnostic artifact for semantic analysis.
+ */
+abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
+
+    val data = ConcurrentHashMap<SourceKey<*>, Any>()
+
+    val descendantArtifacts: List<ArtifactElement> by lazy {
+        val descendants = mutableListOf<ArtifactElement>()
+        descendants {
+            val artifact = it.toArtifact()
+            var visitChildren = true
+            if (artifact != null) {
+                visitChildren = false
+                descendants.add(artifact)
+            }
+            visitChildren
+        }.toList()
+        descendants
+    }
+
+    fun <T> getData(key: SourceKey<T>): T? {
+        return data[key] as T?
+    }
 
     fun isControlStructure(): Boolean = this is ControlStructureArtifact
     fun isCall(): Boolean = this is CallArtifact
+    fun isLiteral(): Boolean = this is ArtifactLiteralValue
+
+    fun getInsights(): List<InsightValue<*>> {
+        return SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getUserData(it.asPsiKey()) } +
+                SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getData(it) }
+    }
+
+    fun getDuration(includingPredictions: Boolean = true): Long? {
+        if (includingPredictions) {
+            val durationPrediction = getUserData(SourceMarkerKeys.FUNCTION_DURATION_PREDICTION.asPsiKey())?.value
+            if (durationPrediction != null) {
+                return durationPrediction
+            }
+        }
+
+        return getUserData(SourceMarkerKeys.FUNCTION_DURATION.asPsiKey())?.value
+    }
+
+    fun getPathExecutionProbability(): InsightValue<Double> {
+        return getUserData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY.asPsiKey())!!
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -37,6 +86,8 @@ open class ArtifactElement(private val psiElement: PsiElement) : PsiElement by p
     override fun hashCode(): Int {
         return psiElement.hashCode()
     }
+
+    abstract fun clone(): ArtifactElement
 }
 
 // Extensions

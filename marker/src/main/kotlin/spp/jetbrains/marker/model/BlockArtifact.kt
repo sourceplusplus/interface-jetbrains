@@ -18,4 +18,7 @@ package spp.jetbrains.marker.model
 
 import com.intellij.psi.PsiElement
 
-abstract class BlockArtifact(psiElement: PsiElement) : ArtifactElement(psiElement)
+abstract class BlockArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
+
+    abstract override fun clone(): BlockArtifact
+}

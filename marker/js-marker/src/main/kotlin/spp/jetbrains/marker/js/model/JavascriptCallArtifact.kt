@@ -18,6 +18,7 @@ package spp.jetbrains.marker.js.model
 
 import com.intellij.lang.javascript.psi.JSCallExpression
 import com.intellij.psi.PsiReference
+import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.jetbrains.marker.service.toArtifact
@@ -26,5 +27,13 @@ class JavascriptCallArtifact(private val psiElement: JSCallExpression) : CallArt
 
     override fun resolveFunction(): FunctionArtifact? {
         return (psiElement.methodExpression as? PsiReference)?.resolve()?.toArtifact() as? FunctionArtifact
+    }
+
+    override fun getArguments(): List<ArtifactElement> {
+        return psiElement.argumentList?.arguments?.mapNotNull { it.toArtifact() } ?: emptyList()
+    }
+
+    override fun clone(): JavascriptCallArtifact {
+        return JavascriptCallArtifact(psiElement)
     }
 }

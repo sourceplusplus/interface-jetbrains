@@ -51,7 +51,7 @@ class PluginSourceMarkEventListener(val project: Project) : CoroutineVerticle(),
 
     private val log = logger<PluginSourceMarkEventListener>()
     private val codeChangeQueue = MergingUpdateQueue(
-        "SPP_CODE_CHANGED", 500, true, null, this
+        "SPP_CODE_CHANGED", 200, true, null, this
     ).setRestartTimerOnAdd(true)
     private val lastModificationStamp = Key.create<Long>(this::class.simpleName + "_LAST_MODIFICATION_STAMP")
 

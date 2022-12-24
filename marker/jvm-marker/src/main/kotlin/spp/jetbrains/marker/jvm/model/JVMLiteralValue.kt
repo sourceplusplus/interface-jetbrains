@@ -18,21 +18,40 @@ package spp.jetbrains.marker.jvm.model
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
+import com.intellij.psi.util.elementType
 import org.jetbrains.kotlin.psi.KtConstantExpression
+import org.jetbrains.kotlin.psi.stubs.ConstantValueKind.*
+import org.jetbrains.kotlin.psi.stubs.elements.KtConstantExpressionElementType.Companion.kindToConstantElementType
 import spp.jetbrains.marker.model.ArtifactLiteralValue
 import spp.jetbrains.marker.service.isKotlin
 
 class JVMLiteralValue(private val psiElement: PsiElement) : ArtifactLiteralValue(psiElement) {
+
     override val value: Any?
         get() {
             return when {
                 psiElement is PsiLiteralValue -> psiElement.value
 
                 psiElement.isKotlin() && psiElement is KtConstantExpression -> {
-                    psiElement.text //todo:
+                    //todo: feels wrong
+                    when {
+                        elementType == kindToConstantElementType(INTEGER_CONSTANT) && text.contains("l", true) -> {
+                            text.removeSuffix("L").removeSuffix("l").toLongOrNull()
+                        }
+
+                        elementType == kindToConstantElementType(INTEGER_CONSTANT) -> text.toIntOrNull()
+                        elementType == kindToConstantElementType(FLOAT_CONSTANT) -> text.toFloatOrNull()
+                        elementType == kindToConstantElementType(BOOLEAN_CONSTANT) -> text.toBoolean()
+                        elementType == kindToConstantElementType(CHARACTER_CONSTANT) -> text.toCharArray().firstOrNull()
+                        else -> psiElement.text
+                    }
                 }
 
                 else -> TODO()
             }
         }
+
+    override fun clone(): JVMLiteralValue {
+        return JVMLiteralValue(psiElement)
+    }
 }

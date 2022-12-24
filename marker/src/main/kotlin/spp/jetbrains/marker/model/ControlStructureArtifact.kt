@@ -18,4 +18,5 @@ package spp.jetbrains.marker.model
 
 interface ControlStructureArtifact {
     val condition: ArtifactElement?
+    val childArtifacts: List<ArtifactElement>
 }
