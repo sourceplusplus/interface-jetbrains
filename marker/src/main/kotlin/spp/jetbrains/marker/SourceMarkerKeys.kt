@@ -84,11 +84,15 @@ object SourceMarkerKeys {
     val PATH_DURATION = SourceKey<InsightValue<Double>>(InsightType.PATH_DURATION.name)
 
     @JvmStatic
+    val RECURSIVE_CALL = SourceKey<InsightValue<Boolean>>(InsightType.RECURSIVE_CALL.name)
+
+    @JvmStatic
     val ALL_INSIGHTS = listOf(
         METHOD_DURATION,
         METHOD_DURATION_PREDICTION,
         CONTROL_STRUCTURE_PROBABILITY,
         PATH_EXECUTION_PROBABILITY,
-        PATH_DURATION
+        PATH_DURATION,
+        RECURSIVE_CALL
     )
 }
