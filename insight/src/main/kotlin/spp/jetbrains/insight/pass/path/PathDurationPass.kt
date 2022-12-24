@@ -18,6 +18,9 @@ package spp.jetbrains.insight.pass.path
 
 import spp.jetbrains.insight.RuntimePath
 import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.marker.SourceMarkerKeys
+import spp.jetbrains.marker.model.ArtifactElement
+import spp.jetbrains.marker.model.IfArtifact
 import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
 
@@ -27,16 +30,35 @@ import spp.protocol.insight.InsightValue
 class PathDurationPass : RuntimePathPass {
 
     override fun analyze(path: RuntimePath) {
-        var duration: Long? = null
-        path.forEach {
-            val artifactDuration = it.getDuration()
-            if (artifactDuration != null) {
-                duration = (duration ?: 0) + artifactDuration
-            }
-        }
-
+        val duration = analyze(path.artifacts, null)
         if (duration != null) {
             path.insights.add(InsightValue.of(PATH_DURATION, duration).asDerived())
         }
+    }
+
+    private fun analyze(elements: List<ArtifactElement>, duration: Long?): Long? {
+        var duration = duration
+        elements.forEach {
+            if (it is IfArtifact) {
+                //condition always executes so add to duration regardless of condition result
+                val conditionDuration = it.getDuration()
+                duration = duration?.plus(conditionDuration ?: 0) ?: conditionDuration
+                val conditionDescendantDuration = it.condition?.descendantArtifacts
+                    ?.mapNotNull { it.getDuration() }?.takeIf { it.isNotEmpty() }?.sum()
+                duration = duration?.plus(conditionDescendantDuration ?: 0) ?: conditionDescendantDuration
+
+                //if condition passes, add duration of child artifacts
+                val executionProbability = it.getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)
+                if (executionProbability == null || executionProbability.value > 0.0) {
+                    analyze(it.childArtifacts, duration)?.let { duration = it }
+                }
+            } else {
+                val artifactDuration = it.getDuration()
+                if (artifactDuration != null) {
+                    duration = (duration ?: 0) + artifactDuration
+                }
+            }
+        }
+        return duration
     }
 }

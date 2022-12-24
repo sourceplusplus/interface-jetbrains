@@ -24,18 +24,13 @@ import spp.jetbrains.marker.model.IfArtifact
 import java.util.*
 
 /**
- * Removes paths caused by conditional branches that are always or never taken.
+ * Removes paths caused by conditional branches that are never taken.
  */
 class SimplifyPathSetPass : RuntimePathSetPass {
 
-    /**
-     * For each [IfArtifact], analyze if the condition can be statically determined to always be true or false.
-     * If so,
-     */
     override fun postProcess(pathSet: Set<RuntimePath>): Set<RuntimePath> {
         val simplifiedPaths = mutableSetOf<RuntimePath>()
         for (path in pathSet) {
-            //todo: smarter, more dynamic
             path.artifacts.removeIf {
                 if (it is IfArtifact) {
                     val probability = it.getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)
@@ -45,17 +40,24 @@ class SimplifyPathSetPass : RuntimePathSetPass {
                 }
             }
 
+            if (path.artifacts.isNotEmpty()) {
+                simplifiedPaths.add(path)
+            }
+        }
+
+        for (path in pathSet.toMutableSet()) {
             //sublist check
             val pathArtifacts = path.artifacts
-            val dupePath = pathSet.any {
+            val dupePath = simplifiedPaths.any {
                 it !== path && pathArtifacts.none { it is ControlStructureArtifact }
                         && Collections.indexOfSubList(it.artifacts, pathArtifacts) != -1
             }
 
-            if (!dupePath) {
-                simplifiedPaths.add(path)
+            if (dupePath) {
+                simplifiedPaths.remove(path)
             }
         }
+
         return simplifiedPaths
     }
 }

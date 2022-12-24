@@ -21,7 +21,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import spp.jetbrains.insight.coupler.MethodDurationCoupler
+import spp.jetbrains.insight.coupler.FunctionDurationCoupler
 import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -44,7 +44,7 @@ class LiveInsightManager(
     //    private lateinit var insightService: LiveInsightService
 //    private lateinit var workspace: InsightWorkspace
     private val insights = listOf(
-        MethodDurationCoupler(remoteInsightsAvailable)
+        FunctionDurationCoupler(remoteInsightsAvailable)
     )
 
     override suspend fun start() {
@@ -56,7 +56,7 @@ class LiveInsightManager(
     private suspend fun startRemoteInsights() {
 //        val analyzer = SourceAnalyzer(object : InsightStorage {
 //            override suspend fun <T> getInsightValue(type: InsightType, vararg args: PsiElement): T? {
-//                if (type == InsightType.METHOD_DURATION) {
+//                if (type == InsightType.FUNCTION_DURATION) {
 //                    val methodCall = args[0].reference
 //                    if (methodCall is PsiMethodCallExpression) {
 //                        val method = (args[0] as PsiMethodCallExpression).resolveMethod()
@@ -127,13 +127,13 @@ class LiveInsightManager(
 //            val insights = insightService.getArtifactInsights(
 //                workspace.id,
 //                it.artifactQualifiedName,
-//                JsonArray().add(InsightType.METHOD_DURATION.name)
+//                JsonArray().add(InsightType.FUNCTION_DURATION.name)
 //            ).await()
 //            it.putUserData(
-//                SourceMarkerKeys.METHOD_DURATION,
+//                SourceMarkerKeys.FUNCTION_DURATION,
 //                InsightValue.of(
-//                    InsightType.METHOD_DURATION,
-//                    insights.getString(InsightType.METHOD_DURATION.name).toLong()
+//                    InsightType.FUNCTION_DURATION,
+//                    insights.getString(InsightType.FUNCTION_DURATION.name).toLong()
 //                )
 //            )
 //            println(insights)

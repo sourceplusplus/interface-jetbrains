@@ -61,13 +61,13 @@ abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement 
 
     fun getDuration(includingPredictions: Boolean = true): Long? {
         if (includingPredictions) {
-            val durationPrediction = getUserData(SourceMarkerKeys.METHOD_DURATION_PREDICTION.asPsiKey())?.value
+            val durationPrediction = getUserData(SourceMarkerKeys.FUNCTION_DURATION_PREDICTION.asPsiKey())?.value
             if (durationPrediction != null) {
                 return durationPrediction
             }
         }
 
-        return getUserData(SourceMarkerKeys.METHOD_DURATION.asPsiKey())?.value
+        return getUserData(SourceMarkerKeys.FUNCTION_DURATION.asPsiKey())?.value
     }
 
     fun getPathExecutionProbability(): InsightValue<Double> {

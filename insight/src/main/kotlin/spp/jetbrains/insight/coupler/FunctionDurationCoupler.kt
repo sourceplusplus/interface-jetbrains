@@ -17,14 +17,15 @@
 package spp.jetbrains.insight.coupler
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.util.ui.update.MergingUpdateQueue
 import com.intellij.util.ui.update.Update
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.insight.RuntimePathAnalyzer
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarkerKeys.METHOD_DURATION
-import spp.jetbrains.marker.SourceMarkerKeys.METHOD_DURATION_PREDICTION
+import spp.jetbrains.marker.SourceMarkerKeys.FUNCTION_DURATION
+import spp.jetbrains.marker.SourceMarkerKeys.FUNCTION_DURATION_PREDICTION
 import spp.jetbrains.marker.SourceMarkerKeys.VCS_MODIFIED
 import spp.jetbrains.marker.service.ArtifactScopeService
 import spp.jetbrains.marker.service.toArtifact
@@ -47,14 +48,14 @@ import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewEvent
 
 /**
- * Provides the [METHOD_DURATION_PREDICTION] insight. This insight is only calculated for
- * methods that have or call methods with VCS modifications (i.e. [VCS_MODIFIED] flag).
+ * Provides the [FUNCTION_DURATION_PREDICTION] insight. This insight is only calculated for
+ * functions that have or call functions with VCS modifications (i.e. [VCS_MODIFIED] flag).
  */
-class MethodDurationCoupler(private val remoteInsightsAvailable: Boolean) : SourceMarkEventListener {
+class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : SourceMarkEventListener {
 
-    private val log = logger<MethodDurationCoupler>()
+    private val log = logger<FunctionDurationCoupler>()
     private val updateInsightQueue = MergingUpdateQueue(
-        MethodDurationCoupler::javaClass.name, 200, true, null, null
+        FunctionDurationCoupler::javaClass.name, 200, true, null, null
     )
 
     override fun handleEvent(event: SourceMarkEvent) {
@@ -107,7 +108,7 @@ class MethodDurationCoupler(private val remoteInsightsAvailable: Boolean) : Sour
                 mutableSetOf(guideMark.getUserData(EndpointDetector.DETECTED_ENDPOINTS)!!.firstNotNullOf { it.name }),
                 guideMark.artifactQualifiedName,
                 LiveSourceLocation(guideMark.artifactQualifiedName.identifier, -1, service.id),
-                LiveViewConfig(METHOD_DURATION_PREDICTION.name, listenMetrics, 1000)
+                LiveViewConfig(FUNCTION_DURATION_PREDICTION.name, listenMetrics, 1000)
             )
         ).onSuccess {
             val subscriptionId = it.subscriptionId!!
@@ -115,9 +116,9 @@ class MethodDurationCoupler(private val remoteInsightsAvailable: Boolean) : Sour
                 val viewEvent = LiveViewEvent(it.body())
                 val metricsData = JsonObject(viewEvent.metricsData)
                 val responseTime = metricsData.getLong("value")
-                val currentDuration = guideMark.getUserData(METHOD_DURATION)?.value
+                val currentDuration = guideMark.getUserData(FUNCTION_DURATION)?.value
                 if (currentDuration != responseTime) {
-                    guideMark.putUserData(METHOD_DURATION, InsightValue.of(InsightType.METHOD_DURATION, responseTime))
+                    guideMark.putUserData(FUNCTION_DURATION, InsightValue.of(InsightType.FUNCTION_DURATION, responseTime))
                     log.info("Set method duration from $currentDuration to $responseTime. Artifact: ${guideMark.artifactQualifiedName}")
 
                     //propagate to callers
@@ -152,8 +153,8 @@ class MethodDurationCoupler(private val remoteInsightsAvailable: Boolean) : Sour
     }
 
     /**
-     * Analyzes the given [MethodSourceMark] to determine [METHOD_DURATION_PREDICTION] based on the sum
-     * of the average [METHOD_DURATION_PREDICTION]/[METHOD_DURATION] of the methods it calls.
+     * Analyzes the given [MethodSourceMark] to determine [FUNCTION_DURATION_PREDICTION] based on the sum
+     * of the average [FUNCTION_DURATION_PREDICTION]/[FUNCTION_DURATION] of the methods it calls.
      *
      * @param mark The method mark to calculate the insight for.
      */
@@ -179,28 +180,34 @@ class MethodDurationCoupler(private val remoteInsightsAvailable: Boolean) : Sour
             val methodDurationPrediction = pathDurationInsights.map { it.value }
                 .takeIf { it.isNotEmpty() }?.average()?.toLong()
 
-            //set method duration prediction insight
+            //set function duration prediction insight
             if (methodDurationPrediction != null) {
                 log.info("Set method duration prediction to $methodDurationPrediction. Artifact: ${mark.artifactQualifiedName}")
                 mark.putUserData(
-                    METHOD_DURATION_PREDICTION,
-                    InsightValue(InsightType.METHOD_DURATION_PREDICTION, methodDurationPrediction).asDerived()
+                    FUNCTION_DURATION_PREDICTION,
+                    InsightValue(InsightType.FUNCTION_DURATION_PREDICTION, methodDurationPrediction).asDerived()
                 )
             } else {
-                propagateChange = mark.removeUserData(METHOD_DURATION_PREDICTION) != null
+                propagateChange = mark.removeUserData(FUNCTION_DURATION_PREDICTION) != null
             }
         } else {
             log.debug("Artifact ${mark.artifactQualifiedName} and callee(s) are unmodified")
-            propagateChange = mark.removeUserData(METHOD_DURATION_PREDICTION) != null
+            propagateChange = mark.removeUserData(FUNCTION_DURATION_PREDICTION) != null
         }
 
-        //propagate any changes to methods that call this method.
         if (propagateChange) {
-            val callerMethods = ArtifactScopeService.getCallerFunctions(mark.getPsiMethod())
-            callerMethods.forEach { callerMethod ->
-                callerMethod.nameIdentifier?.getUserData(SourceKey.GuideMark)?.let { callerMark ->
-                    queueForInsights(callerMark as MethodGuideMark)
-                }
+            propagateChange(mark.getPsiMethod())
+        }
+    }
+
+    /**
+     * Propagates changes to functions that call the given function.
+     */
+    private fun propagateChange(function: PsiNameIdentifierOwner) {
+        val callerMethods = ArtifactScopeService.getCallerFunctions(function)
+        callerMethods.forEach { callerMethod ->
+            callerMethod.nameIdentifier?.getUserData(SourceKey.GuideMark)?.let { callerMark ->
+                queueForInsights(callerMark as MethodGuideMark)
             }
         }
     }

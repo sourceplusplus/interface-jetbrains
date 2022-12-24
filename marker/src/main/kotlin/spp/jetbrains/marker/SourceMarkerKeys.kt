@@ -69,10 +69,10 @@ object SourceMarkerKeys {
     val RUNTIME_PATHS = SourceKey<Set<IRuntimePath>>("RUNTIME_PATHS")
 
     @JvmStatic
-    val METHOD_DURATION = SourceKey<InsightValue<Long>>(InsightType.METHOD_DURATION.name)
+    val FUNCTION_DURATION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION.name)
 
     @JvmStatic
-    val METHOD_DURATION_PREDICTION = SourceKey<InsightValue<Long>>(InsightType.METHOD_DURATION_PREDICTION.name)
+    val FUNCTION_DURATION_PREDICTION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION_PREDICTION.name)
 
     @JvmStatic
     val CONTROL_STRUCTURE_PROBABILITY = SourceKey<InsightValue<Double>>(InsightType.CONTROL_STRUCTURE_PROBABILITY.name)
@@ -88,8 +88,8 @@ object SourceMarkerKeys {
 
     @JvmStatic
     val ALL_INSIGHTS = listOf(
-        METHOD_DURATION,
-        METHOD_DURATION_PREDICTION,
+        FUNCTION_DURATION,
+        FUNCTION_DURATION_PREDICTION,
         CONTROL_STRUCTURE_PROBABILITY,
         PATH_EXECUTION_PROBABILITY,
         PATH_DURATION,

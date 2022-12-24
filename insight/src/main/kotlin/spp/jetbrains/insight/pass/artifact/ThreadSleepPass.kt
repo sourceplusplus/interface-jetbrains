@@ -21,11 +21,11 @@ import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.ArtifactLiteralValue
 import spp.jetbrains.marker.model.CallArtifact
-import spp.protocol.insight.InsightType.METHOD_DURATION
+import spp.protocol.insight.InsightType.FUNCTION_DURATION
 import spp.protocol.insight.InsightValue
 
 /**
- * Calculates [METHOD_DURATION] for Thread.sleep() [CallArtifact]s that can be statically determined.
+ * Calculates [FUNCTION_DURATION] for Thread.sleep() [CallArtifact]s that can be statically determined.
  */
 class ThreadSleepPass : ArtifactPass {
 
@@ -38,8 +38,8 @@ class ThreadSleepPass : ArtifactPass {
             if (args.size == 1 && args.first() is ArtifactLiteralValue) {
                 val duration = ((args.first() as ArtifactLiteralValue).value as? Number)?.toLong() ?: return
                 element.putUserData(
-                    SourceMarkerKeys.METHOD_DURATION.asPsiKey(),
-                    InsightValue.of(METHOD_DURATION, duration).asDerived()
+                    SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                    InsightValue.of(FUNCTION_DURATION, duration).asDerived()
                 )
             }
         }

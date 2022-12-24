@@ -60,20 +60,14 @@ class MultiInsightTest : BasePlatformTestCase() {
                 InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, 0.5)
             )
             it.putUserData(
-                SourceMarkerKeys.METHOD_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.METHOD_DURATION, 100L)
+                SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                InsightValue.of(InsightType.FUNCTION_DURATION, 100L)
             )
         }
         psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
             it.putUserData(
-                SourceMarkerKeys.METHOD_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.METHOD_DURATION, 200L)
-            )
-        }
-        psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                SourceMarkerKeys.METHOD_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.METHOD_DURATION, 200L)
+                SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
             )
         }
 
@@ -96,7 +90,7 @@ class MultiInsightTest : BasePlatformTestCase() {
         assertEquals(2, falseFalseCallInsights.size)
         assertEquals(200L, falseFalseCallInsights[0].value)
         assertEquals(0.5, falseFalseCallInsights[1].value)
-//        assertEquals(InsightType.METHOD_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
+//        assertEquals(InsightType.FUNCTION_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
 
         //[false, true]
         val falseTruePath = paths.toList()[1]
@@ -114,7 +108,7 @@ class MultiInsightTest : BasePlatformTestCase() {
         assertEquals(2, falseTrueCallInsights.size)
         assertEquals(200L, falseTrueCallInsights[0].value)
         assertEquals(0.5, falseTrueCallInsights[1].value)
-//        assertEquals(InsightType.METHOD_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
+//        assertEquals(InsightType.FUNCTION_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
 
         //[true, false]
         val trueFalsePath = paths.toList()[2]
@@ -148,6 +142,6 @@ class MultiInsightTest : BasePlatformTestCase() {
         assertEquals(2, trueTrueCallInsights.size)
         assertEquals(200L, trueTrueCallInsights[0].value)
         assertEquals(0.25, trueTrueCallInsights[1].value)
-//        assertEquals(InsightType.METHOD_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
+//        assertEquals(InsightType.FUNCTION_DURATION, path1CallInsights.find { it.type }) //todo: save type to insightvalue?
     }
 }

@@ -42,8 +42,8 @@ class InsightPassProvider {
 
             //path passes
             PruneArtifactsPass(),
-            PathDurationPass(),
             PathProbabilityPass(),
+            PathDurationPass(),
             RecursivePathPass(),
 
             //path set passes

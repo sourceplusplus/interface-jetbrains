@@ -28,7 +28,7 @@ import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 
 @TestDataPath("\$CONTENT_ROOT/testData/")
-class MethodDurationTest : BasePlatformTestCase() {
+class FunctionDurationTest : BasePlatformTestCase() {
 
     override fun setUp() {
         super.setUp()
@@ -55,8 +55,8 @@ class MethodDurationTest : BasePlatformTestCase() {
 
         //setup
         psi.getFunctions().first { it.name == "duration500ms" }.putUserData(
-            SourceMarkerKeys.METHOD_DURATION.asPsiKey(),
-            InsightValue.of(InsightType.METHOD_DURATION, 500L)
+            SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+            InsightValue.of(InsightType.FUNCTION_DURATION, 500L)
         )
 
         //calculate
