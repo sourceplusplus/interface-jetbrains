@@ -162,6 +162,17 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
         log.info("Updating method duration prediction insights for: ${mark.artifactQualifiedName}")
 
         val runtimePaths = RuntimePathAnalyzer().analyze(mark.getPsiMethod().toArtifact()!!)
+
+        //ignore functions with recursive paths
+        val hasRecursions = runtimePaths.any { it.getInsights().any { it.type == InsightType.PATH_IS_RECURSIVE } }
+        if (hasRecursions) {
+            log.info("Ignoring function with recursive path(s): ${mark.artifactQualifiedName}")
+            if (mark.removeUserData(FUNCTION_DURATION_PREDICTION) != null) {
+                propagateChange(mark.getPsiMethod())
+            }
+            return
+        }
+
         val isChildrenChanged = runtimePaths.flatMap {
             it.getResolvedCallFunctions()
         }.mapNotNull { it.getUserData(VCS_MODIFIED.asPsiKey()) }.any()
