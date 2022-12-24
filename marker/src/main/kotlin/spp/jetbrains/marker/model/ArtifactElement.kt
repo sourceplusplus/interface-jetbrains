@@ -16,9 +16,7 @@
  */
 package spp.jetbrains.marker.model
 
-import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.util.descendants
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactTypeService
@@ -28,6 +26,9 @@ import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.protocol.insight.InsightValue
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Represents a language-agnostic artifact for semantic analysis.
+ */
 abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
 
     val data = ConcurrentHashMap<SourceKey<*>, Any>()
@@ -72,19 +73,6 @@ abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement 
 
     fun getPathExecutionProbability(): InsightValue<Double> {
         return getUserData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY.asPsiKey())!!
-    }
-
-    override fun <T : Any?> getUserData(key: Key<T>): T? {
-        //todo: rethink this
-        var guideMark = psiElement.getUserData(SourceKey.GuideMark)
-        if (guideMark == null && psiElement is PsiNameIdentifierOwner) {
-            guideMark = psiElement.nameIdentifier?.getUserData(SourceKey.GuideMark)
-        }
-        if (guideMark != null) {
-            return guideMark.getUserData(SourceKey<T>(key.toString()))
-        }
-
-        return psiElement.getUserData(key)
     }
 
     override fun equals(other: Any?): Boolean {
