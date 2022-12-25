@@ -60,8 +60,8 @@ interface IArtifactNamingService : ISourceMarkerService {
             GlobalSearchScope.projectScope(project)
         )
         return virtualFiles
-            .first { it.path.endsWith(location) }
-            .let { PsiManager.getInstance(project).findFile(it) }
+            .firstOrNull { it.path.endsWith(location) }
+            ?.let { PsiManager.getInstance(project).findFile(it) }
     }
 
     fun findPsiFile(language: ArtifactLanguage, project: Project, frame: LiveStackTraceElement): PsiFile?
