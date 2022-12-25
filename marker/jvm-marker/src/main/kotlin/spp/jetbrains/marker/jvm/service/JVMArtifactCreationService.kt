@@ -46,6 +46,7 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions") // public API
 class JVMArtifactCreationService : IArtifactCreationService {
 
     companion object {

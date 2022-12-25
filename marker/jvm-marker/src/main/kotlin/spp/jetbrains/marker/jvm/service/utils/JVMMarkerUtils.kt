@@ -64,7 +64,8 @@ object JVMMarkerUtils {
             )?.let { getFullyQualifiedName(it) }
         }
         if (parentIdentifier == null) {
-            error("Could not determine parent of element: $element") //todo: extension function, see SourceMarkerConfig, make test, groovy import statements
+            //todo: extension function, see SourceMarkerConfig, make test, groovy import statements
+            error("Could not determine parent of element: $element")
         }
 
         element.textRange.startOffset.let {
@@ -130,13 +131,7 @@ object JVMMarkerUtils {
         )
     }
 
-    fun isJvmMethod(element: PsiElement): Boolean {
-        return element is PsiMethod || element is KtFunction
-    }
-
     fun getMethodAnnotations(element: PsiElement): List<PsiElement> {
-        require(isJvmMethod(element)) { "Element is not a JVM method: $element" }
-
         return when (element) {
             is PsiMethod -> element.annotations.toList()
             is KtFunction -> element.annotationEntries

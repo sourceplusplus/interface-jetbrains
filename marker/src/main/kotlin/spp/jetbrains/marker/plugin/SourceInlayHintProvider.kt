@@ -24,6 +24,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.INLINE_PARAMETER_HINT
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.markup.EffectType
@@ -36,6 +37,7 @@ import com.intellij.ui.paint.EffectPainter
 import org.joor.Reflect
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.service.ArtifactMarkService
+import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.MARK_REMOVED
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
@@ -100,23 +102,27 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {
-                                if (it.renderer is BlockInlayRenderer) {
-                                    val cachedPresentation = Reflect.on(it.renderer).field("cachedPresentation").get<Any>()
-                                    if (cachedPresentation is RecursivelyUpdatingRootPresentation) {
-                                        if (cachedPresentation.content is StaticDelegatePresentation) {
-                                            val delegatePresentation = cachedPresentation.content as StaticDelegatePresentation
-                                            if (delegatePresentation.presentation is DynamicTextInlayPresentation) {
-                                                val dynamicPresentation = delegatePresentation.presentation as DynamicTextInlayPresentation
-                                                if (dynamicPresentation.inlayMark == event.sourceMark) {
-                                                    Disposer.dispose(it)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                disposeInlayIfNecessary(it, event.sourceMark)
                             }
 
                         InlayHintsPassFactory.forceHintsUpdateOnNextPass()
+                    }
+                }
+            }
+        }
+
+        private fun disposeInlayIfNecessary(it: Inlay<*>, sourceMark: SourceMark) {
+            if (it.renderer is BlockInlayRenderer) {
+                val cachedPresentation = Reflect.on(it.renderer).field("cachedPresentation").get<Any>()
+                if (cachedPresentation is RecursivelyUpdatingRootPresentation) {
+                    if (cachedPresentation.content is StaticDelegatePresentation) {
+                        val delegatePresentation = cachedPresentation.content as StaticDelegatePresentation
+                        if (delegatePresentation.presentation is DynamicTextInlayPresentation) {
+                            val dynamicPresentation = delegatePresentation.presentation as DynamicTextInlayPresentation
+                            if (dynamicPresentation.inlayMark == sourceMark) {
+                                Disposer.dispose(it)
+                            }
+                        }
                     }
                 }
             }

@@ -25,6 +25,7 @@ import com.intellij.ui.treeStructure.SimpleNode
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.presentation.JVMVariableNode
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
+import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
@@ -64,13 +65,13 @@ class JVMArtifactMarkService : IArtifactMarkService {
                 )
             }
         } else {
-            if (JVMMarkerUtils.isJvmMethod(statement.parent)) {
+            if (ArtifactTypeService.isFunction(statement.parent)) {
                 virtualText.spacingTillMethodText = SourceMarkerUtils.getPrefixSpacingCount(statement.parent)
             }
 
             var startOffset = statement.textRange.startOffset
             if (virtualText.showBeforeAnnotationsWhenBlock) {
-                if (JVMMarkerUtils.isJvmMethod(statement.parent)) {
+                if (ArtifactTypeService.isFunction(statement.parent)) {
                     val annotations = JVMMarkerUtils.getMethodAnnotations(statement.parent)
                     if (annotations.isNotEmpty()) {
                         startOffset = annotations[0].textRange.startOffset
