@@ -58,7 +58,7 @@ class FileActivityListener : FileEditorManagerListener {
         } else {
             log.debug("File closed: $file")
             val psiFile = PsiManager.getInstance(source.project).findFile(file)
-            val fileMarker = psiFile?.getUserData(SourceFileMarker.KEY)
+            val fileMarker = SourceFileMarker.getIfExists(psiFile)
             if (fileMarker != null) {
                 safeRunBlocking {
                     SourceMarker.getInstance(source.project).deactivateSourceFileMarker(fileMarker)
@@ -100,7 +100,7 @@ class FileActivityListener : FileEditorManagerListener {
 
                     var syncViewProvider = false
                     var gutterMark: GutterMark? = null
-                    val fileMarker = psiFile.getUserData(SourceFileMarker.KEY)
+                    val fileMarker = SourceFileMarker.getOrCreate(psiFile)
                     if (fileMarker != null) {
                         gutterMark = fileMarker.getSourceMarks().find {
                             if (it is GutterMark) {

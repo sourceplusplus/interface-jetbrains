@@ -50,7 +50,7 @@ open class SourceMarkPopupAction : AnAction() {
         if (project != null && editor != null && psiFile != null) {
             var classSourceMark: ClassSourceMark? = null
             var sourceMark: SourceMark? = null
-            val fileMarker = psiFile.getUserData(SourceFileMarker.KEY)
+            val fileMarker = SourceFileMarker.getOrCreate(psiFile)
             if (fileMarker != null) {
                 sourceMark = fileMarker.getSourceMarks().find {
                     if (it is ClassSourceMark) {

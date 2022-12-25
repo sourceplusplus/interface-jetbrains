@@ -127,13 +127,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
      */
     @Suppress("unused")
     override fun showBreakpointStatusBar(editor: Editor, lineNumber: Int) {
-        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
-            .getUserData(SourceFileMarker.KEY)
-        if (fileMarker == null) {
-            log.warn("Could not find file marker for file: ${editor.document}")
-            return
-        }
-
+        val fileMarker = SourceFileMarker.getOrCreate(editor) ?: return
         val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
@@ -174,13 +168,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
      */
     @Suppress("unused")
     override fun showLogStatusBar(editor: Editor, lineNumber: Int) {
-        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
-            .getUserData(SourceFileMarker.KEY)
-        if (fileMarker == null) {
-            log.warn("Could not find file marker for file: ${editor.document}")
-            return
-        }
-
+        val fileMarker = SourceFileMarker.getOrCreate(editor) ?: return
         val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
@@ -218,13 +206,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
     @Suppress("unused")
     override fun showMeterStatusBar(editor: Editor, lineNumber: Int) {
-        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
-            .getUserData(SourceFileMarker.KEY)
-        if (fileMarker == null) {
-            log.warn("Could not find file marker for file: ${editor.document}")
-            return
-        }
-
+        val fileMarker = SourceFileMarker.getOrCreate(editor) ?: return
         val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()
@@ -261,13 +243,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
     @Suppress("unused")
     override fun showSpanStatusBar(editor: Editor, lineNumber: Int) {
-        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
-            .getUserData(SourceFileMarker.KEY)
-        if (fileMarker == null) {
-            log.warn("Could not find file marker for file: ${editor.document}")
-            return
-        }
-
+        val fileMarker = SourceFileMarker.getOrCreate(editor) ?: return
         val inlayMark = ArtifactCreationService.createExpressionInlayMark(fileMarker, lineNumber)
         if (!fileMarker.containsSourceMark(inlayMark)) {
             val wrapperPanel = JPanel()

@@ -18,7 +18,6 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
-import com.intellij.psi.PsiDocumentManager
 import liveplugin.implementation.common.toFilePath
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.command.LiveCommand
@@ -110,14 +109,8 @@ object CommandBarController {
         previousControlBar?.dispose(true, false)
         previousControlBar = null
 
-        //determine command bar location
-        val fileMarker = PsiDocumentManager.getInstance(editor.project!!).getPsiFile(editor.document)!!
-            .getUserData(SourceFileMarker.KEY)
-        if (fileMarker == null) {
-            log.warn("Could not find file marker for file: ${editor.document}")
-            return
-        }
-
+        //determine control bar location
+        val fileMarker = SourceFileMarker.getOrCreate(editor) ?: return
         val findInlayMark = ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, lineNumber)
         if (findInlayMark.isPresent && ArtifactScopeService.canShowControlBar(findInlayMark.get().getPsiElement())) {
             val inlayMark = findInlayMark.get()

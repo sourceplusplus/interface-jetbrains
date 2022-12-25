@@ -20,13 +20,16 @@ import com.google.common.collect.ImmutableList
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerUtils.doOnDispatchThread
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
@@ -66,6 +69,21 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         @JvmStatic
         fun isFileSupported(psiFile: PsiFile): Boolean {
             return SUPPORTED_FILE_TYPES.any { it.isInstance(psiFile) }
+        }
+
+        fun getOrCreate(editor: Editor): SourceFileMarker? {
+            val project = editor.project ?: return null
+            val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document) ?: return null
+            return getOrCreate(psiFile)
+        }
+
+        fun getOrCreate(psiFile: PsiFile): SourceFileMarker? {
+            return SourceMarker.getInstance(psiFile.project).getSourceFileMarker(psiFile)
+        }
+
+        fun getIfExists(psiFile: PsiFile?): SourceFileMarker? {
+            if (psiFile == null) return null
+            return SourceMarker.getInstance(psiFile.project).getSourceFileMarkerIfExists(psiFile)
         }
     }
 
