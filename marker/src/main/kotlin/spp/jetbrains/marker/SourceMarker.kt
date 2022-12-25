@@ -101,7 +101,7 @@ class SourceMarker(private val project: Project) {
             log.warn("File type not supported: ${psiFile.fileType.name}")
             return null
         } else if (psiFile.virtualFile == null || !psiFile.virtualFile.isInLocalFileSystem) {
-            log.warn("Skipping in-memory/non-local file: ${psiFile.virtualFile}")
+            log.warn("Skipping in-memory/non-local file: $psiFile")
             return null
         } else if (!SourceStatusService.getInstance(project).isConnected()) {
             log.warn("Not connected, skipping source file marker creation for: $psiFile")
