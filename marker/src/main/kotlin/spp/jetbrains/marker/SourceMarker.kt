@@ -32,6 +32,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.artifact.ArtifactQualifiedName
 
 /**
@@ -101,9 +102,14 @@ class SourceMarker(private val project: Project) {
         if (fileMarker != null) {
             return fileMarker
         } else if (!SourceFileMarker.isFileSupported(psiFile)) {
+            log.warn("File type not supported: ${psiFile.fileType.name}")
             return null
         } else if (psiFile.virtualFile == null || !psiFile.virtualFile.isInLocalFileSystem) {
-            return null //skip in-memory/non-local files
+            log.warn("Skipping in-memory/non-local file: ${psiFile.virtualFile}")
+            return null
+        } else if (!SourceStatusService.getInstance(project).isConnected()) {
+            log.warn("Not connected, skipping source file marker creation for: $psiFile")
+            return null
         }
 
         fileMarker = configuration.sourceFileMarkerProvider.createSourceFileMarker(psiFile)

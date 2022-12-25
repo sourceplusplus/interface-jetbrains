@@ -45,6 +45,14 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     private val reconnectionLock = Any()
     private var reconnectionJob: Job? = null
 
+    override fun isReady(): Boolean {
+        return getCurrentStatus().first == Ready
+    }
+
+    override fun isConnected(): Boolean {
+        return getCurrentStatus().first.let { it == Ready || it == Pending }
+    }
+
     override fun getCurrentStatus(): Pair<SourceStatus, String?> {
         synchronized(statusLock) {
             return Pair(status, message)

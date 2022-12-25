@@ -29,6 +29,9 @@ interface SourceStatusService {
         }
     }
 
+    fun isReady(): Boolean
+    fun isConnected(): Boolean
+
     fun getCurrentStatus(): Pair<SourceStatus, String?>
     fun update(status: SourceStatus, message: String? = null)
 }
