@@ -24,6 +24,7 @@ import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI
 import spp.jetbrains.PluginUI.SMALLEST_FONT
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.marker.SourceMarkerUtils.substringAfterIgnoreCase
 import spp.jetbrains.sourcemarker.command.ui.status.element.AutocompleteDropdown
 import spp.jetbrains.sourcemarker.service.instrument.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -496,13 +497,5 @@ class AutocompleteField<T : AutocompleteFieldRow>(
 
     fun interface SaveListener {
         fun onSave()
-    }
-
-    private fun substringAfterIgnoreCase(str: String, search: String): String {
-        val index = str.indexOf(search, ignoreCase = true)
-        if (index == -1) {
-            return str
-        }
-        return str.substring(index + search.length)
     }
 }

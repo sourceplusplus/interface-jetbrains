@@ -24,6 +24,7 @@ import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.command.LiveLocationContext
+import spp.jetbrains.marker.SourceMarkerUtils.substringAfterIgnoreCase
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.service.ArtifactScopeService
@@ -169,13 +170,5 @@ object CommandBarController {
             }
         }
         return null
-    }
-
-    private fun substringAfterIgnoreCase(str: String, search: String): String {
-        val index = str.indexOf(search, ignoreCase = true)
-        if (index == -1) {
-            return str
-        }
-        return str.substring(index + search.length)
     }
 }

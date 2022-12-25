@@ -125,4 +125,12 @@ object SourceMarkerUtils {
             SwingUtilities.invokeLater { action.invoke() }
         }
     }
+
+    fun substringAfterIgnoreCase(str: String, search: String): String {
+        val index = str.indexOf(search, ignoreCase = true)
+        if (index == -1) {
+            return str
+        }
+        return str.substring(index + search.length)
+    }
 }
