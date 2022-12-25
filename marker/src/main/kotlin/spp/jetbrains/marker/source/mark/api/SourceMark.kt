@@ -44,6 +44,7 @@ import com.intellij.util.ui.JBUI
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerUtils.doOnDispatchThread
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -254,7 +255,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         removeMarkFromUserData()
 
         if (this is InlayMark) {
-            configuration.inlayRef?.get()?.let { Disposer.dispose(it) }
+            configuration.inlayRef?.get()?.let { doOnDispatchThread { Disposer.dispose(it) } }
             configuration.inlayRef = null
         }
         closePopup()

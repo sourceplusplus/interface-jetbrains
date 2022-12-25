@@ -27,6 +27,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.marker.SourceMarkerUtils.doOnDispatchThread
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -47,7 +48,6 @@ import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import javax.swing.SwingUtilities
 
 /**
  * Holds a collection of [SourceMark]s for a given [PsiFile].
@@ -97,11 +97,7 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         if (!psiFile.project.isDisposed && !ApplicationManager.getApplication().isUnitTestMode) {
             try {
                 val analyzer = DaemonCodeAnalyzer.getInstance(project)
-                if (ApplicationManager.getApplication().isDispatchThread) {
-                    analyzer.restart()
-                } else {
-                    SwingUtilities.invokeLater { analyzer.restart() }
-                }
+                doOnDispatchThread { analyzer.restart(psiFile) }
             } catch (ignored: ProcessCanceledException) {
             }
         }

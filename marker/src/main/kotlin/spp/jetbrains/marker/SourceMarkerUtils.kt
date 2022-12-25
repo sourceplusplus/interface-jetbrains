@@ -17,6 +17,7 @@
 package spp.jetbrains.marker
 
 import com.intellij.lang.Language
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
@@ -25,6 +26,7 @@ import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.util.parentOfType
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import javax.swing.SwingUtilities
 
 /**
  * Utility functions for working with [SourceMark]s.
@@ -114,5 +116,13 @@ object SourceMarkerUtils {
     @JvmStatic
     fun isJavaScript(language: Language): Boolean {
         return getJavaScriptLanguages().contains(language.id)
+    }
+
+    fun doOnDispatchThread(action: () -> Unit) {
+        if (ApplicationManager.getApplication().isDispatchThread) {
+            action.invoke()
+        } else {
+            SwingUtilities.invokeLater { action.invoke() }
+        }
     }
 }
