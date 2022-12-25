@@ -19,6 +19,7 @@ package spp.jetbrains.marker
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -103,9 +104,11 @@ class SourceMarker(private val project: Project) {
         } else if (psiFile.virtualFile == null || !psiFile.virtualFile.isInLocalFileSystem) {
             log.warn("Skipping in-memory/non-local file: $psiFile")
             return null
-        } else if (!SourceStatusService.getInstance(project).isConnected()) {
-            log.warn("Not connected, skipping source file marker creation for: $psiFile")
-            return null
+        } else if (!ApplicationManager.getApplication().isUnitTestMode) {
+            if (!SourceStatusService.getInstance(project).isConnected()) {
+                log.warn("Not connected, skipping source file marker creation for: $psiFile")
+                return null
+            }
         }
 
         fileMarker = configuration.sourceFileMarkerProvider.createSourceFileMarker(psiFile)
