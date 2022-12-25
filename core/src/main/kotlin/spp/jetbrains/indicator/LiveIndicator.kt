@@ -51,7 +51,7 @@ abstract class LiveIndicator(val project: Project) {
         vertx.setPeriodic(5000) { timerId ->
             periodicTimerId = timerId
             vertx.safeLaunch {
-                if (SourceStatusService.getInstance(project).getCurrentStatus().first != Ready) {
+                if (!SourceStatusService.getInstance(project).isReady()) {
                     log.debug("Not ready, ignoring indicator refresh")
                     return@safeLaunch
                 }
