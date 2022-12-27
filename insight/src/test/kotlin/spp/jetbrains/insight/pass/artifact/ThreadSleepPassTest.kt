@@ -20,6 +20,7 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
 import spp.jetbrains.insight.ProceduralAnalyzer
+import spp.jetbrains.insight.getDuration
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider

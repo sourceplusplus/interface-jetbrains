@@ -17,8 +17,9 @@
 package spp.jetbrains.insight.pass.artifact
 
 import org.jetbrains.kotlin.utils.addToStdlib.ifNotEmpty
+import spp.jetbrains.insight.InsightKeys
+import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ArtifactPass
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.protocol.insight.InsightType.FUNCTION_DURATION
@@ -35,7 +36,7 @@ class CallDurationPass : ArtifactPass {
 
         val resolvedFunction = element.getResolvedFunction()
         if (resolvedFunction != null) {
-            val proceduralPaths = element.getData(SourceMarkerKeys.RUNTIME_PATHS)
+            val proceduralPaths = element.getData(InsightKeys.RUNTIME_PATHS)
             if (proceduralPaths != null) {
                 //artifact has already been analyzed, use pre-determined duration (if available)
                 val duration = proceduralPaths.mapNotNull {
@@ -43,7 +44,7 @@ class CallDurationPass : ArtifactPass {
                 }.ifNotEmpty { sum() }
                 if (duration != null) {
                     element.putUserData(
-                        SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                        InsightKeys.FUNCTION_DURATION.asPsiKey(),
                         InsightValue.of(FUNCTION_DURATION, duration).asDerived()
                     )
                 }
@@ -52,7 +53,7 @@ class CallDurationPass : ArtifactPass {
             val duration = resolvedFunction.getDuration()
             if (duration != null) {
                 element.putUserData(
-                    SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                    InsightKeys.FUNCTION_DURATION.asPsiKey(),
                     InsightValue.of(FUNCTION_DURATION, duration).asDerived()
                 )
             }

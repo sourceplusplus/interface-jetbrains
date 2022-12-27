@@ -16,14 +16,11 @@
  */
 package spp.jetbrains.marker
 
-import spp.jetbrains.marker.model.analysis.IProceduralPath
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.state.LiveStateBar
-import spp.protocol.insight.InsightType
-import spp.protocol.insight.InsightValue
 import spp.protocol.instrument.LiveInstrumentType
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
@@ -64,35 +61,4 @@ object SourceMarkerKeys {
 
     @JvmStatic
     val VCS_MODIFIED = SourceKey<Boolean>("VCS_MODIFIED")
-
-    @JvmStatic
-    val RUNTIME_PATHS = SourceKey<Set<IProceduralPath>>("RUNTIME_PATHS")
-
-    @JvmStatic
-    val FUNCTION_DURATION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION.name)
-
-    @JvmStatic
-    val FUNCTION_DURATION_PREDICTION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION_PREDICTION.name)
-
-    @JvmStatic
-    val CONTROL_STRUCTURE_PROBABILITY = SourceKey<InsightValue<Double>>(InsightType.CONTROL_STRUCTURE_PROBABILITY.name)
-
-    @JvmStatic
-    val PATH_EXECUTION_PROBABILITY = SourceKey<InsightValue<Double>>(InsightType.PATH_EXECUTION_PROBABILITY.name)
-
-    @JvmStatic
-    val PATH_DURATION = SourceKey<InsightValue<Double>>(InsightType.PATH_DURATION.name)
-
-    @JvmStatic
-    val RECURSIVE_CALL = SourceKey<InsightValue<Boolean>>(InsightType.RECURSIVE_CALL.name)
-
-    @JvmStatic
-    val ALL_INSIGHTS = listOf(
-        FUNCTION_DURATION,
-        FUNCTION_DURATION_PREDICTION,
-        CONTROL_STRUCTURE_PROBABILITY,
-        PATH_EXECUTION_PROBABILITY,
-        PATH_DURATION,
-        RECURSIVE_CALL
-    )
 }

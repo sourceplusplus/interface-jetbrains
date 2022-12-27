@@ -19,7 +19,6 @@ package spp.jetbrains.insight
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -55,7 +54,7 @@ class BranchProbabilityTest : BasePlatformTestCase() {
 
         psi.getChildIfs().forEach {
             it.putUserData(
-                SourceMarkerKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
+                InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
                 InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, 0.5)
             )
         }
@@ -67,9 +66,9 @@ class BranchProbabilityTest : BasePlatformTestCase() {
         val path = paths.first()
         assertEquals(4, path.descendants.size)
         assertEquals(1.0, path.descendants[0].getPathExecutionProbability().value)
-        assertEquals(0.5, path.descendants[0].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.5, path.descendants[0].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
         assertEquals(0.5, path.descendants[1].getPathExecutionProbability().value)
-        assertEquals(0.25, path.descendants[1].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
-        assertEquals(0.25, path.descendants[2].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.25, path.descendants[1].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.25, path.descendants[2].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 }

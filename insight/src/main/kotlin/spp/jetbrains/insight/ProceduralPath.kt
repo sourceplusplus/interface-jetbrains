@@ -20,26 +20,25 @@ import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.model.analysis.IProceduralPath
 import spp.protocol.insight.InsightValue
 
 data class ProceduralPath(
     val evaluations: List<Boolean>,
-    override val rootArtifact: ArtifactElement,
-    override val artifacts: MutableList<ArtifactElement>,
+    val rootArtifact: ArtifactElement,
+    val artifacts: MutableList<ArtifactElement>,
     internal val insights: MutableList<InsightValue<*>> = mutableListOf()
-) : IProceduralPath {
+) : Iterable<ArtifactElement> {
 
     override fun iterator(): Iterator<ArtifactElement> = descendants.iterator()
-    override fun getInsights(): List<InsightValue<*>> = insights
+    fun getInsights(): List<InsightValue<*>> = insights
 
-    override fun getResolvedCallFunctions(): List<FunctionArtifact> {
+    fun getResolvedCallFunctions(): List<FunctionArtifact> {
         return artifacts
             .filterIsInstance<CallArtifact>()
             .mapNotNull { it.getResolvedFunction() }
     }
 
-    override val conditions: List<Pair<Boolean, IfArtifact>>
+    val conditions: List<Pair<Boolean, IfArtifact>>
         get() {
             val conditionals = descendants.filterIsInstance<IfArtifact>()
             val conditions = mutableListOf<Pair<Boolean, IfArtifact>>()
@@ -48,4 +47,31 @@ data class ProceduralPath(
             }
             return conditions
         }
+
+    val descendants: MutableList<ArtifactElement>
+        get() {
+            val descendants = mutableListOf<ArtifactElement>()
+            for (artifact in artifacts) {
+                descendants.add(artifact)
+                descendants.addAll(getDescendants(artifact))
+            }
+            return descendants
+        }
+
+    private fun getDescendants(element: ArtifactElement): List<ArtifactElement> {
+        val descendants = mutableListOf<ArtifactElement>()
+        if (element is IfArtifact) {
+            val children = element.childArtifacts
+            for (child in children) {
+                descendants.add(child)
+                descendants.addAll(getDescendants(child))
+            }
+        } else {
+            for (child in element.descendantArtifacts) {
+                descendants.add(child)
+                descendants.addAll(getDescendants(child))
+            }
+        }
+        return descendants
+    }
 }

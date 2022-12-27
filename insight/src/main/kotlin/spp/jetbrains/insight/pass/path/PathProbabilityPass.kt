@@ -16,9 +16,9 @@
  */
 package spp.jetbrains.insight.pass.path
 
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.IfArtifact
 import spp.protocol.insight.InsightType.CONTROL_STRUCTURE_PROBABILITY
@@ -43,7 +43,7 @@ class PathProbabilityPass : ProceduralPathPass {
                 analyze(it, conditionOrder.next(), 1.0)
             } else {
                 it.data.put(
-                    SourceMarkerKeys.PATH_EXECUTION_PROBABILITY,
+                    InsightKeys.PATH_EXECUTION_PROBABILITY,
                     InsightValue.of(PATH_EXECUTION_PROBABILITY, 1.0)
                 )
             }
@@ -57,7 +57,7 @@ class PathProbabilityPass : ProceduralPathPass {
                 analyze(it, conditionOrder.next(), probability)
             } else {
                 it.data.put(
-                    SourceMarkerKeys.PATH_EXECUTION_PROBABILITY,
+                    InsightKeys.PATH_EXECUTION_PROBABILITY,
                     InsightValue.of(PATH_EXECUTION_PROBABILITY, probability)
                 )
             }
@@ -66,8 +66,8 @@ class PathProbabilityPass : ProceduralPathPass {
 
     private fun calculateProbability(element: ArtifactElement, baseProbability: Double, condition: Boolean): Double {
         var selfProbability = 1.0
-        if (element.getUserData(SourceMarkerKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey()) != null) {
-            selfProbability = element.getUserData(SourceMarkerKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey())!!.value
+        if (element.getUserData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey()) != null) {
+            selfProbability = element.getUserData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey())!!.value
         }
 
         //see if probability can be determined statically
@@ -84,13 +84,13 @@ class PathProbabilityPass : ProceduralPathPass {
         }
 
         element.putUserData(
-            SourceMarkerKeys.PATH_EXECUTION_PROBABILITY.asPsiKey(),
+            InsightKeys.PATH_EXECUTION_PROBABILITY.asPsiKey(),
             InsightValue.of(PATH_EXECUTION_PROBABILITY, baseProbability)
         )
 
         val childProbability = baseProbability * selfProbability
         element.data.put(
-            SourceMarkerKeys.PATH_EXECUTION_PROBABILITY,
+            InsightKeys.PATH_EXECUTION_PROBABILITY,
             InsightValue.of(PATH_EXECUTION_PROBABILITY, childProbability)
         )
 

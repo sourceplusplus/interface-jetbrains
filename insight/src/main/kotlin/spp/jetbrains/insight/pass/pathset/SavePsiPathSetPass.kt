@@ -16,9 +16,9 @@
  */
 package spp.jetbrains.insight.pass.pathset
 
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathSetPass
-import spp.jetbrains.marker.SourceMarkerKeys
 
 /**
  * Saves the [ProceduralPath] set to the root artifact PSI element for later use.
@@ -26,7 +26,7 @@ import spp.jetbrains.marker.SourceMarkerKeys
 class SavePsiPathSetPass : ProceduralPathSetPass {
 
     override fun postProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
-        pathSet.forEach { it.rootArtifact.putUserData(SourceMarkerKeys.RUNTIME_PATHS.asPsiKey(), pathSet) }
+        pathSet.forEach { it.rootArtifact.putUserData(InsightKeys.RUNTIME_PATHS.asPsiKey(), pathSet) }
         return super.postProcess(pathSet)
     }
 }

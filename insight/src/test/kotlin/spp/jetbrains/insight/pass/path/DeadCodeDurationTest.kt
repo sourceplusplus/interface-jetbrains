@@ -20,7 +20,7 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
 import spp.jetbrains.insight.ProceduralAnalyzer
-import spp.jetbrains.marker.SourceMarkerKeys
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -57,7 +57,7 @@ class DeadCodeDurationTest : BasePlatformTestCase() {
         //setup
         psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
             it.putUserData(
-                SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                InsightKeys.FUNCTION_DURATION.asPsiKey(),
                 InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
             )
         }
@@ -88,7 +88,7 @@ class DeadCodeDurationTest : BasePlatformTestCase() {
         //setup
         psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
             it.putUserData(
-                SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                InsightKeys.FUNCTION_DURATION.asPsiKey(),
                 InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
             )
         }

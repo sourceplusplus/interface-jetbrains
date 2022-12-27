@@ -19,7 +19,6 @@ package spp.jetbrains.insight
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -56,17 +55,17 @@ class MultiInsightTest : BasePlatformTestCase() {
         //setup
         psi.getChildIfs().forEach {
             it.putUserData(
-                SourceMarkerKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
+                InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
                 InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, 0.5)
             )
             it.putUserData(
-                SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                InsightKeys.FUNCTION_DURATION.asPsiKey(),
                 InsightValue.of(InsightType.FUNCTION_DURATION, 100L)
             )
         }
         psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
             it.putUserData(
-                SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                InsightKeys.FUNCTION_DURATION.asPsiKey(),
                 InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
             )
         }

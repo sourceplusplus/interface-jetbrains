@@ -17,10 +17,9 @@
 package spp.jetbrains.insight.pass
 
 import spp.jetbrains.insight.ProceduralPath
-import spp.jetbrains.marker.model.analysis.IProceduralPath
 
 /**
- * A pass that analyzes a set of [IProceduralPath]s and adds data to them.
+ * A pass that analyzes a set of [ProceduralPath]s and adds data to them.
  */
 interface ProceduralPathSetPass : IPass {
     fun preProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> = pathSet

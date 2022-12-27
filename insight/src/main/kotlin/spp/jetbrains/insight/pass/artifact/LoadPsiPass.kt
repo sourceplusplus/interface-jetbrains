@@ -16,9 +16,9 @@
  */
 package spp.jetbrains.insight.pass.artifact
 
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ArtifactPass
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 
@@ -32,9 +32,9 @@ class LoadPsiPass : ArtifactPass {
 
         val resolvedFunction = element.getResolvedFunction()
         if (resolvedFunction != null) {
-            val paths = resolvedFunction.getUserData(SourceMarkerKeys.RUNTIME_PATHS.asPsiKey())
+            val paths = resolvedFunction.getUserData(InsightKeys.RUNTIME_PATHS.asPsiKey())
             if (paths != null) {
-                element.data[SourceMarkerKeys.RUNTIME_PATHS] = paths
+                element.data[InsightKeys.RUNTIME_PATHS] = paths
             }
         }
     }

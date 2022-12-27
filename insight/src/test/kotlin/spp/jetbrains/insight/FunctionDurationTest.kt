@@ -19,7 +19,6 @@ package spp.jetbrains.insight
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -55,7 +54,7 @@ class FunctionDurationTest : BasePlatformTestCase() {
 
         //setup
         psi.getFunctions().first { it.name == "duration500ms" }.putUserData(
-            SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+            InsightKeys.FUNCTION_DURATION.asPsiKey(),
             InsightValue.of(InsightType.FUNCTION_DURATION, 500L)
         )
 

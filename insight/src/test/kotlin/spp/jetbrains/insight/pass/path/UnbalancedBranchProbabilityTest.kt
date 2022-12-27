@@ -19,8 +19,9 @@ package spp.jetbrains.insight.pass.path
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralAnalyzer
-import spp.jetbrains.marker.SourceMarkerKeys
+import spp.jetbrains.insight.getInsights
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.model.CallArtifact
@@ -57,7 +58,7 @@ class UnbalancedBranchProbabilityTest : BasePlatformTestCase() {
 
         psi.getChildIfs().forEach {
             it.putUserData(
-                SourceMarkerKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
+                InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
                 InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, 0.75)
             )
         }

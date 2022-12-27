@@ -20,7 +20,6 @@ import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.BlockArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.model.analysis.IProceduralPath
 import spp.jetbrains.marker.service.getParentFunction
 import spp.jetbrains.marker.service.toArtifact
 import java.util.*
@@ -57,7 +56,7 @@ class ProceduralAnalyzer {
     }
 
     /**
-     * Performs an intraprocedural analysis of the given [ArtifactElement] and returns the [IProceduralPath]s that
+     * Performs an intraprocedural analysis of the given [ArtifactElement] and returns the [ProceduralPath]s that
      * contain the given [ArtifactElement].
      *
      * @param element the [ArtifactElement] to analyze

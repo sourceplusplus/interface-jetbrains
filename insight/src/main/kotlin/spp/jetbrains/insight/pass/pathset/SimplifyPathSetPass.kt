@@ -16,9 +16,9 @@
  */
 package spp.jetbrains.insight.pass.pathset
 
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathSetPass
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ControlStructureArtifact
 import spp.jetbrains.marker.model.IfArtifact
 import java.util.*
@@ -33,7 +33,7 @@ class SimplifyPathSetPass : ProceduralPathSetPass {
         for (path in pathSet) {
             path.artifacts.removeIf {
                 if (it is IfArtifact) {
-                    val probability = it.getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)
+                    val probability = it.getData(InsightKeys.PATH_EXECUTION_PROBABILITY)
                     probability?.value == 0.0 || it.childArtifacts.isEmpty()
                 } else {
                     false

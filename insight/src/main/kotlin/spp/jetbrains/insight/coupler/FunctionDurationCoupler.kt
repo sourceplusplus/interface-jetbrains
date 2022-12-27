@@ -22,10 +22,10 @@ import com.intellij.util.ui.update.MergingUpdateQueue
 import com.intellij.util.ui.update.Update
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
+import spp.jetbrains.insight.InsightKeys.FUNCTION_DURATION
+import spp.jetbrains.insight.InsightKeys.FUNCTION_DURATION_PREDICTION
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.SourceMarkerKeys.FUNCTION_DURATION
-import spp.jetbrains.marker.SourceMarkerKeys.FUNCTION_DURATION_PREDICTION
 import spp.jetbrains.marker.SourceMarkerKeys.VCS_MODIFIED
 import spp.jetbrains.marker.service.ArtifactScopeService
 import spp.jetbrains.marker.service.toArtifact

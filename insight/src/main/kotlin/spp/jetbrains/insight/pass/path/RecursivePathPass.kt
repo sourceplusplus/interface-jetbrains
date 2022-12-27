@@ -16,9 +16,9 @@
  */
 package spp.jetbrains.insight.pass.path
 
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.protocol.insight.InsightType.PATH_IS_RECURSIVE
@@ -36,7 +36,7 @@ class RecursivePathPass : ProceduralPathPass {
             val recursiveCalls = calls.filter { it.getResolvedFunction() == path.rootArtifact }
             if (recursiveCalls.isNotEmpty()) {
                 path.insights.add(InsightValue.of(PATH_IS_RECURSIVE, true))
-                recursiveCalls.forEach { it.data[SourceMarkerKeys.RECURSIVE_CALL] = true }
+                recursiveCalls.forEach { it.data[InsightKeys.RECURSIVE_CALL] = true }
             }
         }
     }

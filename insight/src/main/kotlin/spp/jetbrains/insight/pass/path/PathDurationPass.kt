@@ -16,9 +16,10 @@
  */
 package spp.jetbrains.insight.pass.path
 
+import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.IfArtifact
 import spp.protocol.insight.InsightType.PATH_DURATION
@@ -48,7 +49,7 @@ class PathDurationPass : ProceduralPathPass {
                 duration = duration?.plus(conditionDescendantDuration ?: 0) ?: conditionDescendantDuration
 
                 //if condition passes, add duration of child artifacts
-                val executionProbability = it.getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)
+                val executionProbability = it.getData(InsightKeys.PATH_EXECUTION_PROBABILITY)
                 if (executionProbability == null || executionProbability.value > 0.0) {
                     analyze(it.childArtifacts, duration)?.let { duration = it }
                 }

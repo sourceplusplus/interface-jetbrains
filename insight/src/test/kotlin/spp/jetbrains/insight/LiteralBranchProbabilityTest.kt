@@ -19,7 +19,6 @@ package spp.jetbrains.insight
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -54,7 +53,7 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         val method = psi.getFunctions().first { it.name == "booleanConstant" }
         val ifExpression = method.getChildIfs().first()
 
-        val paths = ProceduralAnalyzer().apply{
+        val paths = ProceduralAnalyzer().apply {
             passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
         }.analyzeUp(ifExpression.toArtifact()!!)
         assertEquals(2, paths.size)
@@ -65,7 +64,7 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         assertTrue(truePath.descendants[0].isControlStructure())
         assertTrue(truePath.descendants[1].isCall())
         assertTrue(truePath.descendants[2].isLiteral())
-        assertEquals(1.0, truePath.descendants[0].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(1.0, truePath.descendants[0].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 
     @Test
@@ -82,7 +81,7 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         val method = psi.getFunctions().first { it.name == "numberCompare" }
         val ifExpression = method.getChildIfs().first()
 
-        val paths = ProceduralAnalyzer().apply{
+        val paths = ProceduralAnalyzer().apply {
             passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
         }.analyzeUp(ifExpression.toArtifact()!!)
         assertEquals(2, paths.size)
@@ -93,6 +92,6 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         assertTrue(truePath.descendants[0].isControlStructure())
         assertTrue(truePath.descendants[1].isCall())
         assertTrue(truePath.descendants[2].isLiteral())
-        assertEquals(1.0, truePath.descendants[0].getData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(1.0, truePath.descendants[0].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 }

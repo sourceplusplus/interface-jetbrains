@@ -18,12 +18,10 @@ package spp.jetbrains.marker.model
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.descendants
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.getCalls
 import spp.jetbrains.marker.service.toArtifact
 import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.protocol.insight.InsightValue
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -54,26 +52,6 @@ abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement 
     fun isControlStructure(): Boolean = this is ControlStructureArtifact
     fun isCall(): Boolean = this is CallArtifact
     fun isLiteral(): Boolean = this is ArtifactLiteralValue
-
-    fun getInsights(): List<InsightValue<*>> {
-        return SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getUserData(it.asPsiKey()) } +
-                SourceMarkerKeys.ALL_INSIGHTS.mapNotNull { getData(it) }
-    }
-
-    fun getDuration(includingPredictions: Boolean = true): Long? {
-        if (includingPredictions) {
-            val durationPrediction = getUserData(SourceMarkerKeys.FUNCTION_DURATION_PREDICTION.asPsiKey())?.value
-            if (durationPrediction != null) {
-                return durationPrediction
-            }
-        }
-
-        return getUserData(SourceMarkerKeys.FUNCTION_DURATION.asPsiKey())?.value
-    }
-
-    fun getPathExecutionProbability(): InsightValue<Double> {
-        return getUserData(SourceMarkerKeys.PATH_EXECUTION_PROBABILITY.asPsiKey())!!
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
