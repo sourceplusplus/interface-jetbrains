@@ -37,7 +37,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.safeLaunch
-import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime
+import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 import spp.protocol.instrument.LiveSourceLocation
@@ -97,7 +97,7 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
         }
         val swVersion = skywalkingMonitorService.getVersion()
         val listenMetrics = listOf(
-            Endpoint_RespTime.asRealtime().getMetricId(swVersion)
+            Endpoint_RespTime_AVG.asRealtime().getMetricId(swVersion)
         )
 
         val vertx = UserData.vertx(guideMark.project)
