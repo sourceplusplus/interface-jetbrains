@@ -20,7 +20,7 @@ import com.intellij.lang.Language
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
+import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage

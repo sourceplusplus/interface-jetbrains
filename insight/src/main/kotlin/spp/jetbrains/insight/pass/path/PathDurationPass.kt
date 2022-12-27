@@ -16,12 +16,12 @@
  */
 package spp.jetbrains.insight.pass.path
 
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.IfArtifact
 import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
 

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service.define
+package spp.jetbrains.artifact.service.define
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile

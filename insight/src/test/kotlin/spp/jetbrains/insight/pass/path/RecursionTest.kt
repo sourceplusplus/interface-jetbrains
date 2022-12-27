@@ -19,6 +19,8 @@ package spp.jetbrains.insight.pass.path
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
+import spp.jetbrains.artifact.service.getFunctions
+import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider

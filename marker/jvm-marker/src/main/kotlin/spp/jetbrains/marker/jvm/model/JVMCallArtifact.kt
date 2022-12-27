@@ -21,10 +21,10 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.nj2k.postProcessing.resolve
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.CallArtifact
-import spp.jetbrains.marker.model.FunctionArtifact
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.FunctionArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class JVMCallArtifact(private val psiElement: PsiElement) : CallArtifact(psiElement) {
 

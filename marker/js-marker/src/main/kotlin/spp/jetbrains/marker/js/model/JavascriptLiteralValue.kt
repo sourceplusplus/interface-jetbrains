@@ -17,7 +17,7 @@
 package spp.jetbrains.marker.js.model
 
 import com.intellij.psi.PsiLiteralValue
-import spp.jetbrains.marker.model.ArtifactLiteralValue
+import spp.jetbrains.artifact.model.ArtifactLiteralValue
 
 class JavascriptLiteralValue(private val psiElement: PsiLiteralValue) : ArtifactLiteralValue(psiElement) {
     override val value: Any?

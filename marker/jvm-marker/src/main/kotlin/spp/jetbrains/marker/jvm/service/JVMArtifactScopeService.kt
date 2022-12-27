@@ -40,9 +40,9 @@ import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
 import org.joor.Reflect
+import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.service.ArtifactTypeService
-import spp.jetbrains.marker.service.define.IArtifactScopeService
 
 /**
  * Used to determine the scope of JVM artifacts.

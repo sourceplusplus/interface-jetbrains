@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service
+package spp.jetbrains.artifact.service
 
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
-import spp.jetbrains.marker.service.define.IArtifactTypeService
+import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
+import spp.jetbrains.artifact.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 @Suppress("TooManyFunctions") // public API
@@ -59,7 +58,7 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     }
 
     fun isJvm(element: PsiElement): Boolean {
-        return SourceMarkerUtils.getJvmLanguages().contains(element.language.id)
+        return getJvmLanguages().contains(element.language.id)
     }
 
     fun isJava(element: PsiElement): Boolean {
@@ -75,7 +74,15 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     }
 
     fun isJavaScript(element: PsiElement): Boolean {
-        return SourceMarkerUtils.getJavaScriptLanguages().contains(element.language.id)
+        return getJavaScriptLanguages().contains(element.language.id)
+    }
+
+    fun getJvmLanguages(): List<String> {
+        return listOf("JAVA", "kotlin", "Groovy", "Scala")
+    }
+
+    fun getJavaScriptLanguages(): List<String> {
+        return listOf("JavaScript", "ECMAScript 6")
     }
 }
 

@@ -28,8 +28,8 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.resolve.jvm.JvmPrimitiveType
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType

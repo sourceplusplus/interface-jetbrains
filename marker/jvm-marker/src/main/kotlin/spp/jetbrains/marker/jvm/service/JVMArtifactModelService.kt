@@ -18,10 +18,10 @@ package spp.jetbrains.marker.jvm.service
 
 import com.intellij.psi.*
 import org.jetbrains.kotlin.psi.*
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.service.define.IArtifactModelService
+import spp.jetbrains.artifact.service.isKotlin
 import spp.jetbrains.marker.jvm.model.*
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.service.define.IArtifactModelService
-import spp.jetbrains.marker.service.isKotlin
 
 /**
  * Provides language-agnostic artifact model service for JVM languages.

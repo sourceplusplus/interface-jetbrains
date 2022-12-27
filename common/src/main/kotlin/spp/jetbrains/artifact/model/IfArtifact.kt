@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.model
+package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
 

@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.service.define
 
+import spp.jetbrains.artifact.service.define.ISourceMarkerService
 import spp.jetbrains.marker.source.SourceFileMarker
 
 /**

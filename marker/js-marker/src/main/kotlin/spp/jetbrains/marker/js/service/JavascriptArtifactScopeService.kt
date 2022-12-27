@@ -35,9 +35,9 @@ import com.intellij.psi.util.descendantsOfType
 import com.intellij.psi.util.findParentOfType
 import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.parentOfTypes
+import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.service.ArtifactTypeService
-import spp.jetbrains.marker.service.define.IArtifactScopeService
 
 /**
  * Used to determine the scope of JavaScript artifacts.

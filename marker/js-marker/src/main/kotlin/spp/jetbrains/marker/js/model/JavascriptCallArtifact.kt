@@ -18,10 +18,10 @@ package spp.jetbrains.marker.js.model
 
 import com.intellij.lang.javascript.psi.JSCallExpression
 import com.intellij.psi.PsiReference
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.CallArtifact
-import spp.jetbrains.marker.model.FunctionArtifact
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.FunctionArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class JavascriptCallArtifact(private val psiElement: JSCallExpression) : CallArtifact(psiElement) {
 

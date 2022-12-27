@@ -14,19 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.model
+package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
 
-abstract class CallArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
-    abstract fun resolveFunction(): FunctionArtifact?
-    abstract fun getArguments(): List<ArtifactElement>
-
-    private var resolvedFunction: FunctionArtifact? = null
-    fun getResolvedFunction(): FunctionArtifact? {
-        if (resolvedFunction == null || resolvedFunction?.isValid == false) {
-            resolvedFunction = resolveFunction()
-        }
-        return resolvedFunction
-    }
+abstract class ArtifactLiteralValue(psiElement: PsiElement) : ArtifactElement(psiElement) {
+    abstract val value: Any?
 }

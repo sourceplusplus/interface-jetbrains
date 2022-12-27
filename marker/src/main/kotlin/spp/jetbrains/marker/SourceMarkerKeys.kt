@@ -16,10 +16,10 @@
  */
 package spp.jetbrains.marker
 
+import spp.jetbrains.SourceKey
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.state.LiveStateBar
 import spp.protocol.instrument.LiveInstrumentType
 import spp.protocol.service.listen.LiveInstrumentListener

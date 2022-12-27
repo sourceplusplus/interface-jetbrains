@@ -24,7 +24,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.util.parentOfType
-import spp.jetbrains.marker.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import javax.swing.SwingUtilities
 

@@ -19,9 +19,9 @@ package spp.jetbrains.marker.js.service
 import com.intellij.lang.javascript.psi.*
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.service.define.IArtifactModelService
 import spp.jetbrains.marker.js.model.*
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.service.define.IArtifactModelService
 
 /**
  * Provides language-agnostic artifact model service for JavaScript-based languages.

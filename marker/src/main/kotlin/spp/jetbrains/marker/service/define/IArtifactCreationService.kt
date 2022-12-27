@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.service.define
 
 import com.intellij.psi.PsiElement
+import spp.jetbrains.artifact.service.define.ISourceMarkerService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark

@@ -27,9 +27,9 @@ import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.packaging.GrPackageDef
 import org.jetbrains.uast.UDeclaration
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.toUElement
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
-import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark

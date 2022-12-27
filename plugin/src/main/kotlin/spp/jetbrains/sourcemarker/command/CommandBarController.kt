@@ -20,13 +20,13 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import liveplugin.implementation.common.toFilePath
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.command.LiveCommand
 import spp.jetbrains.command.LiveCommandContext
 import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.marker.SourceMarkerUtils.substringAfterIgnoreCase
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.service.ArtifactNamingService
-import spp.jetbrains.marker.service.ArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider

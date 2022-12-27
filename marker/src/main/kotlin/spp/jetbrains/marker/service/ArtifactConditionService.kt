@@ -17,7 +17,7 @@
 package spp.jetbrains.marker.service
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
+import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactConditionService
 
 /**

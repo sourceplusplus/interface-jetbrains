@@ -14,16 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.model
+package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNameIdentifierOwner
 
-abstract class FunctionArtifact(
-    private val psiElement: PsiNameIdentifierOwner
-) : ArtifactElement(psiElement), PsiNameIdentifierOwner {
+abstract class BlockArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
 
-    override fun getName(): String? = psiElement.name
-    override fun setName(name: String): PsiElement = psiElement.setName(name)
-    override fun getNameIdentifier(): PsiElement? = psiElement.nameIdentifier
+    abstract override fun clone(): BlockArtifact
 }

@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service.define
+package spp.jetbrains.artifact.service.define
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
 import com.intellij.psi.impl.light.LightIdentifier
-import spp.jetbrains.marker.model.ArtifactLiteralValue
+import spp.jetbrains.artifact.model.ArtifactLiteralValue
 import spp.protocol.artifact.ArtifactType
 
 interface IArtifactTypeService : ISourceMarkerService {

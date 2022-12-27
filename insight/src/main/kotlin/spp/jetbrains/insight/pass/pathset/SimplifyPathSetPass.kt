@@ -16,11 +16,11 @@
  */
 package spp.jetbrains.insight.pass.pathset
 
+import spp.jetbrains.artifact.model.ControlStructureArtifact
+import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathSetPass
-import spp.jetbrains.marker.model.ControlStructureArtifact
-import spp.jetbrains.marker.model.IfArtifact
 import java.util.*
 
 /**

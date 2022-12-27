@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.model
+package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.descendants
-import spp.jetbrains.marker.service.ArtifactTypeService
-import spp.jetbrains.marker.service.getCalls
-import spp.jetbrains.marker.service.toArtifact
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.SourceKey
+import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.getCalls
+import spp.jetbrains.artifact.service.toArtifact
 import java.util.concurrent.ConcurrentHashMap
 
 /**

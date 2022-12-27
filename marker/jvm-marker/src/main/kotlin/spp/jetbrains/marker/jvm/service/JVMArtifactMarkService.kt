@@ -22,10 +22,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiStatement
 import com.intellij.ui.treeStructure.SimpleNode
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.presentation.JVMVariableNode
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
-import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText

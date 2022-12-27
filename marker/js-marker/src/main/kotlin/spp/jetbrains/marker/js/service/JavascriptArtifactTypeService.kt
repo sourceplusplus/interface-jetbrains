@@ -20,7 +20,7 @@ import com.intellij.lang.javascript.psi.JSExpression
 import com.intellij.lang.javascript.psi.JSFunction
 import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.service.define.IArtifactTypeService
+import spp.jetbrains.artifact.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 /**

@@ -17,7 +17,7 @@
 package spp.jetbrains.marker.source.info
 
 import com.intellij.openapi.editor.Editor
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.SourceKey
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 

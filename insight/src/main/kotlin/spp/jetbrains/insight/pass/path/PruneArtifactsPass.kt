@@ -16,11 +16,11 @@
  */
 package spp.jetbrains.insight.pass.path
 
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.ControlStructureArtifact
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.CallArtifact
-import spp.jetbrains.marker.model.ControlStructureArtifact
 
 /**
  * Remove non-control structure, non-call artifacts from the paths.

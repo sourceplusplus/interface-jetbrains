@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.insight
 
+import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.insight.pass.ArtifactPass
 import spp.jetbrains.insight.pass.IPass
 import spp.jetbrains.insight.pass.ProceduralPathPass
@@ -29,7 +30,6 @@ import spp.jetbrains.insight.pass.path.PruneArtifactsPass
 import spp.jetbrains.insight.pass.path.RecursivePathPass
 import spp.jetbrains.insight.pass.pathset.SavePsiPathSetPass
 import spp.jetbrains.insight.pass.pathset.SimplifyPathSetPass
-import spp.jetbrains.marker.model.ArtifactElement
 
 /**
  * Used to process passes over [ProceduralPath] sets, [ProceduralPath]s, and [ArtifactElement]s.

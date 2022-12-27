@@ -18,6 +18,7 @@ package spp.jetbrains.marker.service.define
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import spp.jetbrains.artifact.service.define.ISourceMarkerService
 
 /**
  * Used to parse/format instrument conditions.

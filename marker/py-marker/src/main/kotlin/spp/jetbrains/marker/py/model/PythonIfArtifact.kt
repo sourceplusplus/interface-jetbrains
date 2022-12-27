@@ -17,9 +17,9 @@
 package spp.jetbrains.marker.py.model
 
 import com.jetbrains.python.psi.PyIfStatement
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class PythonIfArtifact(private val psiElement: PyIfStatement) : IfArtifact(psiElement) {
 

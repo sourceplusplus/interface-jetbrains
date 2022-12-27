@@ -17,9 +17,9 @@
 package spp.jetbrains.marker.js.model
 
 import com.intellij.lang.javascript.psi.JSIfStatement
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class JavascriptIfArtifact(private val psiElement: JSIfStatement) : IfArtifact(psiElement) {
 

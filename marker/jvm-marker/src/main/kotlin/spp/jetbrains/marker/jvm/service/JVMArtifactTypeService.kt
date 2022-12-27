@@ -25,10 +25,10 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFunction
+import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.define.IArtifactTypeService
+import spp.jetbrains.artifact.service.isKotlin
 import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
-import spp.jetbrains.marker.service.ArtifactTypeService
-import spp.jetbrains.marker.service.define.IArtifactTypeService
-import spp.jetbrains.marker.service.isKotlin
 import spp.protocol.artifact.ArtifactType
 
 /**

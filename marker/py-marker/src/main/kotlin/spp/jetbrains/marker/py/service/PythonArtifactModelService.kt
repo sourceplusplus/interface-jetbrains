@@ -18,9 +18,9 @@ package spp.jetbrains.marker.py.service
 
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.*
-import spp.jetbrains.marker.model.ArtifactElement
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.service.define.IArtifactModelService
 import spp.jetbrains.marker.py.model.*
-import spp.jetbrains.marker.service.define.IArtifactModelService
 
 /**
  * Provides language-agnostic artifact model service for Python.
