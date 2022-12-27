@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.insight
 
-import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.BlockArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
@@ -31,7 +30,6 @@ import java.util.stream.IntStream
 
 class RuntimePathAnalyzer {
 
-    var savePathsToPsi: Boolean = true
     var passProvider: InsightPassProvider = InsightPassProvider.FULL
 
     fun analyze(element: ArtifactElement): Set<IRuntimePath> {
@@ -47,12 +45,7 @@ class RuntimePathAnalyzer {
             runtimePaths.add(path)
         }
 
-        val uniquePaths = runtimePaths.toSet()
-        val paths = passProvider.analyze(uniquePaths)
-        if (savePathsToPsi) {
-            element.putUserData(SourceMarkerKeys.RUNTIME_PATHS.asPsiKey(), paths)
-        }
-        return paths
+        return passProvider.analyze(runtimePaths.toSet())
     }
 
     fun analyzeUp(psi: ArtifactElement): Set<IRuntimePath> {

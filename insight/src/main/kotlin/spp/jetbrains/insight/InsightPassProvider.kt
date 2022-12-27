@@ -21,11 +21,13 @@ import spp.jetbrains.insight.pass.IPass
 import spp.jetbrains.insight.pass.RuntimePathPass
 import spp.jetbrains.insight.pass.RuntimePathSetPass
 import spp.jetbrains.insight.pass.artifact.CallDurationPass
+import spp.jetbrains.insight.pass.artifact.LoadPsiPass
 import spp.jetbrains.insight.pass.artifact.ThreadSleepPass
 import spp.jetbrains.insight.pass.path.PathDurationPass
 import spp.jetbrains.insight.pass.path.PathProbabilityPass
 import spp.jetbrains.insight.pass.path.PruneArtifactsPass
 import spp.jetbrains.insight.pass.path.RecursivePathPass
+import spp.jetbrains.insight.pass.pathset.SavePsiPathSetPass
 import spp.jetbrains.insight.pass.pathset.SimplifyPathSetPass
 import spp.jetbrains.marker.model.ArtifactElement
 
@@ -37,6 +39,7 @@ class InsightPassProvider {
     companion object {
         val ALL_PASSES = listOf(
             //artifact passes
+            LoadPsiPass(),
             CallDurationPass(),
             ThreadSleepPass(),
 
@@ -47,7 +50,8 @@ class InsightPassProvider {
             RecursivePathPass(),
 
             //path set passes
-            SimplifyPathSetPass()
+            SimplifyPathSetPass(),
+            SavePsiPathSetPass()
         )
 
         val FULL = InsightPassProvider().apply {

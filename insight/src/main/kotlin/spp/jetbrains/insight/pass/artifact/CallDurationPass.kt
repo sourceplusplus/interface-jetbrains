@@ -16,11 +16,13 @@
  */
 package spp.jetbrains.insight.pass.artifact
 
+import org.jetbrains.kotlin.utils.addToStdlib.ifNotEmpty
 import spp.jetbrains.insight.pass.ArtifactPass
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.protocol.insight.InsightType.FUNCTION_DURATION
+import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
 
 /**
@@ -32,12 +34,28 @@ class CallDurationPass : ArtifactPass {
         if (element !is CallArtifact) return //only interested in calls
 
         val resolvedFunction = element.getResolvedFunction()
-        val duration = resolvedFunction?.getDuration()
-        if (duration != null) {
-            element.putUserData(
-                SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(FUNCTION_DURATION, duration).asDerived()
-            )
+        if (resolvedFunction != null) {
+            val runtimePaths = element.getData(SourceMarkerKeys.RUNTIME_PATHS)
+            if (runtimePaths != null) {
+                //artifact has already been analyzed, use pre-determined duration (if available)
+                val duration = runtimePaths.mapNotNull {
+                    it.getInsights().find { it.type == PATH_DURATION }?.value as Long?
+                }.ifNotEmpty { sum() }
+                if (duration != null) {
+                    element.putUserData(
+                        SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                        InsightValue.of(FUNCTION_DURATION, duration).asDerived()
+                    )
+                }
+            }
+
+            val duration = resolvedFunction.getDuration()
+            if (duration != null) {
+                element.putUserData(
+                    SourceMarkerKeys.FUNCTION_DURATION.asPsiKey(),
+                    InsightValue.of(FUNCTION_DURATION, duration).asDerived()
+                )
+            }
         }
     }
 }
