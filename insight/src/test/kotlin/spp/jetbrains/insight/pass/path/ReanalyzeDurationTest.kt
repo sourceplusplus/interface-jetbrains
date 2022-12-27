@@ -19,7 +19,7 @@ package spp.jetbrains.insight.pass.path
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.insight.RuntimePathAnalyzer
+import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
@@ -63,12 +63,12 @@ class ReanalyzeDurationTest : BasePlatformTestCase() {
         }
 
         //analyze code2
-        RuntimePathAnalyzer().analyze(
+        ProceduralAnalyzer().analyze(
             psi.getFunctions().find { it.name!!.contains("code2") }.toArtifact()!!
         )
 
         //analyze code1
-        val paths = RuntimePathAnalyzer().analyze(
+        val paths = ProceduralAnalyzer().analyze(
             psi.getFunctions().find { it.name!!.contains("code1") }.toArtifact()!!
         )
         assertEquals(1, paths.size)

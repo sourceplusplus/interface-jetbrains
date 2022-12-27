@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.insight.pass.path
 
-import spp.jetbrains.insight.RuntimePath
-import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.insight.pass.ProceduralPathPass
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.IfArtifact
@@ -31,11 +31,11 @@ import spp.protocol.insight.InsightValue
  * in the path. For example, if the path contains two [IfArtifact]s with probability of 0.5, the
  * following artifacts will have a base probability of 0.25.
  */
-class PathProbabilityPass : RuntimePathPass {
+class PathProbabilityPass : ProceduralPathPass {
 
     private lateinit var conditionOrder: Iterator<Boolean>
 
-    override fun analyze(path: RuntimePath) {
+    override fun analyze(path: ProceduralPath) {
         conditionOrder = path.evaluations.iterator()
 
         path.artifacts.forEach {

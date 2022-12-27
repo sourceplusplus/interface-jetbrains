@@ -54,7 +54,7 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         val method = psi.getFunctions().first { it.name == "booleanConstant" }
         val ifExpression = method.getChildIfs().first()
 
-        val paths = RuntimePathAnalyzer().apply{
+        val paths = ProceduralAnalyzer().apply{
             passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
         }.analyzeUp(ifExpression.toArtifact()!!)
         assertEquals(2, paths.size)
@@ -82,7 +82,7 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         val method = psi.getFunctions().first { it.name == "numberCompare" }
         val ifExpression = method.getChildIfs().first()
 
-        val paths = RuntimePathAnalyzer().apply{
+        val paths = ProceduralAnalyzer().apply{
             passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
         }.analyzeUp(ifExpression.toArtifact()!!)
         assertEquals(2, paths.size)

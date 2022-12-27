@@ -20,7 +20,7 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
 import spp.jetbrains.insight.InsightPassProvider
-import spp.jetbrains.insight.RuntimePathAnalyzer
+import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.model.CallArtifact
@@ -54,7 +54,7 @@ class SimplifyBranchTest : BasePlatformTestCase() {
     private fun doBranchSimplify(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/SimplifyBranch.$extension")
 
-        val unsimplifiedPaths = RuntimePathAnalyzer().apply {
+        val unsimplifiedPaths = ProceduralAnalyzer().apply {
             passProvider = InsightPassProvider().apply {
                 passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
             }
@@ -74,7 +74,7 @@ class SimplifyBranchTest : BasePlatformTestCase() {
         val falseIfChildren = (falsePath.artifacts.toList()[0] as IfArtifact).childArtifacts
         assertEquals(0, falseIfChildren.size)
 
-        val simplifiedPaths = RuntimePathAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
+        val simplifiedPaths = ProceduralAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
         assertEquals(1, simplifiedPaths.size)
         assertEquals(2, simplifiedPaths.first().artifacts.size)
         assertTrue(simplifiedPaths.first().artifacts.toList()[0] is IfArtifact)

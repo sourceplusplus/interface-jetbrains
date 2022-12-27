@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.marker
 
-import spp.jetbrains.marker.model.analysis.IRuntimePath
+import spp.jetbrains.marker.model.analysis.IProceduralPath
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -66,7 +66,7 @@ object SourceMarkerKeys {
     val VCS_MODIFIED = SourceKey<Boolean>("VCS_MODIFIED")
 
     @JvmStatic
-    val RUNTIME_PATHS = SourceKey<Set<IRuntimePath>>("RUNTIME_PATHS")
+    val RUNTIME_PATHS = SourceKey<Set<IProceduralPath>>("RUNTIME_PATHS")
 
     @JvmStatic
     val FUNCTION_DURATION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION.name)

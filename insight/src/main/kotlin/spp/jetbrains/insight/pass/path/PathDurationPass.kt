@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.insight.pass.path
 
-import spp.jetbrains.insight.RuntimePath
-import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.insight.pass.ProceduralPathPass
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.IfArtifact
@@ -27,9 +27,9 @@ import spp.protocol.insight.InsightValue
 /**
  * Calculates [PATH_DURATION] based on the sum of the durations of the artifacts in the runtime path.
  */
-class PathDurationPass : RuntimePathPass {
+class PathDurationPass : ProceduralPathPass {
 
-    override fun analyze(path: RuntimePath) {
+    override fun analyze(path: ProceduralPath) {
         val duration = analyze(path.artifacts, null)
         if (duration != null) {
             path.insights.add(InsightValue.of(PATH_DURATION, duration).asDerived())

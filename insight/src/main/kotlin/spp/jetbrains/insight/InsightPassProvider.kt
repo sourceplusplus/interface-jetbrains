@@ -18,8 +18,8 @@ package spp.jetbrains.insight
 
 import spp.jetbrains.insight.pass.ArtifactPass
 import spp.jetbrains.insight.pass.IPass
-import spp.jetbrains.insight.pass.RuntimePathPass
-import spp.jetbrains.insight.pass.RuntimePathSetPass
+import spp.jetbrains.insight.pass.ProceduralPathPass
+import spp.jetbrains.insight.pass.ProceduralPathSetPass
 import spp.jetbrains.insight.pass.artifact.CallDurationPass
 import spp.jetbrains.insight.pass.artifact.LoadPsiPass
 import spp.jetbrains.insight.pass.artifact.ThreadSleepPass
@@ -32,7 +32,7 @@ import spp.jetbrains.insight.pass.pathset.SimplifyPathSetPass
 import spp.jetbrains.marker.model.ArtifactElement
 
 /**
- * Used to process passes over [RuntimePath] sets, [RuntimePath]s, and [ArtifactElement]s.
+ * Used to process passes over [ProceduralPath] sets, [ProceduralPath]s, and [ArtifactElement]s.
  */
 class InsightPassProvider {
 
@@ -63,14 +63,14 @@ class InsightPassProvider {
     }
 
     private val artifactPasses = mutableListOf<ArtifactPass>()
-    private val runtimePathPasses = mutableListOf<RuntimePathPass>()
-    private val runtimePathSetPasses = mutableListOf<RuntimePathSetPass>()
+    private val proceduralPathPasses = mutableListOf<ProceduralPathPass>()
+    private val proceduralPathSetPasses = mutableListOf<ProceduralPathSetPass>()
 
     fun registerPass(pass: IPass) {
         when (pass) {
             is ArtifactPass -> artifactPasses.add(pass)
-            is RuntimePathPass -> runtimePathPasses.add(pass)
-            is RuntimePathSetPass -> runtimePathSetPasses.add(pass)
+            is ProceduralPathPass -> proceduralPathPasses.add(pass)
+            is ProceduralPathSetPass -> proceduralPathSetPasses.add(pass)
             else -> throw IllegalArgumentException("Unknown pass type: ${pass::class}")
         }
     }
@@ -79,20 +79,20 @@ class InsightPassProvider {
         artifactPasses.forEach { it.analyze(element) }
     }
 
-    private fun analyze(path: RuntimePath) {
+    private fun analyze(path: ProceduralPath) {
         path.forEach { analyze(it) }
-        runtimePathPasses.forEach { it.analyze(path) }
+        proceduralPathPasses.forEach { it.analyze(path) }
     }
 
-    fun analyze(pathSet: Set<RuntimePath>): Set<RuntimePath> {
-        val preProcessedPathSet = runtimePathSetPasses.fold(pathSet) { acc, pass ->
+    fun analyze(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
+        val preProcessedPathSet = proceduralPathSetPasses.fold(pathSet) { acc, pass ->
             pass.preProcess(acc)
         }
         preProcessedPathSet.map { analyze(it) }.toSet()
-        val analyzedPathSetSet = runtimePathSetPasses.fold(preProcessedPathSet) { acc, pass ->
+        val analyzedPathSetSet = proceduralPathSetPasses.fold(preProcessedPathSet) { acc, pass ->
             pass.analyze(acc)
         }
-        return runtimePathSetPasses.fold(analyzedPathSetSet) { acc, pass ->
+        return proceduralPathSetPasses.fold(analyzedPathSetSet) { acc, pass ->
             pass.postProcess(acc)
         }
     }

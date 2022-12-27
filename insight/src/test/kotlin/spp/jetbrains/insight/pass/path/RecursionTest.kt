@@ -19,7 +19,7 @@ package spp.jetbrains.insight.pass.path
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.insight.RuntimePathAnalyzer
+import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -52,7 +52,7 @@ class RecursionTest : BasePlatformTestCase() {
     private fun doTest(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/Recursion.$extension")
 
-        val paths = RuntimePathAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
+        val paths = ProceduralAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
         assertEquals(1, paths.size)
 
         val path = paths.first()

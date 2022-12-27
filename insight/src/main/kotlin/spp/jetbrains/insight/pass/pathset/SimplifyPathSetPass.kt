@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.insight.pass.pathset
 
-import spp.jetbrains.insight.RuntimePath
-import spp.jetbrains.insight.pass.RuntimePathSetPass
+import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.insight.pass.ProceduralPathSetPass
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.ControlStructureArtifact
 import spp.jetbrains.marker.model.IfArtifact
@@ -26,10 +26,10 @@ import java.util.*
 /**
  * Removes paths caused by conditional branches that are never taken.
  */
-class SimplifyPathSetPass : RuntimePathSetPass {
+class SimplifyPathSetPass : ProceduralPathSetPass {
 
-    override fun postProcess(pathSet: Set<RuntimePath>): Set<RuntimePath> {
-        val simplifiedPaths = mutableSetOf<RuntimePath>()
+    override fun postProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
+        val simplifiedPaths = mutableSetOf<ProceduralPath>()
         for (path in pathSet) {
             path.artifacts.removeIf {
                 if (it is IfArtifact) {

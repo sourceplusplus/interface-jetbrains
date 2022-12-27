@@ -71,7 +71,7 @@ class MultiInsightTest : BasePlatformTestCase() {
             )
         }
 
-        val paths = RuntimePathAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
+        val paths = ProceduralAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
         assertEquals(4, paths.size)
 
         //[false, false]

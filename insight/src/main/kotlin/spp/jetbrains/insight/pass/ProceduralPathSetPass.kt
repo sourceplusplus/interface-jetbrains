@@ -16,14 +16,14 @@
  */
 package spp.jetbrains.insight.pass
 
-import spp.jetbrains.insight.RuntimePath
-import spp.jetbrains.marker.model.analysis.IRuntimePath
+import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.marker.model.analysis.IProceduralPath
 
 /**
- * A pass that analyzes a set of [IRuntimePath]s and adds data to them.
+ * A pass that analyzes a set of [IProceduralPath]s and adds data to them.
  */
-interface RuntimePathSetPass : IPass {
-    fun preProcess(pathSet: Set<RuntimePath>): Set<RuntimePath> = pathSet
-    fun analyze(pathSet: Set<RuntimePath>): Set<RuntimePath> = pathSet
-    fun postProcess(pathSet: Set<RuntimePath>): Set<RuntimePath> = pathSet
+interface ProceduralPathSetPass : IPass {
+    fun preProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> = pathSet
+    fun analyze(pathSet: Set<ProceduralPath>): Set<ProceduralPath> = pathSet
+    fun postProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> = pathSet
 }

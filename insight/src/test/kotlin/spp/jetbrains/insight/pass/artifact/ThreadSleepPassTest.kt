@@ -19,7 +19,7 @@ package spp.jetbrains.insight.pass.artifact
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.insight.RuntimePathAnalyzer
+import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
@@ -52,7 +52,7 @@ class ThreadSleepPassTest : BasePlatformTestCase() {
         val psi = myFixture.configureByFile("$language/ThreadSleep.$extension")
 
         val sleepExpression = psi.getCalls().find { it.text.contains("sleep") }!!
-        val path = RuntimePathAnalyzer().analyzeUp(sleepExpression.toArtifact()!!).first()
+        val path = ProceduralAnalyzer().analyzeUp(sleepExpression.toArtifact()!!).first()
         val insights = path.getInsights()
         assertEquals(1, insights.size)
         assertEquals(1000L, insights.first().value)

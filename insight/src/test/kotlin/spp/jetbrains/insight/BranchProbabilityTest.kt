@@ -61,7 +61,7 @@ class BranchProbabilityTest : BasePlatformTestCase() {
         }
 
         val callExpression = psi.getCalls().find { it.text.contains("true", true) }!!
-        val paths = RuntimePathAnalyzer().analyzeUp(callExpression.toArtifact()!!)
+        val paths = ProceduralAnalyzer().analyzeUp(callExpression.toArtifact()!!)
         assertEquals(1, paths.size)
 
         val path = paths.first()

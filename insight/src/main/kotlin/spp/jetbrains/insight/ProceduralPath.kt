@@ -20,15 +20,15 @@ import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.model.analysis.IRuntimePath
+import spp.jetbrains.marker.model.analysis.IProceduralPath
 import spp.protocol.insight.InsightValue
 
-data class RuntimePath(
+data class ProceduralPath(
     val evaluations: List<Boolean>,
     override val rootArtifact: ArtifactElement,
     override val artifacts: MutableList<ArtifactElement>,
     internal val insights: MutableList<InsightValue<*>> = mutableListOf()
-) : IRuntimePath {
+) : IProceduralPath {
 
     override fun iterator(): Iterator<ArtifactElement> = descendants.iterator()
     override fun getInsights(): List<InsightValue<*>> = insights

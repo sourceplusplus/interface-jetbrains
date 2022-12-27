@@ -20,7 +20,7 @@ import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.BlockArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
 import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.model.analysis.IRuntimePath
+import spp.jetbrains.marker.model.analysis.IProceduralPath
 import spp.jetbrains.marker.service.getParentFunction
 import spp.jetbrains.marker.service.toArtifact
 import java.util.*
@@ -28,31 +28,45 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 import java.util.stream.IntStream
 
-class RuntimePathAnalyzer {
+/**
+ * Provides intra-procedural analysis of [ArtifactElement] trees.
+ */
+class ProceduralAnalyzer {
 
     var passProvider: InsightPassProvider = InsightPassProvider.FULL
 
-    fun analyze(element: ArtifactElement): Set<IRuntimePath> {
+    /**
+     * Performs an intraprocedural analysis of the given [ArtifactElement].
+     *
+     * @param element the [ArtifactElement] to analyze
+     */
+    fun analyze(element: ArtifactElement): Set<ProceduralPath> {
         val parent = mutableListOf<Any>()
         walkDown(element, parent)
 
         val ifCount = getIfArtifactCount(parent, 0)
         val boolPermutations = makeBoolPermutations(ifCount)
-        val runtimePaths = mutableSetOf<RuntimePath>()
+        val paths = mutableSetOf<ProceduralPath>()
         for (boolSet in boolPermutations) {
-            val path = RuntimePath(boolSet.toList(), element, mutableListOf())
-            processRuntimePath(path, path.artifacts, parent, AtomicInteger(0))
-            runtimePaths.add(path)
+            val path = ProceduralPath(boolSet.toList(), element, mutableListOf())
+            processPath(path, path.artifacts, parent, AtomicInteger(0))
+            paths.add(path)
         }
 
-        return passProvider.analyze(runtimePaths.toSet())
+        return passProvider.analyze(paths.toSet())
     }
 
-    fun analyzeUp(psi: ArtifactElement): Set<IRuntimePath> {
+    /**
+     * Performs an intraprocedural analysis of the given [ArtifactElement] and returns the [IProceduralPath]s that
+     * contain the given [ArtifactElement].
+     *
+     * @param element the [ArtifactElement] to analyze
+     */
+    fun analyzeUp(element: ArtifactElement): Set<ProceduralPath> {
         //todo: do this more efficiently
-        val paths = analyze(psi.getParentFunction().toArtifact()!!)
+        val paths = analyze(element.getParentFunction().toArtifact()!!)
         return paths.filter {
-            it.descendants.contains(psi)
+            it.descendants.contains(element)
         }.toSet()
     }
 
@@ -85,8 +99,8 @@ class RuntimePathAnalyzer {
         }
     }
 
-    private fun processRuntimePath(
-        path: RuntimePath,
+    private fun processPath(
+        path: ProceduralPath,
         nextArtifacts: MutableList<ArtifactElement>,
         processArtifacts: List<Any>,
         boolIndex: AtomicInteger
@@ -102,10 +116,10 @@ class RuntimePathAnalyzer {
                 val bool = path.evaluations[boolIndex.getAndIncrement()]
                 if (bool) {
                     val childArtifacts = processArtifacts[index + 1] as List<Any>
-                    processRuntimePath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
+                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
                 } else {
                     val childArtifacts = processArtifacts[index + 2] as List<Any>
-                    processRuntimePath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
+                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
                 }
             }
         }

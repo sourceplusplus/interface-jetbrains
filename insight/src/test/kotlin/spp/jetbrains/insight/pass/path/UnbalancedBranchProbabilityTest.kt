@@ -19,7 +19,7 @@ package spp.jetbrains.insight.pass.path
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.insight.RuntimePathAnalyzer
+import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
@@ -62,7 +62,7 @@ class UnbalancedBranchProbabilityTest : BasePlatformTestCase() {
             )
         }
 
-        val paths = RuntimePathAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
+        val paths = ProceduralAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
         assertEquals(2, paths.size)
 
         val truePath = paths.find { it.conditions.first().first }!!

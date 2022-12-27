@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.insight.pass.path
 
-import spp.jetbrains.insight.RuntimePath
-import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.insight.pass.ProceduralPathPass
 import spp.jetbrains.marker.model.ArtifactElement
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.ControlStructureArtifact
@@ -25,9 +25,9 @@ import spp.jetbrains.marker.model.ControlStructureArtifact
 /**
  * Remove non-control structure, non-call artifacts from the paths.
  */
-class PruneArtifactsPass : RuntimePathPass {
+class PruneArtifactsPass : ProceduralPathPass {
 
-    override fun analyze(path: RuntimePath) {
+    override fun analyze(path: ProceduralPath) {
         removeArtifacts(path.artifacts)
     }
 

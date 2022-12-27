@@ -22,7 +22,7 @@ import com.intellij.util.ui.update.MergingUpdateQueue
 import com.intellij.util.ui.update.Update
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
-import spp.jetbrains.insight.RuntimePathAnalyzer
+import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys.FUNCTION_DURATION
 import spp.jetbrains.marker.SourceMarkerKeys.FUNCTION_DURATION_PREDICTION
@@ -161,10 +161,10 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
     private fun updateInsights(mark: MethodSourceMark) {
         log.info("Updating method duration prediction insights for: ${mark.artifactQualifiedName}")
 
-        val runtimePaths = RuntimePathAnalyzer().analyze(mark.getPsiMethod().toArtifact()!!)
+        val proceduralPaths = ProceduralAnalyzer().analyze(mark.getPsiMethod().toArtifact()!!)
 
         //ignore functions with recursive paths
-        val hasRecursions = runtimePaths.any { it.getInsights().any { it.type == InsightType.PATH_IS_RECURSIVE } }
+        val hasRecursions = proceduralPaths.any { it.getInsights().any { it.type == InsightType.PATH_IS_RECURSIVE } }
         if (hasRecursions) {
             log.info("Ignoring function with recursive path(s): ${mark.artifactQualifiedName}")
             if (mark.removeUserData(FUNCTION_DURATION_PREDICTION) != null) {
@@ -173,7 +173,7 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
             return
         }
 
-        val isChildrenChanged = runtimePaths.flatMap {
+        val isChildrenChanged = proceduralPaths.flatMap {
             it.getResolvedCallFunctions()
         }.mapNotNull { it.getUserData(VCS_MODIFIED.asPsiKey()) }.any()
 
@@ -184,7 +184,7 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
             propagateChange = true
 
             //get runtime path insights
-            val pathDurationInsights = runtimePaths.flatMap { it.getInsights() }
+            val pathDurationInsights = proceduralPaths.flatMap { it.getInsights() }
                 .filter { it.type == InsightType.PATH_DURATION } as List<InsightValue<Long>>
 
             //average path durations

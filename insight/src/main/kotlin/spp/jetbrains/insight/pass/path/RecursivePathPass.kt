@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.insight.pass.path
 
-import spp.jetbrains.insight.RuntimePath
-import spp.jetbrains.insight.pass.RuntimePathPass
+import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.insight.pass.ProceduralPathPass
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.model.CallArtifact
 import spp.jetbrains.marker.model.FunctionArtifact
@@ -25,11 +25,11 @@ import spp.protocol.insight.InsightType.PATH_IS_RECURSIVE
 import spp.protocol.insight.InsightValue
 
 /**
- * Adds the [PATH_IS_RECURSIVE] insight to the [RuntimePath] if it is recursive.
+ * Adds the [PATH_IS_RECURSIVE] insight to the [ProceduralPath] if it is recursive.
  */
-class RecursivePathPass : RuntimePathPass {
+class RecursivePathPass : ProceduralPathPass {
 
-    override fun analyze(path: RuntimePath) {
+    override fun analyze(path: ProceduralPath) {
         if (path.rootArtifact is FunctionArtifact) {
             //search for calls to the root function
             val calls = path.filterIsInstance<CallArtifact>()

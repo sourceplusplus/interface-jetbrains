@@ -61,9 +61,9 @@ class FunctionDurationTest : BasePlatformTestCase() {
 
         //calculate
         val oneCallPath =
-            RuntimePathAnalyzer().analyze(psi.getFunctions().first { it.name == "oneCall" }.toArtifact()!!)
+            ProceduralAnalyzer().analyze(psi.getFunctions().first { it.name == "oneCall" }.toArtifact()!!)
         val twoCallsPath =
-            RuntimePathAnalyzer().analyze(psi.getFunctions().first { it.name == "twoCalls" }.toArtifact()!!)
+            ProceduralAnalyzer().analyze(psi.getFunctions().first { it.name == "twoCalls" }.toArtifact()!!)
 
         //assert
         assertEquals(1, oneCallPath.size)

@@ -16,11 +16,11 @@
  */
 package spp.jetbrains.insight.pass
 
-import spp.jetbrains.insight.RuntimePath
+import spp.jetbrains.insight.ProceduralPath
 
 /**
- * A pass that analyzes an [RuntimePath] and adds data to it.
+ * A pass that analyzes an [ProceduralPath] and adds data to it.
  */
-interface RuntimePathPass : IPass {
-    fun analyze(path: RuntimePath)
+interface ProceduralPathPass : IPass {
+    fun analyze(path: ProceduralPath)
 }
