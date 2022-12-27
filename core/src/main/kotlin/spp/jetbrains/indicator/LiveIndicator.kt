@@ -26,7 +26,6 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.status.SourceStatus.ConnectionError
-import spp.jetbrains.status.SourceStatus.Ready
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.developer.SelfInfo
 
