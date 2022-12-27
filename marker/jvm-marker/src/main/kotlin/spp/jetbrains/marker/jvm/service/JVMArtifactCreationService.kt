@@ -356,7 +356,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(gutterMark)) {
-                lookupExpression.putUserData(InlayMark.KEY, null)
+                lookupExpression.putUserData(GutterMark.KEY, null)
                 null
             } else {
                 gutterMark

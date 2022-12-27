@@ -92,7 +92,7 @@ class PythonArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(gutterMark)) {
-                element.putUserData(InlayMark.KEY, null)
+                element.putUserData(GutterMark.KEY, null)
                 null
             } else {
                 gutterMark
