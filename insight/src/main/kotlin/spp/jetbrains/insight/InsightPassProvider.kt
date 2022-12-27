@@ -63,14 +63,14 @@ class InsightPassProvider {
     }
 
     private val artifactPasses = mutableListOf<ArtifactPass>()
-    private val proceduralPathPasses = mutableListOf<ProceduralPathPass>()
-    private val proceduralPathSetPasses = mutableListOf<ProceduralPathSetPass>()
+    private val pathPasses = mutableListOf<ProceduralPathPass>()
+    private val pathSetPasses = mutableListOf<ProceduralPathSetPass>()
 
     fun registerPass(pass: IPass) {
         when (pass) {
             is ArtifactPass -> artifactPasses.add(pass)
-            is ProceduralPathPass -> proceduralPathPasses.add(pass)
-            is ProceduralPathSetPass -> proceduralPathSetPasses.add(pass)
+            is ProceduralPathPass -> pathPasses.add(pass)
+            is ProceduralPathSetPass -> pathSetPasses.add(pass)
             else -> throw IllegalArgumentException("Unknown pass type: ${pass::class}")
         }
     }
@@ -81,18 +81,18 @@ class InsightPassProvider {
 
     private fun analyze(path: ProceduralPath) {
         path.forEach { analyze(it) }
-        proceduralPathPasses.forEach { it.analyze(path) }
+        pathPasses.forEach { it.analyze(path) }
     }
 
     fun analyze(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
-        val preProcessedPathSet = proceduralPathSetPasses.fold(pathSet) { acc, pass ->
+        val preProcessedPathSet = pathSetPasses.fold(pathSet) { acc, pass ->
             pass.preProcess(acc)
         }
         preProcessedPathSet.map { analyze(it) }.toSet()
-        val analyzedPathSetSet = proceduralPathSetPasses.fold(preProcessedPathSet) { acc, pass ->
+        val analyzedPathSetSet = pathSetPasses.fold(preProcessedPathSet) { acc, pass ->
             pass.analyze(acc)
         }
-        return proceduralPathSetPasses.fold(analyzedPathSetSet) { acc, pass ->
+        return pathSetPasses.fold(analyzedPathSetSet) { acc, pass ->
             pass.postProcess(acc)
         }
     }
