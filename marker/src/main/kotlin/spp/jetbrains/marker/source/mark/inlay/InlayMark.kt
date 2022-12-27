@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.source.mark.inlay
 
+import com.intellij.openapi.util.Key
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkConfiguration
@@ -29,6 +30,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface InlayMark : SourceMark {
+
+    companion object {
+        val KEY = Key.create<Set<InlayMark>>("sm.InlayMarks")
+    }
 
     override val type: SourceMark.Type
         get() = SourceMark.Type.INLAY

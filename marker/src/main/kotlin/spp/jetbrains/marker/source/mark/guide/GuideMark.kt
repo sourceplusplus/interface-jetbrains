@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.source.mark.guide
 
+import com.intellij.openapi.util.Key
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.tooltip.LiveTooltip
 import spp.jetbrains.marker.source.mark.api.component.tooltip.TextLiveTooltip
@@ -30,6 +31,10 @@ import javax.swing.JPanel
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface GuideMark : SourceMark {
+
+    companion object {
+        val KEY = Key.create<GuideMark>("sm.GuideMark")
+    }
 
     override val type: SourceMark.Type
         get() = SourceMark.Type.GUIDE

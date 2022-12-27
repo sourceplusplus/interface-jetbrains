@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.source.mark.gutter
 
+import com.intellij.openapi.util.Key
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
 
@@ -26,6 +27,10 @@ import spp.jetbrains.marker.source.mark.gutter.config.GutterMarkConfiguration
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface GutterMark : SourceMark {
+
+    companion object {
+        val KEY = Key.create<GutterMark>("sm.GutterMark")
+    }
 
     override val type: SourceMark.Type
         get() = SourceMark.Type.GUTTER

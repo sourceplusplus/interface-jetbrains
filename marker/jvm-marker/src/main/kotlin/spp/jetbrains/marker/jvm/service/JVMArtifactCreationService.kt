@@ -33,10 +33,11 @@ import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import java.util.*
 
@@ -69,12 +70,12 @@ class JVMArtifactCreationService : IArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean
     ): MethodGutterMark? {
-        var gutterMark = element.getUserData(SourceKey.GutterMark) as MethodGutterMark?
+        var gutterMark = element.getUserData(GutterMark.KEY) as MethodGutterMark?
         if (gutterMark == null) {
             gutterMark = fileMarker.getMethodSourceMark(element.parent, SourceMark.Type.GUTTER) as MethodGutterMark?
             if (gutterMark != null) {
                 if (gutterMark.updatePsiMethod(element.parent as PsiNameIdentifierOwner)) {
-                    element.putUserData(SourceKey.GutterMark, gutterMark)
+                    element.putUserData(GutterMark.KEY, gutterMark)
                 } else {
                     gutterMark = null
                 }
@@ -95,7 +96,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
         } else {
             return when {
                 fileMarker.removeIfInvalid(gutterMark) -> {
-                    element.putUserData(SourceKey.GutterMark, null)
+                    element.putUserData(GutterMark.KEY, null)
                     null
                 }
 
@@ -183,7 +184,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             lookupExpression = lookupExpression.firstChild
         }
 
-        var inlayMark = lookupExpression.getUserData(SourceKey.InlayMarks)?.firstOrNull() as ExpressionInlayMark?
+        var inlayMark = lookupExpression.getUserData(InlayMark.KEY)?.firstOrNull() as ExpressionInlayMark?
         if (inlayMark == null) {
             inlayMark = fileMarker.getExpressionSourceMark(
                 lookupExpression,
@@ -196,8 +197,8 @@ class JVMArtifactCreationService : IArtifactCreationService {
                     )
                 ) {
                     lookupExpression.putUserData(
-                        SourceKey.InlayMarks,
-                        lookupExpression.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: setOf(inlayMark)
+                        InlayMark.KEY,
+                        lookupExpression.getUserData(InlayMark.KEY)?.plus(inlayMark) ?: setOf(inlayMark)
                     )
                 } else {
                     inlayMark = null
@@ -218,7 +219,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
-                lookupExpression.putUserData(SourceKey.InlayMarks, null)
+                lookupExpression.putUserData(InlayMark.KEY, null)
                 null
             } else {
                 inlayMark
@@ -232,7 +233,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
         autoApply: Boolean = false
     ): ExpressionInlayMark? {
         log.trace("getOrCreateExpressionInlayMark: $element")
-        var inlayMark = element.getUserData(SourceKey.InlayMarks)?.firstOrNull() as ExpressionInlayMark?
+        var inlayMark = element.getUserData(InlayMark.KEY)?.firstOrNull() as ExpressionInlayMark?
         if (inlayMark == null) {
             inlayMark = fileMarker.getExpressionSourceMark(
                 element,
@@ -241,8 +242,8 @@ class JVMArtifactCreationService : IArtifactCreationService {
             if (inlayMark != null) {
                 if (inlayMark.updatePsiExpression(element, JVMMarkerUtils.getFullyQualifiedName(element))) {
                     element.putUserData(
-                        SourceKey.InlayMarks,
-                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: setOf(inlayMark)
+                        InlayMark.KEY,
+                        element.getUserData(InlayMark.KEY)?.plus(inlayMark) ?: setOf(inlayMark)
                     )
                 } else {
                     inlayMark = null
@@ -267,7 +268,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
-                element.putUserData(SourceKey.InlayMarks, null)
+                element.putUserData(InlayMark.KEY, null)
                 null
             } else {
                 inlayMark
@@ -323,7 +324,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             lookupExpression = lookupExpression.firstChild
         }
 
-        var gutterMark = lookupExpression.getUserData(SourceKey.GutterMark) as ExpressionGutterMark?
+        var gutterMark = lookupExpression.getUserData(GutterMark.KEY) as ExpressionGutterMark?
         if (gutterMark == null) {
             gutterMark = fileMarker.getExpressionSourceMark(
                 lookupExpression,
@@ -335,7 +336,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
                         JVMMarkerUtils.getFullyQualifiedName(lookupExpression)
                     )
                 ) {
-                    lookupExpression.putUserData(SourceKey.GutterMark, gutterMark)
+                    lookupExpression.putUserData(GutterMark.KEY, gutterMark)
                 } else {
                     gutterMark = null
                 }
@@ -355,7 +356,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(gutterMark)) {
-                lookupExpression.putUserData(SourceKey.InlayMarks, null)
+                lookupExpression.putUserData(InlayMark.KEY, null)
                 null
             } else {
                 gutterMark

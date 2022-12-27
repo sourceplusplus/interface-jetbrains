@@ -37,7 +37,7 @@ import spp.jetbrains.marker.service.ArtifactVersionService
 import spp.jetbrains.marker.service.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.CODE_CHANGED
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 
@@ -128,7 +128,7 @@ class PluginSourceMarkEventListener(val project: Project) : CoroutineVerticle(),
         //detect changed guide marks
         val changedElements = ArtifactVersionService.getChangedFunctions(fileMarker.psiFile)
         val changedGuideMarks = changedElements
-            .mapNotNull { it.nameIdentifier?.getUserData(SourceKey.GuideMark) }
+            .mapNotNull { it.nameIdentifier?.getUserData(GuideMark.KEY) }
         val noLongerChangedGuideMarks = fileMarker.getGuideMarks()
             .filter { it.getUserData(VCS_MODIFIED) == true }
             .filter { it !in changedGuideMarks }

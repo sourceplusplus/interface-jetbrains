@@ -24,7 +24,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.util.Function
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.service.ArtifactMarkService
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 
 /**
@@ -36,7 +35,7 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        val gutterMark = element.getUserData(SourceKey.GutterMark) ?: return null
+        val gutterMark = element.getUserData(GutterMark.KEY) ?: return null
         if (!gutterMark.isVisible()) {
             return null
         }
@@ -44,7 +43,7 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
         if (gutterMark.configuration.activateOnMouseClick) {
             navigationHandler = GutterIconNavigationHandler { _, _ ->
-                element.getUserData(SourceKey.GutterMark)!!.displayPopup()
+                element.getUserData(GutterMark.KEY)!!.displayPopup()
             }
         }
         return LineMarkerInfo(

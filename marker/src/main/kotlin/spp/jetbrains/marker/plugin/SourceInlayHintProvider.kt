@@ -40,7 +40,6 @@ import spp.jetbrains.marker.service.ArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.MARK_REMOVED
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode.*
@@ -151,7 +150,7 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
     ): InlayHintsCollector {
         return object : FactoryInlayHintsCollector(editor) {
             override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
-                element.getUserData(SourceKey.InlayMarks).orEmpty().forEach { inlayMark ->
+                element.getUserData(InlayMark.KEY).orEmpty().forEach { inlayMark ->
                     displayInlayMark(inlayMark, element)
                 }
                 latestInlayMarkAddedAt = System.currentTimeMillis()

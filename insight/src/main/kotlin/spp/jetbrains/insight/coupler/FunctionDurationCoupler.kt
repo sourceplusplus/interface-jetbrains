@@ -34,7 +34,6 @@ import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.safeLaunch
@@ -118,12 +117,15 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
                 val responseTime = metricsData.getLong("value")
                 val currentDuration = guideMark.getUserData(FUNCTION_DURATION)?.value
                 if (currentDuration != responseTime) {
-                    guideMark.putUserData(FUNCTION_DURATION, InsightValue.of(InsightType.FUNCTION_DURATION, responseTime))
+                    guideMark.putUserData(
+                        FUNCTION_DURATION,
+                        InsightValue.of(InsightType.FUNCTION_DURATION, responseTime)
+                    )
                     log.info("Set method duration from $currentDuration to $responseTime. Artifact: ${guideMark.artifactQualifiedName}")
 
                     //propagate to callers
                     ArtifactScopeService.getCallerFunctions(guideMark.getPsiElement())
-                        .mapNotNull { it.nameIdentifier?.getUserData(SourceKey.GuideMark) }
+                        .mapNotNull { it.nameIdentifier?.getUserData(GuideMark.KEY) }
                         .filterIsInstance<MethodGuideMark>().forEach {
                             queueForInsights(it)
                         }
@@ -217,7 +219,7 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
     private fun propagateChange(function: PsiNameIdentifierOwner) {
         val callerMethods = ArtifactScopeService.getCallerFunctions(function)
         callerMethods.forEach { callerMethod ->
-            callerMethod.nameIdentifier?.getUserData(SourceKey.GuideMark)?.let { callerMark ->
+            callerMethod.nameIdentifier?.getUserData(GuideMark.KEY)?.let { callerMark ->
                 queueForInsights(callerMark as MethodGuideMark)
             }
         }

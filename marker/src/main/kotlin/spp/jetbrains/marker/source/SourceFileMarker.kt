@@ -34,9 +34,6 @@ import spp.jetbrains.marker.SourceMarkerUtils.doOnDispatchThread
 import spp.jetbrains.marker.source.mark.api.*
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
-import spp.jetbrains.marker.source.mark.api.key.SourceKey.Companion.GutterMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey.Companion.InlayMarks
 import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
 import spp.jetbrains.marker.source.mark.guide.ExpressionGuideMark
 import spp.jetbrains.marker.source.mark.guide.GuideMark
@@ -177,23 +174,23 @@ open class SourceFileMarker(val psiFile: PsiFile) : SourceMarkProvider {
         sourceMark.triggerEvent(SourceMarkEvent(sourceMark, SourceMarkEventCode.MARK_BEFORE_ADDED))
         if (sourceMarks.add(sourceMark)) {
             when (sourceMark) {
-                is ClassGutterMark -> sourceMark.getNameIdentifier().putUserData(GutterMark, sourceMark)
-                is MethodGutterMark -> sourceMark.getNameIdentifier().putUserData(GutterMark, sourceMark)
-                is ExpressionGutterMark -> sourceMark.getPsiElement().putUserData(GutterMark, sourceMark)
+                is ClassGutterMark -> sourceMark.getNameIdentifier().putUserData(GutterMark.KEY, sourceMark)
+                is MethodGutterMark -> sourceMark.getNameIdentifier().putUserData(GutterMark.KEY, sourceMark)
+                is ExpressionGutterMark -> sourceMark.getPsiElement().putUserData(GutterMark.KEY, sourceMark)
 
                 is MethodInlayMark -> sourceMark.getNameIdentifier().putUserData(
-                    InlayMarks,
-                    sourceMark.getNameIdentifier().getUserData(InlayMarks)?.plus(sourceMark) ?: setOf(sourceMark)
+                    InlayMark.KEY,
+                    sourceMark.getNameIdentifier().getUserData(InlayMark.KEY)?.plus(sourceMark) ?: setOf(sourceMark)
                 )
 
                 is ExpressionInlayMark -> sourceMark.getPsiElement().putUserData(
-                    InlayMarks,
-                    sourceMark.getPsiElement().getUserData(InlayMarks)?.plus(sourceMark) ?: setOf(sourceMark)
+                    InlayMark.KEY,
+                    sourceMark.getPsiElement().getUserData(InlayMark.KEY)?.plus(sourceMark) ?: setOf(sourceMark)
                 )
 
-                is ClassGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
-                is MethodGuideMark -> sourceMark.getNameIdentifier().putUserData(SourceKey.GuideMark, sourceMark)
-                is ExpressionGuideMark -> sourceMark.getPsiElement().putUserData(SourceKey.GuideMark, sourceMark)
+                is ClassGuideMark -> sourceMark.getNameIdentifier().putUserData(GuideMark.KEY, sourceMark)
+                is MethodGuideMark -> sourceMark.getNameIdentifier().putUserData(GuideMark.KEY, sourceMark)
+                is ExpressionGuideMark -> sourceMark.getPsiElement().putUserData(GuideMark.KEY, sourceMark)
             }
 
             if (autoRefresh) refresh()

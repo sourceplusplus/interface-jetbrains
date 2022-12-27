@@ -17,9 +17,6 @@
 package spp.jetbrains.marker.source.mark.api.key
 
 import com.intellij.openapi.util.Key
-import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.marker.source.mark.gutter.GutterMark
-import spp.jetbrains.marker.source.mark.inlay.InlayMark
 
 /**
  * Used to associate custom data to PSI elements.
@@ -29,10 +26,6 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
  */
 data class SourceKey<T>(val name: String) {
     companion object {
-        val GutterMark = Key.create<GutterMark>("sm.GutterMark")
-        val InlayMarks = Key.create<Set<InlayMark>>("sm.InlayMarks")
-        val GuideMark = Key.create<GuideMark>("sm.GuideMark")
-
         private val keyCache = mutableMapOf<String, Key<*>>()
     }
 

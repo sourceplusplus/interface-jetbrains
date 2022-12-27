@@ -23,10 +23,11 @@ import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
+import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.MethodInlayMark
 import java.util.*
 
@@ -63,7 +64,7 @@ class PythonArtifactCreationService : IArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean = false
     ): ExpressionGutterMark? {
-        var gutterMark = element.getUserData(SourceKey.GutterMark) as ExpressionGutterMark?
+        var gutterMark = element.getUserData(GutterMark.KEY) as ExpressionGutterMark?
         if (gutterMark == null) {
             gutterMark = fileMarker.getExpressionSourceMark(
                 element,
@@ -71,7 +72,7 @@ class PythonArtifactCreationService : IArtifactCreationService {
             ) as ExpressionGutterMark?
             if (gutterMark != null) {
                 if (gutterMark.updatePsiExpression(element, ArtifactNamingService.getFullyQualifiedName(element))) {
-                    element.putUserData(SourceKey.GutterMark, gutterMark)
+                    element.putUserData(GutterMark.KEY, gutterMark)
                 } else {
                     gutterMark = null
                 }
@@ -91,7 +92,7 @@ class PythonArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(gutterMark)) {
-                element.putUserData(SourceKey.InlayMarks, null)
+                element.putUserData(InlayMark.KEY, null)
                 null
             } else {
                 gutterMark
@@ -159,7 +160,7 @@ class PythonArtifactCreationService : IArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean = false
     ): ExpressionInlayMark? {
-        var inlayMark = element.getUserData(SourceKey.InlayMarks)?.firstOrNull() as ExpressionInlayMark?
+        var inlayMark = element.getUserData(InlayMark.KEY)?.firstOrNull() as ExpressionInlayMark?
         if (inlayMark == null) {
             inlayMark = fileMarker.getExpressionSourceMark(
                 element,
@@ -168,8 +169,8 @@ class PythonArtifactCreationService : IArtifactCreationService {
             if (inlayMark != null) {
                 if (inlayMark.updatePsiExpression(element, ArtifactNamingService.getFullyQualifiedName(element))) {
                     element.putUserData(
-                        SourceKey.InlayMarks,
-                        element.getUserData(SourceKey.InlayMarks)?.plus(inlayMark) ?: setOf(inlayMark)
+                        InlayMark.KEY,
+                        element.getUserData(InlayMark.KEY)?.plus(inlayMark) ?: setOf(inlayMark)
                     )
                 } else {
                     inlayMark = null
@@ -190,7 +191,7 @@ class PythonArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
-                element.putUserData(SourceKey.InlayMarks, null)
+                element.putUserData(InlayMark.KEY, null)
                 null
             } else {
                 inlayMark
