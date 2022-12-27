@@ -19,12 +19,14 @@ package spp.jetbrains.insight.pass.pathset
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
+import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.service.getFunctions
+import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.insight.InsightPassProvider
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
-import spp.jetbrains.marker.model.CallArtifact
-import spp.jetbrains.marker.model.IfArtifact
 import spp.jetbrains.marker.py.PythonLanguageProvider
 import spp.jetbrains.marker.service.*
 

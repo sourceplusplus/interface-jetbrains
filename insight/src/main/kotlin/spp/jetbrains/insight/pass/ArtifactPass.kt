@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.insight.pass
 
-import spp.jetbrains.marker.model.ArtifactElement
+import spp.jetbrains.artifact.model.ArtifactElement
 
 /**
  * A pass that analyzes an [ArtifactElement] and adds data to it.

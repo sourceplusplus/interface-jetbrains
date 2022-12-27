@@ -14,10 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.model
+package spp.jetbrains
 
-import com.intellij.psi.PsiElement
+import com.intellij.openapi.util.Key
 
-abstract class ArtifactLiteralValue(psiElement: PsiElement) : ArtifactElement(psiElement) {
-    abstract val value: Any?
+/**
+ * Used to associate custom data to PSI elements.
+ *
+ * @since 0.1.0
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
+data class SourceKey<T>(val name: String) {
+    companion object {
+        private val keyCache = mutableMapOf<String, Key<*>>()
+    }
+
+    fun asPsiKey(): Key<T> {
+        return keyCache.computeIfAbsent(name) { Key.create<T>(it) } as Key<T>
+    }
 }

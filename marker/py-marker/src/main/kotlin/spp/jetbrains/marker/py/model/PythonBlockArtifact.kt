@@ -17,7 +17,7 @@
 package spp.jetbrains.marker.py.model
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.model.BlockArtifact
+import spp.jetbrains.artifact.model.BlockArtifact
 
 class PythonBlockArtifact(private val psiElement: PsiElement) : BlockArtifact(psiElement) {
 

@@ -16,12 +16,12 @@
  */
 package spp.jetbrains.insight
 
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.BlockArtifact
-import spp.jetbrains.marker.model.FunctionArtifact
-import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.service.getParentFunction
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.BlockArtifact
+import spp.jetbrains.artifact.model.FunctionArtifact
+import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.service.getParentFunction
+import spp.jetbrains.artifact.service.toArtifact
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors

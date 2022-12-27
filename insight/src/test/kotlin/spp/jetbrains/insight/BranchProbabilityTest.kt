@@ -19,6 +19,9 @@ package spp.jetbrains.insight
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
+import spp.jetbrains.artifact.service.getCalls
+import spp.jetbrains.artifact.service.getChildIfs
+import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider

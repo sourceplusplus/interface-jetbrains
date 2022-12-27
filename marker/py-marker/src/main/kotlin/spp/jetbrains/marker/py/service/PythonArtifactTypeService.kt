@@ -20,8 +20,8 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.jetbrains.python.psi.*
+import spp.jetbrains.artifact.service.define.IArtifactTypeService
 import spp.jetbrains.marker.SourceMarkerUtils.getLineNumber
-import spp.jetbrains.marker.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 /**

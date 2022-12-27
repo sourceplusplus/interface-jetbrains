@@ -23,9 +23,9 @@ import com.intellij.psi.util.descendantsOfType
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import kotlinx.coroutines.runBlocking
+import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.py.PythonLanguageProvider
-import spp.jetbrains.marker.service.ArtifactScopeService
 
 @TestDataPath("\$CONTENT_ROOT/testData/scope/")
 class PythonArtifactScopeServiceTest : BasePlatformTestCase() {

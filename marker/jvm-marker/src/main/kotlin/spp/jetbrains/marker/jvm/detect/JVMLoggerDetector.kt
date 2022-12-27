@@ -31,7 +31,7 @@ import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.path.GrMethodCallExpression
-import spp.jetbrains.marker.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER

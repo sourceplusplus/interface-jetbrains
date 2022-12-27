@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service
+package spp.jetbrains.artifact.service
 
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
-import spp.jetbrains.marker.service.define.IArtifactTypeService
+import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
+import spp.jetbrains.artifact.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
 
 @Suppress("TooManyFunctions") // public API

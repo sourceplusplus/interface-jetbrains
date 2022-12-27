@@ -19,6 +19,9 @@ package spp.jetbrains.marker.py
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.psi.PyFile
 import spp.jetbrains.UserData
+import spp.jetbrains.artifact.service.ArtifactModelService
+import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys

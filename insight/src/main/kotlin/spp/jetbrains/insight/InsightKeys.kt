@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.insight
 
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
+import spp.jetbrains.SourceKey
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 

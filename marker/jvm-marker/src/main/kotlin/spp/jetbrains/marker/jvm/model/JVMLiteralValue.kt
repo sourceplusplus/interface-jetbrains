@@ -22,8 +22,8 @@ import com.intellij.psi.util.elementType
 import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.stubs.ConstantValueKind.*
 import org.jetbrains.kotlin.psi.stubs.elements.KtConstantExpressionElementType.Companion.kindToConstantElementType
-import spp.jetbrains.marker.model.ArtifactLiteralValue
-import spp.jetbrains.marker.service.isKotlin
+import spp.jetbrains.artifact.model.ArtifactLiteralValue
+import spp.jetbrains.artifact.service.isKotlin
 
 class JVMLiteralValue(private val psiElement: PsiElement) : ArtifactLiteralValue(psiElement) {
 

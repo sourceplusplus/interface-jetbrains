@@ -16,11 +16,11 @@
  */
 package spp.jetbrains.insight.pass.path
 
+import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.marker.model.CallArtifact
-import spp.jetbrains.marker.model.FunctionArtifact
 import spp.protocol.insight.InsightType.PATH_IS_RECURSIVE
 import spp.protocol.insight.InsightValue
 

@@ -20,7 +20,7 @@ import com.intellij.codeInsight.hints.InlayHintsSink
 import com.intellij.codeInsight.hints.presentation.InlayPresentation
 import com.intellij.psi.PsiElement
 import com.intellij.ui.treeStructure.SimpleNode
-import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
+import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactMarkService
 import spp.jetbrains.marker.source.mark.inlay.config.InlayMarkVirtualText
 import spp.protocol.artifact.ArtifactLanguage

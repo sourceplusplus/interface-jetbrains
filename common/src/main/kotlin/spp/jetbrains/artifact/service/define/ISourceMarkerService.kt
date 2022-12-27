@@ -14,9 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.model
+package spp.jetbrains.artifact.service.define
 
-interface ControlStructureArtifact {
-    val condition: ArtifactElement?
-    val childArtifacts: List<ArtifactElement>
-}
+interface ISourceMarkerService

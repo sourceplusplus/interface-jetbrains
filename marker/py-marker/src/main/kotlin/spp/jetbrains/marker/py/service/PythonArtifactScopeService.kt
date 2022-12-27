@@ -39,9 +39,9 @@ import com.jetbrains.python.psi.PyCallExpression
 import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyIfStatement
 import com.jetbrains.python.psi.PyReferenceExpression
+import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
-import spp.jetbrains.marker.service.ArtifactTypeService
-import spp.jetbrains.marker.service.define.IArtifactScopeService
 
 /**
  * Used to determine the scope of Python artifacts.

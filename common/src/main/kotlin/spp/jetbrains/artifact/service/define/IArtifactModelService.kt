@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service
+package spp.jetbrains.artifact.service.define
 
 import com.intellij.psi.PsiElement
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
-import spp.jetbrains.marker.service.define.IArtifactModelService
+import spp.jetbrains.artifact.model.ArtifactElement
 
 /**
  * Language-agnostic artifact model service.
@@ -27,15 +25,7 @@ import spp.jetbrains.marker.service.define.IArtifactModelService
  * @since 0.7.5
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-object ArtifactModelService : AbstractSourceMarkerService<IArtifactModelService>(), IArtifactModelService {
+interface IArtifactModelService : ISourceMarkerService {
 
-    override fun toArtifact(element: PsiElement): ArtifactElement? {
-        return getService(element.language).toArtifact(element)
-    }
-}
-
-// Extensions
-
-fun PsiElement?.toArtifact(): ArtifactElement? {
-    return this?.let { ArtifactModelService.toArtifact(it) }
+    fun toArtifact(element: PsiElement): ArtifactElement?
 }

@@ -17,9 +17,9 @@
 package spp.jetbrains.marker.py.model
 
 import com.jetbrains.python.psi.PyBinaryExpression
-import spp.jetbrains.marker.model.ArtifactBinaryExpression
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.service.ArtifactModelService
+import spp.jetbrains.artifact.model.ArtifactBinaryExpression
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.service.ArtifactModelService
 
 class PythonBinaryExpression(private val psiElement: PyBinaryExpression) : ArtifactBinaryExpression(psiElement) {
 

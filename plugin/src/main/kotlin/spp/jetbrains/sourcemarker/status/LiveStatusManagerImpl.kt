@@ -24,6 +24,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Vertx
 import spp.jetbrains.UserData
+import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS
@@ -33,8 +35,6 @@ import spp.jetbrains.marker.SourceMarkerKeys.VIEW_EVENT_LISTENERS
 import spp.jetbrains.marker.SourceMarkerKeys.VIEW_SUBSCRIPTION_ID
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.service.ArtifactNamingService
-import spp.jetbrains.marker.service.ArtifactScopeService
-import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration

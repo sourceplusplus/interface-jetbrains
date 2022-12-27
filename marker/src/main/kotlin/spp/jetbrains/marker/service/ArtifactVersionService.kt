@@ -43,6 +43,7 @@ import com.intellij.util.Function
 import com.intellij.util.SmartList
 import com.intellij.util.concurrency.FutureResult
 import com.intellij.util.containers.ContainerUtil
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import java.util.*
 
 /**

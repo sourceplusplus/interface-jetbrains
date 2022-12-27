@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.insight
 
-import spp.jetbrains.marker.model.ArtifactElement
+import spp.jetbrains.artifact.model.ArtifactElement
 import spp.protocol.insight.InsightValue
 
 fun ArtifactElement.getInsights(): List<InsightValue<*>> {

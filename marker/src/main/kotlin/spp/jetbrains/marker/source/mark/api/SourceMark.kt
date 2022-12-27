@@ -43,6 +43,7 @@ import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.ui.JBUI
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.SourceKey
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerUtils.doOnDispatchThread
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
@@ -51,7 +52,6 @@ import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
 import spp.jetbrains.marker.source.mark.api.event.*
-import spp.jetbrains.marker.source.mark.api.key.SourceKey
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.event.GutterMarkEventCode

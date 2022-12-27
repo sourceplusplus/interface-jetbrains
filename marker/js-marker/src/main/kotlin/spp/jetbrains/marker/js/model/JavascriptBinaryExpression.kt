@@ -17,9 +17,9 @@
 package spp.jetbrains.marker.js.model
 
 import com.intellij.lang.javascript.psi.JSBinaryExpression
-import spp.jetbrains.marker.model.ArtifactBinaryExpression
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.service.ArtifactModelService
+import spp.jetbrains.artifact.model.ArtifactBinaryExpression
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.service.ArtifactModelService
 
 class JavascriptBinaryExpression(private val psiElement: JSBinaryExpression) : ArtifactBinaryExpression(psiElement) {
 

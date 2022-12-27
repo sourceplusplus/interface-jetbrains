@@ -19,9 +19,9 @@ package spp.jetbrains.marker.jvm.model
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiIfStatement
 import org.jetbrains.kotlin.psi.KtIfExpression
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.IfArtifact
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class JVMIfArtifact(private val psiElement: PsiElement) : IfArtifact(psiElement) {
 

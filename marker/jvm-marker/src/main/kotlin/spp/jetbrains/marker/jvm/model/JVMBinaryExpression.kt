@@ -19,10 +19,10 @@ package spp.jetbrains.marker.jvm.model
 import com.intellij.psi.PsiBinaryExpression
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.psi.KtBinaryExpression
-import spp.jetbrains.marker.model.ArtifactBinaryExpression
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.service.isKotlin
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactBinaryExpression
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.service.isKotlin
+import spp.jetbrains.artifact.service.toArtifact
 
 class JVMBinaryExpression(private val psiElement: PsiElement) : ArtifactBinaryExpression(psiElement) {
 

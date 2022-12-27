@@ -22,8 +22,8 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.service.ArtifactNamingService
-import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent

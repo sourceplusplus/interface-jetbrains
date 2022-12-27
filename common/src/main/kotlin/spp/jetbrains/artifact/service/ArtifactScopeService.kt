@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.service
+package spp.jetbrains.artifact.service
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiNamedElement
-import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
-import spp.jetbrains.marker.service.define.IArtifactScopeService
+import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
+import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 

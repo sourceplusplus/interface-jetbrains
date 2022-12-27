@@ -18,10 +18,10 @@ package spp.jetbrains.marker.py.model
 
 import com.jetbrains.python.psi.PyCallExpression
 import com.jetbrains.python.psi.PyReferenceExpression
-import spp.jetbrains.marker.model.ArtifactElement
-import spp.jetbrains.marker.model.CallArtifact
-import spp.jetbrains.marker.model.FunctionArtifact
-import spp.jetbrains.marker.service.toArtifact
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.FunctionArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class PythonCallArtifact(private val psiElement: PyCallExpression) : CallArtifact(psiElement) {
 
