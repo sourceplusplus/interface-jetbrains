@@ -22,7 +22,6 @@ import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiNamedElement
 import spp.jetbrains.marker.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
-import spp.jetbrains.marker.source.SourceFileMarker
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 
@@ -67,8 +66,8 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
         return getService(element.language).getCallerFunctions(element, includeIndirect)
     }
 
-    override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
-        return getService(fileMarker.psiFile.language).getScopeVariables(fileMarker, lineNumber)
+    override fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String> {
+        return getService(file.language).getScopeVariables(file, lineNumber)
     }
 
     fun isOnFunction(qualifiedName: ArtifactQualifiedName): Boolean {

@@ -42,7 +42,6 @@ import com.jetbrains.python.psi.PyReferenceExpression
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
-import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * Used to determine the scope of Python artifacts.
@@ -112,8 +111,8 @@ class PythonArtifactScopeService : IArtifactScopeService {
         })
     }
 
-    override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
-        val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) ?: return emptyList()
+    override fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String> {
+        val position = SourceMarkerUtils.getElementAtLine(file, lineNumber) ?: return emptyList()
         val scope = ScopeUtil.getScopeOwner(position) ?: return emptyList()
         return ControlFlowCache.getScope(scope).namedElements.mapNotNull { it.name }
     }

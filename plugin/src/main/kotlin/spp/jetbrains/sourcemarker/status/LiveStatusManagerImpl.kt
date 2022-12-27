@@ -142,7 +142,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
             val statusBar = BreakpointStatusBar(
                 location,
-                ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
+                ArtifactScopeService.getScopeVariables(fileMarker.psiFile, lineNumber),
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
@@ -183,7 +183,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
             val statusBar = LogStatusBar(
                 location,
-                ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
+                ArtifactScopeService.getScopeVariables(fileMarker.psiFile, lineNumber),
                 inlayMark
             )
 
@@ -221,7 +221,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
             val statusBar = MeterStatusBar(
                 location,
-                ArtifactScopeService.getScopeVariables(fileMarker, lineNumber),
+                ArtifactScopeService.getScopeVariables(fileMarker.psiFile, lineNumber),
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
@@ -327,7 +327,7 @@ class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatus
 
                     val statusBar = LogStatusBar(
                         liveLog.location,
-                        ArtifactScopeService.getScopeVariables(fileMarker, liveLog.location.line),
+                        ArtifactScopeService.getScopeVariables(fileMarker.psiFile, liveLog.location.line),
                         inlayMark
                     )
                     inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)

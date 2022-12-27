@@ -20,7 +20,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiNamedElement
-import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * todo: description.
@@ -44,8 +43,8 @@ interface IArtifactScopeService : ISourceMarkerService {
     ): List<PsiNameIdentifierOwner>
 
     fun getCallerFunctions(element: PsiElement, includeIndirect: Boolean = false): List<PsiNameIdentifierOwner>
-    fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String>
+    fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String>
     fun isInsideFunction(element: PsiElement): Boolean
     fun isInsideEndlessLoop(element: PsiElement): Boolean = false
-    fun canShowControlBar(psiElement: PsiElement): Boolean = true
+    fun canShowControlBar(element: PsiElement): Boolean = true
 }

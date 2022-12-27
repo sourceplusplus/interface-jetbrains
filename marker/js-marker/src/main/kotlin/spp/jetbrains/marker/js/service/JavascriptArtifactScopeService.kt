@@ -38,7 +38,6 @@ import com.intellij.psi.util.parentOfTypes
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
-import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * Used to determine the scope of JavaScript artifacts.
@@ -108,9 +107,9 @@ class JavascriptArtifactScopeService : IArtifactScopeService {
         })
     }
 
-    override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
+    override fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String> {
         val vars = mutableListOf<JSVariable>()
-        val position = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
+        val position = SourceMarkerUtils.getElementAtLine(file, lineNumber)!!
         JSTreeUtil.processDeclarationsInScope(position, position, { element, _ ->
             if (element is JSVariable) {
                 vars.add(element)

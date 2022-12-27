@@ -43,7 +43,6 @@ import org.joor.Reflect
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.service.ArtifactTypeService
 import spp.jetbrains.marker.service.define.IArtifactScopeService
-import spp.jetbrains.marker.source.SourceFileMarker
 
 /**
  * Used to determine the scope of JVM artifacts.
@@ -135,13 +134,13 @@ class JVMArtifactScopeService : IArtifactScopeService {
         })
     }
 
-    override fun getScopeVariables(fileMarker: SourceFileMarker, lineNumber: Int): List<String> {
+    override fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String> {
         //determine available vars
         var checkLine = lineNumber
         val scopeVars = mutableListOf<String>()
         var minScope: PsiElement? = null
         while (minScope == null) {
-            minScope = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, --checkLine)
+            minScope = SourceMarkerUtils.getElementAtLine(file, --checkLine)
         }
         val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
             override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
@@ -165,14 +164,14 @@ class JVMArtifactScopeService : IArtifactScopeService {
         return parentLoop != null && ControlFlowUtils.isEndlessLoop(parentLoop)
     }
 
-    override fun canShowControlBar(psiElement: PsiElement): Boolean {
-        return when (psiElement::class.java.name) {
+    override fun canShowControlBar(element: PsiElement): Boolean {
+        return when (element::class.java.name) {
             "org.jetbrains.kotlin.psi.KtObjectDeclaration" -> false
             "org.jetbrains.kotlin.psi.KtProperty" -> {
-                Reflect.on(psiElement).call("isLocal").get<Boolean>() == true
+                Reflect.on(element).call("isLocal").get<Boolean>() == true
             }
 
-            else -> super.canShowControlBar(psiElement)
+            else -> super.canShowControlBar(element)
         }
     }
 
