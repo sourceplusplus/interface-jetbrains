@@ -33,7 +33,7 @@ import javax.swing.table.TableCellRenderer
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class TestColumnInfo(name: String) : ColumnInfo<NodeDescriptor<*>, String>(name) {
+class TraceColumnInfo(name: String) : ColumnInfo<NodeDescriptor<*>, String>(name) {
 
     private val formatter = DateTimeFormatter.ofPattern("h:mm:ss a")
         .withZone(ZoneId.systemDefault())

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.service.view.trace.column
+package spp.jetbrains.sourcemarker.service.view.model.column
 
 import com.intellij.util.ui.ColumnInfo
 import spp.protocol.platform.general.ServiceInstance

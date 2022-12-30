@@ -397,7 +397,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 }
             }
             ApplicationManager.getApplication().invokeLater {
-                LiveViewTraceService.getInstance(project).showLiveViewTraceWindow()
+                LiveViewTraceService.getInstance(project).showLiveViewTraceWindow("GET:/high-load-endpoint")
             }
             val viewListener = LiveViewManager(project, config)
             vertx.deployVerticle(viewListener).await()

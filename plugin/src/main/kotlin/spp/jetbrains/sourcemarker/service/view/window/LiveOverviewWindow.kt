@@ -63,10 +63,9 @@ class LiveOverviewWindow(project: Project, service: Service) : LiveViewChartWind
 
         var index = 0
         tabbedPane.tabComponentInsets = JBUI.emptyInsets()
-        tabbedPane.insertTab("Service Avg Response Time (ms)", null, respTimePanel, null, index++)
-//        tabbedPane.insertTab("Service Apdex", null, JPanel(), null, 1)
-        tabbedPane.insertTab("Service Response Time Percentile (ms)", null, respTimePercentilesPanel, null, index++)
-        tabbedPane.insertTab("Service Load (calls/min)", null, loadPanel, null, index++)
-        tabbedPane.insertTab("Success Rate (%)", null, slaPanel, null, index++)
+        tabbedPane.insertTab("Service Response Time (Average)", null, respTimePanel, null, index++)
+        tabbedPane.insertTab("Service Response Time (Percentile)", null, respTimePercentilesPanel, null, index++)
+        tabbedPane.insertTab("Service Success Rate", null, slaPanel, null, index++)
+        tabbedPane.insertTab("Service Throughput", null, loadPanel, null, index++)
     }
 }

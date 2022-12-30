@@ -24,7 +24,7 @@ import com.intellij.util.ui.ListTableModel
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.service.view.trace.column.ServiceInstanceColumnInfo
+import spp.jetbrains.sourcemarker.service.view.model.column.ServiceInstanceColumnInfo
 import spp.protocol.platform.general.Service
 import spp.protocol.platform.general.ServiceInstance
 import java.awt.BorderLayout

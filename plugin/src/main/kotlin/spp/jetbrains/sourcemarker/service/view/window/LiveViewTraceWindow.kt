@@ -25,7 +25,7 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import spp.jetbrains.ScopeExtensions
 import spp.jetbrains.UserData
-import spp.jetbrains.sourcemarker.service.view.trace.CallUsageTableCellRenderer
+import spp.jetbrains.sourcemarker.service.view.trace.renderer.TraceDurationTableCellRenderer
 import spp.jetbrains.sourcemarker.service.view.trace.LiveViewTraceModel
 import spp.jetbrains.sourcemarker.service.view.trace.LiveViewTraceRowSorter
 import spp.jetbrains.sourcemarker.service.view.trace.LiveViewTraceTreeStructure
@@ -44,16 +44,18 @@ import javax.swing.*
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewTraceWindow(val project: Project) : Disposable {
+class LiveViewTraceWindow(
+    private val project: Project,
+    private val endpointName: String
+) : Disposable {
 
     val layoutComponent: JComponent
         get() = component
 
     val component: JPanel = JPanel(BorderLayout())
     private val rootNode = TraceListRootNode(project)
-    private val model = LiveViewTraceModel(
-        LiveViewTraceTreeStructure(project, rootNode)
-    )
+    private val model = LiveViewTraceModel(LiveViewTraceTreeStructure(project, rootNode))
+    val refreshRate = 2000
 
     init {
         Disposer.register(this, model)
@@ -65,33 +67,15 @@ class LiveViewTraceWindow(val project: Project) : Disposable {
             SortOrder.DESCENDING
         )
         rowSorter.sortKeys = listOf(sortKey)
-        table.setDefaultRenderer(Icon::class.java, CallUsageTableCellRenderer())
+        table.setDefaultRenderer(Icon::class.java, TraceDurationTableCellRenderer())
         component.add(table, "Center")
 
         val vertx = UserData.vertx(project)
 
-//        vertx.setPeriodic(2000) {
-//            val trace = Trace(
-//                "key" + System.currentTimeMillis(),
-//                listOf("operationNames" + System.currentTimeMillis()),
-//                1,
-//                Instant.now(),
-//                false,
-//                listOf("traceIds" + System.currentTimeMillis()),
-//                false,
-//                "segmentId" + System.currentTimeMillis(),
-//                mutableMapOf()
-//            )
-//            rootNode.traces.add(trace)
-//            rootNode.children.add(TraceListNode(project, trace))
-//            model.reset()
-//        }
-
         ScopeExtensions.safeRunBlocking(vertx.dispatcher()) {
-            val refreshRate = 2000
             val liveView = UserData.liveViewService(project)!!.addLiveView(
                 LiveView(
-                    entityIds = mutableSetOf("GET:/high-load-endpoint"),
+                    entityIds = mutableSetOf(endpointName),
                     viewConfig = LiveViewConfig("TRACE_VIEW", listOf("endpoint_traces"), refreshRate)
                 )
             ).await()
@@ -102,11 +86,11 @@ class LiveViewTraceWindow(val project: Project) : Disposable {
             consumer.handler {
                 val liveViewEvent = LiveViewEvent(it.body())
                 if (liveView.subscriptionId != liveViewEvent.subscriptionId) return@handler
-                println(liveViewEvent)
+
                 val event = JsonObject(liveViewEvent.metricsData)
                 val trace = Trace(event.getJsonObject("trace"))
                 rootNode.traces.add(trace)
-                model.reset()
+                model.reset() //todo: optimize
             }
         }
     }

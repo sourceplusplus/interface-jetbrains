@@ -25,7 +25,7 @@ import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.SortableColumnModel
 import com.intellij.util.ui.tree.AbstractTreeModel
 import org.jetbrains.concurrency.Promise
-import spp.jetbrains.sourcemarker.service.view.trace.column.TestColumnInfo
+import spp.jetbrains.sourcemarker.service.view.trace.column.TraceColumnInfo
 import spp.jetbrains.sourcemarker.service.view.trace.node.TraceListNode
 import javax.swing.JTree
 import javax.swing.RowSorter
@@ -46,9 +46,9 @@ class LiveViewTraceModel(
 
     companion object {
         val COLUMN_INFOS: Array<ColumnInfo<NodeDescriptor<*>, String>> = arrayOf(
-            TestColumnInfo("Trace"),
-            TestColumnInfo("Duration"),
-            TestColumnInfo("Time"),
+            TraceColumnInfo("Trace"),
+            TraceColumnInfo("Duration"),
+            TraceColumnInfo("Time"),
         )
     }
 

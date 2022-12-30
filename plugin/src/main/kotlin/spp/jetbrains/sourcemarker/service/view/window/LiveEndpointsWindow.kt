@@ -29,7 +29,7 @@ import spp.jetbrains.UserData
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.service.view.LiveViewChartService
 import spp.jetbrains.sourcemarker.service.view.model.ServiceEndpointRow
-import spp.jetbrains.sourcemarker.service.view.trace.column.ServiceEndpointColumnInfo
+import spp.jetbrains.sourcemarker.service.view.model.column.ServiceEndpointColumnInfo
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_CPM
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_SLA

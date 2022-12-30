@@ -34,7 +34,7 @@ import spp.protocol.platform.general.Service
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewChartService(private val project: Project) : Disposable {
+class LiveViewChartService(private val project: Project) : spp.jetbrains.plugin.LiveViewChartService, Disposable {
 
     companion object {
         fun getInstance(project: Project): LiveViewChartService {
@@ -48,6 +48,7 @@ class LiveViewChartService(private val project: Project) : Disposable {
     private var contentManager = toolWindow.contentManager
 
     init {
+        project.putUserData(spp.jetbrains.plugin.LiveViewChartService.KEY, this)
         toolWindow.setTitleActions(listOf(ChangeTimeAction()))
 
 //        val attachedSide = DefaultActionGroup.createPopupGroup { "Attached Side" }
@@ -86,7 +87,7 @@ class LiveViewChartService(private val project: Project) : Disposable {
         contentManager.addContent(endpointsContent)
     }
 
-    fun doThing(endpointName: String) {
+    override fun doThing(endpointName: String) {
         val activityWindow = LiveActivityWindow(project, endpointName)
         val content = ContentFactory.getInstance().createContent(
             activityWindow.layoutComponent,
@@ -96,6 +97,8 @@ class LiveViewChartService(private val project: Project) : Disposable {
         content.setDisposer(activityWindow)
         contentManager.addContent(content)
         contentManager.setSelectedContent(content)
+
+        toolWindow.show()
     }
 
     override fun dispose() = Unit

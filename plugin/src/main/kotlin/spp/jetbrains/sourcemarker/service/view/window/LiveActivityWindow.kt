@@ -36,15 +36,15 @@ class LiveActivityWindow(project: Project, endpointName: String) : LiveViewChart
     init {
         val vertx = UserData.vertx(project)
 
-        val respTimePercentilesChart = setupRespTimePercentileChart(endpointName, vertx)
-        val respTimePercentilesPanel = JPanel()
-        respTimePercentilesPanel.layout = BoxLayout(respTimePercentilesPanel, BoxLayout.Y_AXIS)
-        respTimePercentilesPanel.add(respTimePercentilesChart.component)
-
         val respTimeChart = setupSingleLineChart(endpointName, vertx, Endpoint_RespTime_AVG.asRealtime())
         val respTimePanel = JPanel()
         respTimePanel.layout = BoxLayout(respTimePanel, BoxLayout.Y_AXIS)
         respTimePanel.add(respTimeChart.component)
+
+        val respTimePercentilesChart = setupRespTimePercentileChart(endpointName, vertx)
+        val respTimePercentilesPanel = JPanel()
+        respTimePercentilesPanel.layout = BoxLayout(respTimePercentilesPanel, BoxLayout.Y_AXIS)
+        respTimePercentilesPanel.add(respTimePercentilesChart.component)
 
         val slaChart = setupSingleLineChart(endpointName, vertx, Endpoint_SLA.asRealtime())
         val slaPanel = JPanel()
@@ -58,9 +58,9 @@ class LiveActivityWindow(project: Project, endpointName: String) : LiveViewChart
 
         var index = 0
         tabbedPane.tabComponentInsets = JBUI.emptyInsets()
-        tabbedPane.insertTab("Response Percentile (ms)", null, respTimePercentilesPanel, null, index++)
-        tabbedPane.insertTab("Response Average (ms)", null, respTimePanel, null, index++)
-        tabbedPane.insertTab("SLA (%)", null, slaPanel, null, index++)
-        tabbedPane.insertTab("Load (calls/min)", null, loadPanel, null, index++)
+        tabbedPane.insertTab("Endpoint Response (Average)", null, respTimePanel, null, index++)
+        tabbedPane.insertTab("Endpoint Response (Percentile)", null, respTimePercentilesPanel, null, index++)
+        tabbedPane.insertTab("Endpoint Success Rate", null, slaPanel, null, index++)
+        tabbedPane.insertTab("Endpoint Throughput", null, loadPanel, null, index++)
     }
 }

@@ -61,15 +61,14 @@ class LiveViewTraceService(private val project: Project) : Disposable {
         })
     }
 
-    fun showLiveViewTraceWindow() {
-        val chartsWindow = LiveViewTraceWindow(project)
+    fun showLiveViewTraceWindow(endpointName: String) {
+        val chartsWindow = LiveViewTraceWindow(project, endpointName)
         val content = ContentFactory.getInstance().createContent(
             chartsWindow.layoutComponent,
-            "Endpoint: fail-50-percent",
+            "/" + endpointName.substringAfterLast("/"),
             false
         )
         content.setDisposer(chartsWindow)
-        content.isCloseable = false
         contentManager!!.addContent(content)
     }
 

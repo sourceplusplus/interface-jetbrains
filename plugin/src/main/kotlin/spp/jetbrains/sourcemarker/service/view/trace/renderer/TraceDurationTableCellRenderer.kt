@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.service.view.trace
+package spp.jetbrains.sourcemarker.service.view.trace.renderer
 
-import com.intellij.ui.JBColor
+import com.intellij.ui.DarculaColors
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.render.RenderingUtil
 import com.intellij.util.ui.JBUI
@@ -32,10 +32,18 @@ import javax.swing.table.TableCellRenderer
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class CallUsageTableCellRenderer : JBLabel(), TableCellRenderer {
+class TraceDurationTableCellRenderer : JBLabel(), TableCellRenderer {
 
-    private val SPARK_LINE_COLOR: JBColor
-    private val percentage: PercentageState
+    companion object {
+        const val SPACING_SIZE = 8
+    }
+
+    private val percentage = PercentageState()
+
+    init {
+        border = JBUI.Borders.empty(0, 4)
+        horizontalAlignment = 4
+    }
 
     override fun getTableCellRendererComponent(
         table: JTable,
@@ -55,7 +63,7 @@ class CallUsageTableCellRenderer : JBLabel(), TableCellRenderer {
         percentage.apply {
             this.x = 100
             this.width = 200
-            this.color = Color.red
+            this.color = DarculaColors.RED
         }
         var10001 = this.formatValue(11020)
         comp.text = var10001
@@ -72,9 +80,7 @@ class CallUsageTableCellRenderer : JBLabel(), TableCellRenderer {
         return String.format(var2, *var3.copyOf(var3.size))
     }
 
-    override fun isOpaque(): Boolean {
-        return false
-    }
+    override fun isOpaque(): Boolean = false
 
     override fun paintComponent(g: Graphics) {
         g.color = background
@@ -88,17 +94,11 @@ class CallUsageTableCellRenderer : JBLabel(), TableCellRenderer {
         super.paintComponent(g)
     }
 
-    init {
-        SPARK_LINE_COLOR = JBColor(12769014, 4543843)
-        percentage = PercentageState()
-        border = JBUI.Borders.empty(0, 4)
-        horizontalAlignment = 4
-    }
-
-    private class PercentageState {
-        var x = 0
-        var width = 0
+    private class PercentageState(
+        var x: Int = 0,
+        var width: Int = 0,
         var color: Color? = null
+    ) {
 
         fun updateState(x: Int, width: Int, color: Color?) {
             this.x = x
@@ -109,9 +109,5 @@ class CallUsageTableCellRenderer : JBLabel(), TableCellRenderer {
         fun clear() {
             updateState(0, 0, null as Color?)
         }
-    }
-
-    companion object {
-        const val SPACING_SIZE = 8
     }
 }
