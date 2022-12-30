@@ -35,16 +35,16 @@ class ServiceEndpointColumnInfo(name: String) : ColumnInfo<ServiceEndpointRow, S
                 t.endpoint.name.compareTo(t2.endpoint.name)
             }
 
-            "Load" -> Comparator { t: ServiceEndpointRow, t2: ServiceEndpointRow ->
-                t.cpm.compareTo(t2.cpm)
+            "Latency" -> Comparator { t: ServiceEndpointRow, t2: ServiceEndpointRow ->
+                t.respTimeAvg.compareTo(t2.respTimeAvg)
             }
 
-            "Success Rate" -> Comparator { t: ServiceEndpointRow, t2: ServiceEndpointRow ->
+            "Availability" -> Comparator { t: ServiceEndpointRow, t2: ServiceEndpointRow ->
                 t.sla.compareTo(t2.sla)
             }
 
-            "Response Time" -> Comparator { t: ServiceEndpointRow, t2: ServiceEndpointRow ->
-                t.respTimeAvg.compareTo(t2.respTimeAvg)
+            "Throughput" -> Comparator { t: ServiceEndpointRow, t2: ServiceEndpointRow ->
+                t.cpm.compareTo(t2.cpm)
             }
 
             else -> null
@@ -54,9 +54,9 @@ class ServiceEndpointColumnInfo(name: String) : ColumnInfo<ServiceEndpointRow, S
     override fun valueOf(item: ServiceEndpointRow): String {
         return when (name) {
             "Name" -> item.endpoint.name
-            "Load" -> item.cpm.toDouble().fromPerSecondToPrettyFrequency()
-            "Success Rate" -> item.sla.toString() + "%"
-            "Response Time" -> item.respTimeAvg.toPrettyDuration()
+            "Latency" -> item.respTimeAvg.toPrettyDuration()
+            "Availability" -> item.sla.toString() + "%"
+            "Throughput" -> item.cpm.toDouble().fromPerSecondToPrettyFrequency()
             else -> item.toString()
         }
     }

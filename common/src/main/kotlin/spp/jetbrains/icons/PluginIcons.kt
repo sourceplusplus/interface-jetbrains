@@ -139,4 +139,10 @@ object PluginIcons {
 
     @JvmField
     val squareDashed = IconLoader.getIcon("/icons/square-dashed.svg", PluginIcons::class.java)
+
+    @JvmField
+    val chartMixed = IconLoader.getIcon("/icons/chart-mixed.svg", PluginIcons::class.java)
+
+    @JvmField
+    val clockRotateLeft = IconLoader.getIcon("/icons/clock-rotate-left.svg", PluginIcons::class.java)
 }

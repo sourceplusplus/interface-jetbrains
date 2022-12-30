@@ -66,9 +66,9 @@ class LiveEndpointsWindow(project: Project, service: Service) : LiveViewChartWin
     val model: ListTableModel<ServiceEndpointRow> = ListTableModel<ServiceEndpointRow>(
         arrayOf(
             ServiceEndpointColumnInfo("Name"),
-            ServiceEndpointColumnInfo("Load"),
-            ServiceEndpointColumnInfo("Success Rate"),
-            ServiceEndpointColumnInfo("Response Time")
+            ServiceEndpointColumnInfo("Latency"),
+            ServiceEndpointColumnInfo("Availability"),
+            ServiceEndpointColumnInfo("Throughput")
         ),
         ArrayList(), 0, SortOrder.DESCENDING
     )

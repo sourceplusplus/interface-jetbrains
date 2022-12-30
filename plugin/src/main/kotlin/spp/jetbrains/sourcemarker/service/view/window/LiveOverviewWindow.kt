@@ -21,7 +21,6 @@ import com.intellij.util.ui.JBUI
 import spp.jetbrains.UserData
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.artifact.metrics.MetricType.Companion.Service_RespTime_AVG
-import spp.protocol.artifact.metrics.MetricType.Companion.Service_RespTime_Percentiles
 import spp.protocol.platform.general.Service
 import javax.swing.BoxLayout
 import javax.swing.JPanel
@@ -42,11 +41,6 @@ class LiveOverviewWindow(project: Project, service: Service) : LiveViewChartWind
         respTimePanel.layout = BoxLayout(respTimePanel, BoxLayout.Y_AXIS)
         respTimePanel.add(respTimeChart.component)
 
-        val respTimePercentilesChart = setupRespTimePercentileChart(service.name, vertx, Service_RespTime_Percentiles)
-        val respTimePercentilesPanel = JPanel()
-        respTimePercentilesPanel.layout = BoxLayout(respTimePercentilesPanel, BoxLayout.Y_AXIS)
-        respTimePercentilesPanel.add(respTimePercentilesChart.component)
-
         val slaChart = setupSingleLineChart(
             service.name, vertx, MetricType.Service_SLA
         )
@@ -63,8 +57,7 @@ class LiveOverviewWindow(project: Project, service: Service) : LiveViewChartWind
 
         var index = 0
         tabbedPane.tabComponentInsets = JBUI.emptyInsets()
-        tabbedPane.insertTab("Service Latency (Average)", null, respTimePanel, null, index++)
-        tabbedPane.insertTab("Service Latency (Percentile)", null, respTimePercentilesPanel, null, index++)
+        tabbedPane.insertTab("Service Latency", null, respTimePanel, null, index++)
         tabbedPane.insertTab("Service Availability", null, slaPanel, null, index++)
         tabbedPane.insertTab("Service Throughput", null, loadPanel, null, index++)
     }

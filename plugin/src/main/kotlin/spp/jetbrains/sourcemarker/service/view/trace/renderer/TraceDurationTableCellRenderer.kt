@@ -63,7 +63,7 @@ class TraceDurationTableCellRenderer : JBLabel(), TableCellRenderer {
         percentage.apply {
             this.x = 100
             this.width = 200
-            this.color = DarculaColors.RED
+            this.color = DarculaColors.BLUE
         }
         var10001 = this.formatValue(11020)
         comp.text = var10001

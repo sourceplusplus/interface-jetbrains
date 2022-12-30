@@ -41,11 +41,6 @@ class LiveActivityWindow(project: Project, endpointName: String) : LiveViewChart
         respTimePanel.layout = BoxLayout(respTimePanel, BoxLayout.Y_AXIS)
         respTimePanel.add(respTimeChart.component)
 
-        val respTimePercentilesChart = setupRespTimePercentileChart(endpointName, vertx)
-        val respTimePercentilesPanel = JPanel()
-        respTimePercentilesPanel.layout = BoxLayout(respTimePercentilesPanel, BoxLayout.Y_AXIS)
-        respTimePercentilesPanel.add(respTimePercentilesChart.component)
-
         val slaChart = setupSingleLineChart(endpointName, vertx, Endpoint_SLA.asRealtime())
         val slaPanel = JPanel()
         slaPanel.layout = BoxLayout(slaPanel, BoxLayout.Y_AXIS)
@@ -58,8 +53,7 @@ class LiveActivityWindow(project: Project, endpointName: String) : LiveViewChart
 
         var index = 0
         tabbedPane.tabComponentInsets = JBUI.emptyInsets()
-        tabbedPane.insertTab("Endpoint Latency (Average)", null, respTimePanel, null, index++)
-        tabbedPane.insertTab("Endpoint Latency (Percentile)", null, respTimePercentilesPanel, null, index++)
+        tabbedPane.insertTab("Endpoint Latency", null, respTimePanel, null, index++)
         tabbedPane.insertTab("Endpoint Availability", null, slaPanel, null, index++)
         tabbedPane.insertTab("Endpoint Throughput", null, loadPanel, null, index++)
     }

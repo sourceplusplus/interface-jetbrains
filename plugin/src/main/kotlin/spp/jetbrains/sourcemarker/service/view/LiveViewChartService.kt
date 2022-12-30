@@ -22,6 +22,7 @@ import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentFactory
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.sourcemarker.service.view.action.ChangeChartAction
 import spp.jetbrains.sourcemarker.service.view.action.ChangeTimeAction
 import spp.jetbrains.sourcemarker.service.view.window.LiveActivityWindow
 import spp.jetbrains.sourcemarker.service.view.window.LiveEndpointsWindow
@@ -49,7 +50,12 @@ class LiveViewChartService(private val project: Project) : spp.jetbrains.plugin.
 
     init {
         project.putUserData(spp.jetbrains.plugin.LiveViewChartService.KEY, this)
-        toolWindow.setTitleActions(listOf(ChangeTimeAction()))
+        toolWindow.setTitleActions(
+            listOf(
+                ChangeChartAction(),
+                ChangeTimeAction()
+            )
+        )
 
 //        val attachedSide = DefaultActionGroup.createPopupGroup { "Attached Side" }
 //        toolWindow.setAdditionalGearActions(DefaultActionGroup(attachedSide))

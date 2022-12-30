@@ -28,9 +28,9 @@ import javax.swing.Icon
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ChangeTimeAction : AnAction(PluginIcons.clockRotateLeft) {
+class ChangeChartAction : AnAction(PluginIcons.chartMixed) {
 
-    var selected = "Last 5 Minutes"
+    var selected = "Average"
 
     override fun actionPerformed(e: AnActionEvent) {
         JBPopupFactory.getInstance().createListPopup(
@@ -55,13 +55,8 @@ class ChangeTimeAction : AnAction(PluginIcons.clockRotateLeft) {
 
                 override fun getValues(): MutableList<String> {
                     return listOf(
-                        "Last 5 Minutes",
-                        "Last 15 Minutes",
-                        "Last 30 Minutes",
-                        "Last 1 Hour",
-                        "Last 4 Hours",
-                        "Last 12 Hours",
-                        "Last 24 Hours",
+                        "Average",
+                        "Percentile",
                     ).toMutableList()
                 }
 
