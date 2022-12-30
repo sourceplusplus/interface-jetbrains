@@ -57,7 +57,7 @@ class CallUsageTableCellRenderer : JBLabel(), TableCellRenderer {
             this.width = 200
             this.color = Color.red
         }
-        var10001 = this.formatValue(11020);
+        var10001 = this.formatValue(11020)
         comp.text = var10001
         return this
     }

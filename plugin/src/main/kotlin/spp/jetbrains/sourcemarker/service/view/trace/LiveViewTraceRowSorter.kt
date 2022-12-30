@@ -35,10 +35,7 @@ class LiveViewTraceRowSorter(
 ) : RowSorter<TableModel>() {
 
     private var mySortKey: SortKey? = null
-
-    override fun getModel(): TableModel {
-        return myTreeTable.table.model
-    }
+    override fun getModel(): TableModel = myTreeTable.table.model
 
     override fun toggleSortOrder(column: Int) {
         val sortOrder =
@@ -48,13 +45,8 @@ class LiveViewTraceRowSorter(
         sortKeys = listOf(SortKey(column, sortOrder))
     }
 
-    override fun convertRowIndexToModel(index: Int): Int {
-        return index
-    }
-
-    override fun convertRowIndexToView(index: Int): Int {
-        return index
-    }
+    override fun convertRowIndexToModel(index: Int): Int = index
+    override fun convertRowIndexToView(index: Int): Int = index
 
     override fun getSortKeys(): List<SortKey> {
         return if (mySortKey == null) {
@@ -85,11 +77,11 @@ class LiveViewTraceRowSorter(
         return myTreeTable.tree.rowCount
     }
 
-    override fun modelStructureChanged() {}
-    override fun allRowsChanged() {}
-    override fun rowsInserted(firstRow: Int, endRow: Int) {}
-    override fun rowsDeleted(firstRow: Int, endRow: Int) {}
-    override fun rowsUpdated(firstRow: Int, endRow: Int) {}
+    override fun modelStructureChanged() = Unit
+    override fun allRowsChanged() = Unit
+    override fun rowsInserted(firstRow: Int, endRow: Int) = Unit
+    override fun rowsDeleted(firstRow: Int, endRow: Int) = Unit
+    override fun rowsUpdated(firstRow: Int, endRow: Int) = Unit
     override fun rowsUpdated(firstRow: Int, endRow: Int, column: Int) {}
 
     companion object {

@@ -21,10 +21,8 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.ide.util.treeView.AbstractTreeNode
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import spp.protocol.artifact.trace.Trace
 import spp.protocol.artifact.trace.TraceSpan
 import java.awt.Color
-import java.time.Instant
 
 /**
  * todo: description.
