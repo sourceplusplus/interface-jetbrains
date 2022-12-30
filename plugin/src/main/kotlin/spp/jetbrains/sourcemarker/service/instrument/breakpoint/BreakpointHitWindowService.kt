@@ -17,7 +17,6 @@
 package spp.jetbrains.sourcemarker.service.instrument.breakpoint
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindow
@@ -39,7 +38,6 @@ import spp.protocol.instrument.event.LiveBreakpointHit
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Service
 class BreakpointHitWindowService(private val project: Project) : Disposable {
 
     companion object {

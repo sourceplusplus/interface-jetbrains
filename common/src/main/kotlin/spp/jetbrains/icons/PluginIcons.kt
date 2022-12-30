@@ -121,4 +121,22 @@ object PluginIcons {
 
     @JvmField
     val histogram = IconLoader.getIcon("/icons/histogram.svg", PluginIcons::class.java)
+
+    @JvmField
+    val server = IconLoader.getIcon("/icons/server.svg", PluginIcons::class.java)
+
+    @JvmField
+    val chartArea = IconLoader.getIcon("/icons/chart-area.svg", PluginIcons::class.java)
+
+    @JvmField
+    val earthAmericas = IconLoader.getIcon("/icons/earth-americas.svg", PluginIcons::class.java)
+
+    @JvmField
+    val diagramSubtask = IconLoader.getIcon("/icons/diagram-subtask.svg", PluginIcons::class.java)
+
+    @JvmField
+    val squareCheck = IconLoader.getIcon("/icons/square-check.svg", PluginIcons::class.java)
+
+    @JvmField
+    val squareDashed = IconLoader.getIcon("/icons/square-dashed.svg", PluginIcons::class.java)
 }

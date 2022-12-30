@@ -30,6 +30,8 @@ import spp.protocol.platform.auth.RolePermission
 import spp.protocol.platform.developer.Developer
 import spp.protocol.platform.developer.SelfInfo
 import spp.protocol.platform.general.Service
+import spp.protocol.platform.general.ServiceEndpoint
+import spp.protocol.platform.general.ServiceInstance
 import spp.protocol.platform.status.InstanceConnection
 import spp.protocol.service.LiveManagementService
 
@@ -115,6 +117,14 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
         return Future.failedFuture("Illegal operation")
     }
 
+    override fun getEndpoints(serviceId: String): Future<List<ServiceEndpoint>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getInstances(serviceId: String): Future<List<ServiceInstance>> {
+        TODO("Not yet implemented")
+    }
+
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
@@ -140,6 +150,10 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
             promise.complete(services.map { Service(it.id, it.name) })
         }
         return promise.future()
+    }
+
+    override fun getServices(layer: String?): Future<List<Service>> {
+        TODO("Not yet implemented")
     }
 
     /**

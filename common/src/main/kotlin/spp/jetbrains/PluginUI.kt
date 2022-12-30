@@ -20,6 +20,7 @@ import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
 import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.ui.Gray
+import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.UIUtil.getWindowColor
@@ -29,6 +30,9 @@ import java.awt.Font
 import javax.swing.border.LineBorder
 
 object PluginUI {
+
+    val purple = JBColor("purple", Color(151, 118, 169))
+    val green = JBColor("green", Color(98, 150, 85))
 
     @JvmField
     val LABEL_FOREGROUND_COLOR = Color(152, 118, 170)

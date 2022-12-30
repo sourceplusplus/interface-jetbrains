@@ -65,6 +65,7 @@ import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
+import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.plugin.LiveStatusManager
 import spp.jetbrains.safeLaunch
@@ -78,6 +79,8 @@ import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.service.view.LiveViewChartService
+import spp.jetbrains.sourcemarker.service.view.LiveViewTraceService
 import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
@@ -388,6 +391,14 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 .build(LiveViewService::class.java)
             UserData.liveViewService(project, liveView)
 
+            ServiceBridge.currentServiceConsumer(vertx).handler {
+                ApplicationManager.getApplication().invokeLater {
+                    LiveViewChartService.getInstance(project).showLiveViewChartsWindow(it.body())
+                }
+            }
+            ApplicationManager.getApplication().invokeLater {
+                LiveViewTraceService.getInstance(project).showLiveViewTraceWindow()
+            }
             val viewListener = LiveViewManager(project, config)
             vertx.deployVerticle(viewListener).await()
         } else {
