@@ -58,9 +58,9 @@ class LiveActivityWindow(project: Project, endpointName: String) : LiveViewChart
 
         var index = 0
         tabbedPane.tabComponentInsets = JBUI.emptyInsets()
-        tabbedPane.insertTab("Endpoint Response (Average)", null, respTimePanel, null, index++)
-        tabbedPane.insertTab("Endpoint Response (Percentile)", null, respTimePercentilesPanel, null, index++)
-        tabbedPane.insertTab("Endpoint Success Rate", null, slaPanel, null, index++)
+        tabbedPane.insertTab("Endpoint Latency (Average)", null, respTimePanel, null, index++)
+        tabbedPane.insertTab("Endpoint Latency (Percentile)", null, respTimePercentilesPanel, null, index++)
+        tabbedPane.insertTab("Endpoint Availability", null, slaPanel, null, index++)
         tabbedPane.insertTab("Endpoint Throughput", null, loadPanel, null, index++)
     }
 }
