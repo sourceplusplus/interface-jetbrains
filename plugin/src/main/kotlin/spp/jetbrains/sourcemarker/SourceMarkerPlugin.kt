@@ -73,12 +73,12 @@ import spp.jetbrains.sourcemarker.config.getServicePortNormalized
 import spp.jetbrains.sourcemarker.config.isSsl
 import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
-import spp.jetbrains.sourcemarker.portal.PortalController
 import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.service.view.LiveViewChartServiceImpl
+import spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl
 import spp.jetbrains.sourcemarker.service.view.LiveViewTraceServiceImpl
 import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
@@ -132,6 +132,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         //make sure services are initialized
         LiveViewChartServiceImpl.init(project)
         LiveViewTraceServiceImpl.init(project)
+        LiveViewLogServiceImpl.init(project)
 
         //setup plugin
         safeRunBlocking { getInstance(project).init() }
@@ -216,8 +217,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             }
 
             if (connectedMonitor) {
-                initUI(vertx, config)
-
                 val pluginsPromise = Promise.promise<Nothing>()
                 ProgressManager.getInstance()
                     .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
@@ -587,10 +586,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName, project
             )
         ).await()
-    }
-
-    private suspend fun initUI(vertx: Vertx, config: SourceMarkerConfig) {
-        vertx.deployVerticle(PortalController(project, config)).await()
     }
 
     private suspend fun initMarker(vertx: Vertx) {

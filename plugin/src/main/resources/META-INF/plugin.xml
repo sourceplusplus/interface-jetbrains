@@ -23,6 +23,9 @@
         <projectService
                 serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewChartServiceImpl"/>
         <projectService
+                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl"/>
+
+        <projectService
                 serviceImplementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService"/>
         <editor.linePainter
                 implementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.painter.VariableEditorLinePainter"/>
@@ -81,10 +84,6 @@
                 class="spp.jetbrains.marker.plugin.action.SourceMarkerVisibilityAction"
                 text="SourceMarkVisibility Action" description="SourceMark visibility action">
             <keyboard-shortcut first-keystroke="control shift D" keymap="$default"/>
-        </action>
-        <action id="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
-                class="spp.jetbrains.marker.source.mark.SourceMarkPopupAction"
-                text="SourcePortal Popup Action" description="SourcePortal popup action">
         </action>
 
         <action id="spp.RunCommand" class="liveplugin.implementation.actions.RunPluginAction"

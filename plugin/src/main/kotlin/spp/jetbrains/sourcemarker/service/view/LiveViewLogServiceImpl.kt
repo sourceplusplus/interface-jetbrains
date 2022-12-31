@@ -16,6 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.service.view
 
+import com.intellij.execution.ui.ConsoleView
+import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
@@ -28,8 +30,8 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.plugin.LiveViewTraceService
-import spp.jetbrains.sourcemarker.service.view.window.LiveViewTraceWindow
+import spp.jetbrains.plugin.LiveViewLogService
+import spp.jetbrains.sourcemarker.service.view.window.LiveLogWindow
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
 
@@ -39,20 +41,20 @@ import spp.jetbrains.status.SourceStatusListener
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewTraceServiceImpl(private val project: Project) : LiveViewTraceService, Disposable {
+class LiveViewLogServiceImpl(private val project: Project) : LiveViewLogService, Disposable {
 
     companion object {
         fun init(project: Project) {
-            project.getService(LiveViewTraceServiceImpl::class.java)
+            project.getService(LiveViewLogServiceImpl::class.java)
         }
     }
 
     private var toolWindow: ToolWindow = ToolWindowManager.getInstance(project)
-        .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.diagramSubtask))
+        .registerToolWindow(RegisterToolWindowTask.closable("Live Logs", PluginIcons.messageLines))
     private var contentManager: ContentManager = toolWindow.contentManager
 
     init {
-        project.putUserData(LiveViewTraceService.KEY, this)
+        project.putUserData(LiveViewLogService.KEY, this)
         project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
             if (it == SourceStatus.Ready) {
 //                val vertx = UserData.vertx(project)
@@ -79,18 +81,28 @@ class LiveViewTraceServiceImpl(private val project: Project) : LiveViewTraceServ
         })
     }
 
-    override fun showLiveViewTraceWindow(endpointName: String) = ApplicationManager.getApplication().invokeLater {
-        val chartsWindow = LiveViewTraceWindow(project, endpointName)
-        val content = ContentFactory.getInstance().createContent(
-            chartsWindow.layoutComponent,
-            endpointName,
-            false
-        )
-        content.setDisposer(chartsWindow)
-        contentManager.addContent(content)
-        contentManager.setSelectedContent(content)
+    override fun showInConsole(
+        message: String,
+        consoleTitle: String,
+        project: Project,
+        contentType: ConsoleViewContentType,
+        scrollTo: Int
+    ): ConsoleView {
+        val liveLogWindow = LiveLogWindow(project)
+        ApplicationManager.getApplication().invokeLater {
+            val content = ContentFactory.getInstance().createContent(
+                liveLogWindow.layoutComponent,
+                "Service Logs",
+                false
+            )
+            content.setDisposer(liveLogWindow)
+            contentManager.addContent(content)
+            contentManager.setSelectedContent(content)
 
-        toolWindow.show()
+            toolWindow.show()
+        }
+
+        return liveLogWindow.showInConsole(message, project, contentType, scrollTo)
     }
 
     override fun dispose() = Unit

@@ -145,4 +145,7 @@ object PluginIcons {
 
     @JvmField
     val clockRotateLeft = IconLoader.getIcon("/icons/clock-rotate-left.svg", PluginIcons::class.java)
+
+    @JvmField
+    val messageLines = IconLoader.getIcon("/icons/message-lines.svg", PluginIcons::class.java)
 }

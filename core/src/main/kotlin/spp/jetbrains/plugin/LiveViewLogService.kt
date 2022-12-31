@@ -16,6 +16,8 @@
  */
 package spp.jetbrains.plugin
 
+import com.intellij.execution.ui.ConsoleView
+import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 
@@ -25,15 +27,20 @@ import com.intellij.openapi.util.Key
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LiveViewChartService {
+interface LiveViewLogService {
     companion object {
-        val KEY = Key.create<LiveViewChartService>("SPP_LIVE_VIEW_CHART_SERVICE")
+        val KEY = Key.create<LiveViewLogService>("SPP_LIVE_VIEW_LOG_SERVICE")
 
-        fun getInstance(project: Project): LiveViewChartService {
+        fun getInstance(project: Project): LiveViewLogService {
             return project.getUserData(KEY)!!
         }
     }
 
-    fun showOverview()
-    fun doThing(endpointName: String)
+    fun showInConsole(
+        message: String,
+        consoleTitle: String = "",
+        project: Project,
+        contentType: ConsoleViewContentType = ConsoleViewContentType.NORMAL_OUTPUT,
+        scrollTo: Int = -1
+    ): ConsoleView
 }
