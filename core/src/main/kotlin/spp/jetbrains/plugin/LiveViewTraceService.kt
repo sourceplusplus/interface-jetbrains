@@ -14,29 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.status
+package spp.jetbrains.plugin
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.openapi.util.Pair
 
 /**
- * Service for getting the current status of the Source++ plugin.
+ * todo: description.
  *
+ * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface SourceStatusService {
+interface LiveViewTraceService {
     companion object {
-        val KEY = Key.create<SourceStatusService>("SPP_SOURCE_STATUS_SERVICE")
+        val KEY = Key.create<LiveViewTraceService>("SPP_LIVE_VIEW_TRACE_SERVICE")
 
-        fun getInstance(project: Project): SourceStatusService {
+        fun getInstance(project: Project): LiveViewTraceService {
             return project.getUserData(KEY)!!
         }
     }
 
-    fun isReady(): Boolean
-    fun isConnected(): Boolean
-
-    fun getCurrentStatus(): Pair<SourceStatus, String?>
-    fun update(status: SourceStatus, message: String? = null)
+    fun showLiveViewTraceWindow(endpointName: String)
 }

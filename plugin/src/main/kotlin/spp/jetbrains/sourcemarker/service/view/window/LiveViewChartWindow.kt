@@ -19,6 +19,7 @@ package spp.jetbrains.sourcemarker.service.view.window
 import com.codahale.metrics.Histogram
 import com.codahale.metrics.SlidingWindowReservoir
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.DarculaColors
@@ -27,10 +28,7 @@ import com.intellij.ui.charts.*
 import com.intellij.ui.components.JBTabbedPane
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
 import spp.jetbrains.PluginUI
-import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.sourcemarker.service.view.overlay.ValueDotPainter
 import spp.protocol.artifact.metrics.MetricType
@@ -59,6 +57,7 @@ import javax.swing.SwingConstants
  */
 open class LiveViewChartWindow(val project: Project) : Disposable {
 
+    private val log = logger<LiveViewChartWindow>()
     private val formatter = DateTimeFormatterBuilder()
         .appendPattern("yyyyMMddHHmm")
         .toFormatter()
@@ -191,14 +190,12 @@ open class LiveViewChartWindow(val project: Project) : Disposable {
         val chart = respTimePercentileChart(entityId, metricType)
         val histogram = Histogram(SlidingWindowReservoir(keepSize))
 
-        safeRunBlocking(vertx.dispatcher()) {
-            val liveView = UserData.liveViewService(project)!!.addLiveView(
-                LiveView(
-                    entityIds = mutableSetOf(entityId),
-                    viewConfig = LiveViewConfig("ACTIVITY_VIEW", listOf(metricType.metricId), refreshInterval)
-                )
-            ).await()
-
+        UserData.liveViewService(project)!!.addLiveView(
+            LiveView(
+                entityIds = mutableSetOf(entityId),
+                viewConfig = LiveViewConfig("ACTIVITY_VIEW", listOf(metricType.metricId), refreshInterval)
+            )
+        ).onSuccess { liveView ->
             val consumer = vertx.eventBus().consumer<JsonObject>(
                 toLiveViewSubscriberAddress("system")
             )
@@ -232,7 +229,10 @@ open class LiveViewChartWindow(val project: Project) : Disposable {
                 chart.update()
             }
             Disposer.register(this) { consumer.unregister() }
+        }.onFailure {
+            log.error("Failed to add live view", it)
         }
+
         return chart
     }
 
@@ -245,14 +245,12 @@ open class LiveViewChartWindow(val project: Project) : Disposable {
         val chart = singleLineChart(entityId, metricType, chartColor)
         val histogram = Histogram(SlidingWindowReservoir(keepSize))
 
-        safeRunBlocking(vertx.dispatcher()) {
-            val liveView = UserData.liveViewService(project)!!.addLiveView(
-                LiveView(
-                    entityIds = mutableSetOf(entityId),
-                    viewConfig = LiveViewConfig("ACTIVITY_CHART", listOf(metricType.metricId), refreshInterval)
-                )
-            ).await()
-
+        UserData.liveViewService(project)!!.addLiveView(
+            LiveView(
+                entityIds = mutableSetOf(entityId),
+                viewConfig = LiveViewConfig("ACTIVITY_CHART", listOf(metricType.metricId), refreshInterval)
+            )
+        ).onSuccess { liveView ->
             val consumer = vertx.eventBus().consumer<JsonObject>(
                 toLiveViewSubscriberAddress("system")
             )
@@ -287,7 +285,10 @@ open class LiveViewChartWindow(val project: Project) : Disposable {
                 chart.update()
             }
             Disposer.register(this) { consumer.unregister() }
+        }.onFailure {
+            log.error("Failed to add live view", it)
         }
+
         return chart
     }
 

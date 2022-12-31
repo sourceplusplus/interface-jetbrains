@@ -16,10 +16,10 @@
  */
 package spp.jetbrains.sourcemarker.service.view.trace.renderer
 
-import com.intellij.ui.DarculaColors
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.render.RenderingUtil
 import com.intellij.util.ui.JBUI
+import spp.jetbrains.PluginUI
 import java.awt.Color
 import java.awt.Component
 import java.awt.Graphics
@@ -63,7 +63,7 @@ class TraceDurationTableCellRenderer : JBLabel(), TableCellRenderer {
         percentage.apply {
             this.x = 100
             this.width = 200
-            this.color = DarculaColors.BLUE
+            this.color = PluginUI.purple
         }
         var10001 = this.formatValue(11020)
         comp.text = var10001

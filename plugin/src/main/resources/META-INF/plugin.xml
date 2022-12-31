@@ -19,9 +19,9 @@
         <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.statusBar.SourceWidgetFactory"/>
 
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewTraceService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewTraceServiceImpl"/>
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewChartService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewChartServiceImpl"/>
         <projectService
                 serviceImplementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService"/>
         <editor.linePainter

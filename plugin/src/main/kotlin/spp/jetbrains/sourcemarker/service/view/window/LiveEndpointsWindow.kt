@@ -26,8 +26,8 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
+import spp.jetbrains.plugin.LiveViewChartService
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.service.view.LiveViewChartService
 import spp.jetbrains.sourcemarker.service.view.model.ServiceEndpointRow
 import spp.jetbrains.sourcemarker.service.view.model.column.ServiceEndpointColumnInfo
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_CPM

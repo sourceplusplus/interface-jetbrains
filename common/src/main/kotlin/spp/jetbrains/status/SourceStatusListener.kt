@@ -18,6 +18,11 @@ package spp.jetbrains.status
 
 import com.intellij.util.messages.Topic
 
+/**
+ * Listener for changes to the current status of the Source++ plugin.
+ *
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 fun interface SourceStatusListener {
     companion object {
         @Topic.ProjectLevel

@@ -17,7 +17,9 @@
 package spp.jetbrains.sourcemarker.service.view
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
@@ -26,7 +28,10 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.plugin.LiveViewTraceService
 import spp.jetbrains.sourcemarker.service.view.window.LiveViewTraceWindow
+import spp.jetbrains.status.SourceStatus
+import spp.jetbrains.status.SourceStatusListener
 
 /**
  * todo: description.
@@ -34,34 +39,47 @@ import spp.jetbrains.sourcemarker.service.view.window.LiveViewTraceWindow
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewTraceService(private val project: Project) : Disposable {
+class LiveViewTraceServiceImpl(private val project: Project) : LiveViewTraceService, Disposable {
 
     companion object {
-        fun getInstance(project: Project): LiveViewTraceService {
-            return project.getService(LiveViewTraceService::class.java)
+        fun init(project: Project) {
+            project.getService(LiveViewTraceServiceImpl::class.java)
         }
     }
 
-    private var _toolWindow: ToolWindow? = null
-    private var contentManager: ContentManager? = null
+    private var toolWindow: ToolWindow = ToolWindowManager.getInstance(project)
+        .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.diagramSubtask))
+    private var contentManager: ContentManager = toolWindow.contentManager
 
     init {
-        _toolWindow = ToolWindowManager.getInstance(project).registerToolWindow(
-            RegisterToolWindowTask.closable("Live Traces", PluginIcons.diagramSubtask)
-        )
-        contentManager = _toolWindow!!.contentManager
+        project.putUserData(LiveViewTraceService.KEY, this)
+        project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+            if (it == SourceStatus.Ready) {
+//                val vertx = UserData.vertx(project)
+//                vertx.safeLaunch {
+//                    val service = ServiceBridge.getCurrentService(vertx)!!
+//                    showLiveViewTraceWindow(service)
+//                }
+            } else {
+//                ApplicationManager.getApplication().invokeLater {
+//                    hideLiveViewChartsWindow()
+//                }
+            }
+        })
 
-        _toolWindow!!.contentManager.addContentManagerListener(object : ContentManagerListener {
+        Disposer.register(this, contentManager)
+
+        toolWindow.contentManager.addContentManagerListener(object : ContentManagerListener {
             override fun contentAdded(contentManagerEvent: ContentManagerEvent) = Unit
             override fun contentRemoved(event: ContentManagerEvent) {
-                if (_toolWindow!!.contentManager.contentCount == 0) {
-                    _toolWindow!!.setAvailable(false, null)
+                if (toolWindow.contentManager.contentCount == 0) {
+                    toolWindow.setAvailable(false, null)
                 }
             }
         })
     }
 
-    fun showLiveViewTraceWindow(endpointName: String) {
+    override fun showLiveViewTraceWindow(endpointName: String) = ApplicationManager.getApplication().invokeLater {
         val chartsWindow = LiveViewTraceWindow(project, endpointName)
         val content = ContentFactory.getInstance().createContent(
             chartsWindow.layoutComponent,
@@ -69,7 +87,10 @@ class LiveViewTraceService(private val project: Project) : Disposable {
             false
         )
         content.setDisposer(chartsWindow)
-        contentManager!!.addContent(content)
+        contentManager.addContent(content)
+        contentManager.setSelectedContent(content)
+
+        toolWindow.show()
     }
 
     override fun dispose() = Unit

@@ -17,16 +17,24 @@
 package spp.jetbrains.sourcemarker.service.view
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentFactory
+import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
+import spp.jetbrains.plugin.LiveViewChartService
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.service.view.action.ChangeChartAction
 import spp.jetbrains.sourcemarker.service.view.action.ChangeTimeAction
 import spp.jetbrains.sourcemarker.service.view.window.LiveActivityWindow
 import spp.jetbrains.sourcemarker.service.view.window.LiveEndpointsWindow
 import spp.jetbrains.sourcemarker.service.view.window.LiveOverviewWindow
+import spp.jetbrains.status.SourceStatus
+import spp.jetbrains.status.SourceStatusListener
 import spp.protocol.platform.general.Service
 
 /**
@@ -35,21 +43,40 @@ import spp.protocol.platform.general.Service
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewChartService(private val project: Project) : spp.jetbrains.plugin.LiveViewChartService, Disposable {
+class LiveViewChartServiceImpl(private val project: Project) : LiveViewChartService, Disposable {
 
     companion object {
-        fun getInstance(project: Project): LiveViewChartService {
-            return project.getService(LiveViewChartService::class.java)
+        fun init(project: Project) {
+            project.getService(LiveViewChartServiceImpl::class.java)
         }
     }
 
-    private var toolWindow = ToolWindowManager.getInstance(project).registerToolWindow(
-        RegisterToolWindowTask.closable("Live Activity", PluginIcons.chartArea)
-    )
+    private var toolWindow = ToolWindowManager.getInstance(project)
+        .registerToolWindow(RegisterToolWindowTask.closable("Live Activity", PluginIcons.chartArea))
     private var contentManager = toolWindow.contentManager
 
     init {
-        project.putUserData(spp.jetbrains.plugin.LiveViewChartService.KEY, this)
+        project.putUserData(LiveViewChartService.KEY, this)
+        project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+            if (it == SourceStatus.Ready) {
+                val vertx = UserData.vertx(project)
+                vertx.safeLaunch {
+                    val service = ServiceBridge.getCurrentService(vertx)!!
+                    ApplicationManager.getApplication().invokeLater {
+                        showLiveViewChartsWindow(service)
+                    }
+                }
+            } else {
+                ApplicationManager.getApplication().invokeLater {
+                    hideLiveViewChartsWindow()
+                }
+            }
+        })
+
+        Disposer.register(this, contentManager)
+    }
+
+    private fun showLiveViewChartsWindow(service: Service) {
         toolWindow.setTitleActions(
             listOf(
                 ChangeChartAction(),
@@ -57,11 +84,6 @@ class LiveViewChartService(private val project: Project) : spp.jetbrains.plugin.
             )
         )
 
-//        val attachedSide = DefaultActionGroup.createPopupGroup { "Attached Side" }
-//        toolWindow.setAdditionalGearActions(DefaultActionGroup(attachedSide))
-    }
-
-    fun showLiveViewChartsWindow(service: Service) {
         val chartsWindow = LiveOverviewWindow(project, service)
         val overviewContent = ContentFactory.getInstance().createContent(
             chartsWindow.layoutComponent,
@@ -93,7 +115,14 @@ class LiveViewChartService(private val project: Project) : spp.jetbrains.plugin.
         contentManager.addContent(endpointsContent)
     }
 
-    override fun doThing(endpointName: String) {
+    private fun hideLiveViewChartsWindow() {
+        toolWindow.setTitleActions(emptyList())
+        contentManager.contents.forEach { content ->
+            contentManager.removeContent(content, true)
+        }
+    }
+
+    override fun doThing(endpointName: String) = ApplicationManager.getApplication().invokeLater {
         val activityWindow = LiveActivityWindow(project, endpointName)
         val content = ContentFactory.getInstance().createContent(
             activityWindow.layoutComponent,

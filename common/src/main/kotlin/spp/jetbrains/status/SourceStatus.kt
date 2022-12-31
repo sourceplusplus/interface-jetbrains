@@ -19,6 +19,11 @@ package spp.jetbrains.status
 import spp.jetbrains.icons.PluginIcons
 import javax.swing.Icon
 
+/**
+ * Represents the current status of the Source++ plugin.
+ *
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 enum class SourceStatus {
     Ready,
     Enabled,
@@ -49,4 +54,7 @@ enum class SourceStatus {
 
     val disposedPlugin: Boolean
         get() = this == Disabled || this == ConnectionError
+
+    val isConnected: Boolean
+        get() = this == Ready || this == Pending
 }

@@ -50,7 +50,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     }
 
     override fun isConnected(): Boolean {
-        return getCurrentStatus().first.let { it == Ready || it == Pending }
+        return getCurrentStatus().first.isConnected
     }
 
     override fun getCurrentStatus(): Pair<SourceStatus, String?> {

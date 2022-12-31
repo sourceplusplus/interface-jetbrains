@@ -27,7 +27,7 @@ import com.intellij.openapi.util.Key
  */
 interface LiveViewChartService {
     companion object {
-        val KEY = Key.create<LiveViewChartService>("SPP_LIVE_VIEW_SERVICE")
+        val KEY = Key.create<LiveViewChartService>("SPP_LIVE_VIEW_CHART_SERVICE")
 
         fun getInstance(project: Project): LiveViewChartService {
             return project.getUserData(KEY)!!
