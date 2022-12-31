@@ -148,4 +148,13 @@ object PluginIcons {
 
     @JvmField
     val messageLines = IconLoader.getIcon("/icons/message-lines.svg", PluginIcons::class.java)
+
+    @JvmField
+    val play = IconLoader.getIcon("/icons/play.svg", PluginIcons::class.java)
+
+    @JvmField
+    val pause = IconLoader.getIcon("/icons/pause.svg", PluginIcons::class.java)
+
+    @JvmField
+    val stop = IconLoader.getIcon("/icons/stop.svg", PluginIcons::class.java)
 }

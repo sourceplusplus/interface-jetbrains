@@ -16,16 +16,32 @@
  */
 package spp.jetbrains.sourcemarker.service.view.window
 
+import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.observable.util.whenDisposed
 import com.intellij.openapi.project.Project
+import io.vertx.core.eventbus.MessageConsumer
+import io.vertx.core.json.JsonObject
+import spp.jetbrains.UserData
+import spp.protocol.artifact.ArtifactNameUtils
+import spp.protocol.artifact.log.Log
+import spp.protocol.platform.general.Service
+import spp.protocol.service.SourceServices
+import spp.protocol.view.LiveView
+import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewEvent
 import java.awt.BorderLayout
+import java.awt.Font
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.concurrent.atomic.AtomicReference
-import javax.swing.JComponent
 import javax.swing.JPanel
 
 /**
@@ -34,12 +50,82 @@ import javax.swing.JPanel
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveLogWindow(project: Project) : Disposable {
+class LiveLogWindow(private val project: Project, private val service: Service? = null) : Disposable {
 
-    val layoutComponent: JComponent
-        get() = component
+    private val log = logger<LiveLogWindow>()
 
-    val component: JPanel = JPanel(BorderLayout())
+    private val liveOutputType = ConsoleViewContentType(
+        "LIVE_OUTPUT",
+        TextAttributes(
+            LookupCellRenderer.MATCHED_FOREGROUND_COLOR, null, null, null, Font.PLAIN
+        )
+    )
+
+    private val vertx = UserData.vertx(project)
+    private val viewService = UserData.liveViewService(project)!!
+    private var liveView: LiveView? = null
+    private var consumer: MessageConsumer<JsonObject>? = null
+    private var console: ConsoleView? = null
+    val component = JPanel(BorderLayout()).apply { isFocusable = true }
+
+    var isRunning = true
+        private set
+
+    fun pause() {
+        isRunning = false
+
+        consumer?.unregister()
+        consumer = null
+        liveView?.let { viewService.removeLiveView(it.subscriptionId!!) }
+        liveView = null
+    }
+
+    fun resume() {
+        isRunning = true
+        viewService.addLiveView(
+            LiveView(
+                entityIds = mutableSetOf("*"),
+                viewConfig = LiveViewConfig("VIEW_LOGS", listOf("endpoint_logs"))
+            )
+        ).onSuccess { sub ->
+            liveView = sub
+            if (console == null) {
+                console = showInConsole("", project)
+            }
+
+            consumer = vertx.eventBus().consumer(
+                SourceServices.Subscribe.toLiveViewSubscriberAddress("system")
+            )
+            consumer!!.handler {
+                val liveViewEvent = LiveViewEvent(it.body())
+                if (liveViewEvent.subscriptionId != sub.subscriptionId) return@handler
+
+                val rawLog = Log(JsonObject(liveViewEvent.metricsData).getJsonObject("log"))
+                val localTime = LocalTime.ofInstant(rawLog.timestamp, ZoneId.systemDefault())
+                val logLine = buildString {
+                    append(localTime)
+                    append(" [").append(rawLog.thread).append("] ")
+                    append(rawLog.level.uppercase()).append(" - ")
+                    rawLog.logger?.let { append(ArtifactNameUtils.getShortQualifiedClassName(it)).append(" - ") }
+                    append(rawLog.toFormattedMessage())
+                    appendLine()
+                }
+
+                when (rawLog.level.uppercase()) {
+                    "LIVE" -> console?.print(logLine, liveOutputType)
+                    "WARN", "ERROR" -> console?.print(logLine, ConsoleViewContentType.ERROR_OUTPUT)
+                    else -> console?.print(logLine, ConsoleViewContentType.NORMAL_OUTPUT)
+                }
+            }
+
+            console?.whenDisposed {
+                consumer?.unregister()
+                viewService.removeLiveView(sub.subscriptionId!!)
+            }
+        }.onFailure {
+            log.error("Failed to start service logs tail", it)
+        }
+    }
 
     fun showInConsole(
         message: String,

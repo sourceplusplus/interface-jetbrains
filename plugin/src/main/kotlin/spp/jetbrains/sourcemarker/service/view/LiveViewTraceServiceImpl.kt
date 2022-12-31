@@ -25,13 +25,15 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
-import com.intellij.ui.content.ContentManagerEvent
-import com.intellij.ui.content.ContentManagerListener
+import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.plugin.LiveViewTraceService
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.service.view.window.LiveViewTraceWindow
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
+import spp.protocol.platform.general.Service
 
 /**
  * todo: description.
@@ -55,11 +57,11 @@ class LiveViewTraceServiceImpl(private val project: Project) : LiveViewTraceServ
         project.putUserData(LiveViewTraceService.KEY, this)
         project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
             if (it == SourceStatus.Ready) {
-//                val vertx = UserData.vertx(project)
-//                vertx.safeLaunch {
-//                    val service = ServiceBridge.getCurrentService(vertx)!!
-//                    showLiveViewTraceWindow(service)
-//                }
+                val vertx = UserData.vertx(project)
+                vertx.safeLaunch {
+                    val service = ServiceBridge.getCurrentService(vertx)!!
+                    showWindow(service)
+                }
             } else {
 //                ApplicationManager.getApplication().invokeLater {
 //                    hideLiveViewChartsWindow()
@@ -68,15 +70,18 @@ class LiveViewTraceServiceImpl(private val project: Project) : LiveViewTraceServ
         })
 
         Disposer.register(this, contentManager)
+    }
 
-        toolWindow.contentManager.addContentManagerListener(object : ContentManagerListener {
-            override fun contentAdded(contentManagerEvent: ContentManagerEvent) = Unit
-            override fun contentRemoved(event: ContentManagerEvent) {
-                if (toolWindow.contentManager.contentCount == 0) {
-                    toolWindow.setAvailable(false, null)
-                }
-            }
-        })
+    private fun showWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
+        val chartsWindow = LiveViewTraceWindow(project, "todo")
+        val overviewContent = ContentFactory.getInstance().createContent(
+            chartsWindow.layoutComponent,
+            "Service: ${service.name}",
+            true
+        )
+        overviewContent.setDisposer(chartsWindow)
+        overviewContent.isCloseable = false
+        contentManager.addContent(overviewContent)
     }
 
     override fun showLiveViewTraceWindow(endpointName: String) = ApplicationManager.getApplication().invokeLater {
