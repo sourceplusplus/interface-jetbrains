@@ -40,7 +40,7 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusManager;
 import spp.jetbrains.marker.SourceMarkerKeys;
 import spp.jetbrains.sourcemarker.command.ui.status.config.LiveMeterConfigurationPanel;
-import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitColumnInfo;
+import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
 import spp.jetbrains.state.LiveStateBar;

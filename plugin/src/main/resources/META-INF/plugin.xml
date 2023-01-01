@@ -19,16 +19,16 @@
         <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.statusBar.SourceWidgetFactory"/>
 
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewTraceManagerImpl"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl"/>
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewChartManagerImpl"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl"/>
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.service.view.LiveViewLogManagerImpl"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl"/>
 
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService"/>
         <editor.linePainter
-                implementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.painter.VariableEditorLinePainter"/>
+                implementation="spp.jetbrains.sourcemarker.instrument.breakpoint.painter.VariableEditorLinePainter"/>
         <projectConfigurable
                 instance="spp.jetbrains.sourcemarker.config.SourceMarkerConfigurable"
                 groupId="tools"
