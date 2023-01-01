@@ -14,14 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.plugin
+package spp.jetbrains.view
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import io.vertx.core.eventbus.MessageConsumer
-import io.vertx.core.json.JsonObject
-import spp.jetbrains.view.LogWindow
-import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -29,18 +25,15 @@ import spp.protocol.view.LiveView
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LiveViewLogService {
+interface LiveViewChartManager {
     companion object {
-        val KEY = Key.create<LiveViewLogService>("SPP_LIVE_VIEW_LOG_SERVICE")
+        val KEY = Key.create<LiveViewChartManager>("SPP_LIVE_VIEW_CHART_MANAGER")
 
-        fun getInstance(project: Project): LiveViewLogService {
+        fun getInstance(project: Project): LiveViewChartManager {
             return project.getUserData(KEY)!!
         }
     }
 
-    fun getOrCreateLogWindow(
-        liveView: LiveView,
-        consumer: (LogWindow) -> MessageConsumer<JsonObject>,
-        title: String
-    ): LogWindow
+    fun showOverviewActivity()
+    fun showEndpointActivity(endpointName: String)
 }

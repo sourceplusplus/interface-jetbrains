@@ -14,10 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.plugin
+package spp.jetbrains.view
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
+import com.intellij.openapi.Disposable
+import io.vertx.core.eventbus.MessageConsumer
+import io.vertx.core.json.JsonObject
+import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -25,14 +27,11 @@ import com.intellij.openapi.util.Key
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LiveViewTraceService {
-    companion object {
-        val KEY = Key.create<LiveViewTraceService>("SPP_LIVE_VIEW_TRACE_SERVICE")
+interface ResumableView : Disposable {
+    val liveView: LiveView
+    var consumer: MessageConsumer<JsonObject>?
+    val isRunning: Boolean
 
-        fun getInstance(project: Project): LiveViewTraceService {
-            return project.getUserData(KEY)!!
-        }
-    }
-
-    fun showEndpointTraces(endpointName: String)
+    fun resume()
+    fun pause()
 }

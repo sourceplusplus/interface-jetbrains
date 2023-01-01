@@ -14,10 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.plugin
+package spp.jetbrains.sourcemarker.service.view.action
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.view.ResumableViewManager
 
 /**
  * todo: description.
@@ -25,15 +27,13 @@ import com.intellij.openapi.util.Key
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LiveViewChartService {
-    companion object {
-        val KEY = Key.create<LiveViewChartService>("SPP_LIVE_VIEW_CHART_SERVICE")
+class StopViewAction(private val viewManager: ResumableViewManager) : AnAction(PluginIcons.stop) {
 
-        fun getInstance(project: Project): LiveViewChartService {
-            return project.getUserData(KEY)!!
-        }
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabled = viewManager.currentView?.isRunning == true
     }
 
-    fun showOverviewActivity()
-    fun showEndpointActivity(endpointName: String)
+    override fun actionPerformed(e: AnActionEvent) {
+        viewManager.currentView?.pause()
+    }
 }

@@ -23,6 +23,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import spp.protocol.artifact.trace.TraceSpan
 import java.awt.Color
+import java.time.Instant
 
 /**
  * todo: description.
@@ -31,7 +32,7 @@ import java.awt.Color
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 open class SpanInfoListNode(project: Project, span: TraceSpan) :
-    AbstractTreeNode<Any>(project, span.spanId) {
+    AbstractTreeNode<Any>(project, span) {
 
     override fun update(presentation: PresentationData) {
         ApplicationManager.getApplication().runReadAction {
@@ -42,6 +43,40 @@ open class SpanInfoListNode(project: Project, span: TraceSpan) :
     }
 
     override fun getChildren(): MutableCollection<out AbstractTreeNode<*>> {
-        return mutableListOf()
+        return mutableListOf(
+            SpanInfoListNode(
+                project, TraceSpan(
+                    traceId = "traceId",
+                    segmentId = "segmentId",
+                    spanId = 1,
+                    parentSpanId = 0,
+                    serviceCode = "serviceCode",
+                    startTime = Instant.now(),
+                    endTime = Instant.now(),
+                    type = "type",
+                    peer = "peer",
+                    component = "component",
+                    error = true,
+                    childError = true,
+                    layer = "layer"
+                )
+            ), SpanInfoListNode(
+                project, TraceSpan(
+                    traceId = "traceId",
+                    segmentId = "segmentId",
+                    spanId = 1,
+                    parentSpanId = 0,
+                    serviceCode = "serviceCode",
+                    startTime = Instant.now(),
+                    endTime = Instant.now(),
+                    type = "type",
+                    peer = "peer",
+                    component = "component",
+                    error = true,
+                    childError = true,
+                    layer = "layer"
+                )
+            )
+        )
     }
 }

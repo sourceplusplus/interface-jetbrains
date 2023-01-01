@@ -26,7 +26,7 @@ import com.intellij.ui.content.ContentFactory
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
-import spp.jetbrains.plugin.LiveViewChartService
+import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.service.view.action.ChangeChartAction
 import spp.jetbrains.sourcemarker.service.view.action.ChangeTimeAction
@@ -43,11 +43,11 @@ import spp.protocol.platform.general.Service
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewChartServiceImpl(private val project: Project) : LiveViewChartService, Disposable {
+class LiveViewChartManagerImpl(private val project: Project) : LiveViewChartManager, Disposable {
 
     companion object {
         fun init(project: Project) {
-            project.getService(LiveViewChartServiceImpl::class.java)
+            project.getService(LiveViewChartManagerImpl::class.java)
         }
     }
 
@@ -56,34 +56,34 @@ class LiveViewChartServiceImpl(private val project: Project) : LiveViewChartServ
     private var contentManager = toolWindow.contentManager
 
     init {
-        project.putUserData(LiveViewChartService.KEY, this)
+        project.putUserData(LiveViewChartManager.KEY, this)
         project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
             if (it == SourceStatus.Ready) {
                 val vertx = UserData.vertx(project)
                 vertx.safeLaunch {
                     val service = ServiceBridge.getCurrentService(vertx)!!
                     ApplicationManager.getApplication().invokeLater {
-                        showLiveViewChartsWindow(service)
+                        showWindow(service)
                     }
                 }
             } else {
                 ApplicationManager.getApplication().invokeLater {
-                    hideLiveViewChartsWindow()
+                    hideWindow()
                 }
             }
         })
 
         Disposer.register(this, contentManager)
-    }
 
-    private fun showLiveViewChartsWindow(service: Service) {
         toolWindow.setTitleActions(
             listOf(
                 ChangeChartAction(),
                 ChangeTimeAction()
             )
         )
+    }
 
+    private fun showWindow(service: Service) {
         val chartsWindow = LiveOverviewWindow(project, service)
         val overviewContent = ContentFactory.getInstance().createContent(
             chartsWindow.layoutComponent,
@@ -115,8 +115,7 @@ class LiveViewChartServiceImpl(private val project: Project) : LiveViewChartServ
         contentManager.addContent(endpointsContent)
     }
 
-    private fun hideLiveViewChartsWindow() {
-        toolWindow.setTitleActions(emptyList())
+    private fun hideWindow() {
         contentManager.contents.forEach { content ->
             contentManager.removeContent(content, true)
         }

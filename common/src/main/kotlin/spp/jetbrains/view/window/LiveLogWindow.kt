@@ -14,13 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.view
+package spp.jetbrains.view.window
 
 import com.intellij.execution.ui.ConsoleView
-import com.intellij.openapi.Disposable
-import io.vertx.core.eventbus.MessageConsumer
-import io.vertx.core.json.JsonObject
-import spp.protocol.view.LiveView
+import spp.jetbrains.view.ResumableView
 
 /**
  * todo: description.
@@ -28,11 +25,6 @@ import spp.protocol.view.LiveView
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LogWindow : Disposable {
-    var liveView: LiveView?
-    var consumer: MessageConsumer<JsonObject>?
-    var console: ConsoleView?
-
-    fun resume()
-    fun pause()
+interface LiveLogWindow : ResumableView {
+    val console: ConsoleView
 }

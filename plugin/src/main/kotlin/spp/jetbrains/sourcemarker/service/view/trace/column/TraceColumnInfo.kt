@@ -20,8 +20,10 @@ import com.intellij.ide.util.treeView.NodeDescriptor
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.table.IconTableCellRenderer
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.sourcemarker.service.view.trace.node.SpanInfoListNode
 import spp.jetbrains.sourcemarker.service.view.trace.node.TraceListNode
 import spp.protocol.artifact.trace.Trace
+import spp.protocol.artifact.trace.TraceSpan
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.swing.Icon
@@ -58,6 +60,9 @@ class TraceColumnInfo(name: String) : ColumnInfo<NodeDescriptor<*>, String>(name
                 if (t is TraceListNode) {
                     t2 as TraceListNode
                     (t.value as Trace).start.compareTo((t2.value as Trace).start)
+                } else if (t is SpanInfoListNode) {
+                    t2 as SpanInfoListNode
+                    (t.value as TraceSpan).startTime.compareTo((t2.value as TraceSpan).startTime)
                 } else {
                     TODO()
                 }
@@ -67,6 +72,9 @@ class TraceColumnInfo(name: String) : ColumnInfo<NodeDescriptor<*>, String>(name
                 if (t is TraceListNode) {
                     t2 as TraceListNode
                     (t.value as Trace).duration.compareTo((t2.value as Trace).duration)
+                } else if (t is SpanInfoListNode) {
+                    t2 as SpanInfoListNode
+                    (t.value as TraceSpan).startTime.compareTo((t2.value as TraceSpan).startTime)
                 } else {
                     TODO()
                 }

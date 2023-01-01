@@ -26,7 +26,7 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
-import spp.jetbrains.plugin.LiveViewChartService
+import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.service.view.model.ServiceEndpointRow
 import spp.jetbrains.sourcemarker.service.view.model.column.ServiceEndpointColumnInfo
@@ -82,7 +82,7 @@ class LiveEndpointsWindow(project: Project, service: Service) : LiveViewChartWin
                 val row = table.rowAtPoint(mouseEvent.point)
                 if (mouseEvent.clickCount == 2 && row >= 0) {
                     val endpointRow = model.items[table.rowSorter.convertRowIndexToModel(row)]
-                    LiveViewChartService.getInstance(project).showEndpointActivity(endpointRow.endpoint.name)
+                    LiveViewChartManager.getInstance(project).showEndpointActivity(endpointRow.endpoint.name)
                 }
             }
         })

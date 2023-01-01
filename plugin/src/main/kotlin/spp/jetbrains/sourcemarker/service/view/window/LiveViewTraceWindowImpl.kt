@@ -16,25 +16,21 @@
  */
 package spp.jetbrains.sourcemarker.service.view.window
 
-import com.intellij.openapi.Disposable
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBTreeTable
+import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.coroutines.await
-import io.vertx.kotlin.coroutines.dispatcher
-import spp.jetbrains.ScopeExtensions
 import spp.jetbrains.UserData
-import spp.jetbrains.sourcemarker.service.view.trace.renderer.TraceDurationTableCellRenderer
 import spp.jetbrains.sourcemarker.service.view.trace.LiveViewTraceModel
 import spp.jetbrains.sourcemarker.service.view.trace.LiveViewTraceRowSorter
 import spp.jetbrains.sourcemarker.service.view.trace.LiveViewTraceTreeStructure
 import spp.jetbrains.sourcemarker.service.view.trace.node.TraceListRootNode
+import spp.jetbrains.sourcemarker.service.view.trace.renderer.TraceDurationTableCellRenderer
+import spp.jetbrains.view.window.LiveTraceWindow
 import spp.protocol.artifact.trace.Trace
-import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
-import spp.protocol.view.LiveViewConfig
-import spp.protocol.view.LiveViewEvent
 import java.awt.BorderLayout
 import javax.swing.*
 
@@ -44,18 +40,24 @@ import javax.swing.*
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewTraceWindow(
-    private val project: Project,
-    private val endpointName: String
-) : Disposable {
+class LiveViewTraceWindowImpl(
+    project: Project,
+    override val liveView: LiveView,
+    private val consumerCreator: (LiveTraceWindow) -> MessageConsumer<JsonObject>
+) : LiveTraceWindow {
 
+    private val log = logger<LiveViewTraceWindowImpl>()
+    private val viewService = UserData.liveViewService(project)!!
     val layoutComponent: JComponent
         get() = component
+
+    override var consumer: MessageConsumer<JsonObject>? = null
+    override var isRunning = false
+        private set
 
     val component: JPanel = JPanel(BorderLayout())
     private val rootNode = TraceListRootNode(project)
     private val model = LiveViewTraceModel(LiveViewTraceTreeStructure(project, rootNode))
-    val refreshRate = 2000
 
     init {
         Disposer.register(this, model)
@@ -70,27 +72,31 @@ class LiveViewTraceWindow(
         table.setDefaultRenderer(Icon::class.java, TraceDurationTableCellRenderer())
         component.add(table, "Center")
 
-        val vertx = UserData.vertx(project)
+        resume()
+    }
 
-        ScopeExtensions.safeRunBlocking(vertx.dispatcher()) {
-            val liveView = UserData.liveViewService(project)!!.addLiveView(
-                LiveView(
-                    entityIds = mutableSetOf(endpointName),
-                    viewConfig = LiveViewConfig("TRACE_VIEW", listOf("endpoint_traces"), refreshRate)
-                )
-            ).await()
+    override fun addTrace(trace: Trace) {
+        rootNode.traces.add(trace)
+        model.reset() //todo: optimize
+    }
 
-            val consumer = vertx.eventBus().consumer<JsonObject>(
-                toLiveViewSubscriberAddress("system")
-            )
-            consumer.handler {
-                val liveViewEvent = LiveViewEvent(it.body())
-                if (liveView.subscriptionId != liveViewEvent.subscriptionId) return@handler
+    override fun resume() {
+        if (isRunning) return
+        isRunning = true
+        consumer = consumerCreator.invoke(this)
+        viewService.addLiveView(liveView).onFailure {
+            log.error("Failed to resume live view", it)
+        }
+    }
 
-                val event = JsonObject(liveViewEvent.metricsData)
-                val trace = Trace(event.getJsonObject("trace"))
-                rootNode.traces.add(trace)
-                model.reset() //todo: optimize
+    override fun pause() {
+        if (!isRunning) return
+        isRunning = false
+        consumer?.unregister()
+        consumer = null
+        liveView.subscriptionId?.let {
+            viewService.removeLiveView(it).onFailure {
+                log.error("Failed to pause live view", it)
             }
         }
     }

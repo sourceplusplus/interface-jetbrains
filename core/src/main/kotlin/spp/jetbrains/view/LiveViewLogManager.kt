@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.service.view.action
+package spp.jetbrains.view
 
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
+import io.vertx.core.eventbus.MessageConsumer
+import io.vertx.core.json.JsonObject
+import spp.jetbrains.view.window.LiveLogWindow
+import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -27,13 +29,18 @@ import spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ResumeLogsAction(private val viewLogService: LiveViewLogServiceImpl) : AnAction(PluginIcons.play) {
+interface LiveViewLogManager : ResumableViewManager {
+    companion object {
+        val KEY = Key.create<LiveViewLogManager>("SPP_LIVE_VIEW_LOG_MANAGER")
 
-    override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = viewLogService.getCurrentLogWindow()?.isRunning == false
+        fun getInstance(project: Project): LiveViewLogManager {
+            return project.getUserData(KEY)!!
+        }
     }
 
-    override fun actionPerformed(e: AnActionEvent) {
-        viewLogService.getCurrentLogWindow()?.resume()
-    }
+    fun getOrCreateLogWindow(
+        liveView: LiveView,
+        consumer: (LiveLogWindow) -> MessageConsumer<JsonObject>,
+        title: String
+    ): LiveLogWindow
 }

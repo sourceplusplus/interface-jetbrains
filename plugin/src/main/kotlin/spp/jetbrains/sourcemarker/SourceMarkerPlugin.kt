@@ -77,9 +77,9 @@ import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
 import spp.jetbrains.sourcemarker.service.LiveViewManager
 import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.service.view.LiveViewChartServiceImpl
-import spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl
-import spp.jetbrains.sourcemarker.service.view.LiveViewTraceServiceImpl
+import spp.jetbrains.sourcemarker.service.view.LiveViewChartManagerImpl
+import spp.jetbrains.sourcemarker.service.view.LiveViewLogManagerImpl
+import spp.jetbrains.sourcemarker.service.view.LiveViewTraceManagerImpl
 import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
@@ -129,10 +129,10 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             return //tests manually set up necessary components
         }
 
-        //make sure services are initialized
-        LiveViewChartServiceImpl.init(project)
-        LiveViewTraceServiceImpl.init(project)
-        LiveViewLogServiceImpl.init(project)
+        //make sure live view managers are initialized
+        LiveViewChartManagerImpl.init(project)
+        LiveViewTraceManagerImpl.init(project)
+        LiveViewLogManagerImpl.init(project)
 
         //setup plugin
         safeRunBlocking { getInstance(project).init() }

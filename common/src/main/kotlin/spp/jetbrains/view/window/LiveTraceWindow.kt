@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.service.view.action
+package spp.jetbrains.view.window
 
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl
+import spp.jetbrains.view.ResumableView
+import spp.protocol.artifact.trace.Trace
 
 /**
  * todo: description.
@@ -27,13 +25,6 @@ import spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class StopLogsAction(private val viewLogService: LiveViewLogServiceImpl) : AnAction(PluginIcons.stop) {
-
-    override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = viewLogService.getCurrentLogWindow()?.isRunning == true
-    }
-
-    override fun actionPerformed(e: AnActionEvent) {
-        viewLogService.getCurrentLogWindow()?.pause()
-    }
+interface LiveTraceWindow : ResumableView {
+    fun addTrace(trace: Trace)
 }
