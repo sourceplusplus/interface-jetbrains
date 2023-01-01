@@ -98,13 +98,13 @@
         </group>
 
         <action id="spp.enableSourcePP"
-                class="spp.jetbrains.sourcemarker.actions.EnableSourceAction">
+                class="spp.jetbrains.sourcemarker.action.EnableSourceAction">
             <override-text place="MainMenu" text="Enable Source++"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
 
         <action id="spp.disableSourcePP" use-shortcut-of="spp.enableSourcePP"
-                class="spp.jetbrains.sourcemarker.actions.DisableSourceAction">
+                class="spp.jetbrains.sourcemarker.action.DisableSourceAction">
             <override-text place="MainMenu" text="Disable Source++"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>

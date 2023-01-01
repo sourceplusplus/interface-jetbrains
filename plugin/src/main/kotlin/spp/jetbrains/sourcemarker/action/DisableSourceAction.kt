@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.actions
+package spp.jetbrains.sourcemarker.action
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import spp.jetbrains.status.SourceStatus.Enabled
+import spp.jetbrains.status.SourceStatus.Disabled
 import spp.jetbrains.status.SourceStatusService
 
-class EnableSourceAction : AnAction() {
+class DisableSourceAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         e.project?.let {
-            SourceStatusService.getInstance(it).update(Enabled)
+            SourceStatusService.getInstance(it).update(Disabled)
         }
     }
 }
