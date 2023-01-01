@@ -16,8 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.service.view
 
-import com.intellij.execution.ui.ConsoleView
-import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
@@ -30,18 +28,21 @@ import com.intellij.openapi.wm.ex.ToolWindowManagerListener.ToolWindowManagerEve
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
+import io.vertx.core.eventbus.MessageConsumer
+import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.plugin.LiveViewLogService
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.service.view.action.StopLogsAction
 import spp.jetbrains.sourcemarker.service.view.action.ResumeLogsAction
+import spp.jetbrains.sourcemarker.service.view.action.StopLogsAction
 import spp.jetbrains.sourcemarker.service.view.window.LiveLogWindow
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
-import spp.jetbrains.status.SourceStatusService
+import spp.jetbrains.view.LogWindow
 import spp.protocol.platform.general.Service
+import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -64,11 +65,18 @@ class LiveViewLogServiceImpl(
         .registerToolWindow(RegisterToolWindowTask.closable("Live Logs", PluginIcons.messageLines))
     private var contentManager = toolWindow.contentManager
     private lateinit var serviceLogsWindow: LiveLogWindow
+    private var currentWindow: LiveLogWindow? = null
 
     init {
         project.putUserData(LiveViewLogService.KEY, this)
         project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
-            if (it != SourceStatus.Ready) {
+            if (it == SourceStatus.Ready) {
+                val vertx = UserData.vertx(project)
+                vertx.safeLaunch {
+                    val service = ServiceBridge.getCurrentService(vertx)!!
+                    showServicesWindow(service)
+                }
+            } else {
                 ApplicationManager.getApplication().invokeLater {
                     hideWindow()
                 }
@@ -78,16 +86,10 @@ class LiveViewLogServiceImpl(
 
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
             override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
-                if (toolWindow.isVisible && SourceStatusService.getInstance(project).isReady()) {
-                    if (!::serviceLogsWindow.isInitialized) {
-                        val vertx = UserData.vertx(project)
-                        vertx.safeLaunch {
-                            val service = ServiceBridge.getCurrentService(vertx)!!
-                            showWindow(service)
-                        }
-                    }
-                } else if (::serviceLogsWindow.isInitialized && !toolWindow.isVisible) {
-                    serviceLogsWindow.pause()
+                if (!toolWindow.isVisible) {
+                    contentManager.contents
+                        .mapNotNull { it.disposer as? LiveLogWindow }
+                        .forEach { it.pause() }
                 }
             }
         })
@@ -95,16 +97,20 @@ class LiveViewLogServiceImpl(
         Disposer.register(this, contentManager)
     }
 
+    fun getCurrentLogWindow(): LiveLogWindow? = currentWindow
+
     override fun selectionChanged(event: ContentManagerEvent) {
-        println(event)
+        if (event.operation == ContentManagerEvent.ContentOperation.add) {
+            currentWindow = event.content.disposer as LiveLogWindow
+        }
     }
 
-    private fun showWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
-        serviceLogsWindow = LiveLogWindow(project, service)
+    private fun showServicesWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
+        serviceLogsWindow = LiveLogWindow(project)
         toolWindow.setTitleActions(
             listOf(
-                ResumeLogsAction(serviceLogsWindow),
-                StopLogsAction(serviceLogsWindow)
+                ResumeLogsAction(this),
+                StopLogsAction(this)
             )
         )
 
@@ -116,8 +122,6 @@ class LiveViewLogServiceImpl(
         content.setDisposer(serviceLogsWindow)
         content.isCloseable = false
         contentManager.addContent(content)
-
-        serviceLogsWindow.resume()
     }
 
     private fun hideWindow() {
@@ -127,20 +131,30 @@ class LiveViewLogServiceImpl(
         }
     }
 
-    override fun showInConsole(
-        message: String,
-        consoleTitle: String,
-        project: Project,
-        contentType: ConsoleViewContentType,
-        scrollTo: Int
-    ): ConsoleView {
+    override fun getOrCreateLogWindow(
+        liveView: LiveView,
+        consumer: (LogWindow) -> MessageConsumer<JsonObject>,
+        title: String
+    ): LogWindow {
+        val existingContent = contentManager.findContent(title)
+        if (existingContent != null) {
+            ApplicationManager.getApplication().invokeLater {
+                contentManager.setSelectedContent(existingContent)
+                toolWindow.show()
+            }
+
+            val logWindow = existingContent.disposer as LogWindow
+            logWindow.resume()
+            return logWindow
+        }
+
         val liveLogWindow = LiveLogWindow(project)
+        liveLogWindow.liveView = liveView
+        liveLogWindow.consumer = consumer.invoke(liveLogWindow)
+
         ApplicationManager.getApplication().invokeLater {
-            val content = ContentFactory.getInstance().createContent(
-                liveLogWindow.component,
-                "Endpoint Logs",
-                false
-            )
+            val content = ContentFactory.getInstance()
+                .createContent(liveLogWindow.component, title, false)
             content.setDisposer(liveLogWindow)
             contentManager.addContent(content)
             contentManager.setSelectedContent(content)
@@ -148,7 +162,7 @@ class LiveViewLogServiceImpl(
             toolWindow.show()
         }
 
-        return liveLogWindow.showInConsole(message, project, contentType, scrollTo)
+        return liveLogWindow
     }
 
     override fun dispose() = Unit

@@ -16,10 +16,12 @@
  */
 package spp.jetbrains.plugin
 
-import com.intellij.execution.ui.ConsoleView
-import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import io.vertx.core.eventbus.MessageConsumer
+import io.vertx.core.json.JsonObject
+import spp.jetbrains.view.LogWindow
+import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -36,11 +38,9 @@ interface LiveViewLogService {
         }
     }
 
-    fun showInConsole(
-        message: String,
-        consoleTitle: String = "",
-        project: Project,
-        contentType: ConsoleViewContentType = ConsoleViewContentType.NORMAL_OUTPUT,
-        scrollTo: Int = -1
-    ): ConsoleView
+    fun getOrCreateLogWindow(
+        liveView: LiveView,
+        consumer: (LogWindow) -> MessageConsumer<JsonObject>,
+        title: String
+    ): LogWindow
 }

@@ -34,6 +34,6 @@ interface LiveViewChartService {
         }
     }
 
-    fun showOverview()
-    fun doThing(endpointName: String)
+    fun showOverviewActivity()
+    fun showEndpointActivity(endpointName: String)
 }

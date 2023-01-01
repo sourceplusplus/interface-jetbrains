@@ -16,23 +16,21 @@
  */
 package spp.jetbrains.sourcemarker.service.view.window
 
-import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
+import com.intellij.codeInsight.lookup.impl.LookupCellRenderer.MATCHED_FOREGROUND_COLOR
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.observable.util.whenDisposed
 import com.intellij.openapi.project.Project
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
+import spp.jetbrains.view.LogWindow
 import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.log.Log
-import spp.protocol.platform.general.Service
 import spp.protocol.service.SourceServices
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewConfig
@@ -50,37 +48,33 @@ import javax.swing.JPanel
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveLogWindow(private val project: Project, private val service: Service? = null) : Disposable {
+class LiveLogWindow(private val project: Project) : LogWindow {
 
     private val log = logger<LiveLogWindow>()
-
     private val liveOutputType = ConsoleViewContentType(
         "LIVE_OUTPUT",
-        TextAttributes(
-            LookupCellRenderer.MATCHED_FOREGROUND_COLOR, null, null, null, Font.PLAIN
-        )
+        TextAttributes(MATCHED_FOREGROUND_COLOR, null, null, null, Font.PLAIN)
     )
 
     private val vertx = UserData.vertx(project)
     private val viewService = UserData.liveViewService(project)!!
-    private var liveView: LiveView? = null
-    private var consumer: MessageConsumer<JsonObject>? = null
-    private var console: ConsoleView? = null
+    override var liveView: LiveView? = null
+    override var consumer: MessageConsumer<JsonObject>? = null
+    override var console: ConsoleView? = null
     val component = JPanel(BorderLayout()).apply { isFocusable = true }
 
     var isRunning = true
         private set
 
-    fun pause() {
+    override fun pause() {
         isRunning = false
-
         consumer?.unregister()
         consumer = null
-        liveView?.let { viewService.removeLiveView(it.subscriptionId!!) }
+        liveView?.subscriptionId?.let { viewService.removeLiveView(it) }
         liveView = null
     }
 
-    fun resume() {
+    override fun resume() {
         isRunning = true
         viewService.addLiveView(
             LiveView(
@@ -90,7 +84,7 @@ class LiveLogWindow(private val project: Project, private val service: Service? 
         ).onSuccess { sub ->
             liveView = sub
             if (console == null) {
-                console = showInConsole("", project)
+                console = makeConsoleView(project)
             }
 
             consumer = vertx.eventBus().consumer(
@@ -117,38 +111,25 @@ class LiveLogWindow(private val project: Project, private val service: Service? 
                     else -> console?.print(logLine, ConsoleViewContentType.NORMAL_OUTPUT)
                 }
             }
-
-            console?.whenDisposed {
-                consumer?.unregister()
-                viewService.removeLiveView(sub.subscriptionId!!)
-            }
         }.onFailure {
             log.error("Failed to start service logs tail", it)
         }
     }
 
-    fun showInConsole(
-        message: String,
-        project: Project,
-        contentType: ConsoleViewContentType = ConsoleViewContentType.NORMAL_OUTPUT,
-        scrollTo: Int = -1
-    ): ConsoleView {
+    private fun makeConsoleView(project: Project): ConsoleView {
         val result: AtomicReference<ConsoleView> = AtomicReference()
-
         ApplicationManager.getApplication().invokeAndWait {
             val console = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
-            console.print(message, contentType)
-
             val toolbarActions = DefaultActionGroup()
             component.add(console.component, BorderLayout.CENTER)
-
             console.createConsoleActions().forEach { toolbarActions.add(it) }
-
             result.set(console)
-            if (scrollTo >= 0) console.scrollTo(scrollTo)
         }
         return result.get()
     }
 
-    override fun dispose() = Unit
+    override fun dispose() {
+        consumer?.unregister()
+        liveView?.subscriptionId?.let { viewService.removeLiveView(it) }
+    }
 }

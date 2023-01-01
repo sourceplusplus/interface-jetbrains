@@ -84,7 +84,14 @@ class LiveViewTraceServiceImpl(private val project: Project) : LiveViewTraceServ
         contentManager.addContent(overviewContent)
     }
 
-    override fun showLiveViewTraceWindow(endpointName: String) = ApplicationManager.getApplication().invokeLater {
+    override fun showEndpointTraces(endpointName: String) = ApplicationManager.getApplication().invokeLater {
+        val existingContent = contentManager.findContent(endpointName)
+        if (existingContent != null) {
+            contentManager.setSelectedContent(existingContent)
+            toolWindow.show()
+            return@invokeLater
+        }
+
         val chartsWindow = LiveViewTraceWindow(project, endpointName)
         val content = ContentFactory.getInstance().createContent(
             chartsWindow.layoutComponent,

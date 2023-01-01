@@ -82,7 +82,7 @@ class LiveEndpointsWindow(project: Project, service: Service) : LiveViewChartWin
                 val row = table.rowAtPoint(mouseEvent.point)
                 if (mouseEvent.clickCount == 2 && row >= 0) {
                     val endpointRow = model.items[table.rowSorter.convertRowIndexToModel(row)]
-                    LiveViewChartService.getInstance(project).doThing(endpointRow.endpoint.name)
+                    LiveViewChartService.getInstance(project).showEndpointActivity(endpointRow.endpoint.name)
                 }
             }
         })

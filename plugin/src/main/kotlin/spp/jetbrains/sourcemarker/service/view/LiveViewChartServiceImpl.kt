@@ -122,12 +122,19 @@ class LiveViewChartServiceImpl(private val project: Project) : LiveViewChartServ
         }
     }
 
-    override fun showOverview() = ApplicationManager.getApplication().invokeLater {
+    override fun showOverviewActivity() = ApplicationManager.getApplication().invokeLater {
         contentManager.setSelectedContent(contentManager.findContent("Overview"))
         toolWindow.show()
     }
 
-    override fun doThing(endpointName: String) = ApplicationManager.getApplication().invokeLater {
+    override fun showEndpointActivity(endpointName: String) = ApplicationManager.getApplication().invokeLater {
+        val existingContent = contentManager.findContent(endpointName)
+        if (existingContent != null) {
+            contentManager.setSelectedContent(existingContent)
+            toolWindow.show()
+            return@invokeLater
+        }
+
         val activityWindow = LiveActivityWindow(project, endpointName)
         val content = ContentFactory.getInstance().createContent(
             activityWindow.layoutComponent,

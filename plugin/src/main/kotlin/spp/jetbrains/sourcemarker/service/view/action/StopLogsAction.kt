@@ -19,7 +19,7 @@ package spp.jetbrains.sourcemarker.service.view.action
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.service.view.window.LiveLogWindow
+import spp.jetbrains.sourcemarker.service.view.LiveViewLogServiceImpl
 
 /**
  * todo: description.
@@ -27,13 +27,13 @@ import spp.jetbrains.sourcemarker.service.view.window.LiveLogWindow
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class StopLogsAction(private val logWindow: LiveLogWindow) : AnAction(PluginIcons.stop) {
+class StopLogsAction(private val viewLogService: LiveViewLogServiceImpl) : AnAction(PluginIcons.stop) {
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = logWindow.isRunning
+        e.presentation.isEnabled = viewLogService.getCurrentLogWindow()?.isRunning == true
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        logWindow.pause()
+        viewLogService.getCurrentLogWindow()?.pause()
     }
 }
