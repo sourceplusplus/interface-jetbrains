@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
