@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.command.ui.status;
+package spp.jetbrains.sourcemarker.command.status.ui;
 
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
-import spp.jetbrains.plugin.LiveStatusManager;
+import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentEventType;
@@ -82,7 +82,7 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
         hourValueLabel.setVisible(false);
         dayLabel.setVisible(false);
         dayValueLabel.setVisible(false);
-        LiveStatusManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
+        LiveStatusBarManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
     }
 
     public void accept(@NotNull LiveInstrumentEvent event) {
@@ -132,7 +132,7 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
                 UserData.liveInstrumentService(gutterMark.getProject()).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                     if (it.succeeded()) {
                         gutterMark.dispose();
-                        LiveStatusManager.getInstance(gutterMark.getProject()).removeActiveLiveInstrument(liveMeter);
+                        LiveStatusBarManager.getInstance(gutterMark.getProject()).removeActiveLiveInstrument(liveMeter);
                     } else {
                         it.cause().printStackTrace();
                     }

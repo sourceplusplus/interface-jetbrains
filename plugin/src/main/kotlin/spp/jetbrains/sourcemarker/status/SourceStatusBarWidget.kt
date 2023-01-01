@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.statusBar
+package spp.jetbrains.sourcemarker.status
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.project.Project

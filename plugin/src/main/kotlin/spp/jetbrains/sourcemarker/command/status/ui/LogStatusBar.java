@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.command.ui.status;
+package spp.jetbrains.sourcemarker.command.status.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
@@ -36,13 +36,13 @@ import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.plugin.LiveStatusManager;
+import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.jetbrains.marker.SourceMarkerKeys;
-import spp.jetbrains.sourcemarker.command.ui.status.config.LiveLogConfigurationPanel;
+import spp.jetbrains.sourcemarker.command.status.ui.config.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.instrument.log.LogHitColumnInfo;
 import spp.jetbrains.sourcemarker.instrument.log.VariableParser;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
+import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
+import spp.jetbrains.sourcemarker.command.util.AutocompleteFieldRow;
 import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.artifact.log.Log;
 import spp.protocol.artifact.log.LogOrderType;
@@ -168,7 +168,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         initComponents();
         setupComponents();
 
-        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
+        LiveStatusBarManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
         showEditableMode();
         liveLogTextField.setEditMode(true);
         liveLogTextField.addSaveListener(this::saveLiveLog);
@@ -183,11 +183,11 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         displayTimeField();
         addExpandButton();
         repaint();
-        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
+        LiveStatusBarManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
     }
 
     private void initCommandModel() {
-        List logData = LiveStatusManager.getInstance(inlayMark.getProject()).getLogData(inlayMark);
+        List logData = LiveStatusBarManager.getInstance(inlayMark.getProject()).getLogData(inlayMark);
         if (logData.isEmpty()) {
             liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
         } else {
@@ -611,7 +611,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
 
             UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(oldLiveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(oldLiveLog);
+                    LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(oldLiveLog);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -672,7 +672,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
             if (it.succeeded()) {
                 liveLog = (LiveLog) it.result();
                 inlayMark.putUserData(SourceMarkerKeys.getINSTRUMENT_ID(), it.result().getId());
-                LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveLog);
+                LiveStatusBarManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveLog);
 
                 inlayMark.getUserData(SourceMarkerKeys.INSTANCE.getLOGGER_DETECTOR())
                         .addLiveLog(editor, inlayMark, finalLogPattern, sourceLocation.getLine());
@@ -692,10 +692,10 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         }
 
         if (liveLog != null) {
-            LiveStatusManager.getInstance(inlayMark.getProject()).removeLogData(inlayMark);
+            LiveStatusBarManager.getInstance(inlayMark.getProject()).removeLogData(inlayMark);
             UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveLog.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveLog);
+                    LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveLog);
                 } else {
                     it.cause().printStackTrace();
                 }

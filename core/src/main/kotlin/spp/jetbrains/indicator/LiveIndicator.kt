@@ -23,7 +23,7 @@ import spp.jetbrains.UserData
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
@@ -41,7 +41,7 @@ abstract class LiveIndicator(val project: Project) {
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
     val managementService = UserData.liveManagementService(project)!!
     val viewService = UserData.liveViewService(project)!!
-    val statusManager = LiveStatusManager.getInstance(project)
+    val statusManager = LiveStatusBarManager.getInstance(project)
     val instrumentService = UserData.liveInstrumentService(project)
     val selfInfo: SelfInfo
         get() = UserData.selfInfo(project)

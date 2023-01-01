@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status.util
+package spp.jetbrains.sourcemarker.command.util
 
 import spp.jetbrains.PluginUI.getBackgroundFocusColor
 import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
-import spp.jetbrains.sourcemarker.command.ui.status.element.AutocompleteRow
+import spp.jetbrains.sourcemarker.command.status.ui.element.AutocompleteRow
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.Component
@@ -31,7 +31,7 @@ import javax.swing.JList
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class AutoCompleteCellRenderer(private val artifactQualifiedName: ArtifactQualifiedName) : DefaultListCellRenderer() {
+class AutocompleteCellRenderer(private val artifactQualifiedName: ArtifactQualifiedName) : DefaultListCellRenderer() {
     init {
         isOpaque = true
     }

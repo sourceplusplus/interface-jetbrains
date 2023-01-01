@@ -16,7 +16,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language=""
                                         implementationClass="spp.jetbrains.marker.plugin.SourceLineMarkerProvider"/>
-        <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.statusBar.SourceWidgetFactory"/>
+        <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.status.SourceWidgetFactory"/>
 
         <projectService
                 serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl"/>

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status.util
+package spp.jetbrains.sourcemarker.command.util
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ScalableIcon
@@ -25,7 +25,8 @@ import spp.jetbrains.PluginUI
 import spp.jetbrains.PluginUI.SMALLEST_FONT
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.SourceMarkerUtils.substringAfterIgnoreCase
-import spp.jetbrains.sourcemarker.command.ui.status.element.AutocompleteDropdown
+import spp.jetbrains.sourcemarker.command.status.ui.element.AutocompleteDropdown
+import spp.jetbrains.sourcemarker.command.ui.util.LiveCommandFieldRow
 import spp.jetbrains.sourcemarker.instrument.log.VariableParser
 import spp.protocol.artifact.ArtifactQualifiedName
 import java.awt.*
@@ -112,7 +113,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         })
 
         list.font = SMALLEST_FONT
-        list.setCellRenderer(AutoCompleteCellRenderer(artifactQualifiedName))
+        list.setCellRenderer(AutocompleteCellRenderer(artifactQualifiedName))
 
         list.setBorder(JBUI.Borders.empty())
         val scroll: JScrollPane = object : JScrollPane(list) {

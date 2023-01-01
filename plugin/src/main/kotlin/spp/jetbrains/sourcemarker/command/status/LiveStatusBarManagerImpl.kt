@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status
+package spp.jetbrains.sourcemarker.command.status
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
@@ -44,10 +44,10 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.command.ui.status.*
-import spp.jetbrains.sourcemarker.status.util.CircularList
+import spp.jetbrains.sourcemarker.command.status.ui.*
+import spp.jetbrains.sourcemarker.command.util.CircularList
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
@@ -71,10 +71,10 @@ import javax.swing.JPanel
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveStatusManagerImpl(val project: Project, val vertx: Vertx) : LiveStatusManager, SourceMarkEventListener {
+class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveStatusBarManager, SourceMarkEventListener {
 
     companion object {
-        private val log = logger<LiveStatusManagerImpl>()
+        private val log = logger<LiveStatusBarManagerImpl>()
     }
 
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.command.ui.status.element;
+package spp.jetbrains.sourcemarker.command.status.ui.element;
 
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;

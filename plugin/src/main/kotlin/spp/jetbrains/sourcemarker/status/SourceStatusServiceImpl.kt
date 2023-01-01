@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.stat
+package spp.jetbrains.sourcemarker.status
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
@@ -27,7 +27,6 @@ import kotlinx.coroutines.isActive
 import spp.jetbrains.ScopeExtensions.safeGlobalAsync
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
-import spp.jetbrains.sourcemarker.statusBar.SourceStatusBarWidget
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusListener

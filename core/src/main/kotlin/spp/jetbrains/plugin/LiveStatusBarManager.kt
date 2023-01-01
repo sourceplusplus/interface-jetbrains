@@ -29,7 +29,7 @@ import spp.protocol.instrument.LiveMeter
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 
-interface LiveStatusManager {
+interface LiveStatusBarManager {
     fun showBreakpointStatusBar(editor: Editor, lineNumber: Int)
     fun showLogStatusBar(editor: Editor, lineNumber: Int)
     fun showMeterStatusBar(editor: Editor, lineNumber: Int)
@@ -47,10 +47,10 @@ interface LiveStatusManager {
     fun removeLogData(inlayMark: InlayMark)
 
     companion object {
-        val KEY = Key.create<LiveStatusManager>("SPP_LIVE_STATUS_MANAGER")
+        val KEY = Key.create<LiveStatusBarManager>("SPP_LIVE_STATUS_BAR_MANAGER")
 
         @JvmStatic
-        fun getInstance(project: Project): LiveStatusManager {
+        fun getInstance(project: Project): LiveStatusBarManager {
             return project.getUserData(KEY)!!
         }
     }

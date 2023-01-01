@@ -27,7 +27,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys
-import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
@@ -77,7 +77,7 @@ class LiveInstrumentManager(
         UserData.liveInstrumentService(project)!!.getLiveInstruments(null).onComplete {
             if (it.succeeded()) {
                 log.info("Found ${it.result().size} active live status bars")
-                LiveStatusManager.getInstance(project).addActiveLiveInstruments(it.result())
+                LiveStatusBarManager.getInstance(project).addActiveLiveInstruments(it.result())
             } else {
                 log.warn("Failed to get live status bars", it.cause())
             }
@@ -93,7 +93,7 @@ class LiveInstrumentManager(
                 inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.id)
                 inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event)
             } else {
-                LiveStatusManager.getInstance(project).addActiveLiveInstrument(event)
+                LiveStatusBarManager.getInstance(project).addActiveLiveInstrument(event)
             }
         }
     }

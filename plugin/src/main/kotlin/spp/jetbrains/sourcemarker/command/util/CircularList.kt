@@ -14,19 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status.util
+package spp.jetbrains.sourcemarker.command.util
 
-import javax.swing.Icon
+class CircularList<E>(private val maxCapacity: Int) : ArrayList<E>() {
 
-/**
- * todo: description.
- *
- * @since 0.3.0
- * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
- */
-interface AutocompleteFieldRow {
-    fun getText(): String
-    fun getDescription(): String?
-    fun getSelectedIcon(): Icon?
-    fun getUnselectedIcon(): Icon?
+    override fun add(element: E): Boolean {
+        if (size == maxCapacity) {
+            removeLast()
+        }
+        return super.add(element)
+    }
+
+    override fun add(index: Int, element: E) {
+        if (size == maxCapacity) {
+            removeLast()
+        }
+        super.add(index, element)
+    }
 }

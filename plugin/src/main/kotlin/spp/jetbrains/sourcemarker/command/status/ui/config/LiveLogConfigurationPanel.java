@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.command.ui.status.config;
+package spp.jetbrains.sourcemarker.command.status.ui.config;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.marker.SourceMarkerUtils;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
+import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 
 import javax.swing.*;
 import java.awt.*;

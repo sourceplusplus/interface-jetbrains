@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.command.ui.status.config;
+package spp.jetbrains.sourcemarker.command.status.ui.config;
 
 import net.miginfocom.swing.MigLayout;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
+import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 
 import javax.swing.*;
 import java.awt.*;

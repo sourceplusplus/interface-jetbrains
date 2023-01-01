@@ -14,16 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.command.ui.status;
+package spp.jetbrains.sourcemarker.command.status.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
-import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.JBIntSpinner;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.ColumnInfo;
@@ -31,7 +29,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
@@ -39,29 +37,25 @@ import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.plugin.LiveStatusManager;
+import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.jetbrains.marker.SourceMarkerKeys;
-import spp.jetbrains.sourcemarker.command.ui.status.config.LiveBreakpointConfigurationPanel;
+import spp.jetbrains.sourcemarker.command.status.ui.config.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitColumnInfo;
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteFieldRow;
+import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
+import spp.jetbrains.sourcemarker.command.util.AutocompleteFieldRow;
 import spp.jetbrains.state.LiveStateBar;
-import spp.protocol.instrument.LiveBreakpoint;
 import spp.protocol.instrument.LiveInstrument;
+import spp.protocol.instrument.LiveMeter;
 import spp.protocol.instrument.LiveSourceLocation;
-import spp.protocol.instrument.event.LiveBreakpointHit;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
-import spp.protocol.instrument.event.TrackedLiveEvent;
-import spp.protocol.instrument.throttle.InstrumentThrottle;
-import spp.protocol.instrument.throttle.ThrottleStep;
-import spp.protocol.instrument.variable.LiveVariableControl;
+import spp.protocol.instrument.meter.MeterType;
+import spp.protocol.instrument.meter.MetricValue;
+import spp.protocol.instrument.meter.MetricValueType;
 import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Instant;
@@ -70,27 +64,24 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.instrument.event.LiveInstrumentEventType.BREAKPOINT_REMOVED;
 
-public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveInstrumentListener, VisibleAreaListener {
+public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
     private EditorImpl editor;
     private JWindow popup;
-    private LiveBreakpointConfigurationPanel configurationPanel;
+    private LiveMeterConfigurationPanel configurationPanel;
     private boolean disposed = false;
-    private final List<AutocompleteFieldRow> scopeVars;
-    private final Function<String, List<AutocompleteFieldRow>> lookup;
-    private final String placeHolderText = message("breakpoint_condition");
-    private LiveBreakpoint liveBreakpoint;
+    private final String meterName = message("meter_name");
+    private final String placeHolderText = message("metric_value");
+    private LiveMeter liveMeter;
     private LiveBreakpointStatusPanel statusPanel;
     private JPanel wrapper;
     private JPanel panel;
@@ -98,13 +89,16 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
     private boolean expanded = false;
     private final ListTableModel commandModel = new ListTableModel<>(
             new ColumnInfo[]{
-                    new BreakpointHitColumnInfo(message("breakpoint_data")),
+                    new BreakpointHitColumnInfo(message("meter_data")),
                     new BreakpointHitColumnInfo(message("time"))
             },
             new ArrayList<>(), 0, SortOrder.DESCENDING);
+    private final List<AutocompleteFieldRow> scopeVars;
+    private final Function<String, List<AutocompleteFieldRow>> lookup;
 
-    public BreakpointStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
+    public MeterStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
         this.sourceLocation = sourceLocation;
+        this.inlayMark = inlayMark;
         this.scopeVars = scopeVars.stream().map(it -> new AutocompleteFieldRow() {
             public String getText() {
                 return it;
@@ -146,21 +140,13 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
                 .limit(7)
                 .collect(Collectors.toList());
 
-        this.inlayMark = inlayMark;
-
         initComponents();
         setupComponents();
     }
 
-    @Override
-    public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
-        LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(event.getLiveInstrument());
-        this.liveBreakpoint = null;
-    }
-
     public void setLiveInstrument(LiveInstrument liveInstrument) {
-        this.liveBreakpoint = (LiveBreakpoint) liveInstrument;
-        setupAsActive(liveBreakpoint);
+        this.liveMeter = (LiveMeter) liveInstrument;
+        setupAsActive();
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -169,7 +155,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
 
     @Override
     public void visibleAreaChanged(VisibleAreaEvent e) {
-        breakpointConditionField.hideAutocompletePopup();
+        meterIdField.hideAutocompletePopup();
         if (popup != null) {
             popup.dispose();
             popup = null;
@@ -181,8 +167,8 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
     }
 
     public void focus() {
-        breakpointConditionField.grabFocus();
-        breakpointConditionField.requestFocusInWindow();
+        meterIdField.grabFocus();
+        meterIdField.requestFocusInWindow();
     }
 
     private void removeActiveDecorations() {
@@ -191,25 +177,18 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
             closeLabel.setIcon(PluginIcons.close);
             configPanel.setBackground(getInputBackgroundColor());
 
-            if (!breakpointConditionField.getEditMode()) {
-                breakpointConditionField.setBorder(new CompoundBorder(
+            if (!meterIdField.getEditMode()) {
+                meterIdField.setBorder(new CompoundBorder(
                         new LineBorder(JBColor.DARK_GRAY, 0, true),
                         JBUI.Borders.empty(2, 6, 0, 0)));
-                breakpointConditionField.setBackground(PluginUI.getEditCompleteColor());
-                breakpointConditionField.setEditable(false);
+                meterIdField.setBackground(PluginUI.getEditCompleteColor());
+                meterIdField.setEditable(false);
             }
         });
     }
 
-    private void setupAsActive(LiveBreakpoint liveBreakpoint) {
-        LiveStatusManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, new LiveInstrumentListener() {
-            @Override
-            public void onBreakpointHitEvent(@NotNull LiveBreakpointHit event) {
-                if (statusPanel == null) return;
-                commandModel.insertRow(0, event);
-                statusPanel.incrementHits();
-            }
-
+    private void setupAsActive() {
+        LiveStatusBarManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, new LiveInstrumentListener() {
             @Override
             public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
                 if (statusPanel == null) return;
@@ -224,21 +203,19 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
             }
         });
         statusPanel = new LiveBreakpointStatusPanel();
-        statusPanel.setHitLimit(liveBreakpoint.getHitLimit());
+        statusPanel.setHitLimit(liveMeter.getHitLimit());
 
-        breakpointConditionField.setEditMode(false);
+        meterIdField.setEditMode(false);
         removeActiveDecorations();
         configDropdownLabel.setVisible(false);
         SwingUtilities.invokeLater(() -> {
             mainPanel.removeAll();
             mainPanel.setLayout(new BorderLayout());
-            statusPanel.setExpires(liveBreakpoint.getExpiresAt());
+            //statusPanel.setExpires(liveMeter.getExpiresAt());
             mainPanel.add(statusPanel);
 
             remove(closeLabel);
-//                    JLabel searchLabel = new JLabel();
-//                    searchLabel.setIcon(PluginIcons.search);
-//                    add(searchLabel, "cell 2 0");
+
             expandLabel = new JLabel();
             expandLabel.setCursor(Cursor.getDefaultCursor());
             expandLabel.addMouseMotionListener(new MouseAdapter() {
@@ -262,28 +239,6 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
                         table.setModel(commandModel);
                         table.setStriped(true);
                         table.setShowColumns(true);
-
-                        AtomicReference<LiveBreakpointHit> shownBreakpointHit = new AtomicReference<>();
-                        table.getSelectionModel().addListSelectionListener(event -> ApplicationManager.getApplication().invokeLater(() -> {
-                            if (table.getSelectedRow() > -1) {
-                                TrackedLiveEvent selectedEvent = (TrackedLiveEvent) commandModel.getItem(
-                                        table.convertRowIndexToModel(table.getSelectedRow())
-                                );
-                                if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;
-                                LiveBreakpointHit selectedValue = (LiveBreakpointHit) selectedEvent;
-                                if (selectedValue.equals(shownBreakpointHit.getAndSet(selectedValue))) return;
-
-                                SwingUtilities.invokeLater(() -> {
-                                    expanded = false;
-                                    wrapper.remove(panel);
-
-                                    BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
-                                            .clearContent();
-                                    BreakpointHitWindowService.Companion.getInstance(inlayMark.getProject())
-                                            .showBreakpointHit(shownBreakpointHit.get(), true);
-                                });
-                            }
-                        }));
 
                         table.setBackground(getBackgroundColor());
                         panel.add(scrollPane);
@@ -318,26 +273,41 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
     }
 
     private void setupComponents() {
-        JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();
-        spinnerTextField.addKeyListener(new KeyAdapter() {
+        meterTypeComboBox.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    if (StringUtils.isNumeric(spinnerTextField.getText())) {
-                        ApplicationManager.getApplication().runWriteAction(() -> saveLiveBreakpoint());
-                    } else {
-                        spinnerTextField.setText("1");
-                    }
+                    ApplicationManager.getApplication().runWriteAction(() -> saveLiveMeter());
                 }
             }
         });
-        spinnerTextField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
-        breakpointConditionField.getDocument().addDocumentListener(new DocumentAdapter() {
+        meterTypeComboBox.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+
+        meterIdField.setCanShowSaveButton(false);
+        meterIdField.addKeyListener(new KeyAdapter() {
             @Override
-            protected void textChanged(DocumentEvent e) {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_TAB) {
+                    e.consume();
+
+                    if (!meterIdField.getText().trim().isEmpty()) {
+                        meterConditionField.requestFocus();
+                    }
+                }
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
+                    dispose();
+                } else if (e.getKeyChar() == KeyEvent.VK_ENTER && meterIdField.getText().length() > 0) {
+                    meterConditionField.requestFocus();
+                }
             }
         });
-        breakpointConditionField.addKeyListener(new KeyAdapter() {
+
+        meterConditionField.setCanShowSaveButton(false);
+        meterConditionField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_TAB) {
@@ -350,12 +320,13 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
                     dispose();
-                } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    spinnerTextField.requestFocus();
+                } else if (e.getKeyChar() == KeyEvent.VK_ENTER && meterConditionField.getText().length() > 0) {
+                    meterTypeComboBox.requestFocus();
                 }
             }
         });
-        breakpointConditionField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        meterIdField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
+        meterConditionField.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true);
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -420,19 +391,19 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
     }
 
     private void showConfigurationPopup(AtomicLong popupLastOpened) {
-        popup = new JWindow(SwingUtilities.getWindowAncestor(BreakpointStatusBar.this));
+        popup = new JWindow(SwingUtilities.getWindowAncestor(MeterStatusBar.this));
         popup.setType(Window.Type.POPUP);
         popup.setAlwaysOnTop(true);
 
         if (configurationPanel == null) {
-            configurationPanel = new LiveBreakpointConfigurationPanel(breakpointConditionField);
+            configurationPanel = new LiveMeterConfigurationPanel(meterIdField, inlayMark);
         }
 
         popup.add(configurationPanel);
-        popup.setPreferredSize(new Dimension(BreakpointStatusBar.this.getWidth(), popup.getPreferredSize().height));
+        popup.setPreferredSize(new Dimension(MeterStatusBar.this.getWidth(), popup.getPreferredSize().height));
         popup.pack();
         popup.setLocation(configPanel.getLocationOnScreen().x - 1,
-                configPanel.getLocationOnScreen().y + BreakpointStatusBar.this.getHeight() - 2);
+                configPanel.getLocationOnScreen().y + MeterStatusBar.this.getHeight() - 2);
 
         popup.setVisible(true);
 
@@ -449,36 +420,20 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         });
     }
 
-    private void saveLiveBreakpoint() {
-        breakpointConditionField.setShowSaveButton(false);
+    private void saveLiveMeter() {
+        meterIdField.setShowSaveButton(false);
 
         String condition = null;
-        if (!breakpointConditionField.getText().isEmpty()) {
-            condition = ArtifactConditionService.INSTANCE.getCondition(
-                    breakpointConditionField.getText(), inlayMark.getPsiElement()
-            );
-        }
-
-        LiveVariableControl variableControl = null;
-        long expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * 15);
-        InstrumentThrottle throttle = InstrumentThrottle.Companion.getDEFAULT();
-        JFormattedTextField spinnerTextField = ((JSpinner.NumberEditor) hitLimitSpinner.getEditor()).getTextField();
-        int hitLimit = Integer.parseInt(spinnerTextField.getText());
+        Long expirationDate = null;
+        int hitLimit = -1;
         if (configurationPanel != null) {
-            expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
-            throttle = new InstrumentThrottle(
-                    configurationPanel.getRateLimitCount(),
-                    ThrottleStep.valueOf(configurationPanel.getRateLimitStep().toUpperCase())
-            );
-
-            if (configurationPanel.isVariableControlChanged()) {
-                variableControl = new LiveVariableControl(
-                        configurationPanel.getMaxObjectDepth(),
-                        configurationPanel.getMaxObjectSize(),
-                        configurationPanel.getMaxCollectionLength(),
-                        Collections.emptyMap(),
-                        Collections.emptyMap()
+            if (configurationPanel.getCondition() != null) {
+                condition = ArtifactConditionService.INSTANCE.getCondition(
+                        configurationPanel.getCondition().getExpression(), inlayMark.getPsiElement()
                 );
+            }
+            if (configurationPanel.getExpirationInMinutes() != -1) {
+                expirationDate = Instant.now().toEpochMilli() + (1000L * 60L * configurationPanel.getExpirationInMinutes());
             }
 
             configurationPanel.setNewDefaults();
@@ -487,8 +442,19 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         HashMap<String, String> meta = new HashMap<>();
         meta.put("original_source_mark", inlayMark.getId());
 
-        LiveBreakpoint instrument = new LiveBreakpoint(
-                variableControl,
+        MetricValue metricValue;
+        if (NumberUtils.isCreatable(meterConditionField.getText())) {
+            metricValue = new MetricValue(MetricValueType.NUMBER, meterConditionField.getText());
+        } else {
+            //todo: NUMBER_EXPRESSION
+            metricValue = new MetricValue(MetricValueType.VALUE_EXPRESSION, meterConditionField.getText());
+        }
+
+        LiveMeter instrument = new LiveMeter(
+                MeterType.values()[meterTypeComboBox.getSelectedIndex()],
+                metricValue,
+//                meterIdField.getText(),
+                new ArrayList<>(),
                 sourceLocation,
                 condition,
                 expirationDate,
@@ -497,14 +463,21 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
                 false,
                 false,
                 false,
-                throttle,
+                null,
                 meta
         );
-        UserData.liveInstrumentService(inlayMark.getProject()).addLiveBreakpoint(instrument).onComplete(it -> {
+        UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {
             if (it.succeeded()) {
-                liveBreakpoint = it.result();
-                inlayMark.putUserData(SourceMarkerKeys.getINSTRUMENT_ID(), liveBreakpoint.getId());
-                LiveStatusManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveBreakpoint);
+                liveMeter = (LiveMeter) it.result();
+                LiveStatusBarManager.getInstance(inlayMark.getProject()).addActiveLiveInstrument(liveMeter);
+
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    inlayMark.dispose(); //dispose this bar
+
+                    //create gutter popup
+                    ApplicationManager.getApplication().runReadAction(()
+                            -> LiveStatusBarManager.getInstance(inlayMark.getProject()).showMeterStatusIcon(liveMeter, inlayMark.getSourceFileMarker()));
+                });
             } else {
                 it.cause().printStackTrace();
             }
@@ -523,10 +496,10 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkerKeys.getGROUPED_MARKS());
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
-        if (liveBreakpoint != null) {
-            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveBreakpoint.getId()).onComplete(it -> {
+        if (liveMeter != null) {
+            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveMeter.getId()).onComplete(it -> {
                 if (it.succeeded()) {
-                    LiveStatusManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveBreakpoint);
+                    LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveMeter);
                 } else {
                     it.cause().printStackTrace();
                 }
@@ -547,9 +520,10 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         configLabel = new JLabel();
         configDropdownLabel = new JLabel();
         mainPanel = new JPanel();
-        breakpointConditionField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
+        meterIdField = new AutocompleteField(inlayMark.getProject(), meterName, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false);
+        meterConditionField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
         label1 = new JLabel();
-        hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
+        meterTypeComboBox = new JComboBox<>();
         timeLabel = new JLabel();
         separator1 = new JSeparator();
         closeLabel = new JLabel();
@@ -561,7 +535,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
-            "0[fill]0" +
+            "0[fill]" +
             "[grow,fill]" +
             "[fill]",
             // rows
@@ -582,7 +556,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
                 "[grow]"));
 
             //---- configLabel ----
-            configLabel.setIcon(PluginIcons.breakpointConfig);
+            configLabel.setIcon(PluginIcons.meterConfig);
             configPanel.add(configLabel, "cell 0 0");
 
             //---- configDropdownLabel ----
@@ -597,30 +571,43 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
             mainPanel.setLayout(new MigLayout(
                 "novisualpadding,hidemode 3",
                 // columns
+                "[150,left]" +
                 "[grow,fill]" +
                 "[fill]",
                 // rows
                 "0[grow]0"));
 
-            //---- breakpointConditionField ----
-            breakpointConditionField.setBackground(getInputBackgroundColor());
-            breakpointConditionField.setBorder(new CompoundBorder(
-                    new LineBorder(UIUtil.getBoundsColor(), 1, true),
+            //---- meterNameField ----
+            meterIdField.setBackground(getInputBackgroundColor());
+            meterIdField.setBorder(new CompoundBorder(
+                  new LineBorder(UIUtil.getBoundsColor(), 1, true),
                     JBUI.Borders.empty(2, 6, 0, 0)));
-            breakpointConditionField.setFont(BIG_FONT);
-            breakpointConditionField.setMinimumSize(new Dimension(0, 27));
-            mainPanel.add(breakpointConditionField, "cell 0 0");
+            meterIdField.setFont(BIG_FONT);
+            meterIdField.setMinimumSize(new Dimension(0, 27));
+            mainPanel.add(meterIdField, "cell 0 0,growx");
+
+            //---- meterConditionField ----
+            meterConditionField.setBackground(getInputBackgroundColor());
+            meterConditionField.setBorder(new CompoundBorder(
+                new LineBorder(UIUtil.getBoundsColor(), 1, true),
+                    JBUI.Borders.empty(2, 6, 0, 0)));
+            meterConditionField.setFont(BIG_FONT);
+            meterConditionField.setMinimumSize(new Dimension(0, 27));
+            mainPanel.add(meterConditionField, "cell 1 0");
 
             //---- label1 ----
-            label1.setText(message("hit_limit"));
+            label1.setText(message("type"));
             label1.setForeground(Color.gray);
             label1.setFont(SMALLER_FONT);
-            mainPanel.add(label1, "cell 1 0");
+            mainPanel.add(label1, "cell 2 0");
 
-            //---- hitLimitSpinner ----
-            hitLimitSpinner.setBackground(null);
-            //hitLimitSpinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
-            mainPanel.add(hitLimitSpinner, "cell 1 0");
+            //---- meterTypeComboBox ----
+            meterTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
+                message("count"),
+                message("gauge"),
+                message("histogram")
+            }));
+            mainPanel.add(meterTypeComboBox, "cell 2 0");
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
@@ -650,9 +637,10 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
     private JLabel configLabel;
     private JLabel configDropdownLabel;
     private JPanel mainPanel;
-    private AutocompleteField<AutocompleteFieldRow> breakpointConditionField;
+    private AutocompleteField meterIdField;
+    private AutocompleteField meterConditionField;
     private JLabel label1;
-    private JBIntSpinner hitLimitSpinner;
+    private JComboBox<String> meterTypeComboBox;
     private JLabel timeLabel;
     private JSeparator separator1;
     private JLabel closeLabel;

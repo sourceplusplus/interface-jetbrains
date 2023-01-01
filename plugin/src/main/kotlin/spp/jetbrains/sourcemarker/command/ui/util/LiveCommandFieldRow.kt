@@ -14,20 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.statusBar
+package spp.jetbrains.sourcemarker.command.ui.util
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.StatusBarWidget
-import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory
+import spp.jetbrains.command.LiveCommand
+import spp.jetbrains.command.LiveLocationContext
+import spp.jetbrains.sourcemarker.command.util.AutocompleteFieldRow
+import javax.swing.Icon
 
-class SourceWidgetFactory : StatusBarEditorBasedWidgetFactory() {
-
-    override fun getId(): String = "spp.jetbrains.sourcemarker"
-    override fun getDisplayName(): String = "Source++"
-
-    override fun createWidget(project: Project): StatusBarWidget {
-        return SourceStatusBarWidget(project)
-    }
-
-    override fun disposeWidget(widget: StatusBarWidget) = Unit
+class LiveCommandFieldRow(
+    val liveCommand: LiveCommand,
+    private val context: LiveLocationContext
+) : AutocompleteFieldRow {
+    override fun getText(): String = liveCommand.getTriggerName()
+    override fun getDescription(): String = liveCommand.getDescription(context)
+    override fun getSelectedIcon(): Icon? = liveCommand.selectedIcon
+    override fun getUnselectedIcon(): Icon? = liveCommand.unselectedIcon
 }

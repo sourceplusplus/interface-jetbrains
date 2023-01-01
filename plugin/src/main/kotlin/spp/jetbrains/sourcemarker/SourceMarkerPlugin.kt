@@ -66,7 +66,7 @@ import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
-import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.config.getServicePortNormalized
@@ -78,8 +78,8 @@ import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowServi
 import spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl
-import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
-import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
+import spp.jetbrains.sourcemarker.status.SourceStatusServiceImpl
+import spp.jetbrains.sourcemarker.command.status.LiveStatusBarManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatusService
@@ -336,8 +336,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
 
-        val liveStatusManager = LiveStatusManagerImpl(project, vertx)
-        project.putUserData(LiveStatusManager.KEY, liveStatusManager)
+        val liveStatusManager = LiveStatusBarManagerImpl(project, vertx)
+        project.putUserData(LiveStatusBarManager.KEY, liveStatusManager)
 
         log.info("Discovering available services")
         val availableRecords = discovery!!.getRecords { true }.await()

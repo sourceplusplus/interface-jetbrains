@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.status.util
+package spp.jetbrains.sourcemarker.command.ui.util
 
 import spp.jetbrains.PluginUI.getBackgroundFocusColor
 import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
 import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.sourcemarker.command.ui.status.element.LiveControlBarRow
+import spp.jetbrains.sourcemarker.command.status.ui.element.LiveControlBarRow
+import spp.jetbrains.sourcemarker.command.util.AutocompleteField
 import spp.protocol.artifact.ArtifactNameUtils.getShortFunctionSignature
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
