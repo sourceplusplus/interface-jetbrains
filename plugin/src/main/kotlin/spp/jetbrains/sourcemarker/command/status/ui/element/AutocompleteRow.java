@@ -24,7 +24,6 @@ import javax.swing.*;
 import java.awt.*;
 
 import static spp.jetbrains.PluginUI.LABEL_FOREGROUND_COLOR;
-import static spp.jetbrains.PluginUI.PANEL_BACKGROUND_COLOR;
 
 public class AutocompleteRow extends JPanel {
 

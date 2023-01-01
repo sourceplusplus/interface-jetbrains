@@ -25,8 +25,8 @@ import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveViewEvent
 

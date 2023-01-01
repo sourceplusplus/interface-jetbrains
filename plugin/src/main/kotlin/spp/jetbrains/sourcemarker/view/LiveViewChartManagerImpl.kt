@@ -26,7 +26,6 @@ import com.intellij.ui.content.ContentFactory
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
-import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ChangeChartAction
 import spp.jetbrains.sourcemarker.view.action.ChangeTimeAction
@@ -35,6 +34,7 @@ import spp.jetbrains.sourcemarker.view.window.LiveEndpointsWindow
 import spp.jetbrains.sourcemarker.view.window.LiveOverviewWindow
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
+import spp.jetbrains.view.LiveViewChartManager
 import spp.protocol.platform.general.Service
 
 /**

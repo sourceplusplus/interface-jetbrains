@@ -18,7 +18,10 @@ package spp.jetbrains.sourcemarker.instrument.log
 
 import com.intellij.util.ui.ColumnInfo
 import spp.jetbrains.PluginBundle.message
-import spp.protocol.instrument.event.*
+import spp.protocol.instrument.event.LiveInstrumentEventType
+import spp.protocol.instrument.event.LiveInstrumentRemoved
+import spp.protocol.instrument.event.LiveLogHit
+import spp.protocol.instrument.event.TrackedLiveEvent
 import spp.protocol.utils.toPrettyDuration
 import java.time.Instant
 

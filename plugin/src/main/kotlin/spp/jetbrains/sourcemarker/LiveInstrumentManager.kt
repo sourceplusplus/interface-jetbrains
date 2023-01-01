@@ -29,9 +29,9 @@ import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
-import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.LiveBreakpointHit

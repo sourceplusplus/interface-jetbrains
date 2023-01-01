@@ -26,7 +26,6 @@ import io.vertx.core.Promise
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import java.util.*
 
 /**
  * todo: description.

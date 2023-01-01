@@ -26,10 +26,10 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
-import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.model.ServiceEndpointRow
 import spp.jetbrains.sourcemarker.view.model.column.ServiceEndpointColumnInfo
+import spp.jetbrains.view.LiveViewChartManager
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_CPM
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_SLA
