@@ -40,7 +40,7 @@ import javax.swing.JPanel
  */
 class LiveLogWindowImpl(
     project: Project,
-    override val liveView: LiveView,
+    override var liveView: LiveView,
     private val consumerCreator: (LiveLogWindow) -> MessageConsumer<JsonObject>
 ) : LiveLogWindow {
 
@@ -62,8 +62,10 @@ class LiveLogWindowImpl(
     override fun resume() {
         if (isRunning) return
         isRunning = true
-        consumer = consumerCreator.invoke(this)
-        viewService.addLiveView(liveView).onFailure {
+        viewService.addLiveView(liveView).onSuccess {
+            liveView = it
+            consumer = consumerCreator.invoke(this)
+        }.onFailure {
             log.error("Failed to resume live view", it)
         }
     }
