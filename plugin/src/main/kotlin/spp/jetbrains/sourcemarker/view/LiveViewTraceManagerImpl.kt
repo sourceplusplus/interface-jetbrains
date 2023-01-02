@@ -64,9 +64,7 @@ class LiveViewTraceManagerImpl(
     private var toolWindow: ToolWindow = ToolWindowManager.getInstance(project)
         .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.diagramSubtask))
     private var contentManager: ContentManager = toolWindow.contentManager
-    private var currentWindow: LiveViewTraceWindowImpl? = null
-    override val currentView: ResumableView?
-        get() = currentWindow
+    override var currentView: ResumableView? = null
 
     init {
         project.putUserData(LiveViewTraceManager.KEY, this)
@@ -108,16 +106,20 @@ class LiveViewTraceManagerImpl(
 
     override fun selectionChanged(event: ContentManagerEvent) {
         if (event.operation == ContentManagerEvent.ContentOperation.add) {
-            currentWindow = event.content.disposer as LiveViewTraceWindowImpl
+            currentView = event.content.disposer as ResumableView
+
+            if (toolWindow.isVisible) {
+                currentView?.onFocused()
+            }
         }
     }
 
     override fun contentRemoved(event: ContentManagerEvent) {
-        val removedWindow = event.content.disposer as LiveViewTraceWindowImpl
+        val removedWindow = event.content.disposer as ResumableView
         removedWindow.pause()
 
-        if (removedWindow == currentWindow) {
-            currentWindow = null
+        if (removedWindow == currentView) {
+            currentView = null
         }
     }
 

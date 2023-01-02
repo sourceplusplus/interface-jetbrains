@@ -62,9 +62,7 @@ class LiveViewLogManagerImpl(
     private var toolWindow = ToolWindowManager.getInstance(project)
         .registerToolWindow(RegisterToolWindowTask.closable("Live Logs", PluginIcons.messageLines))
     private var contentManager = toolWindow.contentManager
-    private var currentWindow: LiveLogWindowImpl? = null
-    override val currentView: ResumableView?
-        get() = currentWindow
+    override var currentView: ResumableView? = null
 
     init {
         project.putUserData(LiveViewLogManager.KEY, this)
@@ -106,16 +104,20 @@ class LiveViewLogManagerImpl(
 
     override fun selectionChanged(event: ContentManagerEvent) {
         if (event.operation == ContentManagerEvent.ContentOperation.add) {
-            currentWindow = event.content.disposer as LiveLogWindowImpl
+            currentView = event.content.disposer as ResumableView
+
+            if (toolWindow.isVisible) {
+                currentView?.onFocused()
+            }
         }
     }
 
     override fun contentRemoved(event: ContentManagerEvent) {
-        val removedWindow = event.content.disposer as LiveLogWindowImpl
+        val removedWindow = event.content.disposer as ResumableView
         removedWindow.pause()
 
-        if (removedWindow == currentWindow) {
-            currentWindow = null
+        if (removedWindow == currentView) {
+            currentView = null
         }
     }
 

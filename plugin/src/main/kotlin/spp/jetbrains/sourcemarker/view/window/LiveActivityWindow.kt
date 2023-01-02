@@ -41,6 +41,8 @@ class LiveActivityWindow(
     private val refreshInterval: Int = 500
 ) : TabbedResumableView() {
 
+    private var initialFocus = true
+
     init {
         val vertx = UserData.vertx(project)
         metrics.forEach {
@@ -55,6 +57,13 @@ class LiveActivityWindow(
                 )
             ) { consumerCreator(it, vertx) }
             addTab("$scope ${it.simpleName}", respTimeChart, respTimeChart.component)
+        }
+    }
+
+    override fun onFocused() {
+        if (initialFocus) {
+            initialFocus = false
+            resume()
         }
     }
 

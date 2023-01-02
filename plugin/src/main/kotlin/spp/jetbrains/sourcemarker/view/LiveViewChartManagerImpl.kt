@@ -61,7 +61,6 @@ class LiveViewChartManagerImpl(
         .registerToolWindow(RegisterToolWindowTask.closable("Live Activity", PluginIcons.chartArea))
     private var contentManager = toolWindow.contentManager
     override var currentView: ResumableView? = null
-    private var initialFocus = true
 
     init {
         project.putUserData(LiveViewChartManager.KEY, this)
@@ -85,13 +84,7 @@ class LiveViewChartManagerImpl(
         //pause views when tool window is closed
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
             override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
-                if (toolWindow.isVisible) {
-                    (contentManager.contents.first().disposer as ResumableView).onFocused()
-                    if (initialFocus) {
-                        initialFocus = false
-                        (contentManager.contents.first().disposer as ResumableView).resume()
-                    }
-                } else {
+                if (!toolWindow.isVisible) {
                     contentManager.contents
                         .mapNotNull { it.disposer as? ResumableView }
                         .forEach { it.pause() }
@@ -116,7 +109,10 @@ class LiveViewChartManagerImpl(
     override fun selectionChanged(event: ContentManagerEvent) {
         if (event.operation == ContentManagerEvent.ContentOperation.add) {
             currentView = event.content.disposer as ResumableView
-            currentView?.onFocused()
+
+            if (toolWindow.isVisible) {
+                currentView?.onFocused()
+            }
         }
     }
 
