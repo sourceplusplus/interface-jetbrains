@@ -32,7 +32,7 @@ import java.time.format.DateTimeFormatter
  */
 class TraceSpanTreeNodeColumnInfo(name: String) : ColumnInfo<TraceSpanTreeNode, String>(name) {
 
-    private val formatter = DateTimeFormatter.ofPattern("h:mm:ss.S a")
+    private val formatter = DateTimeFormatter.ofPattern("h:mm:ss.SSS a")
         .withZone(ZoneId.systemDefault())
 
     override fun getColumnClass(): Class<*> {
