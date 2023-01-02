@@ -295,8 +295,10 @@ class LiveViewChartWindow(
 
     companion object {
         fun defaultChartColor(metricType: MetricType): Color {
-            return if (metricType.requiresConversion) {
+            return if (metricType.metricId.contains("sla")) {
                 PluginUI.purple
+            } else if (metricType.metricId.contains("cpm")) {
+                DarculaColors.RED
             } else {
                 DarculaColors.BLUE
             }
