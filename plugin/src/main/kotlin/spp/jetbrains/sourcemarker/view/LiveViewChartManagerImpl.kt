@@ -81,10 +81,12 @@ class LiveViewChartManagerImpl(
         })
         contentManager.addContentManagerListener(this)
 
-        //pause views when tool window is closed
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
             override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
-                if (!toolWindow.isVisible) {
+                if (toolWindow.isVisible) {
+                    (contentManager.contents.first().disposer as ResumableView).onFocused()
+                } else {
+                    //pause views when tool window is hidden
                     contentManager.contents
                         .mapNotNull { it.disposer as? ResumableView }
                         .forEach { it.pause() }
