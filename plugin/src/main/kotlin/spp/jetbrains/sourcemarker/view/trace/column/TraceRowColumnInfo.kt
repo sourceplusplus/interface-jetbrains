@@ -44,12 +44,17 @@ class TraceRowColumnInfo(name: String) : ColumnInfo<Trace, String>(name) {
 
     override fun getComparator(): Comparator<Trace>? {
         return when (name) {
-            "Time" -> Comparator { t: Trace, t2: Trace ->
-                t.start.compareTo(t2.start)
-            }
-
-            "Duration" -> Comparator { t: Trace, t2: Trace ->
-                t.duration.compareTo(t2.duration)
+            "Trace" -> Comparator { t, t2 -> t.operationNames.first().compareTo(t2.operationNames.first()) }
+            "Time" -> Comparator { t, t2 -> t.start.compareTo(t2.start) }
+            "Duration" -> Comparator { t, t2 -> t.duration.compareTo(t2.duration) }
+            "Status" -> Comparator { t, t2 ->
+                if (t.error == t2.error) {
+                    val tStatusCode = t.meta["http.status_code"] ?: "KO"
+                    val t2StatusCode = t2.meta["http.status_code"] ?: "KO"
+                    tStatusCode.compareTo(t2StatusCode)
+                } else {
+                    t.error.toString().compareTo(t2.error.toString())
+                }
             }
 
             else -> null
