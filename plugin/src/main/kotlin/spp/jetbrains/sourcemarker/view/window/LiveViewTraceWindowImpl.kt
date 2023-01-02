@@ -71,7 +71,6 @@ class LiveViewTraceWindowImpl(
 
     init {
         val table = JBTable(model)
-//        table.isStriped = true
         table.setShowColumns(true)
         table.setDefaultRenderer(Duration::class.java, TraceDurationTableCellRenderer())
         table.setDefaultRenderer(Icon::class.java, TraceErrorTableCellRenderer())

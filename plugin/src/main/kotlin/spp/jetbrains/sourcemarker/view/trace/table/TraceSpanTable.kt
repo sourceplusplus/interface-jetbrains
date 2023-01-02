@@ -42,7 +42,6 @@ class TraceSpanTable(span: TraceSpan) : Disposable {
 
     init {
         val table = JBTable(model)
-        table.isStriped = true
         table.setShowColumns(true)
         component.add(JBScrollPane(table), "Center")
 
