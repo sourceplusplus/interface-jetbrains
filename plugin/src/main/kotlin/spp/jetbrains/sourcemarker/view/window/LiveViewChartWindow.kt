@@ -32,7 +32,6 @@ import spp.jetbrains.view.ResumableView
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
-import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.Insets
@@ -43,7 +42,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatterBuilder
 import java.util.*
 import javax.swing.JComponent
-import javax.swing.JPanel
 import javax.swing.SwingConstants
 
 /**
@@ -66,7 +64,6 @@ class LiveViewChartWindow(
 
     private val viewService = UserData.liveViewService(project)!!
     private var consumer: MessageConsumer<JsonObject>? = null
-    private var refreshInterval = 500
     private val keepSize = 10 * 6 * 5
     private val keepTimeSize = 10_000L * 6 * 5
     private val xStepSize = 10_000L * 6
@@ -76,13 +73,10 @@ class LiveViewChartWindow(
     var chartColor: Color = defaultChartColor(metricType)
 
     override var isRunning: Boolean = false
-    val component: JComponent = JPanel(BorderLayout())
     private val histogram = Histogram(SlidingWindowReservoir(keepSize))
     private val chart = singleLineChart(entityId, metricType, chartColor)
-
-    init {
-        component.add(chart.component)
-    }
+    val component: JComponent
+        get() = chart.component
 
     override fun resume() {
         if (isRunning) return

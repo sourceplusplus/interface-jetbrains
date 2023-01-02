@@ -113,7 +113,7 @@ class LiveEndpointsWindow(
             LiveSourceLocation("", 0, service.id),
             LiveViewConfig("LiveEndpointsWindow", listenMetrics, -1)
         )
-        val row = EndpointRowView(vertx, viewService, liveView, { consumerCreator(vertx, it, endpoint) })
+        val row = EndpointRowView(viewService, liveView) { consumerCreator(vertx, it, endpoint) }
         addView(row)
     }
 

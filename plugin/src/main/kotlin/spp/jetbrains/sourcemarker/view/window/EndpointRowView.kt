@@ -17,7 +17,6 @@
 package spp.jetbrains.sourcemarker.view.window
 
 import com.intellij.openapi.diagnostic.logger
-import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.view.ResumableView
@@ -31,8 +30,7 @@ import spp.protocol.view.LiveView
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class EndpointRowView(
-    val vertx: Vertx,
-    val viewService: LiveViewService,
+    private val viewService: LiveViewService,
     var liveView: LiveView,
     private val consumerCreator: (EndpointRowView) -> MessageConsumer<JsonObject>
 ) : ResumableView {
