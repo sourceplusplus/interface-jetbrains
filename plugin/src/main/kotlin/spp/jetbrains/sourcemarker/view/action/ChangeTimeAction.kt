@@ -32,6 +32,10 @@ class ChangeTimeAction : AnAction(PluginIcons.clockRotateLeft) {
 
     var selected = "Last 5 Minutes"
 
+    init {
+        templatePresentation.text = "Change Time"
+    }
+
     override fun actionPerformed(e: AnActionEvent) {
         JBPopupFactory.getInstance().createListPopup(
             object : ListPopupStep<String> {

@@ -25,7 +25,7 @@ import com.intellij.openapi.util.Key
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LiveViewChartManager {
+interface LiveViewChartManager : ResumableViewManager {
     companion object {
         val KEY = Key.create<LiveViewChartManager>("SPP_LIVE_VIEW_CHART_MANAGER")
 

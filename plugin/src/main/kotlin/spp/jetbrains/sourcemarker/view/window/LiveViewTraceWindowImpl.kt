@@ -51,7 +51,7 @@ class LiveViewTraceWindowImpl(
     val layoutComponent: JComponent
         get() = component
 
-    override var consumer: MessageConsumer<JsonObject>? = null
+    private var consumer: MessageConsumer<JsonObject>? = null
     override var isRunning = false
         private set
 

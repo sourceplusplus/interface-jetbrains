@@ -18,6 +18,7 @@ package spp.jetbrains.view.window
 
 import com.intellij.execution.ui.ConsoleView
 import spp.jetbrains.view.ResumableView
+import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -26,5 +27,6 @@ import spp.jetbrains.view.ResumableView
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface LiveLogWindow : ResumableView {
+    val liveView: LiveView
     val console: ConsoleView
 }

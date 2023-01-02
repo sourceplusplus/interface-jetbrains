@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.view.action
+package spp.jetbrains.sourcemarker.view.window
 
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.view.ResumableViewManager
+import com.intellij.ui.components.JBTabbedPane
+import com.intellij.util.ui.JBUI
+import spp.jetbrains.view.ResumableView
+import spp.jetbrains.view.ResumableViewCollection
+import javax.swing.JComponent
 
 /**
  * todo: description.
@@ -27,17 +28,16 @@ import spp.jetbrains.view.ResumableViewManager
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ResumeViewAction(private val viewManager: ResumableViewManager) : AnAction(PluginIcons.play) {
+open class TabbedResumableView : ResumableViewCollection() {
+
+    val component: JBTabbedPane = JBTabbedPane()
 
     init {
-        templatePresentation.text = "Resume View"
+        component.tabComponentInsets = JBUI.emptyInsets()
     }
 
-    override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = viewManager.currentView?.isRunning == false
-    }
-
-    override fun actionPerformed(e: AnActionEvent) {
-        viewManager.currentView?.resume()
+    fun addTab(title: String, view: ResumableView, viewComponent: JComponent) {
+        component.insertTab(title, null, viewComponent, null, size)
+        addView(view)
     }
 }

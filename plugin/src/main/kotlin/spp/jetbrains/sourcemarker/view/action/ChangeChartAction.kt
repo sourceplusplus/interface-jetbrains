@@ -32,6 +32,10 @@ class ChangeChartAction : AnAction(PluginIcons.chartMixed) {
 
     var selected = "Average"
 
+    init {
+        templatePresentation.text = "Change Chart"
+    }
+
     override fun actionPerformed(e: AnActionEvent) {
         JBPopupFactory.getInstance().createListPopup(
             object : ListPopupStep<String> {

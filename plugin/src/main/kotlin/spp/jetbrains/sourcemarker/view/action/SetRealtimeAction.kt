@@ -27,17 +27,16 @@ import spp.jetbrains.view.ResumableViewManager
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ResumeViewAction(private val viewManager: ResumableViewManager) : AnAction(PluginIcons.play) {
+class SetRealtimeAction(private val viewManager: ResumableViewManager) : AnAction(PluginIcons.bolt) {
 
     init {
-        templatePresentation.text = "Resume View"
+        templatePresentation.text = "Set Realtime"
     }
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = viewManager.currentView?.isRunning == false
+        e.presentation.isEnabled = viewManager.currentView?.isRunning == true
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        viewManager.currentView?.resume()
     }
 }

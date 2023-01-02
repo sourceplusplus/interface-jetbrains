@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.view
 
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
@@ -52,7 +51,7 @@ import spp.protocol.view.LiveView
  */
 class LiveViewLogManagerImpl(
     private val project: Project
-) : LiveViewLogManager, ContentManagerListener, Disposable {
+) : LiveViewLogManager, ContentManagerListener {
 
     companion object {
         fun init(project: Project) {

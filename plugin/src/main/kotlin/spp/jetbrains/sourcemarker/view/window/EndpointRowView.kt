@@ -16,21 +16,13 @@
  */
 package spp.jetbrains.sourcemarker.view.window
 
-import com.intellij.execution.filters.TextConsoleBuilderFactory
-import com.intellij.execution.ui.ConsoleView
-import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Disposer
+import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
-import spp.jetbrains.UserData
-import spp.jetbrains.view.window.LiveLogWindow
+import spp.jetbrains.view.ResumableView
+import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
-import java.awt.BorderLayout
-import java.util.concurrent.atomic.AtomicReference
-import javax.swing.JPanel
 
 /**
  * todo: description.
@@ -38,26 +30,18 @@ import javax.swing.JPanel
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveLogWindowImpl(
-    project: Project,
-    override var liveView: LiveView,
-    private val consumerCreator: (LiveLogWindow) -> MessageConsumer<JsonObject>
-) : LiveLogWindow {
+class EndpointRowView(
+    val vertx: Vertx,
+    val viewService: LiveViewService,
+    var liveView: LiveView,
+    private val consumerCreator: (EndpointRowView) -> MessageConsumer<JsonObject>
+) : ResumableView {
 
-    private val log = logger<LiveLogWindowImpl>()
-    private val viewService = UserData.liveViewService(project)!!
+    private val log = logger<EndpointRowView>()
     private var consumer: MessageConsumer<JsonObject>? = null
-    override val console: ConsoleView
-    val component = JPanel(BorderLayout()).apply { isFocusable = true }
+
     override var isRunning = false
         private set
-
-    init {
-        console = makeConsoleView(project)
-        Disposer.register(this, console)
-
-        resume()
-    }
 
     override fun resume() {
         if (isRunning) return
@@ -80,18 +64,6 @@ class LiveLogWindowImpl(
                 log.error("Failed to pause live view", it)
             }
         }
-    }
-
-    private fun makeConsoleView(project: Project): ConsoleView {
-        val result: AtomicReference<ConsoleView> = AtomicReference()
-        ApplicationManager.getApplication().invokeAndWait {
-            val console = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
-            val toolbarActions = DefaultActionGroup()
-            component.add(console.component, BorderLayout.CENTER)
-            console.createConsoleActions().forEach { toolbarActions.add(it) }
-            result.set(console)
-        }
-        return result.get()
     }
 
     override fun dispose() = pause()

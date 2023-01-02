@@ -29,6 +29,10 @@ import spp.jetbrains.view.ResumableViewManager
  */
 class StopViewAction(private val viewManager: ResumableViewManager) : AnAction(PluginIcons.stop) {
 
+    init {
+        templatePresentation.text = "Stop View"
+    }
+
     override fun update(e: AnActionEvent) {
         e.presentation.isEnabled = viewManager.currentView?.isRunning == true
     }

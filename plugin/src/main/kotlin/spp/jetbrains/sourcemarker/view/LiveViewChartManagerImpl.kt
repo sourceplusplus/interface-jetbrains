@@ -16,25 +16,29 @@
  */
 package spp.jetbrains.sourcemarker.view
 
-import com.intellij.openapi.Disposable
+import com.intellij.openapi.actionSystem.Separator
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.openapi.wm.ex.ToolWindowManagerListener
+import com.intellij.openapi.wm.ex.ToolWindowManagerListener.ToolWindowManagerEventType
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManagerEvent
+import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.view.action.ChangeChartAction
-import spp.jetbrains.sourcemarker.view.action.ChangeTimeAction
+import spp.jetbrains.sourcemarker.view.action.*
 import spp.jetbrains.sourcemarker.view.window.LiveActivityWindow
 import spp.jetbrains.sourcemarker.view.window.LiveEndpointsWindow
-import spp.jetbrains.sourcemarker.view.window.LiveOverviewWindow
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.view.LiveViewChartManager
+import spp.jetbrains.view.ResumableView
+import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.platform.general.Service
 
 /**
@@ -43,7 +47,9 @@ import spp.protocol.platform.general.Service
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewChartManagerImpl(private val project: Project) : LiveViewChartManager, Disposable {
+class LiveViewChartManagerImpl(
+    private val project: Project
+) : LiveViewChartManager, ContentManagerListener {
 
     companion object {
         fun init(project: Project) {
@@ -54,6 +60,8 @@ class LiveViewChartManagerImpl(private val project: Project) : LiveViewChartMana
     private var toolWindow = ToolWindowManager.getInstance(project)
         .registerToolWindow(RegisterToolWindowTask.closable("Live Activity", PluginIcons.chartArea))
     private var contentManager = toolWindow.contentManager
+    override var currentView: ResumableView? = null
+    private var initialFocus = true
 
     init {
         project.putUserData(LiveViewChartManager.KEY, this)
@@ -72,25 +80,69 @@ class LiveViewChartManagerImpl(private val project: Project) : LiveViewChartMana
                 }
             }
         })
+        contentManager.addContentManagerListener(this)
+
+        //pause views when tool window is closed
+        project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
+            override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
+                if (toolWindow.isVisible) {
+                    (contentManager.contents.first().disposer as ResumableView).onFocused()
+                    if (initialFocus) {
+                        initialFocus = false
+                        (contentManager.contents.first().disposer as ResumableView).resume()
+                    }
+                } else {
+                    contentManager.contents
+                        .mapNotNull { it.disposer as? ResumableView }
+                        .forEach { it.pause() }
+                }
+            }
+        })
 
         Disposer.register(this, contentManager)
 
         toolWindow.setTitleActions(
             listOf(
+                ResumeViewAction(this),
+                StopViewAction(this),
+                SetRealtimeAction(this),
+                Separator.getInstance(),
                 ChangeChartAction(),
                 ChangeTimeAction()
             )
         )
     }
 
+    override fun selectionChanged(event: ContentManagerEvent) {
+        if (event.operation == ContentManagerEvent.ContentOperation.add) {
+            currentView = event.content.disposer as ResumableView
+            currentView?.onFocused()
+        }
+    }
+
+    override fun contentRemoved(event: ContentManagerEvent) {
+        val removedWindow = event.content.disposer as ResumableView
+        removedWindow.pause()
+
+        if (removedWindow == currentView) {
+            currentView = null
+        }
+    }
+
     private fun showWindow(service: Service) {
-        val chartsWindow = LiveOverviewWindow(project, service)
+        val overviewWindow = LiveActivityWindow(
+            project, service.name, "Service", listOf(
+                MetricType.Service_RespTime_AVG,
+                MetricType.Service_SLA,
+                MetricType.Service_CPM
+            )
+        )
         val overviewContent = ContentFactory.getInstance().createContent(
-            chartsWindow.layoutComponent,
+            overviewWindow.component,
             "Overview",
             true
         )
-        overviewContent.setDisposer(chartsWindow)
+        overviewContent.setDisposer(overviewWindow)
         overviewContent.isCloseable = false
         contentManager.addContent(overviewContent)
 
@@ -106,7 +158,7 @@ class LiveViewChartManagerImpl(private val project: Project) : LiveViewChartMana
 
         val endpointsWindow = LiveEndpointsWindow(project, service)
         val endpointsContent = ContentFactory.getInstance().createContent(
-            endpointsWindow.layoutComponent,
+            endpointsWindow.component,
             "Endpoints",
             true
         )
@@ -134,9 +186,17 @@ class LiveViewChartManagerImpl(private val project: Project) : LiveViewChartMana
             return@invokeLater
         }
 
-        val activityWindow = LiveActivityWindow(project, endpointName)
+        val activityWindow = LiveActivityWindow(
+            project, endpointName, "Endpoint", listOf(
+                MetricType.Endpoint_RespTime_AVG.asRealtime(),
+                MetricType.Endpoint_SLA.asRealtime(),
+                MetricType.Endpoint_CPM.asRealtime()
+            ), -1
+        )
+        activityWindow.resume()
+
         val content = ContentFactory.getInstance().createContent(
-            activityWindow.layoutComponent,
+            activityWindow.component,
             endpointName,
             false
         )

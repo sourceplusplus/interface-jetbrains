@@ -18,6 +18,7 @@ package spp.jetbrains.view.window
 
 import spp.jetbrains.view.ResumableView
 import spp.protocol.artifact.trace.Trace
+import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -26,5 +27,6 @@ import spp.protocol.artifact.trace.Trace
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface LiveTraceWindow : ResumableView {
+    val liveView: LiveView
     fun addTrace(trace: Trace)
 }

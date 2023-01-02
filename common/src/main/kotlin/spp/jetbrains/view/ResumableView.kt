@@ -17,9 +17,6 @@
 package spp.jetbrains.view
 
 import com.intellij.openapi.Disposable
-import io.vertx.core.eventbus.MessageConsumer
-import io.vertx.core.json.JsonObject
-import spp.protocol.view.LiveView
 
 /**
  * todo: description.
@@ -28,10 +25,9 @@ import spp.protocol.view.LiveView
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 interface ResumableView : Disposable {
-    val liveView: LiveView
-    var consumer: MessageConsumer<JsonObject>?
     val isRunning: Boolean
 
+    fun onFocused() = Unit
     fun resume()
     fun pause()
 }

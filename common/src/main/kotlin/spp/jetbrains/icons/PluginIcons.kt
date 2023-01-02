@@ -157,4 +157,10 @@ object PluginIcons {
 
     @JvmField
     val stop = IconLoader.getIcon("/icons/stop.svg", PluginIcons::class.java)
+
+    @JvmField
+    val bolt = IconLoader.getIcon("/icons/bolt.svg", PluginIcons::class.java)
+
+    @JvmField
+    val boltSlash = IconLoader.getIcon("/icons/bolt-slash.svg", PluginIcons::class.java)
 }

@@ -64,7 +64,7 @@ class TraceColumnInfo(name: String) : ColumnInfo<NodeDescriptor<*>, String>(name
                     t2 as SpanInfoListNode
                     (t.value as TraceSpan).startTime.compareTo((t2.value as TraceSpan).startTime)
                 } else {
-                    TODO()
+                    t.toString().compareTo(t2.toString())
                 }
             }
 
@@ -76,7 +76,7 @@ class TraceColumnInfo(name: String) : ColumnInfo<NodeDescriptor<*>, String>(name
                     t2 as SpanInfoListNode
                     (t.value as TraceSpan).startTime.compareTo((t2.value as TraceSpan).startTime)
                 } else {
-                    TODO()
+                    t.toString().compareTo(t2.toString())
                 }
             }
 

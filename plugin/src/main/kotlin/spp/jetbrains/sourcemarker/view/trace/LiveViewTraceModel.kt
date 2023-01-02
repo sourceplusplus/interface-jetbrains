@@ -133,9 +133,7 @@ class LiveViewTraceModel(
         return path.lastPathComponent
     }
 
-    override fun getDefaultSortKey(): RowSorter.SortKey? {
-        return null
-    }
+    override fun getDefaultSortKey(): RowSorter.SortKey? = null
 
     override fun accept(visitor: TreeVisitor): Promise<TreePath> = myAsyncModel.accept(visitor)
 

@@ -16,12 +16,14 @@
  */
 package spp.jetbrains.view
 
+import com.intellij.openapi.Disposable
+
 /**
  * todo: description.
  *
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface ResumableViewManager {
+interface ResumableViewManager : Disposable {
     val currentView: ResumableView?
 }

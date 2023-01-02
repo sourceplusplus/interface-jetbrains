@@ -21,9 +21,6 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.ide.util.treeView.AbstractTreeNode
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import kotlinx.coroutines.runBlocking
-import spp.jetbrains.UserData
-import spp.protocol.artifact.trace.Trace
 import java.awt.Color
 
 /**
@@ -32,26 +29,17 @@ import java.awt.Color
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class TraceListNode(
-    private val project: Project,
-    private val trace: Trace? = null
-) : AbstractTreeNode<Any>(project, trace ?: "root") {
+open class SpanValueListNode(project: Project, value: Any) : AbstractTreeNode<Any>(project, value) {
 
     override fun update(presentation: PresentationData) {
         ApplicationManager.getApplication().runReadAction {
-            presentation.presentableText = trace?.operationNames?.firstOrNull()
+            presentation.setPresentableText(value?.toString())
             presentation.setIcon(AllIcons.Ide.Gift)
             presentation.forcedTextForeground = Color.orange
         }
     }
 
-    override fun getChildren(): MutableCollection<out AbstractTreeNode<*>> = runBlocking {
-        val monitorService = UserData.skywalkingMonitorService(project)
-        val traceStack = monitorService.getTraceStack(trace!!.traceIds.first())
-        println("Got spans: " + traceStack)
-
-        return@runBlocking traceStack.map { span ->
-            SpanInfoListNode(project, span)
-        }.toMutableList()
+    override fun getChildren(): MutableCollection<out AbstractTreeNode<*>> {
+        return mutableListOf()
     }
 }

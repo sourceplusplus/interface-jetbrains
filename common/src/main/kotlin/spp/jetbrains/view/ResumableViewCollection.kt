@@ -14,12 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.view.action
-
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.view.ResumableViewManager
+package spp.jetbrains.view
 
 /**
  * todo: description.
@@ -27,17 +22,31 @@ import spp.jetbrains.view.ResumableViewManager
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ResumeViewAction(private val viewManager: ResumableViewManager) : AnAction(PluginIcons.play) {
+abstract class ResumableViewCollection : ResumableView {
 
-    init {
-        templatePresentation.text = "Resume View"
+    private val views: MutableList<ResumableView> = mutableListOf()
+    override val isRunning: Boolean
+        get() = views.any { it.isRunning }
+    val size: Int
+        get() = views.size
+
+    fun addView(view: ResumableView) {
+        views.add(view)
     }
 
-    override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = viewManager.currentView?.isRunning == false
+    fun getViews(): List<ResumableView> {
+        return views.toList()
     }
 
-    override fun actionPerformed(e: AnActionEvent) {
-        viewManager.currentView?.resume()
+    override fun resume() {
+        if (isRunning) return
+        views.forEach { it.resume() }
     }
+
+    override fun pause() {
+        if (!isRunning) return
+        views.forEach { it.pause() }
+    }
+
+    override fun dispose() = pause()
 }
