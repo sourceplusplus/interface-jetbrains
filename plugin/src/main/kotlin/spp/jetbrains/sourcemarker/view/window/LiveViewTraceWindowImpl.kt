@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.sourcemarker.view.window
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
@@ -57,6 +58,7 @@ class LiveViewTraceWindowImpl(
     private var consumer: MessageConsumer<JsonObject>? = null
     override var isRunning = false
         private set
+    private var initialFocus = true
 
     private val model = ListTableModel<Trace>(
         arrayOf(
@@ -91,12 +93,17 @@ class LiveViewTraceWindowImpl(
         table.columnModel.getColumn(2).minWidth = 125
         table.columnModel.getColumn(3).maxWidth = 150
         table.columnModel.getColumn(3).minWidth = 100
-
-        resume()
     }
 
-    override fun addTrace(trace: Trace) {
+    override fun addTrace(trace: Trace) = ApplicationManager.getApplication().invokeLater {
         model.addRow(trace)
+    }
+
+    override fun onFocused() {
+        if (initialFocus) {
+            initialFocus = false
+            resume()
+        }
     }
 
     override fun resume() {

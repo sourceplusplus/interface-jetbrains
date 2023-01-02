@@ -45,7 +45,10 @@ import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.window.LiveTraceWindow
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.platform.general.Service
+import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
+import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewEvent
 
 /**
  * todo: description.
@@ -87,7 +90,9 @@ class LiveViewTraceManagerImpl(
 
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
             override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
-                if (!toolWindow.isVisible) {
+                if (toolWindow.isVisible) {
+                    (contentManager.contents.first().disposer as ResumableView).onFocused()
+                } else {
                     //pause views when tool window is hidden
                     contentManager.contents
                         .mapNotNull { it.disposer as? ResumableView }
@@ -126,15 +131,34 @@ class LiveViewTraceManagerImpl(
     }
 
     private fun showWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
-//        val traceWindow = LiveViewTraceWindow(project)
-//        val overviewContent = ContentFactory.getInstance().createContent(
-//            traceWindow.layoutComponent,
-//            "Service: ${service.name}",
-//            true
-//        )
-//        overviewContent.setDisposer(traceWindow)
-//        overviewContent.isCloseable = false
-//        contentManager.addContent(overviewContent)
+        val refreshRate = 2000
+        val liveView = LiveView(
+            entityIds = mutableSetOf(service.name),
+            viewConfig = LiveViewConfig("SERVICE_TRACE_CHART", listOf("service_traces"), refreshRate)
+        )
+        val traceWindow = LiveViewTraceWindowImpl(project, liveView, { serviceTracesConsumerCreator(it) })
+        val overviewContent = ContentFactory.getInstance().createContent(
+            traceWindow.component,
+            "Service: ${service.name}",
+            true
+        )
+        overviewContent.setDisposer(traceWindow)
+        overviewContent.isCloseable = false
+        contentManager.addContent(overviewContent)
+    }
+
+    private fun serviceTracesConsumerCreator(traceWindow: LiveTraceWindow): MessageConsumer<JsonObject> {
+        val vertx = UserData.vertx(project)
+        val consumer = vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress("system"))
+        consumer.handler {
+            val liveViewEvent = LiveViewEvent(it.body())
+            if (liveViewEvent.subscriptionId != traceWindow.liveView.subscriptionId) return@handler
+
+            val event = JsonObject(liveViewEvent.metricsData)
+            val trace = Trace(event.getJsonObject("trace"))
+            traceWindow.addTrace(trace)
+        }
+        return consumer
     }
 
     private fun hideWindow() {
