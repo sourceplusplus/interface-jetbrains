@@ -19,9 +19,8 @@ package spp.jetbrains.sourcemarker.view.trace
 import com.intellij.ide.util.treeView.AbstractTreeNode
 import com.intellij.ide.util.treeView.AbstractTreeStructure
 import com.intellij.ide.util.treeView.NodeDescriptor
-import com.intellij.openapi.project.Project
 import com.intellij.util.ArrayUtil
-import spp.jetbrains.sourcemarker.view.trace.node.TraceListRootNode
+import spp.jetbrains.sourcemarker.view.trace.node.TraceRootTreeNode
 
 /**
  * todo: description.
@@ -30,11 +29,10 @@ import spp.jetbrains.sourcemarker.view.trace.node.TraceListRootNode
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LiveViewTraceTreeStructure(
-    private val project: Project,
-    private val rootNode: TraceListRootNode
+    private val rootNode: TraceRootTreeNode
 ) : AbstractTreeStructure() {
 
-    override fun getRootElement(): TraceListRootNode = rootNode
+    override fun getRootElement(): TraceRootTreeNode = rootNode
 
     override fun getChildElements(element: Any): Array<Any?> {
         return if (element is AbstractTreeNode<*>) {

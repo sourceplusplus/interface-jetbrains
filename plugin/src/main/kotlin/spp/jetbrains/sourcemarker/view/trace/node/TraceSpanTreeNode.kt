@@ -16,15 +16,10 @@
  */
 package spp.jetbrains.sourcemarker.view.trace.node
 
-import com.intellij.icons.AllIcons
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.ide.util.treeView.AbstractTreeNode
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import kotlinx.coroutines.runBlocking
-import spp.jetbrains.UserData
-import spp.protocol.artifact.trace.Trace
-import java.awt.Color
+import spp.protocol.artifact.trace.TraceSpan
 
 /**
  * todo: description.
@@ -32,26 +27,27 @@ import java.awt.Color
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class TraceListNode(
-    private val project: Project,
-    private val trace: Trace? = null
-) : AbstractTreeNode<Any>(project, trace ?: "root") {
+class TraceSpanTreeNode(
+    project: Project,
+    val traceStack: List<TraceSpan>,
+    span: TraceSpan
+) : AbstractTreeNode<TraceSpan>(project, span) {
 
     override fun update(presentation: PresentationData) {
-        ApplicationManager.getApplication().runReadAction {
-            presentation.presentableText = trace?.operationNames?.firstOrNull()
-            presentation.setIcon(AllIcons.Ide.Gift)
-            presentation.forcedTextForeground = Color.orange
-        }
+        presentation.presentableText = value.endpointName
     }
 
-    override fun getChildren(): MutableCollection<out AbstractTreeNode<*>> = runBlocking {
-        val monitorService = UserData.skywalkingMonitorService(project)
-        val traceStack = monitorService.getTraceStack(trace!!.traceIds.first())
-        println("Got spans: " + traceStack)
-
-        return@runBlocking traceStack.map { span ->
-            SpanInfoListNode(project, span)
+    override fun getChildren(): Collection<TraceSpanTreeNode> {
+        val childSpans = traceStack.filter {
+            it.parentSpanId == value.spanId && it.segmentId == value.segmentId
         }.toMutableList()
+
+        //add cross-process refs as children
+        childSpans.addAll(traceStack.filter {
+            val ref = it.refs.find { it.type == "CROSS_PROCESS" } ?: return@filter false
+            ref.parentSegmentId == value.segmentId && ref.parentSpanId == value.spanId
+        })
+
+        return childSpans.map { TraceSpanTreeNode(project, traceStack, it) }
     }
 }

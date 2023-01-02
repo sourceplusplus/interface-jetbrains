@@ -36,12 +36,14 @@ import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.StopViewAction
+import spp.jetbrains.sourcemarker.view.trace.TraceSpanSplitterPanel
 import spp.jetbrains.sourcemarker.view.window.LiveViewTraceWindowImpl
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.view.LiveViewTraceManager
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.window.LiveTraceWindow
+import spp.protocol.artifact.trace.Trace
 import spp.protocol.platform.general.Service
 import spp.protocol.view.LiveView
 
@@ -106,7 +108,7 @@ class LiveViewTraceManagerImpl(
 
     override fun selectionChanged(event: ContentManagerEvent) {
         if (event.operation == ContentManagerEvent.ContentOperation.add) {
-            currentView = event.content.disposer as ResumableView
+            currentView = event.content.disposer as? ResumableView
 
             if (toolWindow.isVisible) {
                 currentView?.onFocused()
@@ -115,8 +117,8 @@ class LiveViewTraceManagerImpl(
     }
 
     override fun contentRemoved(event: ContentManagerEvent) {
-        val removedWindow = event.content.disposer as ResumableView
-        removedWindow.pause()
+        val removedWindow = event.content.disposer as? ResumableView
+        removedWindow?.pause()
 
         if (removedWindow == currentView) {
             currentView = null
@@ -155,7 +157,7 @@ class LiveViewTraceManagerImpl(
 
         val traceWindow = LiveViewTraceWindowImpl(project, liveView, consumer)
         val content = ContentFactory.getInstance().createContent(
-            traceWindow.layoutComponent,
+            traceWindow.component,
             endpointName,
             false
         )
@@ -164,6 +166,37 @@ class LiveViewTraceManagerImpl(
         contentManager.setSelectedContent(content)
 
         toolWindow.show()
+    }
+
+    override fun showTraceSpans(trace: Trace) {
+        val existingContent = contentManager.findContent(trace.traceIds.first())
+        if (existingContent != null) {
+            ApplicationManager.getApplication().invokeLater {
+
+                contentManager.setSelectedContent(existingContent)
+                toolWindow.show()
+            }
+            return
+        }
+
+        UserData.vertx(project).safeLaunch {
+            val monitorService = UserData.skywalkingMonitorService(project)
+            val traceStack = monitorService.getTraceStack(trace.traceIds.first())
+            val traceWindow = TraceSpanSplitterPanel(project, traceStack)
+
+            ApplicationManager.getApplication().invokeLater {
+                val content = ContentFactory.getInstance().createContent(
+                    traceWindow,
+                    trace.traceIds.first(),
+                    false
+                )
+                content.setDisposer(traceWindow)
+                contentManager.addContent(content)
+                contentManager.setSelectedContent(content)
+
+                toolWindow.show()
+            }
+        }
     }
 
     override fun dispose() = Unit

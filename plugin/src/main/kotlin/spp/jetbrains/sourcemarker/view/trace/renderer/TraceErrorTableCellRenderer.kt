@@ -14,10 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.view.trace.node
+package spp.jetbrains.sourcemarker.view.trace.renderer
 
-import com.intellij.openapi.project.Project
+import com.intellij.util.ui.ListTableModel
+import com.intellij.util.ui.table.IconTableCellRenderer
+import spp.jetbrains.icons.PluginIcons
 import spp.protocol.artifact.trace.Trace
+import javax.swing.Icon
+import javax.swing.JTable
 
 /**
  * todo: description.
@@ -25,11 +29,18 @@ import spp.protocol.artifact.trace.Trace
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class TraceListRootNode(project: Project) : TraceListNode(project) {
+class TraceErrorTableCellRenderer : IconTableCellRenderer<String>() {
 
-    val traces: MutableList<Trace> = mutableListOf()
+    override fun getIcon(value: String, table: JTable, row: Int): Icon {
+        val error = value.toBooleanStrict()
+        val trace = (table.model as ListTableModel<Trace>).getRowValue(table.rowSorter.convertRowIndexToModel(row))
+        val statusCode = trace.meta["http.status_code"] ?: if (error) "KO" else "OK"
+        text = statusCode
 
-    override fun getChildren(): MutableCollection<TraceListNode> {
-        return traces.map { TraceListNode(project, it) }.toMutableList()
+        return if (error) {
+            PluginIcons.errorBug
+        } else {
+            PluginIcons.check
+        }
     }
 }

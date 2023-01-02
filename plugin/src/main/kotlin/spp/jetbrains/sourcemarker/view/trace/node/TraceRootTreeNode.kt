@@ -16,14 +16,10 @@
  */
 package spp.jetbrains.sourcemarker.view.trace.node
 
-import com.intellij.icons.AllIcons
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.ide.util.treeView.AbstractTreeNode
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import org.joor.Reflect
 import spp.protocol.artifact.trace.TraceSpan
-import java.awt.Color
 
 /**
  * todo: description.
@@ -31,20 +27,22 @@ import java.awt.Color
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class SpanInfoListNode(project: Project, private val span: TraceSpan) : AbstractTreeNode<Any>(project, span) {
+class TraceRootTreeNode(
+    project: Project,
+    traceStack: List<TraceSpan>
+) : AbstractTreeNode<List<TraceSpan>>(project, traceStack) {
 
-    override fun update(presentation: PresentationData) {
-        ApplicationManager.getApplication().runReadAction {
-            presentation.setPresentableText(value?.toString())
-            presentation.setIcon(AllIcons.Ide.Gift)
-            presentation.forcedTextForeground = Color.orange
+    override fun update(presentation: PresentationData) = Unit
+
+    override fun getChildren(): Collection<TraceSpanTreeNode> {
+        val rootSpans = value.filter { it.parentSpanId == -1 }.toMutableList()
+
+        //remove root spans when cross-process refs parented to root span
+        rootSpans.removeAll {
+            val ref = it.refs.find { it.type == "CROSS_PROCESS" } ?: return@removeAll false
+            rootSpans.any { it.segmentId == ref.parentSegmentId }
         }
-    }
 
-    override fun getChildren(): MutableCollection<out AbstractTreeNode<*>> {
-        return Reflect.on(span).fields().map { field ->
-            val value = field.value.get<Any?>()
-            SpanValueListNode(project, field.key + " = " + value)
-        }.toMutableList()
+        return rootSpans.map { TraceSpanTreeNode(project, value, it) }
     }
 }

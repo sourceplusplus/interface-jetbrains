@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.view.window
+package spp.jetbrains.sourcemarker.view.window.util
 
 import com.intellij.openapi.diagnostic.logger
 import io.vertx.core.eventbus.MessageConsumer

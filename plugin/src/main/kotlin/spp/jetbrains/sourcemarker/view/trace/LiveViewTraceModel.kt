@@ -25,10 +25,11 @@ import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.SortableColumnModel
 import com.intellij.util.ui.tree.AbstractTreeModel
 import org.jetbrains.concurrency.Promise
-import spp.jetbrains.sourcemarker.view.trace.column.TraceColumnInfo
-import spp.jetbrains.sourcemarker.view.trace.node.TraceListNode
+import spp.jetbrains.sourcemarker.view.trace.column.TraceSpanTreeNodeColumnInfo
+import spp.jetbrains.sourcemarker.view.trace.node.TraceSpanTreeNode
 import javax.swing.JTree
 import javax.swing.RowSorter
+import javax.swing.SortOrder
 import javax.swing.event.TreeModelEvent
 import javax.swing.event.TreeModelListener
 import javax.swing.tree.DefaultMutableTreeNode
@@ -45,14 +46,15 @@ class LiveViewTraceModel(
 ) : AbstractTreeModel(), TreeTableModel, SortableColumnModel, TreeModelListener, TreeVisitor.Acceptor {
 
     companion object {
-        val COLUMN_INFOS: Array<ColumnInfo<NodeDescriptor<*>, String>> = arrayOf(
-            TraceColumnInfo("Trace"),
-            TraceColumnInfo("Duration"),
-            TraceColumnInfo("Time"),
+        val COLUMN_INFOS: Array<ColumnInfo<TraceSpanTreeNode, String>> = arrayOf(
+            TraceSpanTreeNodeColumnInfo("Trace"),
+            TraceSpanTreeNodeColumnInfo("Type"),
+            TraceSpanTreeNodeColumnInfo("Duration"),
+            TraceSpanTreeNodeColumnInfo("Time"),
         )
     }
 
-    private val myAsyncModel: AsyncTreeModel
+    private val myAsyncModel: AsyncTreeModel //todo: likely don't need async model
     private var myStructureModel: StructureTreeModel<LiveViewTraceTreeStructure>
     private var myTree: JTree? = null
 
@@ -92,19 +94,16 @@ class LiveViewTraceModel(
     }
 
     override fun getValueAt(node: Any?, column: Int): Any? {
-        val coverageNode = getNode(node)
-        return if (coverageNode != null) {
-            COLUMN_INFOS[column].valueOf(coverageNode)
+        val traceSpanTreeNode = getNode(node)
+        return if (traceSpanTreeNode != null) {
+            COLUMN_INFOS[column].valueOf(traceSpanTreeNode)
         } else ""
     }
 
-    fun getNode(node: Any?): TraceListNode? {
-        if (node is TraceListNode) {
-            return node
-        }
+    private fun getNode(node: Any?): TraceSpanTreeNode? {
         if (node is DefaultMutableTreeNode) {
             val userObject = node.userObject
-            if (userObject is TraceListNode) {
+            if (userObject is TraceSpanTreeNode) {
                 return userObject
             }
         }
@@ -122,8 +121,15 @@ class LiveViewTraceModel(
     override fun treeNodesChanged(e: TreeModelEvent) = treeNodesChanged(e.treePath, e.childIndices, e.children)
     override fun treeNodesInserted(e: TreeModelEvent) = treeNodesInserted(e.treePath, e.childIndices, e.children)
     override fun treeNodesRemoved(e: TreeModelEvent) = treeNodesRemoved(e.treePath, e.childIndices, e.children)
-    override fun treeStructureChanged(e: TreeModelEvent) = treeStructureChanged(e.treePath, e.childIndices, e.children)
-    override fun getColumnInfos(): Array<ColumnInfo<NodeDescriptor<*>, String>> = COLUMN_INFOS
+    override fun treeStructureChanged(e: TreeModelEvent) {
+        treeStructureChanged(e.treePath, e.childIndices, e.children)
+
+        //auto-select first row
+        val firstNode = (e.treePath.path[0] as DefaultMutableTreeNode).firstChild
+        myTree?.selectionPath = e.treePath.pathByAddingChild(firstNode)
+    }
+
+    override fun getColumnInfos(): Array<ColumnInfo<TraceSpanTreeNode, String>> = COLUMN_INFOS
     override fun setSortable(aBoolean: Boolean) = Unit
     override fun isSortable(): Boolean = true
 
@@ -133,11 +139,9 @@ class LiveViewTraceModel(
         return path.lastPathComponent
     }
 
-    override fun getDefaultSortKey(): RowSorter.SortKey? = null
+    override fun getDefaultSortKey(): RowSorter.SortKey {
+        return RowSorter.SortKey(COLUMN_INFOS.indexOfFirst { it.name == "Time" }, SortOrder.DESCENDING)
+    }
 
     override fun accept(visitor: TreeVisitor): Promise<TreePath> = myAsyncModel.accept(visitor)
-
-    fun reset() {
-        myStructureModel.invalidate()
-    }
 }

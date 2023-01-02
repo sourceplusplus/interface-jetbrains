@@ -18,21 +18,27 @@ package spp.jetbrains.sourcemarker.view.window
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Disposer
-import com.intellij.ui.components.JBTreeTable
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.table.JBTable
+import com.intellij.util.ui.ListTableModel
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
-import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceModel
-import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceRowSorter
-import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceTreeStructure
-import spp.jetbrains.sourcemarker.view.trace.node.TraceListRootNode
+import spp.jetbrains.sourcemarker.view.trace.column.TraceRowColumnInfo
 import spp.jetbrains.sourcemarker.view.trace.renderer.TraceDurationTableCellRenderer
+import spp.jetbrains.sourcemarker.view.trace.renderer.TraceErrorTableCellRenderer
+import spp.jetbrains.view.LiveViewTraceManager
 import spp.jetbrains.view.window.LiveTraceWindow
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.view.LiveView
 import java.awt.BorderLayout
-import javax.swing.*
+import java.awt.Point
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import java.time.Duration
+import javax.swing.Icon
+import javax.swing.JPanel
+import javax.swing.SortOrder
 
 /**
  * todo: description.
@@ -48,36 +54,50 @@ class LiveViewTraceWindowImpl(
 
     private val log = logger<LiveViewTraceWindowImpl>()
     private val viewService = UserData.liveViewService(project)!!
-    val layoutComponent: JComponent
-        get() = component
-
     private var consumer: MessageConsumer<JsonObject>? = null
     override var isRunning = false
         private set
 
+    private val model = ListTableModel<Trace>(
+        arrayOf(
+            TraceRowColumnInfo("Trace"),
+            TraceRowColumnInfo("Duration"),
+            TraceRowColumnInfo("Time"),
+            TraceRowColumnInfo("Status")
+        ),
+        ArrayList(), 2, SortOrder.DESCENDING
+    )
     val component: JPanel = JPanel(BorderLayout())
-    private val rootNode = TraceListRootNode(project)
-    private val model = LiveViewTraceModel(LiveViewTraceTreeStructure(project, rootNode))
 
     init {
-        Disposer.register(this, model)
-        val table = JBTreeTable(model)
-        val rowSorter = LiveViewTraceRowSorter(table, model)
-        table.setRowSorter(rowSorter)
-        val sortKey = RowSorter.SortKey(
-            LiveViewTraceModel.COLUMN_INFOS.indexOfFirst { it.name == "Time" },
-            SortOrder.DESCENDING
-        )
-        rowSorter.sortKeys = listOf(sortKey)
-        table.setDefaultRenderer(Icon::class.java, TraceDurationTableCellRenderer())
-        component.add(table, "Center")
+        val table = JBTable(model)
+//        table.isStriped = true
+        table.setShowColumns(true)
+        table.setDefaultRenderer(Duration::class.java, TraceDurationTableCellRenderer())
+        table.setDefaultRenderer(Icon::class.java, TraceErrorTableCellRenderer())
+        table.addMouseListener(object : MouseAdapter() {
+            override fun mousePressed(mouseEvent: MouseEvent) {
+                val point: Point = mouseEvent.point
+                val row = table.rowAtPoint(point)
+                if (mouseEvent.clickCount == 2 && row >= 0) {
+                    val traceRow = model.items[table.rowSorter.convertRowIndexToModel(row)]
+                    LiveViewTraceManager.getInstance(project).showTraceSpans(traceRow)
+                }
+            }
+        })
+        component.add(JBScrollPane(table), "Center")
+
+        //default column widths
+        table.columnModel.getColumn(2).maxWidth = 175
+        table.columnModel.getColumn(2).minWidth = 125
+        table.columnModel.getColumn(3).maxWidth = 150
+        table.columnModel.getColumn(3).minWidth = 100
 
         resume()
     }
 
     override fun addTrace(trace: Trace) {
-        rootNode.traces.add(trace)
-        model.reset() //todo: optimize
+        model.addRow(trace)
     }
 
     override fun resume() {

@@ -16,20 +16,18 @@
  */
 package spp.jetbrains.sourcemarker.view.trace.renderer
 
-import com.codahale.metrics.Histogram
-import com.codahale.metrics.SlidingWindowReservoir
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.DarculaColors
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.render.RenderingUtil
 import com.intellij.util.ui.JBUI
-import com.intellij.util.ui.ListTableModel
-import spp.protocol.artifact.trace.Trace
-import spp.protocol.utils.toPrettyDuration
+import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceModel
+import spp.jetbrains.sourcemarker.view.trace.node.TraceSpanTreeNode
 import java.awt.Component
 import java.awt.Graphics
 import javax.swing.JTable
 import javax.swing.table.TableCellRenderer
+import javax.swing.tree.DefaultMutableTreeNode
 
 /**
  * todo: description.
@@ -37,9 +35,8 @@ import javax.swing.table.TableCellRenderer
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class TraceDurationTableCellRenderer : JBLabel(), TableCellRenderer {
+class SpanEventTableCellRenderer(private val model: LiveViewTraceModel) : JBLabel(), TableCellRenderer {
 
-    private val histogram = Histogram(SlidingWindowReservoir(1000))
     private var x = 0
     private var width = 0
     private var color = ColorUtil.withAlpha(DarculaColors.BLUE, 0.5)
@@ -57,23 +54,24 @@ class TraceDurationTableCellRenderer : JBLabel(), TableCellRenderer {
         row: Int,
         column: Int
     ): Component {
-        val duration = value.toString().toInt()
-        histogram.update(duration)
+        val treeNode = model.getRowValue(table.rowSorter.convertRowIndexToModel(row)) as DefaultMutableTreeNode
+        val spanNode = (treeNode.userObject as? TraceSpanTreeNode) ?: return this
+        val span = spanNode.value
+        val traceStart = spanNode.traceStack.minOf { it.startTime.toEpochMilli() }
+        val traceEnd = spanNode.traceStack.maxOf { it.endTime.toEpochMilli() }
 
-        val trace = (table.model as ListTableModel<Trace>).getRowValue(table.rowSorter.convertRowIndexToModel(row))
-        color = if (trace.error == true) {
-            ColorUtil.withAlpha(DarculaColors.RED, 0.5)
-        } else {
-            ColorUtil.withAlpha(DarculaColors.BLUE, 0.5)
-        }
-
-        val columnWidth = table.columnModel.getColumn(column).width
-        background = RenderingUtil.getBackground(table, isSelected)
-        foreground = RenderingUtil.getForeground(table, isSelected)
-        width = (columnWidth * (duration / histogram.snapshot.max.toDouble())).toInt()
+        val traceDuration = traceEnd - traceStart
+        val spanDuration = span.endTime.toEpochMilli() - span.startTime.toEpochMilli()
+        val spanStart = span.startTime.toEpochMilli() - traceStart
+        val spanPercent = spanDuration.toDouble() / traceDuration.toDouble()
+        val spanPercentWidth = (spanPercent * table.width).toInt()
+        x = (spanStart.toDouble() / traceDuration.toDouble() * table.width).toInt()
 
         val comp = this as JBLabel
-        comp.text = duration.toPrettyDuration()
+        background = RenderingUtil.getBackground(table, isSelected)
+        foreground = RenderingUtil.getForeground(table, isSelected)
+        width = spanPercentWidth
+        comp.text = value.toString()
         return this
     }
 

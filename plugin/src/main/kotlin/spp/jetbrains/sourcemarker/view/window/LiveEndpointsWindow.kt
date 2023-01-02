@@ -30,6 +30,7 @@ import spp.jetbrains.UserData
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.model.ServiceEndpointRow
 import spp.jetbrains.sourcemarker.view.model.column.ServiceEndpointColumnInfo
+import spp.jetbrains.sourcemarker.view.window.util.EndpointRowView
 import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.view.ResumableViewCollection
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_CPM
@@ -53,10 +54,7 @@ import javax.swing.SortOrder
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveEndpointsWindow(
-    project: Project,
-    service: Service
-) : ResumableViewCollection() {
+class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCollection() {
 
     private val log = logger<LiveEndpointsWindow>()
     private val model = ListTableModel<ServiceEndpointRow>(

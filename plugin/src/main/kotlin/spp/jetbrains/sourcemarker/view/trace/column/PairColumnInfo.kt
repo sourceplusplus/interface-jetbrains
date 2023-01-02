@@ -14,15 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.view
+package spp.jetbrains.sourcemarker.view.trace.column
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
-import io.vertx.core.eventbus.MessageConsumer
-import io.vertx.core.json.JsonObject
-import spp.jetbrains.view.window.LiveTraceWindow
-import spp.protocol.artifact.trace.Trace
-import spp.protocol.view.LiveView
+import com.intellij.util.ui.ColumnInfo
 
 /**
  * todo: description.
@@ -30,20 +24,23 @@ import spp.protocol.view.LiveView
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LiveViewTraceManager : ResumableViewManager {
-    companion object {
-        val KEY = Key.create<LiveViewTraceManager>("SPP_LIVE_VIEW_TRACE_MANAGER")
+class PairColumnInfo(name: String, private val key: Boolean) : ColumnInfo<Pair<String, Any?>, String>(name) {
 
-        fun getInstance(project: Project): LiveViewTraceManager {
-            return project.getUserData(KEY)!!
+    override fun getComparator(): Comparator<Pair<String, Any?>> {
+        return Comparator { o1, o2 ->
+            if (key) {
+                o1.first.compareTo(o2.first)
+            } else {
+                o1.second.toString().compareTo(o2.second.toString())
+            }
         }
     }
 
-    fun showEndpointTraces(
-        liveView: LiveView,
-        endpointName: String,
-        consumer: (LiveTraceWindow) -> MessageConsumer<JsonObject>
-    )
-
-    fun showTraceSpans(trace: Trace)
+    override fun valueOf(item: Pair<String, Any?>): String {
+        return if (key) {
+            item.first
+        } else {
+            item.second.toString()
+        }
+    }
 }
