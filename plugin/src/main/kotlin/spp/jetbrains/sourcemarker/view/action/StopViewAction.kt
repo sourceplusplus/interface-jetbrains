@@ -35,6 +35,7 @@ class StopViewAction(private val viewManager: ResumableViewManager) : AnAction(P
 
     override fun update(e: AnActionEvent) {
         e.presentation.isEnabled = viewManager.currentView?.isRunning == true
+        e.presentation.isVisible = viewManager.currentView != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {

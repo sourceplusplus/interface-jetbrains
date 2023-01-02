@@ -35,6 +35,7 @@ class ResumeViewAction(private val viewManager: ResumableViewManager) : AnAction
 
     override fun update(e: AnActionEvent) {
         e.presentation.isEnabled = viewManager.currentView?.isRunning == false
+        e.presentation.isVisible = viewManager.currentView != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {
