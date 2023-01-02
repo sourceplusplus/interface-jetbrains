@@ -57,9 +57,15 @@ class SpanEventTableCellRenderer(private val model: LiveViewTraceModel) : JBLabe
         val treeNode = model.getRowValue(table.rowSorter.convertRowIndexToModel(row)) as DefaultMutableTreeNode
         val spanNode = (treeNode.userObject as? TraceSpanTreeNode) ?: return this
         val span = spanNode.value
+
+        color = if (span.error == true) {
+            ColorUtil.withAlpha(DarculaColors.RED, 0.5)
+        } else {
+            ColorUtil.withAlpha(DarculaColors.BLUE, 0.5)
+        }
+
         val traceStart = spanNode.traceStack.minOf { it.startTime.toEpochMilli() }
         val traceEnd = spanNode.traceStack.maxOf { it.endTime.toEpochMilli() }
-
         val traceDuration = traceEnd - traceStart
         val spanDuration = span.endTime.toEpochMilli() - span.startTime.toEpochMilli()
         val spanStart = span.startTime.toEpochMilli() - traceStart
