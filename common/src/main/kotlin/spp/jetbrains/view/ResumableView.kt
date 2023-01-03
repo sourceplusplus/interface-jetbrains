@@ -26,8 +26,11 @@ import com.intellij.openapi.Disposable
  */
 interface ResumableView : Disposable {
     val isRunning: Boolean
+    val refreshInterval: Int
 
     fun onFocused() = Unit
     fun resume()
     fun pause()
+    fun setRefreshInterval(interval: Int)
+    fun supportsRealtime(): Boolean = false
 }

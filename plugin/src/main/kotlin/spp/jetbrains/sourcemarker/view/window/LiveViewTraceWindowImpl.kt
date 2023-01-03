@@ -58,6 +58,8 @@ class LiveViewTraceWindowImpl(
     private var consumer: MessageConsumer<JsonObject>? = null
     override var isRunning = false
         private set
+    override val refreshInterval: Int
+        get() = liveView.viewConfig.refreshRateLimit
     private var initialFocus = true
 
     private val model = ListTableModel<Trace>(
@@ -128,6 +130,14 @@ class LiveViewTraceWindowImpl(
             }
         }
     }
+
+    override fun setRefreshInterval(interval: Int) {
+        pause()
+        liveView = liveView.copy(viewConfig = liveView.viewConfig.copy(refreshRateLimit = interval))
+        resume()
+    }
+
+    override fun supportsRealtime(): Boolean = true
 
     override fun dispose() = Unit
 }

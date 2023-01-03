@@ -69,6 +69,9 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
     val component: JPanel = JPanel(BorderLayout())
     private val viewService = UserData.liveViewService(project)!!
     private var initialFocus = true
+    private var refreshRate: Int = 1000
+    override val refreshInterval: Int
+        get() = refreshRate
 
     init {
         val table = JBTable(model)
@@ -109,7 +112,7 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
             mutableSetOf(endpoint.endpoint.name),
             null,
             LiveSourceLocation("", 0, service.id),
-            LiveViewConfig("LiveEndpointsWindow", listenMetrics, -1)
+            LiveViewConfig("LiveEndpointsWindow", listenMetrics, refreshInterval)
         )
         val row = EndpointRowView(viewService, liveView) { consumerCreator(vertx, it, endpoint) }
         addView(row)
@@ -130,10 +133,19 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
             val metricArr = JsonArray(viewEvent.metricsData)
             for (i in 0 until metricArr.size()) {
                 val metric = metricArr.getJsonObject(i)
-                when (metric.getJsonObject("meta").getString("metricsName")) {
-                    Endpoint_CPM.metricId -> endpoint.cpm = metric.getInteger("value")
-                    Endpoint_RespTime_AVG.metricId -> endpoint.respTimeAvg = metric.getInteger("value")
-                    Endpoint_SLA.metricId -> endpoint.sla = metric.getInteger("value") / 100.0
+                val metricsName = metric.getJsonObject("meta").getString("metricsName")
+                when {
+                    Endpoint_CPM.equalsIgnoringRealtime(metricsName) -> {
+                        endpoint.cpm = metric.getInteger("value")
+                    }
+
+                    Endpoint_RespTime_AVG.equalsIgnoringRealtime(metricsName) -> {
+                        endpoint.respTimeAvg = metric.getInteger("value")
+                    }
+
+                    Endpoint_SLA.equalsIgnoringRealtime(metricsName) -> {
+                        endpoint.sla = metric.getInteger("value") / 100.0
+                    }
                 }
             }
             model.fireTableDataChanged()
@@ -147,4 +159,31 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
             resume()
         }
     }
+
+    override fun setRefreshInterval(interval: Int) {
+        if (interval == -1) {
+            val listenMetrics = listOf(
+                Endpoint_CPM.asRealtime().metricId,
+                Endpoint_RespTime_AVG.asRealtime().metricId,
+                Endpoint_SLA.asRealtime().metricId
+            )
+            getViews().map { it as EndpointRowView }.forEach {
+                it.liveView = it.liveView.copy(viewConfig = it.liveView.viewConfig.copy(viewMetrics = listenMetrics))
+            }
+        } else {
+            val listenMetrics = listOf(
+                Endpoint_CPM.metricId,
+                Endpoint_RespTime_AVG.metricId,
+                Endpoint_SLA.metricId
+            )
+            getViews().map { it as EndpointRowView }.forEach {
+                it.liveView = it.liveView.copy(viewConfig = it.liveView.viewConfig.copy(viewMetrics = listenMetrics))
+            }
+        }
+
+        refreshRate = interval
+        super.setRefreshInterval(interval)
+    }
+
+    override fun supportsRealtime(): Boolean = true
 }

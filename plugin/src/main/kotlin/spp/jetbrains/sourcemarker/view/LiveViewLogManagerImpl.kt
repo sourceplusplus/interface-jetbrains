@@ -33,6 +33,7 @@ import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
+import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
 import spp.jetbrains.sourcemarker.view.action.StopViewAction
 import spp.jetbrains.sourcemarker.view.window.LiveLogWindowImpl
 import spp.jetbrains.status.SourceStatus
@@ -63,6 +64,8 @@ class LiveViewLogManagerImpl(
         .registerToolWindow(RegisterToolWindowTask.closable("Live Logs", PluginIcons.messageLines))
     private var contentManager = toolWindow.contentManager
     override var currentView: ResumableView? = null
+    override val refreshInterval: Int?
+        get() = currentView?.refreshInterval
 
     init {
         project.putUserData(LiveViewLogManager.KEY, this)
@@ -97,7 +100,8 @@ class LiveViewLogManagerImpl(
         toolWindow.setTitleActions(
             listOf(
                 ResumeViewAction(this),
-                StopViewAction(this)
+                StopViewAction(this),
+                SetRefreshIntervalAction(this)
             )
         )
     }

@@ -28,7 +28,7 @@ import javax.swing.JComponent
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class TabbedResumableView : ResumableViewCollection() {
+abstract class TabbedResumableView : ResumableViewCollection() {
 
     val component: JBTabbedPane = JBTabbedPane()
 

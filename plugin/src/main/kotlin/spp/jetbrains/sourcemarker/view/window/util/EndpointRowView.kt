@@ -40,6 +40,8 @@ class EndpointRowView(
 
     override var isRunning = false
         private set
+    override val refreshInterval: Int
+        get() = liveView.viewConfig.refreshRateLimit
 
     override fun resume() {
         if (isRunning) return
@@ -62,6 +64,12 @@ class EndpointRowView(
                 log.error("Failed to pause live view", it)
             }
         }
+    }
+
+    override fun setRefreshInterval(interval: Int) {
+        pause()
+        liveView = liveView.copy(viewConfig = liveView.viewConfig.copy(refreshRateLimit = interval))
+        resume()
     }
 
     override fun dispose() = pause()

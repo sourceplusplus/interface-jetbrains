@@ -26,4 +26,5 @@ import com.intellij.openapi.Disposable
  */
 interface ResumableViewManager : Disposable {
     val currentView: ResumableView?
+    val refreshInterval: Int?
 }

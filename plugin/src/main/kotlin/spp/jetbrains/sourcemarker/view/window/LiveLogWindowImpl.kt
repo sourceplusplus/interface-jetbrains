@@ -51,6 +51,8 @@ class LiveLogWindowImpl(
     val component = JPanel(BorderLayout()).apply { isFocusable = true }
     override var isRunning = false
         private set
+    override val refreshInterval: Int
+        get() = liveView.viewConfig.refreshRateLimit
 
     init {
         console = makeConsoleView(project)
@@ -80,6 +82,12 @@ class LiveLogWindowImpl(
                 log.error("Failed to pause live view", it)
             }
         }
+    }
+
+    override fun setRefreshInterval(interval: Int) {
+        pause()
+        liveView = liveView.copy(viewConfig = liveView.viewConfig.copy(refreshRateLimit = interval))
+        resume()
     }
 
     private fun makeConsoleView(project: Project): ConsoleView {

@@ -169,4 +169,7 @@ object PluginIcons {
 
     @JvmField
     val check = IconLoader.getIcon("/icons/check.svg", PluginIcons::class.java)
+
+    @JvmField
+    val rotate = IconLoader.getIcon("/icons/rotate.svg", PluginIcons::class.java)
 }

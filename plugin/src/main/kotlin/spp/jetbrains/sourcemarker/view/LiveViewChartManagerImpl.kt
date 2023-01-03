@@ -61,6 +61,8 @@ class LiveViewChartManagerImpl(
         .registerToolWindow(RegisterToolWindowTask.closable("Live Activity", PluginIcons.chartArea))
     private var contentManager = toolWindow.contentManager
     override var currentView: ResumableView? = null
+    override val refreshInterval: Int?
+        get() = currentView?.refreshInterval
 
     init {
         project.putUserData(LiveViewChartManager.KEY, this)
@@ -100,7 +102,7 @@ class LiveViewChartManagerImpl(
             listOf(
                 ResumeViewAction(this),
                 StopViewAction(this),
-                SetRealtimeAction(this),
+                SetRefreshIntervalAction(this),
                 Separator.getInstance(),
                 ChangeChartAction(),
                 ChangeTimeAction()
@@ -133,7 +135,8 @@ class LiveViewChartManagerImpl(
                 MetricType.Service_RespTime_AVG,
                 MetricType.Service_SLA,
                 MetricType.Service_CPM
-            )
+            ),
+            1000
         )
         val overviewContent = ContentFactory.getInstance().createContent(
             overviewWindow.component,

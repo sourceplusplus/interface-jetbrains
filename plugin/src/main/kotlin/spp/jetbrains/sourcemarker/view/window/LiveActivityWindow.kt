@@ -37,12 +37,14 @@ import spp.protocol.view.LiveViewEvent
 class LiveActivityWindow(
     project: Project,
     endpointId: String,
-    scope: String,
+    private val scope: String,
     metrics: List<MetricType>,
-    private val refreshInterval: Int = 500
+    private var refreshRate: Int
 ) : TabbedResumableView() {
 
     private var initialFocus = true
+    override val refreshInterval: Int
+        get() = refreshRate
 
     init {
         val vertx = UserData.vertx(project)
@@ -53,7 +55,7 @@ class LiveActivityWindow(
                     viewConfig = LiveViewConfig(
                         "${scope.uppercase()}_ACTIVITY_CHART",
                         listOf(it.metricId),
-                        refreshInterval
+                        refreshRate
                     )
                 )
             ) { consumerCreator(it, vertx) }
@@ -67,6 +69,13 @@ class LiveActivityWindow(
             resume()
         }
     }
+
+    override fun setRefreshInterval(interval: Int) {
+        refreshRate = interval
+        super.setRefreshInterval(interval)
+    }
+
+    override fun supportsRealtime(): Boolean = scope != "Service"
 
     private fun consumerCreator(window: LiveViewChartWindow, vertx: Vertx): MessageConsumer<JsonObject> {
         val consumer = vertx.eventBus().consumer<JsonObject>(

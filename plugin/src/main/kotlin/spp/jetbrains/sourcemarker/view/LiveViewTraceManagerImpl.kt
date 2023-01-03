@@ -35,6 +35,7 @@ import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
+import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
 import spp.jetbrains.sourcemarker.view.action.StopViewAction
 import spp.jetbrains.sourcemarker.view.trace.TraceSpanSplitterPanel
 import spp.jetbrains.sourcemarker.view.window.LiveViewTraceWindowImpl
@@ -70,6 +71,8 @@ class LiveViewTraceManagerImpl(
         .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.diagramSubtask))
     private var contentManager: ContentManager = toolWindow.contentManager
     override var currentView: ResumableView? = null
+    override val refreshInterval: Int?
+        get() = currentView?.refreshInterval
 
     init {
         project.putUserData(LiveViewTraceManager.KEY, this)
@@ -106,7 +109,8 @@ class LiveViewTraceManagerImpl(
         toolWindow.setTitleActions(
             listOf(
                 ResumeViewAction(this),
-                StopViewAction(this)
+                StopViewAction(this),
+                SetRefreshIntervalAction(this)
             )
         )
     }
@@ -131,10 +135,9 @@ class LiveViewTraceManagerImpl(
     }
 
     private fun showWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
-        val refreshRate = 2000
         val liveView = LiveView(
             entityIds = mutableSetOf(service.name),
-            viewConfig = LiveViewConfig("SERVICE_TRACE_CHART", listOf("service_traces"), refreshRate)
+            viewConfig = LiveViewConfig("SERVICE_TRACE_CHART", listOf("service_traces"), 1000)
         )
         val traceWindow = LiveViewTraceWindowImpl(project, liveView, { serviceTracesConsumerCreator(it) })
         val overviewContent = ContentFactory.getInstance().createContent(

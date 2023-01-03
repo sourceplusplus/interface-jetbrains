@@ -48,5 +48,11 @@ abstract class ResumableViewCollection : ResumableView {
         views.forEach { it.pause() }
     }
 
+    override fun setRefreshInterval(interval: Int) {
+        pause()
+        views.forEach { it.setRefreshInterval(interval) }
+        resume()
+    }
+
     override fun dispose() = pause()
 }

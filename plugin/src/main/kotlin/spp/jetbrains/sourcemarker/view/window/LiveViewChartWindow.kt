@@ -77,6 +77,8 @@ class LiveViewChartWindow(
     private val chart = singleLineChart(entityId, metricType, chartColor)
     val component: JComponent
         get() = chart.component
+    override val refreshInterval: Int
+        get() = liveView.viewConfig.refreshRateLimit
 
     override fun resume() {
         if (isRunning) return
@@ -99,6 +101,12 @@ class LiveViewChartWindow(
                 log.error("Failed to pause live view", it)
             }
         }
+    }
+
+    override fun setRefreshInterval(interval: Int) {
+        pause()
+        liveView = liveView.copy(viewConfig = liveView.viewConfig.copy(refreshRateLimit = interval))
+        resume()
     }
 
     private fun singleLineChart(
