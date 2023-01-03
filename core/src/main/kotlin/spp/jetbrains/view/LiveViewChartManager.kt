@@ -18,6 +18,7 @@ package spp.jetbrains.view
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import spp.protocol.platform.general.ServiceEndpoint
 
 /**
  * todo: description.
@@ -34,6 +35,8 @@ interface LiveViewChartManager : ResumableViewManager {
         }
     }
 
+    fun getHistoricalMinutes(): Int?
+    fun setHistoricalMinutes(historicalMinutes: Int)
     fun showOverviewActivity()
-    fun showEndpointActivity(endpointName: String)
+    fun showEndpointActivity(endpoint: ServiceEndpoint)
 }

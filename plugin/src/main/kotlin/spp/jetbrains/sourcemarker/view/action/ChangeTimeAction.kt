@@ -20,6 +20,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.popup.*
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.view.LiveViewChartManager
 import javax.swing.Icon
 
 /**
@@ -28,9 +29,7 @@ import javax.swing.Icon
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class ChangeTimeAction : AnAction(PluginIcons.clockRotateLeft) {
-
-    var selected = "Last 5 Minutes"
+class ChangeTimeAction(private val viewManager: LiveViewChartManager) : AnAction(PluginIcons.clockRotateLeft) {
 
     init {
         templatePresentation.text = "Change Time"
@@ -74,6 +73,16 @@ class ChangeTimeAction : AnAction(PluginIcons.clockRotateLeft) {
                 override fun getTextFor(value: String): String = value
 
                 override fun getIconFor(value: String): Icon {
+                    val selected = when (viewManager.getHistoricalMinutes()) {
+                        5 -> "Last 5 Minutes"
+                        15 -> "Last 15 Minutes"
+                        30 -> "Last 30 Minutes"
+                        60 -> "Last 1 Hour"
+                        240 -> "Last 4 Hours"
+                        720 -> "Last 12 Hours"
+                        1440 -> "Last 24 Hours"
+                        else -> "Last 5 Minutes"
+                    }
                     return if (value == selected) {
                         PluginIcons.squareCheck
                     } else {
@@ -84,7 +93,21 @@ class ChangeTimeAction : AnAction(PluginIcons.clockRotateLeft) {
                 override fun isSelectable(value: String?): Boolean = true
                 override fun hasSubstep(selectedValue: String?): Boolean = false
 
-                override fun onChosen(selectedValue: String?, finalChoice: Boolean): PopupStep<*>? {
+                override fun onChosen(selectedValue: String, finalChoice: Boolean): PopupStep<*>? {
+                    val minutes = when (selectedValue) {
+                        "Last 5 Minutes" -> 5
+                        "Last 15 Minutes" -> 15
+                        "Last 30 Minutes" -> 30
+                        "Last 1 Hour" -> 60
+                        "Last 4 Hours" -> 240
+                        "Last 12 Hours" -> 720
+                        "Last 24 Hours" -> 1440
+                        else -> 5
+                    }
+
+                    if (minutes != viewManager.getHistoricalMinutes()) {
+                        viewManager.setHistoricalMinutes(minutes)
+                    }
                     return null
                 }
             }

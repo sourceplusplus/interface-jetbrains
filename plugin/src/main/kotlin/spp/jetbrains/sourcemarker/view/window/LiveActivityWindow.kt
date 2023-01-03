@@ -36,7 +36,8 @@ import spp.protocol.view.LiveViewEvent
  */
 class LiveActivityWindow(
     project: Project,
-    endpointId: String,
+    entityId: String,
+    entityName: String,
     private val scope: String,
     metrics: List<MetricType>,
     private var refreshRate: Int
@@ -51,13 +52,13 @@ class LiveActivityWindow(
         metrics.forEach {
             val respTimeChart = LiveViewChartWindow(
                 project, LiveView(
-                    entityIds = mutableSetOf(endpointId),
+                    entityIds = mutableSetOf(entityId),
                     viewConfig = LiveViewConfig(
                         "${scope.uppercase()}_ACTIVITY_CHART",
                         listOf(it.metricId),
                         refreshRate
                     )
-                )
+                ), entityName
             ) { consumerCreator(it, vertx) }
             addTab("$scope ${it.simpleName}", respTimeChart, respTimeChart.component)
         }
@@ -67,6 +68,17 @@ class LiveActivityWindow(
         if (initialFocus) {
             initialFocus = false
             resume()
+        }
+    }
+
+    fun getHistoricalMinutes(): Int? {
+        return (getViews().firstOrNull() as? LiveViewChartWindow)?.getHistoricalMinutes()
+    }
+
+    fun setHistoricalMinutes(historicalMinutes: Int) {
+        getViews().forEach {
+            it as LiveViewChartWindow
+            it.setHistoricalMinutes(historicalMinutes)
         }
     }
 

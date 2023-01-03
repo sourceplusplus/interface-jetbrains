@@ -32,13 +32,16 @@ import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
+import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
+import spp.protocol.view.HistoricalView
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
 import spp.protocol.view.rule.LiveViewRule
+import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
@@ -250,6 +253,16 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
     }
 
     override fun deleteRule(ruleName: String): Future<LiveViewRule?> {
+        return Future.failedFuture(UnsupportedOperationException())
+    }
+
+    override fun getHistoricalMetrics(
+        entityIds: List<String>,
+        metricIds: List<String>,
+        step: MetricStep,
+        start: Instant,
+        stop: Instant?
+    ): Future<HistoricalView> {
         return Future.failedFuture(UnsupportedOperationException())
     }
 

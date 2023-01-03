@@ -18,6 +18,7 @@ package spp.jetbrains.sourcemarker.view.window
 
 import com.codahale.metrics.Histogram
 import com.codahale.metrics.SlidingWindowReservoir
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.DarculaColors
@@ -29,6 +30,7 @@ import spp.jetbrains.PluginUI
 import spp.jetbrains.UserData
 import spp.jetbrains.sourcemarker.view.overlay.ValueDotPainter
 import spp.jetbrains.view.ResumableView
+import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
@@ -38,8 +40,6 @@ import java.awt.Insets
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatterBuilder
 import java.util.*
 import javax.swing.JComponent
 import javax.swing.SwingConstants
@@ -53,28 +53,33 @@ import javax.swing.SwingConstants
 class LiveViewChartWindow(
     val project: Project,
     var liveView: LiveView,
+    private val entityName: String,
     private val consumerCreator: (LiveViewChartWindow) -> MessageConsumer<JsonObject>
 ) : ResumableView {
 
     private val log = logger<LiveViewChartWindow>()
-    private val formatter = DateTimeFormatterBuilder()
-        .appendPattern("yyyyMMddHHmm")
-        .toFormatter()
-        .withZone(ZoneOffset.UTC)
-
     private val viewService = UserData.liveViewService(project)!!
     private var consumer: MessageConsumer<JsonObject>? = null
-    private val keepSize = 10 * 6 * 5
-    private val keepTimeSize = 10_000L * 6 * 5
-    private val xStepSize = 10_000L * 6
-    private val dateFormat = SimpleDateFormat("h:mm:ss a")
-    private val entityId: String = liveView.entityIds.first()
-    private val metricType: MetricType = MetricType(liveView.viewConfig.viewMetrics.first())
-    var chartColor: Color = defaultChartColor(metricType)
+    private var step = MetricStep.MINUTE
+    private var reservoirSize = 5
+    private val keepTimeSize: Int
+        get() = step.milliseconds * reservoirSize
+    private var xStepSize = step.milliseconds
+    private val metricType = MetricType(liveView.viewConfig.viewMetrics.first())
+    private var chartColor = defaultChartColor(metricType)
+    private val timeFormat = SimpleDateFormat("h:mm a")
+    private val timeWithSecondsFormat = SimpleDateFormat("h:mm:ss a")
+    private val dateFormat: SimpleDateFormat
+        get() = if (metricType.isRealtime) {
+            timeWithSecondsFormat
+        } else {
+            timeFormat
+        }
 
+    private var histogramSize = 1000 //todo: optimize
     override var isRunning: Boolean = false
-    private val histogram = Histogram(SlidingWindowReservoir(keepSize))
-    private val chart = singleLineChart(entityId, metricType, chartColor)
+    private var histogram = Histogram(SlidingWindowReservoir(histogramSize))
+    private val chart = singleLineChart(metricType, chartColor)
     val component: JComponent
         get() = chart.component
     override val refreshInterval: Int
@@ -88,6 +93,27 @@ class LiveViewChartWindow(
             consumer = consumerCreator.invoke(this)
         }.onFailure {
             log.error("Failed to resume live view", it)
+        }
+
+        getHistoricalData()
+    }
+
+    private fun getHistoricalData() {
+        val reservoirSize = if (step == MetricStep.MINUTE) 60 else 24
+        val stop = Instant.now()
+        val start = stop.minusSeconds((reservoirSize * step.seconds).toLong())
+        viewService.getHistoricalMetrics(
+            liveView.entityIds.toList(),
+            liveView.viewConfig.viewMetrics,
+            step, start, stop
+        ).onSuccess {
+            for (i in 0 until it.data.size()) {
+                val stepBucket = step.bucketFormatter.format(start.plusSeconds((step.seconds * i).toLong())).toLong()
+                val metricData = it.data.getJsonObject(i)
+                addMetric(metricData.put("timeBucket", stepBucket))
+            }
+        }.onFailure {
+            log.error("Failed to get historical metrics", it)
         }
     }
 
@@ -109,8 +135,26 @@ class LiveViewChartWindow(
         resume()
     }
 
+    fun getHistoricalMinutes(): Int {
+        return reservoirSize
+    }
+
+    fun setHistoricalMinutes(historicalMinutes: Int) {
+        step = if (historicalMinutes >= 720) {
+            MetricStep.HOUR
+        } else {
+            MetricStep.MINUTE
+        }
+
+        reservoirSize = historicalMinutes
+        histogram = Histogram(SlidingWindowReservoir(histogramSize))
+        (chart.datasets[0].data as MutableList<Coordinates<Long, Double>>).clear()
+        xStepSize = step.milliseconds * reservoirSize
+
+        getHistoricalData()
+    }
+
     private fun singleLineChart(
-        entityId: String,
         metricType: MetricType,
         chartColor: Color
     ) = lineChart<Long, Double> {
@@ -126,7 +170,7 @@ class LiveViewChartWindow(
             yMax = 100.0
         }
         grid {
-            xLines = generator(xStepSize)
+            xLines = generator(xStepSize.toLong())
             xPainter {
                 label = if (value - 200 == xOrigin) "" else dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
                 verticalAlignment = SwingConstants.BOTTOM
@@ -141,64 +185,11 @@ class LiveViewChartWindow(
             }
         }
         overlays = listOf(
-            titleOverlay("${metricType.simpleName} (${metricType.unitType}) - $entityId"),
+            titleOverlay("${metricType.simpleName} (${metricType.unitType}) - $entityName"),
             ValueDotPainter(dataset, metricType)
         )
         datasets = listOf(dataset)
     }
-
-//    fun respTimePercentileChart(entityId: String, metricType: MetricType) = lineChart<Long, Long> {
-//        margins(marginInsets())
-//        ranges {
-//            yMin = 0L
-//            yMax = 100L
-//        }
-//        grid {
-//            xLines = generator(xStepSize)
-//            xPainter {
-//                label = if (value - 200 == xOrigin) "" else dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
-//                verticalAlignment = SwingConstants.BOTTOM
-//                horizontalAlignment = SwingConstants.CENTER
-//            }
-//            yLines = generator(10L)
-//            yPainter {
-//                majorLine = value == 100L
-//                label = value.toInt().toString()
-//                verticalAlignment = SwingConstants.CENTER
-//                horizontalAlignment = SwingConstants.RIGHT
-//            }
-//        }
-//        overlays = listOf(
-//            titleOverlay("${metricType.simpleName} (${metricType.unitType}) - $entityId")
-//        )
-//        datasets {
-//            dataset {
-//                label = "Resp Time"
-//                lineColor = PluginUI.green
-//                smooth = true
-//            }
-//            dataset {
-//                label = "Resp Time"
-//                lineColor = PluginUI.purple
-//                smooth = true
-//            }
-//            dataset {
-//                label = "Resp Time"
-//                lineColor = JBColor.ORANGE
-//                smooth = true
-//            }
-//            dataset {
-//                label = "Resp Time"
-//                lineColor = DarculaColors.RED
-//                smooth = true
-//            }
-//            dataset {
-//                label = "Resp Time"
-//                lineColor = DarculaColors.BLUE
-//                smooth = true
-//            }
-//        }
-//    }
 
     private fun titleOverlay(label: String) = object : Overlay<ChartWrapper>() {
         override fun paintComponent(g: Graphics2D) {
@@ -218,62 +209,12 @@ class LiveViewChartWindow(
         }
     }
 
-//    fun setupRespTimePercentileChart(
-//        entityId: String,
-//        vertx: Vertx,
-//        metricType: MetricType = Endpoint_RespTime_Percentiles.asRealtime()
-//    ): XYLineChart<Long, Long> {
-//        val chart = respTimePercentileChart(entityId, metricType)
-//        val histogram = Histogram(SlidingWindowReservoir(keepSize))
-//
-//        UserData.liveViewService(project)!!.addLiveView(
-//            LiveView(
-//                entityIds = mutableSetOf(entityId),
-//                viewConfig = LiveViewConfig("ACTIVITY_VIEW", listOf(metricType.metricId), refreshInterval)
-//            )
-//        ).onSuccess { liveView ->
-//            val consumer = vertx.eventBus().consumer<JsonObject>(
-//                toLiveViewSubscriberAddress("system")
-//            )
-//            consumer.handler {
-//                val liveViewEvent = LiveViewEvent(it.body())
-//                if (liveView.subscriptionId != liveViewEvent.subscriptionId) return@handler
-//
-//                val rawMetrics = JsonObject(liveViewEvent.metricsData)
-//                val rawValues = rawMetrics.getJsonArray("value") ?: rawMetrics.getJsonArray("values")
-//                val metricValues = rawValues.map { it.toString().toLong() }
-//                metricValues.forEach { histogram.update(it) }
-//
-//                val step = histogram.snapshot.max / 10L
-//                if (step >= 1) {
-//                    chart.ranges.yMax = histogram.snapshot.max
-//                    chart.grid.yLines = generator(step)
-//                } else {
-//                    chart.ranges.yMax = 10L
-//                    chart.grid.yLines = generator(1L)
-//                }
-//
-//                val timeBucket =
-//                    System.currentTimeMillis() //Instant.from(formatter.parse(rawMetrics.getLong("timeBucket").toString())).toEpochMilli() //System.currentTimeMillis()
-//                metricValues.forEachIndexed { i: Int, value: Long ->
-//                    chart.datasets[i].add(Coordinates.of(timeBucket, value))
-//                }
-//                chart.ranges.xMax = timeBucket
-//                chart.ranges.xMin = timeBucket - keepTimeSize
-//                chart.grid.xOrigin = chart.ranges.xMin - 200
-//
-//                chart.update()
-//            }
-//            Disposer.register(this) { consumer.unregister() }
-//        }.onFailure {
-//            log.error("Failed to add live view", it)
-//        }
-//
-//        return chart
-//    }
-
     fun addMetric(viewEvent: LiveViewEvent) {
         val rawMetrics = JsonObject(viewEvent.metricsData)
+        addMetric(rawMetrics)
+    }
+
+    private fun addMetric(rawMetrics: JsonObject) = ApplicationManager.getApplication().invokeLater {
         val metricValue = rawMetrics.getLong("value")
         histogram.update(metricValue)
 
@@ -291,13 +232,20 @@ class LiveViewChartWindow(
             }
         }
 
-        val timeBucket =
-            System.currentTimeMillis() //Instant.from(formatter.parse(rawMetrics.getLong("timeBucket").toString())).toEpochMilli() //System.currentTimeMillis()
-        chart.datasets[0].add(Coordinates.of(timeBucket, metricValue / metricType.unitConversion))
+        val timeBucket = rawMetrics.getLong("currentTime")
+            ?: Instant.from(step.bucketFormatter.parse(rawMetrics.getLong("timeBucket").toString())).toEpochMilli()
+        val newCoordinates = Coordinates.of(timeBucket, metricValue / metricType.unitConversion)
+        val chartData = chart.datasets[0].data as MutableList<Coordinates<Long, Double>>
+        val existingCoordinatesIndex = chartData.indexOfFirst { it.x == timeBucket }
+        if (existingCoordinatesIndex != -1) {
+            chartData[existingCoordinatesIndex] = newCoordinates
+        } else {
+            chartData.add(newCoordinates)
+        }
+
         chart.ranges.xMax = timeBucket
         chart.ranges.xMin = timeBucket - keepTimeSize
         chart.grid.xOrigin = chart.ranges.xMin - 200
-
         chart.update()
     }
 

@@ -82,7 +82,7 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
                 val row = table.rowAtPoint(mouseEvent.point)
                 if (mouseEvent.clickCount == 2 && row >= 0) {
                     val endpointRow = model.items[table.rowSorter.convertRowIndexToModel(row)]
-                    LiveViewChartManager.getInstance(project).showEndpointActivity(endpointRow.endpoint.name)
+                    LiveViewChartManager.getInstance(project).showEndpointActivity(endpointRow.endpoint)
                 }
             }
         })
@@ -114,8 +114,7 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
             LiveSourceLocation("", 0, service.id),
             LiveViewConfig("LiveEndpointsWindow", listenMetrics, refreshInterval)
         )
-        val row = EndpointRowView(viewService, liveView) { consumerCreator(vertx, it, endpoint) }
-        addView(row)
+        addView(EndpointRowView(viewService, liveView, endpoint, model) { consumerCreator(vertx, it, endpoint) })
     }
 
     private fun consumerCreator(

@@ -31,7 +31,10 @@ import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.view.action.*
+import spp.jetbrains.sourcemarker.view.action.ChangeTimeAction
+import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
+import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
+import spp.jetbrains.sourcemarker.view.action.StopViewAction
 import spp.jetbrains.sourcemarker.view.window.LiveActivityWindow
 import spp.jetbrains.sourcemarker.view.window.LiveEndpointsWindow
 import spp.jetbrains.status.SourceStatus
@@ -40,6 +43,7 @@ import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.view.ResumableView
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.platform.general.Service
+import spp.protocol.platform.general.ServiceEndpoint
 
 /**
  * todo: description.
@@ -104,8 +108,8 @@ class LiveViewChartManagerImpl(
                 StopViewAction(this),
                 SetRefreshIntervalAction(this),
                 Separator.getInstance(),
-                ChangeChartAction(),
-                ChangeTimeAction()
+//                ChangeChartAction(),
+                ChangeTimeAction(this)
             )
         )
     }
@@ -131,12 +135,11 @@ class LiveViewChartManagerImpl(
 
     private fun showWindow(service: Service) {
         val overviewWindow = LiveActivityWindow(
-            project, service.name, "Service", listOf(
+            project, service.id, service.name, "Service", listOf(
                 MetricType.Service_RespTime_AVG,
                 MetricType.Service_SLA,
                 MetricType.Service_CPM
-            ),
-            1000
+            ), 1000
         )
         val overviewContent = ContentFactory.getInstance().createContent(
             overviewWindow.component,
@@ -146,16 +149,6 @@ class LiveViewChartManagerImpl(
         overviewContent.setDisposer(overviewWindow)
         overviewContent.isCloseable = false
         contentManager.addContent(overviewContent)
-
-//        val instancesWindow = LiveInstancesWindow(project, service)
-//        val instancesContent = ContentFactory.getInstance().createContent(
-//            instancesWindow.layoutComponent,
-//            "Instances",
-//            true
-//        )
-//        instancesContent.setDisposer(instancesWindow)
-//        instancesContent.isCloseable = false
-//        contentManager.addContent(instancesContent)
 
         val endpointsWindow = LiveEndpointsWindow(project, service)
         val endpointsContent = ContentFactory.getInstance().createContent(
@@ -174,13 +167,23 @@ class LiveViewChartManagerImpl(
         }
     }
 
+    override fun getHistoricalMinutes(): Int? {
+        return (currentView as? LiveActivityWindow)?.getHistoricalMinutes()
+    }
+
+    override fun setHistoricalMinutes(historicalMinutes: Int) {
+        contentManager.contents.mapNotNull { it.disposer as? LiveActivityWindow }.forEach {
+            it.setHistoricalMinutes(historicalMinutes)
+        }
+    }
+
     override fun showOverviewActivity() = ApplicationManager.getApplication().invokeLater {
         contentManager.setSelectedContent(contentManager.findContent("Overview"))
         toolWindow.show()
     }
 
-    override fun showEndpointActivity(endpointName: String) = ApplicationManager.getApplication().invokeLater {
-        val existingContent = contentManager.findContent(endpointName)
+    override fun showEndpointActivity(endpoint: ServiceEndpoint) = ApplicationManager.getApplication().invokeLater {
+        val existingContent = contentManager.findContent(endpoint.name)
         if (existingContent != null) {
             contentManager.setSelectedContent(existingContent)
             toolWindow.show()
@@ -188,7 +191,7 @@ class LiveViewChartManagerImpl(
         }
 
         val activityWindow = LiveActivityWindow(
-            project, endpointName, "Endpoint", listOf(
+            project, endpoint.id, endpoint.name, "Endpoint", listOf(
                 MetricType.Endpoint_RespTime_AVG.asRealtime(),
                 MetricType.Endpoint_SLA.asRealtime(),
                 MetricType.Endpoint_CPM.asRealtime()
@@ -198,7 +201,7 @@ class LiveViewChartManagerImpl(
 
         val content = ContentFactory.getInstance().createContent(
             activityWindow.component,
-            endpointName,
+            endpoint.name,
             false
         )
         content.setDisposer(activityWindow)
