@@ -20,6 +20,9 @@ import spp.jetbrains.SourceKey
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 
+/**
+ * Keys useful for storing and/or facilitating insight processing
+ */
 object InsightKeys {
 
     val RUNTIME_PATHS = SourceKey<Set<ProceduralPath>>("RUNTIME_PATHS")

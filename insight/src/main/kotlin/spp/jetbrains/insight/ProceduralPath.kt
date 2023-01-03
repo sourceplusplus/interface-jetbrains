@@ -22,6 +22,9 @@ import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.protocol.insight.InsightValue
 
+/**
+ * Represents an inter/intra-procedural path through the given [rootArtifact].
+ */
 data class ProceduralPath(
     val evaluations: List<Boolean>,
     val rootArtifact: ArtifactElement,
