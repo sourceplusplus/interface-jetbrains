@@ -183,6 +183,8 @@ class LiveViewTraceManagerImpl(
         }
 
         val traceWindow = LiveViewTraceWindowImpl(project, liveView, consumer)
+        traceWindow.resume()
+
         val content = ContentFactory.getInstance().createContent(
             traceWindow.component,
             endpointName,
