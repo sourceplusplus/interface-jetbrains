@@ -18,6 +18,7 @@ package spp.jetbrains.indicator
 
 import com.apollographql.apollo3.exception.ApolloException
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
@@ -37,6 +38,7 @@ abstract class LiveIndicator(val project: Project) {
     open val listenForEvents: List<IEventCode> = emptyList()
 
     private var periodicTimerId = -1L
+    val dumbService = DumbService.getInstance(project)
     val vertx = UserData.vertx(project)
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
     val managementService = UserData.liveManagementService(project)!!

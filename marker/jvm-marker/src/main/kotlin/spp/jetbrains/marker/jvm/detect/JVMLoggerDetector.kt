@@ -18,6 +18,7 @@ package spp.jetbrains.marker.jvm.detect
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.psi.*
@@ -73,7 +74,7 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         fileMarker: SourceFileMarker
     ): List<DetectedLogger> {
         val loggerStatements = mutableListOf<DetectedLogger>()
-        ApplicationManager.getApplication().runReadAction {
+        DumbService.getInstance(project).runReadActionInSmartMode {
             function.acceptChildren(object : PsiRecursiveElementVisitor() {
                 override fun visitElement(element: PsiElement) {
                     if (element is PsiMethodCallExpression) {

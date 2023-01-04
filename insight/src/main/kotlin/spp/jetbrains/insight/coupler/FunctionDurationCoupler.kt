@@ -36,6 +36,7 @@ import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
+import spp.jetbrains.safeExecuteBlocking
 import spp.jetbrains.safeLaunch
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.insight.InsightType
@@ -120,11 +121,13 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
                     log.info("Set method duration from $currentDuration to $responseTime. Artifact: ${guideMark.artifactQualifiedName}")
 
                     //propagate to callers
-                    ArtifactScopeService.getCallerFunctions(guideMark.getPsiElement())
-                        .mapNotNull { it.nameIdentifier?.getUserData(GuideMark.KEY) }
-                        .filterIsInstance<MethodGuideMark>().forEach {
-                            queueForInsights(it)
-                        }
+                    vertx.safeExecuteBlocking {
+                        ArtifactScopeService.getCallerFunctions(guideMark.getPsiElement())
+                            .mapNotNull { it.nameIdentifier?.getUserData(GuideMark.KEY) }
+                            .filterIsInstance<MethodGuideMark>().forEach {
+                                queueForInsights(it)
+                            }
+                    }
                 }
             }
             guideMark.addEventListener {
