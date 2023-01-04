@@ -201,7 +201,6 @@ class LiveViewTraceManagerImpl(
         val existingContent = contentManager.findContent(trace.traceIds.first())
         if (existingContent != null) {
             ApplicationManager.getApplication().invokeLater {
-
                 contentManager.setSelectedContent(existingContent)
                 toolWindow.show()
             }

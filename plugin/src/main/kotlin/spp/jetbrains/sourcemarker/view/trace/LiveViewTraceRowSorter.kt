@@ -82,7 +82,7 @@ class LiveViewTraceRowSorter(
     override fun rowsInserted(firstRow: Int, endRow: Int) = Unit
     override fun rowsDeleted(firstRow: Int, endRow: Int) = Unit
     override fun rowsUpdated(firstRow: Int, endRow: Int) = Unit
-    override fun rowsUpdated(firstRow: Int, endRow: Int, column: Int) {}
+    override fun rowsUpdated(firstRow: Int, endRow: Int, column: Int) = Unit
 
     companion object {
         private fun <T> reverseComparator(comparator: Comparator<T?>, order: SortOrder): Comparator<T?> {
