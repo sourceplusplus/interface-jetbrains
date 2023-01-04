@@ -78,7 +78,6 @@ dependencies {
     runtimeOnly(projectDependency(":marker:py-marker"))
     runtimeOnly(projectDependency(":marker:ult-marker"))
     implementation(projectDependency(":monitor"))
-    implementation("plus.sourceplus.interface:interface-booster-ui:$protocolVersion")
     implementation("plus.sourceplus:protocol:$protocolVersion")
 
     implementation("org.jooq:joor:$joorVersion")

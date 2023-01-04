@@ -84,14 +84,12 @@ subprojects {
     repositories {
         mavenCentral()
         maven(url = "https://pkg.sourceplus.plus/sourceplusplus/protocol")
-        maven(url = "https://pkg.sourceplus.plus/sourceplusplus/interface-booster-ui")
     }
 
     if (!this.toString().contains("commander")) {
         apply(plugin = "app.cash.licensee")
         configure<app.cash.licensee.LicenseeExtension> {
             ignoreDependencies("plus.sourceplus", "protocol")
-            ignoreDependencies("plus.sourceplus.interface", "interface-booster-ui")
             allow("Apache-2.0")
             allow("MIT")
             allow("EPL-1.0")
