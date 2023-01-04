@@ -291,7 +291,8 @@ class AutocompleteField<T : AutocompleteFieldRow>(
             val autocompleteRow = list.selectedValue
             if (replaceCommandOnTab) {
                 if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
-                    if (getText().lowercase().startsWith(autocompleteRow.liveCommand.getTriggerName().lowercase() + " ")) {
+                    val triggerPrefix = autocompleteRow.liveCommand.getTriggerName().lowercase() + " "
+                    if (text.lowercase().startsWith(triggerPrefix)) {
                         return //do nothing
                     }
                     setText(autocompleteRow.getText() + " ")
@@ -302,7 +303,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
                 val userInput = text.substringAfterLast(" ")
                 setText(text.substring(0, text.length - userInput.length) + autocompleteRow.getText())
             }
-            caretPosition = getText().length
+            caretPosition = text.length
         } else if (e.keyCode == KeyEvent.VK_ENTER) {
             if (!autocompleteAndFinishOnEnter) {
                 ready = true

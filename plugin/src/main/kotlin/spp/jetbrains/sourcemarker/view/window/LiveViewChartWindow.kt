@@ -258,7 +258,7 @@ class LiveViewChartWindow(
         }
 
         private val suffix = arrayOf("", "k", "m", "b", "t")
-        private val MAX_LENGTH = 3
+        private const val MAX_LENGTH = 3
 
         private fun format(number: Double): String {
             var r: String = DecimalFormat("##0E0").format(number)

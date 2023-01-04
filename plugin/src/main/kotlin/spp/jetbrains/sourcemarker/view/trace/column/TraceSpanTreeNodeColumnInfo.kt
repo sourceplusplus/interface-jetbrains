@@ -18,7 +18,6 @@ package spp.jetbrains.sourcemarker.view.trace.column
 
 import com.intellij.util.ui.ColumnInfo
 import spp.jetbrains.sourcemarker.view.trace.node.TraceSpanTreeNode
-import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.utils.toPrettyDuration
 import java.time.Duration
 import java.time.ZoneId
@@ -45,12 +44,12 @@ class TraceSpanTreeNodeColumnInfo(name: String) : ColumnInfo<TraceSpanTreeNode, 
     override fun getComparator(): Comparator<TraceSpanTreeNode> {
         return when (name) {
             "Time" -> Comparator { t: TraceSpanTreeNode, t2: TraceSpanTreeNode ->
-                (t.value as TraceSpan).startTime.compareTo((t2.value as TraceSpan).startTime)
+                t.value.startTime.compareTo(t2.value.startTime)
             }
 
             "Duration" -> Comparator { t: TraceSpanTreeNode, t2: TraceSpanTreeNode ->
-                ((t.value as TraceSpan).endTime.toEpochMilli() - (t.value as TraceSpan).startTime.toEpochMilli())
-                    .compareTo((t2.value as TraceSpan).endTime.toEpochMilli() - (t2.value as TraceSpan).startTime.toEpochMilli())
+                (t.value.endTime.toEpochMilli() - t.value.startTime.toEpochMilli())
+                    .compareTo(t2.value.endTime.toEpochMilli() - t2.value.startTime.toEpochMilli())
             }
 
             else -> Comparator { t: TraceSpanTreeNode, t2: TraceSpanTreeNode ->
@@ -61,10 +60,10 @@ class TraceSpanTreeNodeColumnInfo(name: String) : ColumnInfo<TraceSpanTreeNode, 
 
     override fun valueOf(item: TraceSpanTreeNode): String {
         return when (name) {
-            "Trace" -> (item.value as TraceSpan).endpointName.toString()
-            "Time" -> formatter.format((item.value as TraceSpan).startTime)
-            "Type" -> (item.value as TraceSpan).type
-            "Duration" -> ((item.value as TraceSpan).endTime.toEpochMilli() - (item.value as TraceSpan).startTime.toEpochMilli()).toPrettyDuration()
+            "Trace" -> item.value.endpointName.toString()
+            "Time" -> formatter.format(item.value.startTime)
+            "Type" -> item.value.type
+            "Duration" -> (item.value.endTime.toEpochMilli() - item.value.startTime.toEpochMilli()).toPrettyDuration()
             else -> ""
         }
     }
