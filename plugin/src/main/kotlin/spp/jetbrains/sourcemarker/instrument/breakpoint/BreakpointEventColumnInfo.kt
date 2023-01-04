@@ -17,8 +17,6 @@
 package spp.jetbrains.sourcemarker.instrument.breakpoint
 
 import com.intellij.util.ui.ColumnInfo
-import com.intellij.util.ui.table.IconTableCellRenderer
-import spp.jetbrains.icons.PluginIcons
 import spp.protocol.artifact.exception.methodName
 import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.artifact.exception.shortQualifiedClassName
@@ -27,7 +25,6 @@ import spp.protocol.instrument.event.LiveBreakpointHit
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.swing.Icon
-import javax.swing.table.TableCellRenderer
 
 /**
  * todo: description.
@@ -47,27 +44,24 @@ class BreakpointEventColumnInfo(name: String) : ColumnInfo<LiveBreakpointHit, St
         }
     }
 
-    override fun getCustomizedRenderer(o: LiveBreakpointHit, renderer: TableCellRenderer): TableCellRenderer {
-        return when (name) {
-            "Breakpoint Data" -> IconTableCellRenderer.create(PluginIcons.Breakpoint.active)
-            else -> super.getCustomizedRenderer(o, renderer)
-        }
-    }
-
     override fun getComparator(): Comparator<LiveBreakpointHit>? {
         return when (name) {
             "Time" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.occurredAt.compareTo(t2.occurredAt) //todo: could add line number too
             }
+
             "Class Name" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.stackTrace.first().qualifiedClassName().compareTo(t2.stackTrace.first().qualifiedClassName())
             }
+
             "File Name" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.stackTrace.first().source.compareTo(t2.stackTrace.first().source)
             }
+
             "Line No" -> Comparator { t: LiveBreakpointHit, t2: LiveBreakpointHit ->
                 t.stackTrace.first().sourceAsLineNumber()!!.compareTo(t2.stackTrace.first().sourceAsLineNumber()!!)
             }
+
             else -> null
         }
     }
