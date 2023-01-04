@@ -31,6 +31,7 @@ import javax.swing.border.LineBorder
 
 object PluginUI {
 
+    val yellow = JBColor("yellow", Color(190, 145, 23))
     val purple = JBColor("purple", Color(151, 118, 169))
     val green = JBColor("green", Color(98, 150, 85))
 

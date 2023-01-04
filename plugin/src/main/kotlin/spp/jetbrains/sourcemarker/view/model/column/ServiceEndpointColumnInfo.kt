@@ -20,6 +20,7 @@ import com.intellij.util.ui.ColumnInfo
 import spp.jetbrains.sourcemarker.view.model.ServiceEndpointRow
 import spp.protocol.utils.fromPerSecondToPrettyFrequency
 import spp.protocol.utils.toPrettyDuration
+import javax.swing.Icon
 
 /**
  * todo: description.
@@ -28,6 +29,13 @@ import spp.protocol.utils.toPrettyDuration
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class ServiceEndpointColumnInfo(name: String) : ColumnInfo<ServiceEndpointRow, String>(name) {
+
+    override fun getColumnClass(): Class<*> {
+        return when (name) {
+            "Availability" -> Icon::class.java
+            else -> String::class.java
+        }
+    }
 
     override fun getComparator(): Comparator<ServiceEndpointRow>? {
         return when (name) {

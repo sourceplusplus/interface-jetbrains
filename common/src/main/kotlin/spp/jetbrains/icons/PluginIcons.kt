@@ -172,4 +172,7 @@ object PluginIcons {
 
     @JvmField
     val rotate = IconLoader.getIcon("/icons/rotate.svg", PluginIcons::class.java)
+
+    @JvmField
+    val triangleExclamation = IconLoader.getIcon("/icons/triangle-exclamation.svg", PluginIcons::class.java)
 }

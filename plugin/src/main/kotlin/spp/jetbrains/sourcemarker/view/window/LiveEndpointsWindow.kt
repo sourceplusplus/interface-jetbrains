@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.view.window
 
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
@@ -30,6 +29,7 @@ import spp.jetbrains.UserData
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.model.ServiceEndpointRow
 import spp.jetbrains.sourcemarker.view.model.column.ServiceEndpointColumnInfo
+import spp.jetbrains.sourcemarker.view.window.renderer.EndpointAvailabilityTableCellRenderer
 import spp.jetbrains.sourcemarker.view.window.util.EndpointRowView
 import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.view.ResumableViewCollection
@@ -45,6 +45,7 @@ import spp.protocol.view.LiveViewEvent
 import java.awt.BorderLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import javax.swing.Icon
 import javax.swing.JPanel
 import javax.swing.SortOrder
 
@@ -56,7 +57,6 @@ import javax.swing.SortOrder
  */
 class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCollection() {
 
-    private val log = logger<LiveEndpointsWindow>()
     private val model = ListTableModel<ServiceEndpointRow>(
         arrayOf(
             ServiceEndpointColumnInfo("Name"),
@@ -75,8 +75,8 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
 
     init {
         val table = JBTable(model)
-        table.isStriped = true
         table.setShowColumns(true)
+        table.setDefaultRenderer(Icon::class.java, EndpointAvailabilityTableCellRenderer())
         table.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(mouseEvent: MouseEvent) {
                 val row = table.rowAtPoint(mouseEvent.point)
