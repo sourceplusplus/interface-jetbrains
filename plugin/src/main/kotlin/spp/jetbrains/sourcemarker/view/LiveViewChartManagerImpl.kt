@@ -23,7 +23,6 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
-import com.intellij.openapi.wm.ex.ToolWindowManagerListener.ToolWindowManagerEventType
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
@@ -61,6 +60,7 @@ class LiveViewChartManagerImpl(
         }
     }
 
+    private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow = ToolWindowManager.getInstance(project)
         .registerToolWindow(RegisterToolWindowTask.closable("Live Activity", PluginIcons.chartArea))
     private var contentManager = toolWindow.contentManager
@@ -88,7 +88,7 @@ class LiveViewChartManagerImpl(
         contentManager.addContentManagerListener(this)
 
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
-            override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
+            override fun stateChanged(toolWindowManager: ToolWindowManager) {
                 if (toolWindow.isVisible) {
                     (contentManager.contents.first().disposer as ResumableView).onFocused()
                 } else {
@@ -141,7 +141,7 @@ class LiveViewChartManagerImpl(
                 MetricType.Service_CPM
             ), 1000
         )
-        val overviewContent = ContentFactory.getInstance().createContent(
+        val overviewContent = contentFactory.createContent(
             overviewWindow.component,
             "Overview",
             true
@@ -151,7 +151,7 @@ class LiveViewChartManagerImpl(
         contentManager.addContent(overviewContent)
 
         val endpointsWindow = LiveEndpointsWindow(project, service)
-        val endpointsContent = ContentFactory.getInstance().createContent(
+        val endpointsContent = contentFactory.createContent(
             endpointsWindow.component,
             "Endpoints",
             true
@@ -199,7 +199,7 @@ class LiveViewChartManagerImpl(
         )
         activityWindow.resume()
 
-        val content = ContentFactory.getInstance().createContent(
+        val content = contentFactory.createContent(
             activityWindow.component,
             endpoint.name,
             false

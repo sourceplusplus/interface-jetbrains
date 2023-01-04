@@ -22,7 +22,6 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
-import com.intellij.openapi.wm.ex.ToolWindowManagerListener.ToolWindowManagerEventType
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
@@ -63,6 +62,7 @@ class LiveViewLogManagerImpl(
         }
     }
 
+    private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow = ToolWindowManager.getInstance(project)
         .registerToolWindow(RegisterToolWindowTask.closable("Live Logs", PluginIcons.messageLines))
     private var contentManager = toolWindow.contentManager
@@ -88,7 +88,7 @@ class LiveViewLogManagerImpl(
         contentManager.addContentManagerListener(this)
 
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
-            override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
+            override fun stateChanged(toolWindowManager: ToolWindowManager) {
                 if (toolWindow.isVisible) {
                     (contentManager.contents.first().disposer as ResumableView).onFocused()
                 } else {
@@ -136,7 +136,7 @@ class LiveViewLogManagerImpl(
             viewConfig = LiveViewConfig("SERVICE_LOGS_WINDOW", listOf("service_logs"), 1000)
         )
         val logWindow = LiveLogWindowImpl(project, liveView, { serviceLogsConsumerCreator(it) })
-        val overviewContent = ContentFactory.getInstance().createContent(
+        val overviewContent = contentFactory.createContent(
             logWindow.component,
             "Service: ${service.name}",
             true
@@ -185,7 +185,7 @@ class LiveViewLogManagerImpl(
         logWindow.resume()
 
         ApplicationManager.getApplication().invokeLater {
-            val content = ContentFactory.getInstance()
+            val content = contentFactory
                 .createContent(logWindow.component, title, false)
             content.setDisposer(logWindow)
             contentManager.addContent(content)

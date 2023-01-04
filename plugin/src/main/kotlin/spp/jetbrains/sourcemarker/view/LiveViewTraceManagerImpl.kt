@@ -23,7 +23,6 @@ import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
-import com.intellij.openapi.wm.ex.ToolWindowManagerListener.ToolWindowManagerEventType
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
@@ -67,6 +66,7 @@ class LiveViewTraceManagerImpl(
         }
     }
 
+    private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow: ToolWindow = ToolWindowManager.getInstance(project)
         .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.diagramSubtask))
     private var contentManager: ContentManager = toolWindow.contentManager
@@ -92,7 +92,7 @@ class LiveViewTraceManagerImpl(
         contentManager.addContentManagerListener(this)
 
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
-            override fun stateChanged(toolWindowManager: ToolWindowManager, changeType: ToolWindowManagerEventType) {
+            override fun stateChanged(toolWindowManager: ToolWindowManager) {
                 if (toolWindow.isVisible) {
                     (contentManager.contents.first().disposer as ResumableView).onFocused()
                 } else {
@@ -140,7 +140,7 @@ class LiveViewTraceManagerImpl(
             viewConfig = LiveViewConfig("SERVICE_TRACES_WINDOW", listOf("service_traces"), 1000)
         )
         val traceWindow = LiveViewTraceWindowImpl(project, liveView, { serviceTracesConsumerCreator(it) })
-        val overviewContent = ContentFactory.getInstance().createContent(
+        val overviewContent = contentFactory.createContent(
             traceWindow.component,
             "Service: ${service.name}",
             true
@@ -185,7 +185,7 @@ class LiveViewTraceManagerImpl(
         val traceWindow = LiveViewTraceWindowImpl(project, liveView, consumer)
         traceWindow.resume()
 
-        val content = ContentFactory.getInstance().createContent(
+        val content = contentFactory.createContent(
             traceWindow.component,
             endpointName,
             false
@@ -213,7 +213,7 @@ class LiveViewTraceManagerImpl(
             val traceWindow = TraceSpanSplitterPanel(project, traceStack)
 
             ApplicationManager.getApplication().invokeLater {
-                val content = ContentFactory.getInstance().createContent(
+                val content = contentFactory.createContent(
                     traceWindow,
                     trace.traceIds.first(),
                     false
