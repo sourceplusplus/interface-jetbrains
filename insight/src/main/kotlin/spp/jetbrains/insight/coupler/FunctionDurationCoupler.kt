@@ -71,10 +71,6 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
                         subscribeToResponseTime(event.sourceMark as GuideMark)
                     }
                 }
-
-                if (VCS_MODIFIED == event.params.firstOrNull()) {
-                    queueForInsights(event.sourceMark as MethodGuideMark)
-                }
             }
 
             SourceMarkEventCode.CODE_CHANGED -> {
