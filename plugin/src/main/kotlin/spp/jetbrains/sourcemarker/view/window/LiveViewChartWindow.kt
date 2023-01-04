@@ -45,7 +45,7 @@ import javax.swing.JComponent
 import javax.swing.SwingConstants
 
 /**
- * todo: description.
+ * Displays a visual chart graph of the metric values supplied via [LiveView].
  *
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
