@@ -154,10 +154,7 @@ class LiveViewChartWindow(
         getHistoricalData()
     }
 
-    private fun singleLineChart(
-        metricType: MetricType,
-        chartColor: Color
-    ) = lineChart<Long, Double> {
+    private fun singleLineChart(metricType: MetricType, chartColor: Color) = lineChart<Long, Double> {
         val dataset = XYLineDataset<Long, Double>().apply {
             label = metricType.simpleName
             lineColor = chartColor
@@ -254,7 +251,7 @@ class LiveViewChartWindow(
             return if (metricType.metricId.contains("sla")) {
                 PluginUI.purple
             } else if (metricType.metricId.contains("cpm")) {
-                DarculaColors.RED
+                PluginUI.yellow
             } else {
                 DarculaColors.BLUE
             }
