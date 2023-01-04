@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.*
@@ -99,17 +100,17 @@ class JVMArtifactScopeService : IArtifactScopeService {
         includeIndirect: Boolean
     ): List<PsiNameIdentifierOwner> {
         if (includeIndirect) {
-            return ReadAction.compute(ThrowableComputable {
+            return DumbService.getInstance(element.project).runReadActionInSmartMode(Computable {
                 val calledFunctions = getResolvedCalls(element)
                 val filteredFunctions = calledFunctions.filter { includeExternal || it.isWritable }
-                return@ThrowableComputable (filteredFunctions + filteredFunctions.flatMap {
+                return@Computable (filteredFunctions + filteredFunctions.flatMap {
                     getCalledFunctions(it, includeExternal, true)
                 }).toList()
             })
         }
 
-        return ReadAction.compute(ThrowableComputable {
-            return@ThrowableComputable getResolvedCalls(element).filter { includeExternal || it.isWritable }.toList()
+        return DumbService.getInstance(element.project).runReadActionInSmartMode(Computable {
+            return@Computable getResolvedCalls(element).filter { includeExternal || it.isWritable }.toList()
         })
     }
 
@@ -118,7 +119,7 @@ class JVMArtifactScopeService : IArtifactScopeService {
             if (ApplicationManager.getApplication().isReadAccessAllowed) {
                 ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
             } else {
-                ReadAction.compute(ThrowableComputable {
+                DumbService.getInstance(element.project).runReadActionInSmartMode(Computable {
                     ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
                 })
             }

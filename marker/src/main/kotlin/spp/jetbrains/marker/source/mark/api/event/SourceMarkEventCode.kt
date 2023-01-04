@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,12 @@ enum class SourceMarkEventCode(private val code: Int) : IEventCode {
     MARK_BEFORE_ADDED(1001),
     MARK_REMOVED(1002),
     NAME_CHANGED(1003),
-    PORTAL_OPENING(1004),
-    PORTAL_OPENED(1005),
-    PORTAL_CLOSED(1006),
-    UPDATE_PORTAL_CONFIG(1007),
-    MARK_USER_DATA_UPDATED(1008),
-    CHILD_USER_DATA_UPDATED(1009),
-    CUSTOM_EVENT(1010),
-    CODE_CHANGED(1011);
+    PORTAL_OPENED(1004),
+    PORTAL_CLOSED(1005),
+    MARK_USER_DATA_UPDATED(1006),
+    CHILD_USER_DATA_UPDATED(1007),
+    CUSTOM_EVENT(1008),
+    CODE_CHANGED(1009);
 
     override fun code(): Int {
         return this.code

@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
 import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.ui.Gray
+import com.intellij.ui.JBColor
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.UIUtil.getWindowColor
@@ -29,6 +30,10 @@ import java.awt.Font
 import javax.swing.border.LineBorder
 
 object PluginUI {
+
+    val yellow = JBColor("yellow", Color(190, 145, 23))
+    val purple = JBColor("purple", Color(151, 118, 169))
+    val green = JBColor("green", Color(98, 150, 85))
 
     @JvmField
     val LABEL_FOREGROUND_COLOR = Color(152, 118, 170)

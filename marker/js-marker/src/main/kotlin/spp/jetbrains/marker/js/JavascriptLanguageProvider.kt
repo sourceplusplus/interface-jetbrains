@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventList
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.safeLaunch
+import spp.jetbrains.safeExecuteBlocking
 
 /**
  * Provides JavaScript support for the Marker API.
@@ -72,7 +72,7 @@ class JavascriptLanguageProvider : LanguageProvider {
                 //setup endpoint detector and attempt detection
                 if (mark is GuideMark) {
                     mark.putUserData(SourceMarkerKeys.ENDPOINT_DETECTOR, endpointDetector)
-                    UserData.vertx(project).safeLaunch { endpointDetector.getOrFindEndpointIds(mark) }
+                    UserData.vertx(project).safeExecuteBlocking { endpointDetector.getOrFindEndpointIds(mark) }
                 }
 
                 //setup logger detector
@@ -83,7 +83,7 @@ class JavascriptLanguageProvider : LanguageProvider {
 
                 //attempt to detect logger(s) on method guide marks
                 if (mark is MethodGuideMark) {
-                    UserData.vertx(project).safeLaunch { loggerDetector.determineLoggerStatements(mark) }
+                    UserData.vertx(project).safeExecuteBlocking { loggerDetector.determineLoggerStatements(mark) }
                 }
             }
         })

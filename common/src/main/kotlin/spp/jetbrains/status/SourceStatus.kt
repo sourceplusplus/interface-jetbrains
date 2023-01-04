@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,11 @@ package spp.jetbrains.status
 import spp.jetbrains.icons.PluginIcons
 import javax.swing.Icon
 
+/**
+ * Represents the current status of the Source++ plugin.
+ *
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 enum class SourceStatus {
     Ready,
     Enabled,
@@ -49,4 +54,7 @@ enum class SourceStatus {
 
     val disposedPlugin: Boolean
         get() = this == Disabled || this == ConnectionError
+
+    val isConnected: Boolean
+        get() = this == Ready || this == Pending
 }

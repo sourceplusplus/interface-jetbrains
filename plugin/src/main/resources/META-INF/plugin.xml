@@ -16,12 +16,19 @@
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language=""
                                         implementationClass="spp.jetbrains.marker.plugin.SourceLineMarkerProvider"/>
-        <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.statusBar.SourceWidgetFactory"/>
+        <statusBarWidgetFactory implementation="spp.jetbrains.sourcemarker.status.SourceWidgetFactory"/>
 
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl"/>
+        <projectService
+                serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl"/>
+        <projectService
+                serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl"/>
+
+        <projectService
+                serviceImplementation="spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService"/>
         <editor.linePainter
-                implementation="spp.jetbrains.sourcemarker.service.instrument.breakpoint.painter.VariableEditorLinePainter"/>
+                implementation="spp.jetbrains.sourcemarker.instrument.breakpoint.painter.VariableEditorLinePainter"/>
         <projectConfigurable
                 instance="spp.jetbrains.sourcemarker.config.SourceMarkerConfigurable"
                 groupId="tools"
@@ -78,10 +85,6 @@
                 text="SourceMarkVisibility Action" description="SourceMark visibility action">
             <keyboard-shortcut first-keystroke="control shift D" keymap="$default"/>
         </action>
-        <action id="com.sourceplusplus.marker.source.mark.SourceMarkPopupAction"
-                class="spp.jetbrains.marker.source.mark.SourceMarkPopupAction"
-                text="SourcePortal Popup Action" description="SourcePortal popup action">
-        </action>
 
         <action id="spp.RunCommand" class="liveplugin.implementation.actions.RunPluginAction"
                 text="Run Current Command">
@@ -95,13 +98,13 @@
         </group>
 
         <action id="spp.enableSourcePP"
-                class="spp.jetbrains.sourcemarker.actions.EnableSourceAction">
+                class="spp.jetbrains.sourcemarker.action.EnableSourceAction">
             <override-text place="MainMenu" text="Enable Source++"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>
 
         <action id="spp.disableSourcePP" use-shortcut-of="spp.enableSourcePP"
-                class="spp.jetbrains.sourcemarker.actions.DisableSourceAction">
+                class="spp.jetbrains.sourcemarker.action.DisableSourceAction">
             <override-text place="MainMenu" text="Disable Source++"/>
             <override-text place="popup" use-text-of-place="MainMenu"/>
         </action>

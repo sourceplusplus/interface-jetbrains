@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import spp.jetbrains.monitor.skywalking.model.*
 import spp.jetbrains.monitor.skywalking.toProtocol
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
+import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.platform.general.Service
 
 class SkywalkingMonitorServiceImpl(
@@ -69,7 +69,7 @@ class SkywalkingMonitorServiceImpl(
         return EndpointTracesBridge.getTraces(request, skywalkingClient.vertx)
     }
 
-    override suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult {
+    override suspend fun getTraceStack(traceId: String): List<TraceSpan> {
         return EndpointTracesBridge.getTraceStack(traceId, skywalkingClient.vertx)
     }
 

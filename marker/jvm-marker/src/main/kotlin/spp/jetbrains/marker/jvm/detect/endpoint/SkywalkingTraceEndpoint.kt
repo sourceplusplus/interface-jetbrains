@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.marker.jvm.detect.endpoint
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.Computable
 import io.vertx.core.Future
 import io.vertx.core.Promise
@@ -42,7 +42,7 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
             return Future.succeededFuture(emptyList())
         }
 
-        return ApplicationManager.getApplication().runReadAction(Computable {
+        return DumbService.getInstance(guideMark.project).runReadActionInSmartMode(Computable {
             val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
                 ?: return@Computable Future.succeededFuture(emptyList())
             determineEndpointName(uMethod)
@@ -51,7 +51,7 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
 
     override fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
-        ApplicationManager.getApplication().runReadAction {
+        DumbService.getInstance(uMethod.project).runReadActionInSmartMode {
             val annotation = uMethod.findAnnotation(skywalkingTraceAnnotation)
             if (annotation != null) {
                 val operationNameExpr = annotation.attributeValues.find { it.name == "operationName" }

@@ -29,9 +29,9 @@ import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.service.ArtifactNamingService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.CommandBarController;
-import spp.jetbrains.sourcemarker.status.util.AutocompleteField;
-import spp.jetbrains.sourcemarker.status.util.ControlBarCellRenderer;
-import spp.jetbrains.sourcemarker.status.util.LiveCommandFieldRow;
+import spp.jetbrains.sourcemarker.command.ui.util.ControlBarCellRenderer;
+import spp.jetbrains.sourcemarker.command.ui.util.LiveCommandFieldRow;
+import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;

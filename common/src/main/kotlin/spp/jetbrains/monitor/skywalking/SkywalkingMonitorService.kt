@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import io.vertx.core.json.JsonObject
 import spp.jetbrains.monitor.skywalking.model.*
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
+import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.platform.general.Service
 
 interface SkywalkingMonitorService {
@@ -49,7 +49,7 @@ interface SkywalkingMonitorService {
 
     //    suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result>
     suspend fun getTraces(request: GetEndpointTraces): TraceResult
-    suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult
+    suspend fun getTraceStack(traceId: String): List<TraceSpan>
 
     //    suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult>
     suspend fun getCurrentService(): Service?

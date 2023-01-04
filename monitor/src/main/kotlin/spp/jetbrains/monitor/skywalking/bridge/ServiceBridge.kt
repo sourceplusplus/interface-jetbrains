@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,6 @@ class ServiceBridge(
     private var activeServices: List<Service> = emptyList()
 
     override suspend fun start() {
-        SourceStatusService.getInstance(project).update(Pending, "Setting current service")
-        setCurrentService(true)
-
         //async accessors
         vertx.eventBus().localConsumer<Boolean>(getCurrentServiceAddress) { msg ->
             if (currentService == null) {
@@ -66,6 +63,10 @@ class ServiceBridge(
             }
             msg.reply(activeServices)
         }
+
+        //attempt to set current service
+        SourceStatusService.getInstance(project).update(Pending, "Setting current service")
+        setCurrentService(true)
     }
 
     private fun periodicallyCheckForCurrentService() {

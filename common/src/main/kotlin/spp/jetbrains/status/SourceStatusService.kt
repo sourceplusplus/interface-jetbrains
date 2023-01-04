@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.Pair
 
+/**
+ * Service for getting the current status of the Source++ plugin.
+ *
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 interface SourceStatusService {
     companion object {
         val KEY = Key.create<SourceStatusService>("SPP_SOURCE_STATUS_SERVICE")

@@ -1,6 +1,6 @@
 /*
  * Source++, the continuous feedback platform for developers.
- * Copyright (C) 2022 CodeBrig, Inc.
+ * Copyright (C) 2022-2023 CodeBrig, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Key
@@ -110,6 +111,14 @@ class PluginSourceMarkEventListener(val project: Project) : CoroutineVerticle(),
     }
 
     private fun detectChanges(fileMarker: SourceFileMarker) {
+        if (DumbService.isDumb(fileMarker.project)) {
+            log.trace("IDE in dumb mode, delaying code change detection")
+            codeChangeQueue.queue(Update.create(fileMarker.psiFile) {
+                detectChanges(fileMarker)
+            })
+            return
+        }
+
         log.trace("Detecting changes in $fileMarker")
         val count = fileMarker.psiFile.getUserData(lastModificationStamp) ?: 0L
         val newCount = fileMarker.psiFile.modificationStamp
