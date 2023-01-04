@@ -66,20 +66,20 @@ import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
 import spp.jetbrains.plugin.LivePluginService
-import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.safeLaunch
+import spp.jetbrains.sourcemarker.command.status.LiveStatusBarManagerImpl
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.config.getServicePortNormalized
 import spp.jetbrains.sourcemarker.config.isSsl
 import spp.jetbrains.sourcemarker.config.serviceHostNormalized
+import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
-import spp.jetbrains.sourcemarker.portal.PortalController
-import spp.jetbrains.sourcemarker.service.LiveInstrumentManager
-import spp.jetbrains.sourcemarker.service.LiveViewManager
-import spp.jetbrains.sourcemarker.service.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.service.instrument.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.stat.SourceStatusServiceImpl
-import spp.jetbrains.sourcemarker.status.LiveStatusManagerImpl
+import spp.jetbrains.sourcemarker.status.SourceStatusServiceImpl
+import spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl
+import spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl
+import spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatusService
@@ -126,6 +126,11 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         if (ApplicationManager.getApplication().isUnitTestMode) {
             return //tests manually set up necessary components
         }
+
+        //make sure live view managers are initialized
+        LiveViewChartManagerImpl.init(project)
+        LiveViewTraceManagerImpl.init(project)
+        LiveViewLogManagerImpl.init(project)
 
         //setup plugin
         safeRunBlocking { getInstance(project).init() }
@@ -210,8 +215,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             }
 
             if (connectedMonitor) {
-                initUI(vertx, config)
-
                 val pluginsPromise = Promise.promise<Nothing>()
                 ProgressManager.getInstance()
                     .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
@@ -333,8 +336,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
 
-        val liveStatusManager = LiveStatusManagerImpl(project, vertx)
-        project.putUserData(LiveStatusManager.KEY, liveStatusManager)
+        val liveStatusManager = LiveStatusBarManagerImpl(project, vertx)
+        project.putUserData(LiveStatusBarManager.KEY, liveStatusManager)
 
         log.info("Discovering available services")
         val availableRecords = discovery!!.getRecords { true }.await()
@@ -581,10 +584,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName, project
             )
         ).await()
-    }
-
-    private suspend fun initUI(vertx: Vertx, config: SourceMarkerConfig) {
-        vertx.deployVerticle(PortalController(project, config)).await()
     }
 
     private suspend fun initMarker(vertx: Vertx) {

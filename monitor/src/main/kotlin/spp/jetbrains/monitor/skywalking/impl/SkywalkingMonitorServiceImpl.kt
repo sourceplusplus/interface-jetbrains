@@ -28,7 +28,7 @@ import spp.jetbrains.monitor.skywalking.model.*
 import spp.jetbrains.monitor.skywalking.toProtocol
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
+import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.platform.general.Service
 
 class SkywalkingMonitorServiceImpl(
@@ -69,7 +69,7 @@ class SkywalkingMonitorServiceImpl(
         return EndpointTracesBridge.getTraces(request, skywalkingClient.vertx)
     }
 
-    override suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult {
+    override suspend fun getTraceStack(traceId: String): List<TraceSpan> {
         return EndpointTracesBridge.getTraceStack(traceId, skywalkingClient.vertx)
     }
 

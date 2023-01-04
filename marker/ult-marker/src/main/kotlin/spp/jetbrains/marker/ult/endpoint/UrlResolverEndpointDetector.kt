@@ -19,10 +19,10 @@ package spp.jetbrains.marker.ult.endpoint
 import com.intellij.microservices.url.UrlPath
 import com.intellij.microservices.url.UrlResolveRequest
 import com.intellij.microservices.url.UrlResolverManager
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ThrowableComputable
 import io.vertx.core.Future
@@ -63,7 +63,7 @@ class UrlResolverEndpointDetector(
                 UrlResolveRequest(null, null, UrlPath.fromExactString(""), null)
             )
         })
-        ApplicationManager.getApplication().invokeLater {
+        DumbService.getInstance(guideMark.project).smartInvokeLater {
             ProgressManager.getInstance().runProcess({
                 for (targetPath in targetPaths) {
                     if (targetPath.resolveToPsiElement() == guideMark.getPsiElement()) {

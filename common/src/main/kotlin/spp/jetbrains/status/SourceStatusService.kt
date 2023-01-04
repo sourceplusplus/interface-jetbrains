@@ -20,6 +20,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.Pair
 
+/**
+ * Service for getting the current status of the Source++ plugin.
+ *
+ * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
+ */
 interface SourceStatusService {
     companion object {
         val KEY = Key.create<SourceStatusService>("SPP_SOURCE_STATUS_SERVICE")

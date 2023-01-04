@@ -21,7 +21,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
-import spp.jetbrains.plugin.LiveStatusManager
+import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.protocol.platform.developer.SelfInfo
 import javax.swing.Icon
 
@@ -42,7 +42,7 @@ abstract class LiveCommand(val project: Project) {
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
     val managementService = UserData.liveManagementService(project)!!
     val viewService = UserData.liveViewService(project)!!
-    val statusManager = LiveStatusManager.getInstance(project)
+    val statusManager = LiveStatusBarManager.getInstance(project)
     val instrumentService = UserData.liveInstrumentService(project)
     val selfInfo: SelfInfo
         get() = UserData.selfInfo(project)

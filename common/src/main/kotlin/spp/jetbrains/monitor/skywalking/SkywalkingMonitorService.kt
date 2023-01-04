@@ -23,7 +23,7 @@ import io.vertx.core.json.JsonObject
 import spp.jetbrains.monitor.skywalking.model.*
 import spp.protocol.artifact.metrics.ArtifactMetrics
 import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
+import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.platform.general.Service
 
 interface SkywalkingMonitorService {
@@ -49,7 +49,7 @@ interface SkywalkingMonitorService {
 
     //    suspend fun getMultipleMetrics(request: GetMultipleEndpointMetrics): List<GetMultipleLinearIntValuesQuery.Result>
     suspend fun getTraces(request: GetEndpointTraces): TraceResult
-    suspend fun getTraceStack(traceId: String): TraceSpanStackQueryResult
+    suspend fun getTraceStack(traceId: String): List<TraceSpan>
 
     //    suspend fun queryLogs(query: LogsBridge.GetEndpointLogs): AsyncResult<LogResult>
     suspend fun getCurrentService(): Service?

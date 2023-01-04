@@ -26,7 +26,7 @@ import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.toProtocol
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpanStackQueryResult
+import spp.protocol.artifact.trace.TraceSpan
 
 /**
  * todo: description.
@@ -63,12 +63,7 @@ class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : Cor
             launch(vertx.dispatcher()) {
                 val traceStack = skywalkingClient.queryTraceStack(it.body())
                 if (traceStack != null) {
-                    it.reply(
-                        TraceSpanStackQueryResult(
-                            traceSpans = traceStack.spans.map { it.toProtocol() },
-                            total = traceStack.spans.size
-                        )
-                    )
+                    it.reply(traceStack.spans.map { it.toProtocol() })
                 } else {
                     it.reply(null)
                 }
@@ -87,9 +82,9 @@ class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : Cor
                 .await().body()
         }
 
-        suspend fun getTraceStack(traceId: String, vertx: Vertx): TraceSpanStackQueryResult {
+        suspend fun getTraceStack(traceId: String, vertx: Vertx): List<TraceSpan> {
             return vertx.eventBus()
-                .request<TraceSpanStackQueryResult>(getTraceStackAddress, traceId)
+                .request<List<TraceSpan>>(getTraceStackAddress, traceId)
                 .await().body()
         }
     }

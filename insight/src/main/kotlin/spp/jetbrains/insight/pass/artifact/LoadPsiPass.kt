@@ -23,7 +23,8 @@ import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ArtifactPass
 
 /**
- * Loads the [ProceduralPath] set from [CallArtifact]s that have already been processed.
+ * Loads the [ProceduralPath] set from [CallArtifact]s that have already been processed. Allows for basic
+ * interprocedural analyses for artifacts with known [ProceduralPath]s.
  */
 class LoadPsiPass : ArtifactPass {
 

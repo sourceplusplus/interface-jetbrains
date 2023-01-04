@@ -41,6 +41,8 @@ exceptions:
     excludes: ['**/test/**']
 
 complexity:
+  TooManyFunctions:
+    thresholdInClasses: 15
   LongParameterList:
     functionThreshold: 8
   LongMethod:

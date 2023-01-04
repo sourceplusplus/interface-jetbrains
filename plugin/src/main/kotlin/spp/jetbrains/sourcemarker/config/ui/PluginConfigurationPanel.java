@@ -34,8 +34,8 @@ import spp.protocol.platform.general.Service;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static spp.jetbrains.PluginBundle.message;
 

@@ -121,4 +121,58 @@ object PluginIcons {
 
     @JvmField
     val histogram = IconLoader.getIcon("/icons/histogram.svg", PluginIcons::class.java)
+
+    @JvmField
+    val server = IconLoader.getIcon("/icons/server.svg", PluginIcons::class.java)
+
+    @JvmField
+    val chartArea = IconLoader.getIcon("/icons/chart-area.svg", PluginIcons::class.java)
+
+    @JvmField
+    val earthAmericas = IconLoader.getIcon("/icons/earth-americas.svg", PluginIcons::class.java)
+
+    @JvmField
+    val diagramSubtask = IconLoader.getIcon("/icons/diagram-subtask.svg", PluginIcons::class.java)
+
+    @JvmField
+    val squareCheck = IconLoader.getIcon("/icons/square-check.svg", PluginIcons::class.java)
+
+    @JvmField
+    val squareDashed = IconLoader.getIcon("/icons/square-dashed.svg", PluginIcons::class.java)
+
+    @JvmField
+    val chartMixed = IconLoader.getIcon("/icons/chart-mixed.svg", PluginIcons::class.java)
+
+    @JvmField
+    val clockRotateLeft = IconLoader.getIcon("/icons/clock-rotate-left.svg", PluginIcons::class.java)
+
+    @JvmField
+    val messageLines = IconLoader.getIcon("/icons/message-lines.svg", PluginIcons::class.java)
+
+    @JvmField
+    val play = IconLoader.getIcon("/icons/play.svg", PluginIcons::class.java)
+
+    @JvmField
+    val pause = IconLoader.getIcon("/icons/pause.svg", PluginIcons::class.java)
+
+    @JvmField
+    val stop = IconLoader.getIcon("/icons/stop.svg", PluginIcons::class.java)
+
+    @JvmField
+    val bolt = IconLoader.getIcon("/icons/bolt.svg", PluginIcons::class.java)
+
+    @JvmField
+    val boltSlash = IconLoader.getIcon("/icons/bolt-slash.svg", PluginIcons::class.java)
+
+    @JvmField
+    val errorBug = IconLoader.getIcon("/icons/error-bug.svg", PluginIcons::class.java)
+
+    @JvmField
+    val check = IconLoader.getIcon("/icons/check.svg", PluginIcons::class.java)
+
+    @JvmField
+    val rotate = IconLoader.getIcon("/icons/rotate.svg", PluginIcons::class.java)
+
+    @JvmField
+    val triangleExclamation = IconLoader.getIcon("/icons/triangle-exclamation.svg", PluginIcons::class.java)
 }

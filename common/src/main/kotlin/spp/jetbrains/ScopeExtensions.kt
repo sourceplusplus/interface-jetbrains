@@ -86,3 +86,12 @@ fun Vertx.safeLaunch(action: suspend () -> Unit): Job {
         }
     }
 }
+
+fun Vertx.safeExecuteBlocking(action: suspend () -> Unit) {
+    executeBlocking<Nothing> {
+        ScopeExtensions.safeRunBlocking(dispatcher()) {
+            action()
+        }
+        it.complete()
+    }
+}
