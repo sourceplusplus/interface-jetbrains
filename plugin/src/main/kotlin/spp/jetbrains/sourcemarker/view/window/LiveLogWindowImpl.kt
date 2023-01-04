@@ -53,12 +53,18 @@ class LiveLogWindowImpl(
         private set
     override val refreshInterval: Int
         get() = liveView.viewConfig.refreshRateLimit
+    private var initialFocus = true
 
     init {
         console = makeConsoleView(project)
         Disposer.register(this, console)
+    }
 
-        resume()
+    override fun onFocused() {
+        if (initialFocus) {
+            initialFocus = false
+            resume()
+        }
     }
 
     override fun resume() {

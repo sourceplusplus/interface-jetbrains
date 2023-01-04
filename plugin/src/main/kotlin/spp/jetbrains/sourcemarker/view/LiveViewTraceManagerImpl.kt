@@ -137,7 +137,7 @@ class LiveViewTraceManagerImpl(
     private fun showServiceWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
         val liveView = LiveView(
             entityIds = mutableSetOf(service.name),
-            viewConfig = LiveViewConfig("SERVICE_TRACE_WINDOW", listOf("service_traces"), 1000)
+            viewConfig = LiveViewConfig("SERVICE_TRACES_WINDOW", listOf("service_traces"), 1000)
         )
         val traceWindow = LiveViewTraceWindowImpl(project, liveView, { serviceTracesConsumerCreator(it) })
         val overviewContent = ContentFactory.getInstance().createContent(

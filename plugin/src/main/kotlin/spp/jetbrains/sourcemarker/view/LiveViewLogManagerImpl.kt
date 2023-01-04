@@ -42,7 +42,10 @@ import spp.jetbrains.view.LiveViewLogManager
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.window.LiveLogWindow
 import spp.protocol.platform.general.Service
+import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
+import spp.protocol.view.LiveViewConfig
+import spp.protocol.view.LiveViewEvent
 
 /**
  * todo: description.
@@ -78,7 +81,7 @@ class LiveViewLogManagerImpl(
                 }
             } else {
                 ApplicationManager.getApplication().invokeLater {
-                    hideWindow()
+                    hideWindows()
                 }
             }
         })
@@ -126,18 +129,34 @@ class LiveViewLogManagerImpl(
     }
 
     private fun showServicesWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
-//        serviceLogsWindow = LiveLogWindow(project)
-//        val content = ContentFactory.getInstance().createContent(
-//            serviceLogsWindow.component,
-//            "Service: ${service.name}",
-//            true
-//        )
-//        content.setDisposer(serviceLogsWindow)
-//        content.isCloseable = false
-//        contentManager.addContent(content)
+        val liveView = LiveView(
+            entityIds = mutableSetOf(service.name),
+            viewConfig = LiveViewConfig("SERVICE_LOGS_WINDOW", listOf("service_logs"), 1000)
+        )
+        val logWindow = LiveLogWindowImpl(project, liveView, { serviceLogsConsumerCreator(it) })
+        val overviewContent = ContentFactory.getInstance().createContent(
+            logWindow.component,
+            "Service: ${service.name}",
+            true
+        )
+        overviewContent.setDisposer(logWindow)
+        overviewContent.isCloseable = false
+        contentManager.addContent(overviewContent)
     }
 
-    private fun hideWindow() {
+    private fun serviceLogsConsumerCreator(logWindow: LiveLogWindow): MessageConsumer<JsonObject> {
+        val vertx = UserData.vertx(project)
+        val consumer = vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress("system"))
+        consumer.handler {
+            val liveViewEvent = LiveViewEvent(it.body())
+            if (liveViewEvent.subscriptionId != logWindow.liveView.subscriptionId) return@handler
+
+            logWindow.handleEvent(liveViewEvent)
+        }
+        return consumer
+    }
+
+    private fun hideWindows() {
         contentManager.contents.forEach { content ->
             contentManager.removeContent(content, true)
         }
@@ -161,6 +180,8 @@ class LiveViewLogManagerImpl(
         }
 
         val logWindow = LiveLogWindowImpl(project, liveView, consumer)
+        logWindow.resume()
+
         ApplicationManager.getApplication().invokeLater {
             val content = ContentFactory.getInstance()
                 .createContent(logWindow.component, title, false)
