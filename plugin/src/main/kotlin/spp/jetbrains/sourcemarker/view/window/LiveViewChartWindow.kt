@@ -44,6 +44,7 @@ import java.util.*
 import javax.swing.JComponent
 import javax.swing.SwingConstants
 
+//todo: MergingUpdateQueue that handles all the view updates atomically
 /**
  * Displays a visual chart graph of the metric values supplied via [LiveView].
  *
