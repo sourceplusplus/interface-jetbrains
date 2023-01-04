@@ -81,11 +81,11 @@ class LiveViewTraceManagerImpl(
                 val vertx = UserData.vertx(project)
                 vertx.safeLaunch {
                     val service = ServiceBridge.getCurrentService(vertx)!!
-                    showWindow(service)
+                    showServiceWindow(service)
                 }
             } else {
                 ApplicationManager.getApplication().invokeLater {
-                    hideWindow()
+                    hideWindows()
                 }
             }
         })
@@ -134,10 +134,10 @@ class LiveViewTraceManagerImpl(
         }
     }
 
-    private fun showWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
+    private fun showServiceWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
         val liveView = LiveView(
             entityIds = mutableSetOf(service.name),
-            viewConfig = LiveViewConfig("SERVICE_TRACE_CHART", listOf("service_traces"), 1000)
+            viewConfig = LiveViewConfig("SERVICE_TRACE_WINDOW", listOf("service_traces"), 1000)
         )
         val traceWindow = LiveViewTraceWindowImpl(project, liveView, { serviceTracesConsumerCreator(it) })
         val overviewContent = ContentFactory.getInstance().createContent(
@@ -164,7 +164,7 @@ class LiveViewTraceManagerImpl(
         return consumer
     }
 
-    private fun hideWindow() {
+    private fun hideWindows() {
         contentManager.contents.forEach { content ->
             contentManager.removeContent(content, true)
         }

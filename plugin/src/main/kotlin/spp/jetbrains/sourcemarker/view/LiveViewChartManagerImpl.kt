@@ -76,12 +76,12 @@ class LiveViewChartManagerImpl(
                 vertx.safeLaunch {
                     val service = ServiceBridge.getCurrentService(vertx)!!
                     ApplicationManager.getApplication().invokeLater {
-                        showWindow(service)
+                        showServiceWindow(service)
                     }
                 }
             } else {
                 ApplicationManager.getApplication().invokeLater {
-                    hideWindow()
+                    hideWindows()
                 }
             }
         })
@@ -133,7 +133,7 @@ class LiveViewChartManagerImpl(
         }
     }
 
-    private fun showWindow(service: Service) {
+    private fun showServiceWindow(service: Service) {
         val overviewWindow = LiveActivityWindow(
             project, service.id, service.name, "Service", listOf(
                 MetricType.Service_RespTime_AVG,
@@ -161,7 +161,7 @@ class LiveViewChartManagerImpl(
         contentManager.addContent(endpointsContent)
     }
 
-    private fun hideWindow() {
+    private fun hideWindows() {
         contentManager.contents.forEach { content ->
             contentManager.removeContent(content, true)
         }
