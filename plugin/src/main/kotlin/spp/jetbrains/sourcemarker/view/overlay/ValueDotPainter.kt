@@ -20,7 +20,6 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.charts.*
 import spp.protocol.artifact.metrics.MetricType
 import java.awt.Graphics2D
-import java.awt.Point
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
@@ -48,9 +47,11 @@ class ValueDotPainter(
             val dotPoint = (chart as LineChart<Number, Number, *>).findLocation(xy, coords)
             val radius = 4
             g.paint = data.lineColor
-            g.fillOval(dotPoint.x.roundToInt() - radius, dotPoint.y.roundToInt() - radius, radius * 2, radius * 2)
+
+            val theY = dotPoint.y.roundToInt() - radius
+            g.fillOval(dotPoint.x.roundToInt() - radius, theY, radius * 2, radius * 2)
             g.paint = (chart as LineChart<*, *, *>?)!!.background
-            g.drawOval(dotPoint.x.roundToInt() - radius, dotPoint.y.roundToInt() - radius, radius * 2, radius * 2)
+            g.drawOval(dotPoint.x.roundToInt() - radius, theY, radius * 2, radius * 2)
 
             g.color = JBColor.foreground()
             val chartValue = coords.y.toDouble()
@@ -68,77 +69,55 @@ class ValueDotPainter(
             g.drawString(valueLabel, xCord, var14.coerceAtLeast(var15))
 
             if (paintTime) {
-                g.paint = (chart as LineChart<*, *, *>?)!!.gridLabelColor
+                g.paint = (chart as LineChart<*, *, *>).gridLabelColor
                 val timeLabel = "%.1f$postfix"
                 val bounds2 = g.fontMetrics.getStringBounds(timeLabel, null)
                 xCord = dotPoint.x.roundToInt()
-                g.drawString(
-                    timeLabel,
-                    xCord - bounds2.width.toInt() / 2,
-                    (chart as LineChart<*, *, *>?)!!.height - (chart as LineChart<*, *, *>?)!!.margins.bottom + bounds2.height.toInt()
-                )
+
+                val idk = (chart as LineChart<*, *, *>).height -
+                        (chart as LineChart<*, *, *>).margins.bottom + bounds2.height.toInt()
+                g.drawString(timeLabel, xCord - bounds2.width.toInt() / 2, idk)
             }
         }
     }
 
     private fun findHoveredCoordinate(): Coordinates<*, *>? {
-//        Iterable var2 = (Iterable) CpuAndMemoryPanel.this.dotPainters;
-//        Iterator var4 = var2.iterator();
         val var10000: Any?
-        //        while (true) {
-//            if (var4.hasNext()) {
-//                Object var5 = var4.next();
-//                ValueDotPainter itx = (ValueDotPainter) var5;
-//                if (itx.getMouseLocation() == null) {
-//                    continue;
-//                }
-
-//                var10000 = var5;
-//                break;
-//            }
-//
-//            var10000 = null;
-//            break;
-//        }
-        val hoveredPainter = this
-        if (hoveredPainter != null) {
-            val var20 = hoveredPainter.mouseLocation
-            if (var20 != null) {
-                val mouseLocation: Point = var20
-                val hoveredChart = hoveredPainter.chart as LineChart<*, *, *>?
-                val xy = hoveredChart!!.findMinMax()
-                if (xy.isInitialized) {
-                    val var21 = hoveredChart.margins.left
-                    val var10002 = hoveredChart.width - hoveredChart.margins.right
-                    var x = mouseLocation.x
-                    if (var21 <= x) {
-                        if (var10002 >= x) {
-                            x = mouseLocation.x - hoveredChart.margins.left
-                            val rat =
-                                x.toDouble() * 1.0 / (hoveredChart.width - (hoveredChart.margins.left + hoveredChart.margins.right)).toDouble()
-                            val value =
-                                ((xy.xMax.toLong() - xy.xMin.toLong()).toDouble() * rat).roundToLong() + xy.xMin.toLong()
-                            val var10 = data.data
-                            val var12 = var10.iterator()
-                            while (true) {
-                                if (var12.hasNext()) {
-                                    val var13 = var12.next()!!
-                                    val (x1) = var13 as Coordinates<*, *>
-                                    if (x1.toLong() <= value) {
-                                        continue
-                                    }
-                                    var10000 = var13
-                                    break
+        val mouseLocation = mouseLocation
+        if (mouseLocation != null) {
+            val hoveredChart = chart as LineChart<*, *, *>?
+            val xy = hoveredChart!!.findMinMax()
+            if (xy.isInitialized) {
+                val var21 = hoveredChart.margins.left
+                val var10002 = hoveredChart.width - hoveredChart.margins.right
+                var x = mouseLocation.x
+                if (var21 <= x) {
+                    if (var10002 >= x) {
+                        x = mouseLocation.x - hoveredChart.margins.left
+                        val idk = hoveredChart.width - (hoveredChart.margins.left + hoveredChart.margins.right)
+                        val rat = x.toDouble() * 1.0 / idk
+                        val idk2 = ((xy.xMax.toLong() - xy.xMin.toLong()).toDouble() * rat).roundToLong()
+                        val value = idk2 + xy.xMin.toLong()
+                        val var10 = data.data
+                        val var12 = var10.iterator()
+                        while (true) {
+                            if (var12.hasNext()) {
+                                val var13 = var12.next()!!
+                                val (x1) = var13 as Coordinates<*, *>
+                                if (x1.toLong() <= value) {
+                                    continue
                                 }
-                                var10000 = null
+                                var10000 = var13
                                 break
                             }
-                            return var10000 as Coordinates<*, *>?
+                            var10000 = null
+                            break
                         }
+                        return var10000 as Coordinates<*, *>?
                     }
                 }
-                return null
             }
+            return null
         }
         return null
     }
