@@ -118,17 +118,21 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
     }
 
     override fun getEndpoints(serviceId: String): Future<List<ServiceEndpoint>> {
-        TODO("Not yet implemented")
+        return Future.failedFuture("Illegal operation")
     }
 
     override fun getInstances(serviceId: String): Future<List<ServiceInstance>> {
-        TODO("Not yet implemented")
+        return Future.failedFuture("Illegal operation")
     }
 
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
     override fun getStats(): Future<JsonObject> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getVersion(): Future<String> {
         return Future.failedFuture("Illegal operation")
     }
 
