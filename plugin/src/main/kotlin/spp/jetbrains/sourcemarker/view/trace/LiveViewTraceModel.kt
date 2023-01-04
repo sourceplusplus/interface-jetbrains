@@ -17,6 +17,7 @@
 package spp.jetbrains.sourcemarker.view.trace
 
 import com.intellij.ide.util.treeView.NodeDescriptor
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.tree.StructureTreeModel
 import com.intellij.ui.tree.TreeVisitor
@@ -124,9 +125,13 @@ class LiveViewTraceModel(
     override fun treeStructureChanged(e: TreeModelEvent) {
         treeStructureChanged(e.treePath, e.childIndices, e.children)
 
+        //todo: pretty sure this is wrong
         //auto-select first row
-        val firstNode = (e.treePath.path[0] as DefaultMutableTreeNode).firstChild
-        myTree?.selectionPath = e.treePath.pathByAddingChild(firstNode)
+        ApplicationManager.getApplication().invokeLater {
+            val node = (e.treePath.path[0] as DefaultMutableTreeNode)
+            if (node.childCount == 0) return@invokeLater
+            myTree?.selectionPath = e.treePath.pathByAddingChild(node.firstChild)
+        }
     }
 
     override fun getColumnInfos(): Array<ColumnInfo<TraceSpanTreeNode, String>> = COLUMN_INFOS
