@@ -26,7 +26,9 @@ dependencies {
 }
 
 apollo {
-    packageNamesFromFilePaths("monitor.skywalking.protocol")
+    service("service") {
+        packageNamesFromFilePaths("monitor.skywalking.protocol")
+    }
 }
 
 fun projectDependency(name: String): ProjectDependency {
