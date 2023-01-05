@@ -35,6 +35,10 @@ class ChangeTimeAction(private val viewManager: LiveViewChartManager) : AnAction
         templatePresentation.text = "Change Time"
     }
 
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabled = viewManager.currentView != null
+    }
+
     override fun actionPerformed(e: AnActionEvent) {
         JBPopupFactory.getInstance().createListPopup(
             object : ListPopupStep<String> {
