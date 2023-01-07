@@ -18,6 +18,7 @@ package spp.jetbrains.view
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.platform.general.ServiceEndpoint
 
 /**
@@ -39,4 +40,11 @@ interface LiveViewChartManager : ResumableViewManager {
     fun setHistoricalMinutes(historicalMinutes: Int)
     fun showOverviewActivity()
     fun showEndpointActivity(endpoint: ServiceEndpoint)
+
+    fun showChart(
+        entityId: String,
+        name: String,
+        scope: String,
+        metricTypes: List<MetricType>
+    )
 }

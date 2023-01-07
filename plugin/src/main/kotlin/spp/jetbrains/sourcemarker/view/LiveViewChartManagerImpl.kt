@@ -211,5 +211,33 @@ class LiveViewChartManagerImpl(
         toolWindow.show()
     }
 
+    override fun showChart(
+        entityId: String,
+        name: String,
+        scope: String,
+        metricTypes: List<MetricType>
+    ) = ApplicationManager.getApplication().invokeLater {
+        val existingContent = contentManager.findContent(name)
+        if (existingContent != null) {
+            contentManager.setSelectedContent(existingContent)
+            toolWindow.show()
+            return@invokeLater
+        }
+
+        val activityWindow = LiveActivityWindow(project, entityId, name, scope, metricTypes, -1)
+        activityWindow.resume()
+
+        val content = contentFactory.createContent(
+            activityWindow.component,
+            name,
+            false
+        )
+        content.setDisposer(activityWindow)
+        contentManager.addContent(content)
+        contentManager.setSelectedContent(content)
+
+        toolWindow.show()
+    }
+
     override fun dispose() = Unit
 }
