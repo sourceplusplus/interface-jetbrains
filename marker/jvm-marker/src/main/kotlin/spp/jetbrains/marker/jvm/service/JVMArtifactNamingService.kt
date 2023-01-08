@@ -30,7 +30,7 @@ import spp.protocol.artifact.ArtifactNameUtils
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.exception.qualifiedClassName
-import spp.protocol.instrument.LiveSourceLocation
+import spp.protocol.instrument.location.LiveSourceLocation
 
 /**
  * Used to determine the naming/location of JVM artifacts.

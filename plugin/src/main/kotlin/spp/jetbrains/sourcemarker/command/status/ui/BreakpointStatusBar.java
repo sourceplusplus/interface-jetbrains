@@ -49,10 +49,10 @@ import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowServi
 import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.instrument.LiveBreakpoint;
 import spp.protocol.instrument.LiveInstrument;
-import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.event.LiveBreakpointHit;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.event.TrackedLiveEvent;
+import spp.protocol.instrument.location.LiveSourceLocation;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
 import spp.protocol.instrument.variable.LiveVariableControl;

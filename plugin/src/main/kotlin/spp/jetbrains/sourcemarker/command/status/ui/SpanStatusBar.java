@@ -44,9 +44,9 @@ import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.instrument.LiveInstrument;
-import spp.protocol.instrument.LiveSourceLocation;
 import spp.protocol.instrument.LiveSpan;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
+import spp.protocol.instrument.location.LiveSourceLocation;
 import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;

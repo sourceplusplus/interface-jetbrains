@@ -26,7 +26,7 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactLanguage
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.exception.LiveStackTraceElement
-import spp.protocol.instrument.LiveSourceLocation
+import spp.protocol.instrument.location.LiveSourceLocation
 
 /**
  * Responsible for determining the naming/location of source code artifacts.
