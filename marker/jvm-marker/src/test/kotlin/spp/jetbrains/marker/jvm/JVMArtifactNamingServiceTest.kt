@@ -70,7 +70,26 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertNotNull(clazz)
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(clazz!!)
-        assertEquals(getTestName(false) + "", name.identifier)
+        assertEquals(className, name.identifier)
+        assertEquals(ArtifactType.CLASS, name.type)
+        assertNotNull(name.lineNumber)
+    }
+
+    fun testPackageClassName() {
+        doTestPackageClassName<PsiClass>("java")
+        doTestPackageClassName<KtClass>("kt")
+        doTestPackageClassName<PsiClass>("groovy")
+    }
+
+    private inline fun <reified T : PsiElement> doTestPackageClassName(extension: String) {
+        val className = getTestName(false)
+        val testDir = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_HYPHEN).convert(className)
+        val psiFile = myFixture.configureByFile("$testDir/$className.$extension")
+        val clazz = psiFile.findDescendantOfType<T> { true }
+        assertNotNull(clazz)
+
+        val name = JVMArtifactNamingService().getFullyQualifiedName(clazz!!)
+        assertEquals("com.example.$className", name.identifier)
         assertEquals(ArtifactType.CLASS, name.type)
         assertNotNull(name.lineNumber)
     }
@@ -83,7 +102,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertNotNull(clazz)
 
         val name = JVMMarkerUtils.getFullyQualifiedName(clazz!!)
-        assertEquals(getTestName(false) + "", name.identifier)
+        assertEquals(className, name.identifier)
         assertEquals(ArtifactType.CLASS, name.type)
         assertNotNull(name.lineNumber)
     }
@@ -102,7 +121,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertNotNull(clazz)
 
         val parentName = JVMArtifactNamingService().getFullyQualifiedName(clazz!!)
-        assertEquals(getTestName(false) + "", parentName.identifier)
+        assertEquals(className, parentName.identifier)
         assertEquals(ArtifactType.CLASS, parentName.type)
         assertNotNull(parentName.lineNumber)
 
@@ -110,7 +129,34 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertNotNull(innerClazz)
 
         val innerName = JVMArtifactNamingService().getFullyQualifiedName(innerClazz!!)
-        assertEquals(getTestName(false) + "\$ClassName", innerName.identifier)
+        assertEquals("$className\$ClassName", innerName.identifier)
+        assertEquals(ArtifactType.CLASS, innerName.type)
+        assertNotNull(innerName.lineNumber)
+    }
+
+    fun testPackageInnerClassName() {
+        doTestPackageInnerClassName<PsiClass>("java")
+        doTestPackageInnerClassName<KtClass>("kt")
+        doTestPackageInnerClassName<PsiClass>("groovy")
+    }
+
+    private inline fun <reified T : PsiElement> doTestPackageInnerClassName(extension: String) {
+        val className = getTestName(false)
+        val testDir = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_HYPHEN).convert(className)
+        val psiFile = myFixture.configureByFile("$testDir/$className.$extension")
+        val clazz = psiFile.findDescendantOfType<T> { true }
+        assertNotNull(clazz)
+
+        val parentName = JVMArtifactNamingService().getFullyQualifiedName(clazz!!)
+        assertEquals("com.example.$className", parentName.identifier)
+        assertEquals(ArtifactType.CLASS, parentName.type)
+        assertNotNull(parentName.lineNumber)
+
+        val innerClazz = clazz.findDescendantOfType<T> { it !== clazz }
+        assertNotNull(innerClazz)
+
+        val innerName = JVMArtifactNamingService().getFullyQualifiedName(innerClazz!!)
+        assertEquals("com.example.$className\$ClassName", innerName.identifier)
         assertEquals(ArtifactType.CLASS, innerName.type)
         assertNotNull(innerName.lineNumber)
     }
@@ -130,20 +176,20 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val foo1 = methods[0]
         val name = JVMArtifactNamingService().getFullyQualifiedName(foo1)
-        assertEquals(getTestName(false) + ".foo1()", name.identifier)
+        assertEquals("$className.foo1()", name.identifier)
         assertEquals(ArtifactType.METHOD, name.type)
         assertNotNull(name.lineNumber)
 
         val foo2 = methods[1]
         val name2 = JVMArtifactNamingService().getFullyQualifiedName(foo2)
-        assertEquals(getTestName(false) + ".foo2(java.lang.String)", name2.identifier)
+        assertEquals("$className.foo2(java.lang.String)", name2.identifier)
         assertEquals(ArtifactType.METHOD, name2.type)
         assertNotNull(name2.lineNumber)
 
         val foo3 = methods[2]
         val name3 = JVMArtifactNamingService().getFullyQualifiedName(foo3)
         assertEquals(
-            getTestName(false) + ".foo3(java.lang.String,int,long,double,float,boolean,char,byte,short)",
+            "$className.foo3(java.lang.String,int,long,double,float,boolean,char,byte,short)",
             name3.identifier
         )
         assertEquals(ArtifactType.METHOD, name3.type)
@@ -151,14 +197,14 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val foo4 = methods[3]
         val name4 = JVMArtifactNamingService().getFullyQualifiedName(foo4)
-        assertEquals(getTestName(false) + ".foo4($className\$MyObject)", name4.identifier)
+        assertEquals("$className.foo4($className\$MyObject)", name4.identifier)
         assertEquals(ArtifactType.METHOD, name4.type)
         assertNotNull(name4.lineNumber)
 
         val foo5 = methods[4]
         val name5 = JVMArtifactNamingService().getFullyQualifiedName(foo5)
         assertEquals(
-            getTestName(false) + ".foo5(java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[])",
+            "$className.foo5(java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[])",
             name5.identifier
         )
         assertEquals(ArtifactType.METHOD, name5.type)
@@ -179,7 +225,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertNotNull(method)
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(method!!)
-        assertEquals(getTestName(false) + "\$ClassName.foo()", name.identifier)
+        assertEquals("$className\$ClassName.foo()", name.identifier)
         assertEquals(ArtifactType.METHOD, name.type)
         assertNotNull(name.lineNumber)
     }
@@ -201,9 +247,9 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(identifier!!)
         when (extension) {
-            "kt" -> assertEquals(getTestName(false) + ".foo()#aWQ6NTE=", name.identifier)
-            "java" -> assertEquals(getTestName(false) + ".foo()#aWQ6NjY=", name.identifier)
-            "groovy" -> assertEquals(getTestName(false) + ".foo()#aWQ6NTI=", name.identifier)
+            "kt" -> assertEquals("$className.foo()#aWQ6NTE=", name.identifier)
+            "java" -> assertEquals("$className.foo()#aWQ6NjY=", name.identifier)
+            "groovy" -> assertEquals("$className.foo()#aWQ6NTI=", name.identifier)
             else -> fail("Unknown extension: $extension")
         }
         assertEquals(ArtifactType.EXPRESSION, name.type)
@@ -227,9 +273,9 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(identifier!!)
         when (extension) {
-            "kt" -> assertEquals(getTestName(false) + "\$ClassName.foo()#aWQ6OTc=", name.identifier)
-            "java" -> assertEquals(getTestName(false) + "\$ClassName.foo()#aWQ6MTEz", name.identifier)
-            "groovy" -> assertEquals(getTestName(false) + "\$ClassName.foo()#aWQ6OTI=", name.identifier)
+            "kt" -> assertEquals("$className\$ClassName.foo()#aWQ6OTc=", name.identifier)
+            "java" -> assertEquals("$className\$ClassName.foo()#aWQ6MTEz", name.identifier)
+            "groovy" -> assertEquals("$className\$ClassName.foo()#aWQ6OTI=", name.identifier)
             else -> fail("Unknown extension: $extension")
         }
         assertEquals(ArtifactType.EXPRESSION, name.type)
@@ -253,9 +299,9 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(identifier!!)
         when (extension) {
-            "kt" -> assertEquals(getTestName(false) + "#aWQ6MzA=", name.identifier)
-            "java" -> assertEquals(getTestName(false) + "#aWQ6Mzc=", name.identifier)
-            "groovy" -> assertEquals(getTestName(false) + "#aWQ6MzA=", name.identifier)
+            "kt" -> assertEquals("$className#aWQ6MzA=", name.identifier)
+            "java" -> assertEquals("$className#aWQ6Mzc=", name.identifier)
+            "groovy" -> assertEquals("$className#aWQ6MzA=", name.identifier)
             else -> fail("Unknown extension: $extension")
         }
         assertEquals(ArtifactType.EXPRESSION, name.type)
@@ -279,9 +325,9 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(identifier!!)
         when (extension) {
-            "kt" -> assertEquals(getTestName(false) + "\$ClassName#aWQ6Njc=", name.identifier)
-            "java" -> assertEquals(getTestName(false) + "\$ClassName#aWQ6NzU=", name.identifier)
-            "groovy" -> assertEquals(getTestName(false) + "\$ClassName#aWQ6NjE=", name.identifier)
+            "kt" -> assertEquals("$className\$ClassName#aWQ6Njc=", name.identifier)
+            "java" -> assertEquals("$className\$ClassName#aWQ6NzU=", name.identifier)
+            "groovy" -> assertEquals("$className\$ClassName#aWQ6NjE=", name.identifier)
             else -> fail("Unknown extension: $extension")
         }
         assertEquals(ArtifactType.EXPRESSION, name.type)

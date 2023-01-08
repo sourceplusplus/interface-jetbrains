@@ -89,8 +89,15 @@ object JVMMarkerUtils {
     }
 
     private fun getFullyQualifiedName(theClass: KtClass): ArtifactQualifiedName {
-        val fqName = theClass.fqName?.toJvmFqName?.replace(".", "$")
-        if (fqName != null) {
+        var packageName = theClass.containingKtFile.packageFqName.asString()
+        if (packageName.isNotEmpty()) {
+            packageName += "."
+        }
+
+        val fqName = packageName + (theClass.fqName?.toJvmFqName)
+            ?.replace(packageName, "")
+            ?.replace(".", "$")
+        if (fqName.isNotEmpty()) {
             return ArtifactQualifiedName(
                 fqName,
                 type = ArtifactType.CLASS,
@@ -98,10 +105,6 @@ object JVMMarkerUtils {
             )
         }
 
-        var packageName = theClass.containingKtFile.packageFqName.asString()
-        if (packageName.isNotEmpty()) {
-            packageName += "."
-        }
         return ArtifactQualifiedName(
             packageName + theClass.nameAsSafeName.identifier,
             type = ArtifactType.CLASS,
