@@ -1,4 +1,4 @@
-class GroovyMethodVariable {
+class MethodVariable {
     void foo() {
         int id = 1
     }
