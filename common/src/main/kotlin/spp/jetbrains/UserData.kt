@@ -87,6 +87,10 @@ object UserData {
         return selfInfo
     }
 
+    fun hasSelfInfo(project: Project): Boolean {
+        return project.getUserData(SELF_INFO) != null
+    }
+
     fun clear(project: Project) {
         project.putUserData(VERTX, null)
         project.putUserData(SELF_INFO, null)

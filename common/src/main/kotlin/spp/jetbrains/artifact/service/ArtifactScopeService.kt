@@ -85,6 +85,10 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
     override fun isInsideEndlessLoop(element: PsiElement): Boolean {
         return getService(element.language).isInsideEndlessLoop(element)
     }
+
+    override fun canShowControlBar(element: PsiElement): Boolean {
+        return getService(element.language).canShowControlBar(element)
+    }
 }
 
 // Extensions

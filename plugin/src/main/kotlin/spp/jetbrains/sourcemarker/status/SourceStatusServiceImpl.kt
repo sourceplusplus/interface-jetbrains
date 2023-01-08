@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import spp.jetbrains.ScopeExtensions.safeGlobalAsync
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
+import spp.jetbrains.UserData
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
@@ -50,6 +51,10 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
     override fun isConnected(): Boolean {
         return getCurrentStatus().first.isConnected
+    }
+
+    override fun isLoggedIn(): Boolean {
+        return UserData.hasSelfInfo(project)
     }
 
     override fun getCurrentStatus(): Pair<SourceStatus, String?> {

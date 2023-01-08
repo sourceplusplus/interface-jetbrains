@@ -1,0 +1,4 @@
+class InnerClassName {
+    class ClassName {
+    }
+}
