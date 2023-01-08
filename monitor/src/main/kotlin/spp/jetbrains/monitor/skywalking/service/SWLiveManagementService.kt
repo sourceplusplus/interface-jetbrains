@@ -23,10 +23,7 @@ import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
-import spp.protocol.platform.auth.ClientAccess
-import spp.protocol.platform.auth.CommandType
-import spp.protocol.platform.auth.DeveloperRole
-import spp.protocol.platform.auth.RolePermission
+import spp.protocol.platform.auth.*
 import spp.protocol.platform.developer.Developer
 import spp.protocol.platform.developer.SelfInfo
 import spp.protocol.platform.general.Service
@@ -43,7 +40,7 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
-    override fun getRolePermissions(role: String): Future<List<RolePermission>> {
+    override fun getRolePermissions(role: DeveloperRole): Future<List<RolePermission>> {
         return Future.failedFuture("Illegal operation")
     }
 
@@ -71,8 +68,20 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
-    override fun addDeveloper(id: String): Future<Developer> {
+    override fun addDeveloper(developerId: String): Future<Developer> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    override fun removeDeveloper(developerId: String): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun refreshDeveloperToken(developerId: String): Future<Developer> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getRoles(): Future<List<DeveloperRole>> {
+        return Future.failedFuture("Illegal operation")
     }
 
     /**
@@ -82,6 +91,18 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 
+    override fun removeDeveloperRole(developerId: String, role: DeveloperRole): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getDeveloperPermissions(developerId: String): Future<List<RolePermission>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun reset(): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
@@ -89,11 +110,23 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 
+    override fun removeRole(role: DeveloperRole): Future<Boolean> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getDeveloperRoles(developerId: String): Future<List<DeveloperRole>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
     override fun addRolePermission(role: DeveloperRole, permission: RolePermission): Future<Void> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    override fun removeRolePermission(role: DeveloperRole, permission: RolePermission): Future<Void> {
+        return Future.failedFuture("Illegal operation")
     }
 
     /**
@@ -136,6 +169,84 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
         return Future.failedFuture("Illegal operation")
     }
 
+    override fun getAccessPermissions(): Future<List<AccessPermission>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getAccessPermission(id: String): Future<AccessPermission> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun addAccessPermission(locationPatterns: List<String>, type: AccessType): Future<AccessPermission> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun removeAccessPermission(id: String): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getRoleAccessPermissions(role: DeveloperRole): Future<List<AccessPermission>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun addRoleAccessPermission(role: DeveloperRole, id: String): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun removeRoleAccessPermission(role: DeveloperRole, id: String): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getDeveloperAccessPermissions(developerId: String): Future<List<AccessPermission>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getDataRedactions(): Future<List<DataRedaction>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getDataRedaction(id: String): Future<DataRedaction> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun addDataRedaction(
+        id: String,
+        type: RedactionType,
+        lookup: String,
+        replacement: String
+    ): Future<DataRedaction> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun updateDataRedaction(
+        id: String,
+        type: RedactionType,
+        lookup: String,
+        replacement: String
+    ): Future<DataRedaction> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun removeDataRedaction(id: String): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getRoleDataRedactions(role: DeveloperRole): Future<List<DataRedaction>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun addRoleDataRedaction(role: DeveloperRole, id: String): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun removeRoleDataRedaction(role: DeveloperRole, id: String): Future<Void> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getDeveloperDataRedactions(developerId: String): Future<List<DataRedaction>> {
+        return Future.failedFuture("Illegal operation")
+    }
+
     override fun getSelf(): Future<SelfInfo> {
         return Future.succeededFuture(
             SelfInfo(
@@ -157,7 +268,7 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
     }
 
     override fun getServices(layer: String?): Future<List<Service>> {
-        TODO("Not yet implemented")
+        return Future.failedFuture("Illegal operation")
     }
 
     /**
@@ -172,6 +283,10 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
      */
     override fun getAuthToken(accessToken: String): Future<String> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
+    }
+
+    override fun getDevelopers(): Future<List<Developer>> {
+        return Future.failedFuture("Illegal operation")
     }
 
     /**
