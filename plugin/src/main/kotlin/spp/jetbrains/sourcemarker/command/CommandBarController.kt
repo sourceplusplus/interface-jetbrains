@@ -35,6 +35,7 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.sourcemarker.command.ui.ControlBar
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
+import spp.jetbrains.status.SourceStatusService
 import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -108,6 +109,11 @@ object CommandBarController {
         //close previous command bar (if open)
         previousControlBar?.dispose(true, false)
         previousControlBar = null
+
+        //ensure logged in
+        if (!SourceStatusService.getInstance(editor.project!!).isLoggedIn()) {
+            return
+        }
 
         //determine control bar location
         val fileMarker = SourceFileMarker.getOrCreate(editor) ?: return
