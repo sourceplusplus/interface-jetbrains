@@ -1,4 +1,4 @@
-public expect open class KotlinExpectOpenClassName : Throwable {
+public expect open class ExpectOpenClassName : Throwable {
     constructor()
     constructor(message: String?)
     constructor(message: String?, cause: Throwable?)

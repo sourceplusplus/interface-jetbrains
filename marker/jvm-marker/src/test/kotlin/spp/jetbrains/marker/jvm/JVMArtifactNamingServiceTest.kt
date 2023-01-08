@@ -75,8 +75,10 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertNotNull(name.lineNumber)
     }
 
-    fun testKotlinExpectOpenClassName() {
-        val psiFile = myFixture.configureByFile(getTestName(false) + ".kt")
+    fun testExpectOpenClassName() {
+        val className = getTestName(false)
+        val testDir = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_HYPHEN).convert(className)
+        val psiFile = myFixture.configureByFile("$testDir/$className.kt")
         val clazz = psiFile.findDescendantOfType<KtClass> { true }
         assertNotNull(clazz)
 
