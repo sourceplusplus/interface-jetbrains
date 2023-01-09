@@ -82,7 +82,6 @@ class ValueDotPainter(
     }
 
     private fun findHoveredCoordinate(): Coordinates<*, *>? {
-        val var10000: Any?
         val mouseLocation = mouseLocation
         if (mouseLocation != null) {
             val hoveredChart = chart as LineChart<*, *, *>?
@@ -107,17 +106,12 @@ class ValueDotPainter(
                                 if (x1.toLong() <= value) {
                                     continue
                                 }
-                                var10000 = var13
-                                break
+                                return var13
                             }
-                            var10000 = null
-                            break
                         }
-                        return var10000 as Coordinates<*, *>?
                     }
                 }
             }
-            return null
         }
         return null
     }
