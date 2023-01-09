@@ -108,6 +108,7 @@ class ValueDotPainter(
                                 }
                                 return var13
                             }
+                            return null
                         }
                     }
                 }
