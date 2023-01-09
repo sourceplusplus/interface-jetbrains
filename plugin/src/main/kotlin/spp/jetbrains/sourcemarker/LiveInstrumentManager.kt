@@ -74,7 +74,7 @@ class LiveInstrumentManager(
         )
 
         //show live status bars
-        UserData.liveInstrumentService(project)!!.getLiveInstruments(null).onComplete {
+        UserData.liveInstrumentService(project)!!.getLiveInstruments().onComplete {
             if (it.succeeded()) {
                 log.info("Found ${it.result().size} active live status bars")
                 LiveStatusBarManager.getInstance(project).addActiveLiveInstruments(it.result())
