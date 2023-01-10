@@ -4,9 +4,10 @@ plugins {
 }
 
 val vertxVersion: String by project
-val projectVersion: String by project
 val joorVersion: String by project
 val jupiterVersion: String by project
+val guavaVersion: String by project
+val projectVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 group = "plus.sourceplus.interface"
@@ -57,7 +58,7 @@ dependencies {
     implementation("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    compileOnly("com.google.guava:guava:31.1-jre")
+    compileOnly("com.google.guava:guava:$guavaVersion")
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")

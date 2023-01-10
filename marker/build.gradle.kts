@@ -3,9 +3,10 @@ plugins {
     id("maven-publish")
 }
 
-val projectVersion: String by project
 val joorVersion: String by project
 val vertxVersion: String by project
+val guavaVersion: String by project
+val projectVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
 
 group = "plus.sourceplus.interface"
@@ -55,7 +56,7 @@ dependencies {
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    compileOnly("com.google.guava:guava:31.1-jre")
+    compileOnly("com.google.guava:guava:$guavaVersion")
     testImplementation("junit:junit:4.13.2")
 }
 
