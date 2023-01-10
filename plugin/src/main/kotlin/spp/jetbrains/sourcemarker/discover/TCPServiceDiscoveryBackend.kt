@@ -47,7 +47,7 @@ import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.PlatformAddress
 import spp.protocol.platform.status.InstanceConnection
 import spp.protocol.service.SourceServices.LIVE_INSTRUMENT
-import spp.protocol.service.SourceServices.LIVE_MANAGEMENT_SERVICE
+import spp.protocol.service.SourceServices.LIVE_MANAGEMENT
 import spp.protocol.service.SourceServices.LIVE_VIEW
 import spp.protocol.service.extend.TCPServiceFrameParser
 import java.util.*
@@ -151,7 +151,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
             vertx.executeBlocking<Any> {
                 setupHandler(vertx, "get-records")
-                setupHandler(vertx, LIVE_MANAGEMENT_SERVICE)
+                setupHandler(vertx, LIVE_MANAGEMENT)
                 setupHandler(vertx, LIVE_INSTRUMENT)
                 setupHandler(vertx, LIVE_VIEW)
 

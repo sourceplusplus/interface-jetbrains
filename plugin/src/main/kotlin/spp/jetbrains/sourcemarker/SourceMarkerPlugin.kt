@@ -344,12 +344,12 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         log.info("Discovered $availableRecords.size services")
 
         //live service
-        if (availableRecords.any { it.name == SourceServices.LIVE_MANAGEMENT_SERVICE }) {
+        if (availableRecords.any { it.name == SourceServices.LIVE_MANAGEMENT }) {
             log.info("Live management available")
 
             val liveManagementService = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
-                .setAddress(SourceServices.LIVE_MANAGEMENT_SERVICE)
+                .setAddress(SourceServices.LIVE_MANAGEMENT)
                 .build(LiveManagementService::class.java)
             UserData.liveManagementService(project, liveManagementService)
 
