@@ -17,9 +17,14 @@
 package spp.jetbrains.marker.js.model
 
 import com.intellij.lang.javascript.psi.JSFunction
+import spp.jetbrains.artifact.model.BlockArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class JavascriptFunctionArtifact(override val psiElement: JSFunction) : FunctionArtifact(psiElement) {
+
+    override val bodyBlock: BlockArtifact?
+        get() = psiElement.block?.toArtifact() as? BlockArtifact
 
     override fun clone(): JavascriptFunctionArtifact {
         return JavascriptFunctionArtifact(psiElement)

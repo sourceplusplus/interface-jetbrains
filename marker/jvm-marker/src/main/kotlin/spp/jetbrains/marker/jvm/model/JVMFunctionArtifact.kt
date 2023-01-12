@@ -16,10 +16,23 @@
  */
 package spp.jetbrains.marker.jvm.model
 
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiNameIdentifierOwner
+import org.jetbrains.kotlin.psi.KtNamedFunction
+import spp.jetbrains.artifact.model.BlockArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class JVMFunctionArtifact(override val psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement) {
+
+    override val bodyBlock: BlockArtifact?
+        get() {
+            return when (psiElement) {
+                is PsiMethod -> psiElement.body?.toArtifact() as? BlockArtifact
+                is KtNamedFunction -> psiElement.bodyBlockExpression?.toArtifact() as? BlockArtifact
+                else -> TODO()
+            }
+        }
 
     override fun clone(): JVMFunctionArtifact {
         return JVMFunctionArtifact(psiElement)
