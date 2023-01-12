@@ -92,11 +92,8 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
             log.warn("No service selected, skipping response time subscription")
             return
         }
-        val swVersion = skywalkingMonitorService.getVersion()
-        val listenMetrics = listOf(
-            Endpoint_RespTime_AVG.asRealtime().getMetricId(swVersion)
-        )
 
+        val listenMetrics = listOf(Endpoint_RespTime_AVG.asRealtime().metricId)
         val vertx = UserData.vertx(guideMark.project)
         viewService.addLiveView(
             LiveView(
