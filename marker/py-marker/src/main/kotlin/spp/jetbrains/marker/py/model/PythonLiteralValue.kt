@@ -19,7 +19,7 @@ package spp.jetbrains.marker.py.model
 import com.jetbrains.python.psi.PyLiteralExpression
 import spp.jetbrains.artifact.model.ArtifactLiteralValue
 
-class PythonLiteralValue(private val psiElement: PyLiteralExpression) : ArtifactLiteralValue(psiElement) {
+class PythonLiteralValue(override val psiElement: PyLiteralExpression) : ArtifactLiteralValue(psiElement) {
     override val value: Any?
         get() = psiElement.text //todo: value
 

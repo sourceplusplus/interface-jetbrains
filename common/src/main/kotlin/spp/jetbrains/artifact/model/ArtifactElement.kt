@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Represents a language-agnostic artifact for semantic analysis.
  */
-abstract class ArtifactElement(private val psiElement: PsiElement) : PsiElement by psiElement {
+abstract class ArtifactElement(open val psiElement: PsiElement) : PsiElement by psiElement {
 
     val data = ConcurrentHashMap<SourceKey<*>, Any>()
 

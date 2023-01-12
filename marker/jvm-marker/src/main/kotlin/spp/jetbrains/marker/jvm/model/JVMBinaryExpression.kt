@@ -24,7 +24,7 @@ import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.service.isKotlin
 import spp.jetbrains.artifact.service.toArtifact
 
-class JVMBinaryExpression(private val psiElement: PsiElement) : ArtifactBinaryExpression(psiElement) {
+class JVMBinaryExpression(psiElement: PsiElement) : ArtifactBinaryExpression(psiElement) {
 
     override fun getLeftExpression(): ArtifactElement? {
         return when {

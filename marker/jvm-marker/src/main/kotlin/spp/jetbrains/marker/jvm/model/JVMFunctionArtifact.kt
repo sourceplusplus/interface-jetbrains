@@ -19,7 +19,7 @@ package spp.jetbrains.marker.jvm.model
 import com.intellij.psi.PsiNameIdentifierOwner
 import spp.jetbrains.artifact.model.FunctionArtifact
 
-class JVMFunctionArtifact(private val psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement) {
+class JVMFunctionArtifact(override val psiElement: PsiNameIdentifierOwner) : FunctionArtifact(psiElement) {
 
     override fun clone(): JVMFunctionArtifact {
         return JVMFunctionArtifact(psiElement)

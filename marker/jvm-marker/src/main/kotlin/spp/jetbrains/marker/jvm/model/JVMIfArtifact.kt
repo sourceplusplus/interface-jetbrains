@@ -23,7 +23,7 @@ import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.artifact.service.toArtifact
 
-class JVMIfArtifact(private val psiElement: PsiElement) : IfArtifact(psiElement) {
+class JVMIfArtifact(psiElement: PsiElement) : IfArtifact(psiElement) {
 
     override val condition: ArtifactElement?
         get() {

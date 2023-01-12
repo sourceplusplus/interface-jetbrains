@@ -21,7 +21,7 @@ import spp.jetbrains.artifact.model.ArtifactBinaryExpression
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.service.ArtifactModelService
 
-class PythonBinaryExpression(private val psiElement: PyBinaryExpression) : ArtifactBinaryExpression(psiElement) {
+class PythonBinaryExpression(override val psiElement: PyBinaryExpression) : ArtifactBinaryExpression(psiElement) {
 
     override fun getLeftExpression(): ArtifactElement? {
         return psiElement.leftExpression?.let { ArtifactModelService.toArtifact(it) }

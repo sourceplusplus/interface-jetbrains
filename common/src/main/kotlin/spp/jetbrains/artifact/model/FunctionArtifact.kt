@@ -20,7 +20,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 
 abstract class FunctionArtifact(
-    private val psiElement: PsiNameIdentifierOwner
+    override val psiElement: PsiNameIdentifierOwner
 ) : ArtifactElement(psiElement), PsiNameIdentifierOwner {
 
     override fun getName(): String? = psiElement.name

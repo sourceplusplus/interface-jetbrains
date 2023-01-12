@@ -21,7 +21,7 @@ import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.artifact.service.toArtifact
 
-class JavascriptIfArtifact(private val psiElement: JSIfStatement) : IfArtifact(psiElement) {
+class JavascriptIfArtifact(override val psiElement: JSIfStatement) : IfArtifact(psiElement) {
 
     override val condition: ArtifactElement?
         get() = psiElement.condition?.toArtifact()

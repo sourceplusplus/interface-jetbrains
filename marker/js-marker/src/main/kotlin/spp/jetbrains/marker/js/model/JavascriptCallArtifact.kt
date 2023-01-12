@@ -23,7 +23,7 @@ import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.service.toArtifact
 
-class JavascriptCallArtifact(private val psiElement: JSCallExpression) : CallArtifact(psiElement) {
+class JavascriptCallArtifact(override val psiElement: JSCallExpression) : CallArtifact(psiElement) {
 
     override fun resolveFunction(): FunctionArtifact? {
         return (psiElement.methodExpression as? PsiReference)?.resolve()?.toArtifact() as? FunctionArtifact

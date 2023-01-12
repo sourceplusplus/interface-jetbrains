@@ -19,7 +19,7 @@ package spp.jetbrains.marker.js.model
 import com.intellij.psi.PsiElement
 import spp.jetbrains.artifact.model.BlockArtifact
 
-class JavascriptBlockArtifact(private val psiElement: PsiElement) : BlockArtifact(psiElement) {
+class JavascriptBlockArtifact(psiElement: PsiElement) : BlockArtifact(psiElement) {
 
     override fun clone(): JavascriptBlockArtifact {
         return JavascriptBlockArtifact(psiElement)

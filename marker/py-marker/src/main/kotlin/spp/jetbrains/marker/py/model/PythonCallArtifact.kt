@@ -23,7 +23,7 @@ import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.service.toArtifact
 
-class PythonCallArtifact(private val psiElement: PyCallExpression) : CallArtifact(psiElement) {
+class PythonCallArtifact(override val psiElement: PyCallExpression) : CallArtifact(psiElement) {
 
     override fun resolveFunction(): FunctionArtifact? {
         return (psiElement.callee as? PyReferenceExpression)?.reference?.resolve().toArtifact() as? FunctionArtifact

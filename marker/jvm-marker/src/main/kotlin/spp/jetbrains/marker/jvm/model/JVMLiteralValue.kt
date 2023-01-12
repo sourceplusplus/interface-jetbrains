@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.psi.stubs.elements.KtConstantExpressionElementType.C
 import spp.jetbrains.artifact.model.ArtifactLiteralValue
 import spp.jetbrains.artifact.service.isKotlin
 
-class JVMLiteralValue(private val psiElement: PsiElement) : ArtifactLiteralValue(psiElement) {
+class JVMLiteralValue(psiElement: PsiElement) : ArtifactLiteralValue(psiElement) {
 
     override val value: Any?
         get() {
