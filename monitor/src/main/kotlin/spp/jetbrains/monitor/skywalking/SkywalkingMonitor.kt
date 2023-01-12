@@ -134,7 +134,6 @@ class SkywalkingMonitor(
             val timezone = Integer.parseInt(response.data!!.result!!.timezone) / 100
             val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
-            vertx.deployVerticle(GeneralBridge(skywalkingClient)).await()
             vertx.deployVerticle(ServiceBridge(project, skywalkingClient, currentService)).await()
             vertx.deployVerticle(ServiceInstanceBridge(skywalkingClient)).await()
             vertx.deployVerticle(EndpointBridge(project, skywalkingClient)).await()

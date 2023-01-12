@@ -24,7 +24,6 @@ import com.intellij.openapi.diagnostic.logger
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
-import monitor.skywalking.protocol.general.GetVersionQuery
 import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
@@ -86,25 +85,6 @@ class SkywalkingClient(
 
     init {
         registerCodecs(vertx)
-    }
-
-    suspend fun getVersion(): String? {
-        metricRegistry.timer("getVersion").time().use {
-            if (log.isTraceEnabled) {
-                log.trace("Get version request")
-            }
-
-            val response = apolloClient.query(
-                GetVersionQuery()
-            ).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Get version response: ${response.data!!.result}")
-                return response.data!!.result
-            }
-        }
     }
 
     suspend fun getTimeInfo(): GetTimeInfoQuery.Data {
