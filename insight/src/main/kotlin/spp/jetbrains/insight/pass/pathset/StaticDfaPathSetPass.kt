@@ -48,7 +48,8 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
         val flow = DataFlowIRProvider.forElement(
             (pathSet.first().rootArtifact as FunctionArtifact).bodyBlock!!.psiElement,
             factory
-        )!!
+        ) ?: return pathSet
+
         val listener = ConstantConditionDfaListener()
         val interpreter = StandardDataFlowInterpreter(flow, listener)
         val states = listOf(DfaMemoryStateImpl(factory))
