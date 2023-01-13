@@ -30,6 +30,7 @@ import spp.jetbrains.insight.pass.path.PruneArtifactsPass
 import spp.jetbrains.insight.pass.path.RecursivePathPass
 import spp.jetbrains.insight.pass.pathset.SavePsiPathSetPass
 import spp.jetbrains.insight.pass.pathset.SimplifyPathSetPass
+import spp.jetbrains.insight.pass.pathset.StaticDfaPathSetPass
 
 /**
  * Used to process passes over [ProceduralPath] sets, [ProceduralPath]s, and [ArtifactElement]s.
@@ -50,6 +51,7 @@ class InsightPassProvider {
             RecursivePathPass(),
 
             //path set passes
+            StaticDfaPathSetPass(),
             SimplifyPathSetPass(),
             SavePsiPathSetPass()
         )
