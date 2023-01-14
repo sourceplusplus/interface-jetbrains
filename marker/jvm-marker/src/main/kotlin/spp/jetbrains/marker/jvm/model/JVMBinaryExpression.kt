@@ -26,6 +26,14 @@ import spp.jetbrains.artifact.service.toArtifact
 
 class JVMBinaryExpression(psiElement: PsiElement) : ArtifactBinaryExpression(psiElement) {
 
+    override fun getOperator(): String {
+        return when {
+            psiElement is PsiBinaryExpression -> psiElement.operationSign.text
+            psiElement.isKotlin() && psiElement is KtBinaryExpression -> psiElement.operationReference.text
+            else -> throw IllegalArgumentException("Unsupported binary expression type: ${psiElement.javaClass}")
+        }
+    }
+
     override fun getLeftExpression(): ArtifactElement? {
         return when {
             psiElement is PsiBinaryExpression -> psiElement.lOperand.toArtifact()

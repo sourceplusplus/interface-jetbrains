@@ -20,6 +20,7 @@ import com.intellij.psi.PsiElement
 
 abstract class ArtifactBinaryExpression(psiElement: PsiElement) : ArtifactElement(psiElement) {
 
+    abstract fun getOperator(): String
     abstract fun getLeftExpression(): ArtifactElement?
     abstract fun getRightExpression(): ArtifactElement?
 }

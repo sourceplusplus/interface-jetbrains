@@ -23,6 +23,10 @@ import spp.jetbrains.artifact.service.ArtifactModelService
 
 class JavascriptBinaryExpression(override val psiElement: JSBinaryExpression) : ArtifactBinaryExpression(psiElement) {
 
+    override fun getOperator(): String {
+        return psiElement.operationNode?.text ?: ""
+    }
+
     override fun getLeftExpression(): ArtifactElement? {
         return psiElement.lOperand?.let { ArtifactModelService.toArtifact(it) }
     }
