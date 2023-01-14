@@ -65,9 +65,11 @@ class PathProbabilityPass : ProceduralPathPass {
     }
 
     private fun calculateProbability(element: ArtifactElement, baseProbability: Double, condition: Boolean): Double {
-        var selfProbability = 1.0
+        var selfProbability = Double.NaN
         if (element.getUserData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey()) != null) {
             selfProbability = element.getUserData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey())!!.value
+        } else if (element.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY) != null) {
+            selfProbability = element.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)!!.value
         }
 
         //see if probability can be determined statically
@@ -76,6 +78,10 @@ class PathProbabilityPass : ProceduralPathPass {
             if (!staticProbability.isNaN()) {
                 selfProbability = staticProbability
             }
+        }
+
+        if (selfProbability.isNaN()) {
+            return baseProbability
         }
 
         //flip self probability if condition is false

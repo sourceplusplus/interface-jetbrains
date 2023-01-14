@@ -23,6 +23,7 @@ import spp.jetbrains.insight.pass.ProceduralPathPass
 import spp.jetbrains.insight.pass.ProceduralPathSetPass
 import spp.jetbrains.insight.pass.artifact.CallDurationPass
 import spp.jetbrains.insight.pass.artifact.LoadPsiPass
+import spp.jetbrains.insight.pass.artifact.RandomConditionalPass
 import spp.jetbrains.insight.pass.artifact.ThreadSleepPass
 import spp.jetbrains.insight.pass.path.PathDurationPass
 import spp.jetbrains.insight.pass.path.PathProbabilityPass
@@ -41,6 +42,7 @@ class InsightPassProvider {
         val ALL_PASSES = listOf(
             //artifact passes
             LoadPsiPass(),
+            RandomConditionalPass(),
             CallDurationPass(),
             ThreadSleepPass(),
 
