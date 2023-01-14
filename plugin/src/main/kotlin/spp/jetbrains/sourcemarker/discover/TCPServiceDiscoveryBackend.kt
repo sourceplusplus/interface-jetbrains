@@ -95,88 +95,96 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         certificatePins.addAll(pluginConfig.certificatePins)
 
         vertx.safeLaunch {
-            try {
-                client = if (certificatePins.isNotEmpty()) {
-                    val options = NetClientOptions()
-                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
-                        .setSsl(pluginConfig.isSsl())
-                        .setTrustOptions(
-                            TrustOptions.wrap(
-                                JavaPinning.trustManagerForPins(
-                                    certificatePins.map { Pin.fromString("CERTSHA256:$it") }
-                                )
+            setupServiceClient(certificatePins, serviceHost, config)
+        }
+    }
+
+    private suspend fun setupServiceClient(certificatePins: List<String>, serviceHost: String, config: JsonObject) {
+        try {
+            client = if (certificatePins.isNotEmpty()) {
+                val options = NetClientOptions()
+                    .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                    .setSsl(pluginConfig.isSsl())
+                    .setTrustOptions(
+                        TrustOptions.wrap(
+                            JavaPinning.trustManagerForPins(
+                                certificatePins.map { Pin.fromString("CERTSHA256:$it") }
                             )
                         )
-                    vertx.createNetClient(options)
-                } else {
-                    val options = NetClientOptions()
-                        .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
-                        .setSsl(pluginConfig.isSsl())
-                        .apply {
-                            if (!pluginConfig.verifyHost) {
-                                isTrustAll = true
-                            }
+                    )
+                vertx.createNetClient(options)
+            } else {
+                val options = NetClientOptions()
+                    .setReconnectAttempts(Int.MAX_VALUE).setReconnectInterval(5000)
+                    .setSsl(pluginConfig.isSsl())
+                    .apply {
+                        if (!pluginConfig.verifyHost) {
+                            isTrustAll = true
                         }
-                    vertx.createNetClient(options)
-                }
-                socket = client.connect(pluginConfig.getServicePortNormalized(), serviceHost).await()
-            } catch (ex: Exception) {
-                log.warn("Failed to connect to service discovery server", ex)
-                setupPromise.fail(ex)
-                return@safeLaunch
-            }
-            socket!!.handler(FrameParser(TCPServiceFrameParser(vertx, socket!!)))
-            socket!!.exceptionHandler {
-                log.warn("Service discovery socket exception", it)
-                val project = ProjectManager.getInstance().openProjects.find {
-                    it.locationHash == config.getString("project_location_hash")
-                }
-                if (project != null) {
-                    SourceStatusService.getInstance(project).update(ConnectionError, it.message)
-                } else {
-                    log.warn("Unable to find project. Failed to report status update")
-                }
-            }
-            socket!!.closeHandler {
-                log.warn("Service discovery socket closed")
-                val project = ProjectManager.getInstance().openProjects.find {
-                    it.locationHash == config.getString("project_location_hash")
-                }
-                if (project != null) {
-                    SourceStatusService.getInstance(project).update(ConnectionError, "Service discovery socket closed")
-                } else {
-                    log.warn("Unable to find project. Failed to report status update")
-                }
-            }
-
-            vertx.executeBlocking<Any> {
-                setupHandler(vertx, "get-records")
-                setupHandler(vertx, LIVE_MANAGEMENT)
-                setupHandler(vertx, LIVE_INSTRUMENT)
-                setupHandler(vertx, LIVE_VIEW)
-
-                //setup connection
-                val replyAddress = UUID.randomUUID().toString()
-                val pc = InstanceConnection(UUID.randomUUID().toString(), System.currentTimeMillis())
-                val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer(replyAddress)
-
-                val promise = Promise.promise<Void>()
-                consumer.handler {
-                    //todo: handle false
-                    if (it.body() == true) {
-                        promise.complete()
-                        consumer.unregister()
-                        setupPromise.complete()
                     }
-                }
-                val headers = JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } }
-                FrameHelper.sendFrame(
-                    BridgeEventType.SEND.name.lowercase(),
-                    PlatformAddress.MARKER_CONNECTED,
-                    replyAddress, headers, true, JsonObject.mapFrom(pc), socket!!
-                )
+                vertx.createNetClient(options)
+            }
+            socket = client.connect(pluginConfig.getServicePortNormalized(), serviceHost).await()
+        } catch (ex: Exception) {
+            log.warn("Failed to connect to service discovery server", ex)
+            setupPromise.fail(ex)
+            return
+        }
+        socket!!.handler(FrameParser(TCPServiceFrameParser(vertx, socket!!)))
+        socket!!.exceptionHandler {
+            log.warn("Service discovery socket exception", it)
+            val project = ProjectManager.getInstance().openProjects.find {
+                it.locationHash == config.getString("project_location_hash")
+            }
+            if (project != null) {
+                SourceStatusService.getInstance(project).update(ConnectionError, it.message)
+            } else {
+                log.warn("Unable to find project. Failed to report status update")
             }
         }
+        socket!!.closeHandler {
+            log.warn("Service discovery socket closed")
+            val project = ProjectManager.getInstance().openProjects.find {
+                it.locationHash == config.getString("project_location_hash")
+            }
+            if (project != null) {
+                SourceStatusService.getInstance(project).update(ConnectionError, "Service discovery socket closed")
+            } else {
+                log.warn("Unable to find project. Failed to report status update")
+            }
+        }
+
+        vertx.executeBlocking<Unit> {
+            it.complete(connectServices())
+        }
+    }
+
+    private fun connectServices() {
+        setupHandler(vertx, "get-records")
+        setupHandler(vertx, LIVE_MANAGEMENT)
+        setupHandler(vertx, LIVE_INSTRUMENT)
+        setupHandler(vertx, LIVE_VIEW)
+
+        //setup connection
+        val replyAddress = UUID.randomUUID().toString()
+        val pc = InstanceConnection(UUID.randomUUID().toString(), System.currentTimeMillis())
+        val consumer: MessageConsumer<Boolean> = vertx.eventBus().localConsumer(replyAddress)
+
+        val promise = Promise.promise<Void>()
+        consumer.handler {
+            //todo: handle false
+            if (it.body() == true) {
+                promise.complete()
+                consumer.unregister()
+                setupPromise.complete()
+            }
+        }
+        val headers = JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } }
+        FrameHelper.sendFrame(
+            BridgeEventType.SEND.name.lowercase(),
+            PlatformAddress.MARKER_CONNECTED,
+            replyAddress, headers, true, JsonObject.mapFrom(pc), socket!!
+        )
     }
 
     private fun setupHandler(vertx: Vertx, address: String) {
