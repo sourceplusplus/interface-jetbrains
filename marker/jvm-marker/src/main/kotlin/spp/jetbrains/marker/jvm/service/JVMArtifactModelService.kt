@@ -56,6 +56,14 @@ class JVMArtifactModelService : IArtifactModelService {
             is KtNamedFunction -> JVMFunctionArtifact(element)
             is KtCallExpression -> JVMCallArtifact(element)
             is KtBlockExpression -> JVMBlockArtifact(element)
+            is KtDotQualifiedExpression -> {
+                if (element.selectorExpression is KtCallExpression) {
+                    JVMCallArtifact(element)
+                } else {
+                    null
+                }
+            }
+
             else -> null
         }
     }

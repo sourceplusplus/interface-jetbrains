@@ -20,6 +20,7 @@ import com.intellij.psi.PsiCall
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.nj2k.postProcessing.resolve
 import org.jetbrains.kotlin.psi.KtCallExpression
+import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
@@ -36,7 +37,7 @@ class JVMCallArtifact(psiElement: PsiElement) : CallArtifact(psiElement) {
                     ?.toArtifact() as? FunctionArtifact
             }
 
-            else -> TODO()
+            else -> null
         }
     }
 
@@ -44,7 +45,17 @@ class JVMCallArtifact(psiElement: PsiElement) : CallArtifact(psiElement) {
         return when (psiElement) {
             is PsiCall -> psiElement.argumentList?.expressions?.mapNotNull { it.toArtifact() } ?: emptyList()
             is KtCallExpression -> psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
-            else -> TODO()
+            is KtDotQualifiedExpression -> {
+                if (psiElement.selectorExpression is KtCallExpression) {
+                    (psiElement.selectorExpression as KtCallExpression).valueArguments.map {
+                        it.getArgumentExpression()?.toArtifact()!!
+                    }
+                } else {
+                    emptyList()
+                }
+            }
+
+            else -> emptyList()
         }
     }
 
