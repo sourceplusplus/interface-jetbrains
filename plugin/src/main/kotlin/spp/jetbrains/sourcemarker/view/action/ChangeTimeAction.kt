@@ -42,21 +42,12 @@ class ChangeTimeAction(private val viewManager: LiveViewChartManager) : AnAction
     override fun actionPerformed(e: AnActionEvent) {
         JBPopupFactory.getInstance().createListPopup(
             object : ListPopupStep<String> {
-
                 override fun getTitle(): String? = null
                 override fun canceled() = Unit
                 override fun isMnemonicsNavigationEnabled(): Boolean = false
-
-                override fun getMnemonicNavigationFilter(): MnemonicNavigationFilter<String>? {
-                    TODO("Not yet implemented")
-                }
-
+                override fun getMnemonicNavigationFilter(): MnemonicNavigationFilter<String>? = null
                 override fun isSpeedSearchEnabled(): Boolean = false
-
-                override fun getSpeedSearchFilter(): SpeedSearchFilter<String>? {
-                    TODO("Not yet implemented")
-                }
-
+                override fun getSpeedSearchFilter(): SpeedSearchFilter<String>? = null
                 override fun isAutoSelectionEnabled(): Boolean = false
                 override fun getFinalRunnable(): Runnable? = null
 

@@ -39,21 +39,12 @@ class ChangeChartAction : AnAction(PluginIcons.chartMixed) {
     override fun actionPerformed(e: AnActionEvent) {
         JBPopupFactory.getInstance().createListPopup(
             object : ListPopupStep<String> {
-
                 override fun getTitle(): String? = null
                 override fun canceled() = Unit
                 override fun isMnemonicsNavigationEnabled(): Boolean = false
-
-                override fun getMnemonicNavigationFilter(): MnemonicNavigationFilter<String>? {
-                    TODO("Not yet implemented")
-                }
-
+                override fun getMnemonicNavigationFilter(): MnemonicNavigationFilter<String>? = null
                 override fun isSpeedSearchEnabled(): Boolean = false
-
-                override fun getSpeedSearchFilter(): SpeedSearchFilter<String>? {
-                    TODO("Not yet implemented")
-                }
-
+                override fun getSpeedSearchFilter(): SpeedSearchFilter<String>? = null
                 override fun isAutoSelectionEnabled(): Boolean = false
                 override fun getFinalRunnable(): Runnable? = null
 
@@ -78,10 +69,7 @@ class ChangeChartAction : AnAction(PluginIcons.chartMixed) {
 
                 override fun isSelectable(value: String?): Boolean = true
                 override fun hasSubstep(selectedValue: String?): Boolean = false
-
-                override fun onChosen(selectedValue: String?, finalChoice: Boolean): PopupStep<*>? {
-                    return null
-                }
+                override fun onChosen(selectedValue: String?, finalChoice: Boolean): PopupStep<*>? = null
             }
         ).showUnderneathOf(e.inputEvent.component)
     }
