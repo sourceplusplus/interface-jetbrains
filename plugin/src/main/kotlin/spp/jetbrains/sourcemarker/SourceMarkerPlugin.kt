@@ -451,7 +451,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             val req = try {
                 vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
-                        .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
                         .setSsl(config.isSsl())
                         .setHost(config.serviceHostNormalized)
                         .setPort(config.getServicePortNormalized())
@@ -460,7 +459,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             } catch (ignore: ConnectException) {
                 vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
-                        .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
                         .setSsl(config.isSsl())
                         .setHost(config.serviceHostNormalized)
                         .setPort(config.isSsl().let { if (it) 443 else 80 }) //try default HTTP ports
