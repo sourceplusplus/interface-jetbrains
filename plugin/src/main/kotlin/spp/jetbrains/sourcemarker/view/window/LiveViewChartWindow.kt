@@ -144,15 +144,10 @@ class LiveViewChartWindow(
     }
 
     fun setHistoricalMinutes(historicalMinutes: Int) {
-        step = if (historicalMinutes >= 720) {
-            MetricStep.HOUR
-        } else {
-            MetricStep.MINUTE
-        }
-
+        step = if (historicalMinutes >= 720) MetricStep.HOUR else MetricStep.MINUTE
         reservoirSize = historicalMinutes
         histogram = Histogram(SlidingWindowReservoir(histogramSize))
-        (chart.datasets[0].data as MutableList<Coordinates<Long, Double>>).clear()
+        //chart.clear() //todo: possible memory leak
         xStepSize = step.milliseconds * reservoirSize
 
         getHistoricalData()
