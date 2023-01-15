@@ -237,9 +237,13 @@ class LiveViewChartWindow(
             ?: Instant.from(step.bucketFormatter.parse(rawMetrics.getLong("timeBucket").toString())).toEpochMilli()
         val newCoordinates = Coordinates.of(timeBucket, metricValue / metricType.unitConversion)
         val chartData = chart.datasets[0].data as MutableList<Coordinates<Long, Double>>
-        val existingCoordinatesIndex = chartData.indexOfFirst { it.x == timeBucket }
+        val existingCoordinatesIndex = chartData.indexOfFirst { it.x >= timeBucket }
         if (existingCoordinatesIndex != -1) {
-            chartData[existingCoordinatesIndex] = newCoordinates
+            if (chartData[existingCoordinatesIndex].x == timeBucket) {
+                chartData[existingCoordinatesIndex] = newCoordinates
+            } else {
+                chartData.add(existingCoordinatesIndex, newCoordinates)
+            }
         } else {
             chartData.add(newCoordinates)
         }
