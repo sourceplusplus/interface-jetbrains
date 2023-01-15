@@ -23,6 +23,7 @@ import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.guide.ExpressionGuideMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
@@ -152,6 +153,24 @@ class PythonArtifactCreationService : IArtifactCreationService {
             inlayMark
         } else {
             inlayMark
+        }
+    }
+
+    override fun createExpressionGuideMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean
+    ): ExpressionGuideMark {
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber)!!
+        val guideMark = fileMarker.createExpressionSourceMark(
+            element,
+            SourceMark.Type.GUIDE
+        ) as ExpressionGuideMark
+        return if (autoApply) {
+            guideMark.apply(true)
+            guideMark
+        } else {
+            guideMark
         }
     }
 

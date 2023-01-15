@@ -34,6 +34,7 @@ import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
+import spp.jetbrains.marker.source.mark.guide.ExpressionGuideMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.marker.source.mark.gutter.MethodGutterMark
@@ -167,6 +168,15 @@ class JVMArtifactCreationService : IArtifactCreationService {
     ): ExpressionInlayMark {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiElement
         return createExpressionSourceMark(fileMarker, element, SourceMark.Type.INLAY, autoApply) as ExpressionInlayMark
+    }
+
+    override fun createExpressionGuideMark(
+        fileMarker: SourceFileMarker,
+        lineNumber: Int,
+        autoApply: Boolean
+    ): ExpressionGuideMark {
+        val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiElement
+        return createExpressionSourceMark(fileMarker, element, SourceMark.Type.GUIDE, autoApply) as ExpressionGuideMark
     }
 
     private fun getOrCreateExpressionInlayMark(
