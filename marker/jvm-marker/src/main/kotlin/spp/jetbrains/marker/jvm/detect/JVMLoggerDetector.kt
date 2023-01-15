@@ -33,6 +33,7 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.path.GrMethodCallExpression
 import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
@@ -112,8 +113,8 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
                     loggerStatements.add(detectedLogger)
 
                     //create expression guide mark for the log statement
-                    val guideMark = fileMarker.createExpressionSourceMark(
-                        element, SourceMark.Type.GUIDE
+                    val guideMark = ArtifactCreationService.createExpressionGuideMark(
+                        fileMarker, detectedLogger.lineLocation
                     )
                     if (!fileMarker.containsSourceMark(guideMark)) {
                         guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
@@ -190,8 +191,8 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
                     loggerStatements.add(detectedLogger)
 
                     //create expression guide mark for the log statement
-                    val guideMark = fileMarker.createExpressionSourceMark(
-                        element, SourceMark.Type.GUIDE
+                    val guideMark = ArtifactCreationService.createExpressionGuideMark(
+                        fileMarker, detectedLogger.lineLocation
                     )
                     if (!fileMarker.containsSourceMark(guideMark)) {
                         guideMark.putUserData(DETECTED_LOGGER, detectedLogger)
