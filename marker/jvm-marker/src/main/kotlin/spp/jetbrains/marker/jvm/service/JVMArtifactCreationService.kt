@@ -32,6 +32,7 @@ import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
 import spp.jetbrains.marker.service.define.IArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.api.ExpressionSourceMark
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.gutter.ExpressionGutterMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
@@ -166,10 +167,10 @@ class JVMArtifactCreationService : IArtifactCreationService {
     ): ExpressionInlayMark {
         val element = SourceMarkerUtils.getElementAtLine(fileMarker.psiFile, lineNumber) as PsiElement
         return if (element is PsiStatement) {
-            createExpressionInlayMark(fileMarker, element, autoApply)
+            createExpressionSourceMark(fileMarker, element, SourceMark.Type.INLAY, autoApply)
         } else {
-            createExpressionInlayMark(fileMarker, element, autoApply)
-        }
+            createExpressionSourceMark(fileMarker, element, SourceMark.Type.INLAY, autoApply)
+        } as ExpressionInlayMark
     }
 
     private fun getOrCreateExpressionInlayMark(
@@ -276,16 +277,14 @@ class JVMArtifactCreationService : IArtifactCreationService {
         }
     }
 
-    private fun createExpressionInlayMark(
+    private fun createExpressionSourceMark(
         fileMarker: SourceFileMarker,
         element: PsiStatement,
+        type: SourceMark.Type,
         autoApply: Boolean = false
-    ): ExpressionInlayMark {
-        log.trace("createExpressionInlayMark: $element")
-        val inlayMark = fileMarker.createExpressionSourceMark(
-            element,
-            SourceMark.Type.INLAY
-        ) as ExpressionInlayMark
+    ): ExpressionSourceMark {
+        log.trace("createExpressionSourceMark: $element")
+        val inlayMark = fileMarker.createExpressionSourceMark(element, type)
         return if (autoApply) {
             inlayMark.apply(true)
             inlayMark
@@ -294,16 +293,14 @@ class JVMArtifactCreationService : IArtifactCreationService {
         }
     }
 
-    private fun createExpressionInlayMark(
+    private fun createExpressionSourceMark(
         fileMarker: SourceFileMarker,
         element: PsiElement,
+        type: SourceMark.Type,
         autoApply: Boolean = false
-    ): ExpressionInlayMark {
-        log.trace("createExpressionInlayMark: $element")
-        val inlayMark = fileMarker.createExpressionSourceMark(
-            element,
-            SourceMark.Type.INLAY
-        ) as ExpressionInlayMark
+    ): ExpressionSourceMark {
+        log.trace("createExpressionSourceMark: $element")
+        val inlayMark = fileMarker.createExpressionSourceMark(element, type)
         return if (autoApply) {
             inlayMark.apply(true)
             inlayMark
