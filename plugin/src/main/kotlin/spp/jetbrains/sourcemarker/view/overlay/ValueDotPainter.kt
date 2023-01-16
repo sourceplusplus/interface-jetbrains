@@ -20,6 +20,10 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.charts.*
 import spp.protocol.artifact.metrics.MetricType
 import java.awt.Graphics2D
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
@@ -34,8 +38,12 @@ class ValueDotPainter(
     private val metricType: MetricType,
 ) : Overlay<ChartWrapper>() {
 
+    private val shortFormatter = DateTimeFormatter.ofPattern("h:mm a")
+        .withZone(ZoneId.systemDefault())
+    private val fullFormatter = DateTimeFormatter.ofPattern("h:mm:ss.SSS a")
+        .withZone(ZoneId.systemDefault())
     private val postfix: String = if (metricType.requiresConversion) "%" else ""
-    private var paintTime = false
+    private var paintTime = true
 
     override fun paintComponent(g: Graphics2D) {
         val mouseLoc = findHoveredCoordinate()
@@ -69,14 +77,20 @@ class ValueDotPainter(
             g.drawString(valueLabel, xCord, var14.coerceAtLeast(var15))
 
             if (paintTime) {
+                g.font = g.font.deriveFont(g.font.size + 2f)
                 g.paint = (chart as LineChart<*, *, *>).gridLabelColor
-                val timeLabel = "%.1f$postfix"
-                val bounds2 = g.fontMetrics.getStringBounds(timeLabel, null)
                 xCord = dotPoint.x.roundToInt()
 
-                val idk = (chart as LineChart<*, *, *>).height -
-                        (chart as LineChart<*, *, *>).margins.bottom + bounds2.height.toInt()
-                g.drawString(timeLabel, xCord - bounds2.width.toInt() / 2, idk)
+                val time = Instant.ofEpochMilli(coords.x.toLong())
+                val timeLabel = if (time == time.truncatedTo(ChronoUnit.MINUTES)) {
+                    shortFormatter.format(time)
+                } else {
+                    fullFormatter.format(time)
+                }
+
+                val labelBounds = g.fontMetrics.getStringBounds(timeLabel, null)
+                val yCoord = chart.height - chart.margins.bottom + labelBounds.height.toInt()
+                g.drawString(timeLabel, xCord - labelBounds.width.toInt() / 2, yCoord)
             }
         }
     }

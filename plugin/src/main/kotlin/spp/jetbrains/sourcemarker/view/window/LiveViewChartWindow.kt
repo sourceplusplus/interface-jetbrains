@@ -40,6 +40,7 @@ import java.awt.Insets
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.swing.JComponent
 import javax.swing.SwingConstants
@@ -85,6 +86,7 @@ class LiveViewChartWindow(
         get() = chart.component
     override val refreshInterval: Int
         get() = liveView.viewConfig.refreshRateLimit
+    private lateinit var hoverOverlay: ValueDotPainter
 
     override fun resume() {
         if (isRunning) return
@@ -160,6 +162,8 @@ class LiveViewChartWindow(
             fillColor = chartColor.transparent(0.5)
             smooth = true
         }
+        hoverOverlay = ValueDotPainter(dataset, metricType)
+
         margins(marginInsets())
         ranges {
             yMin = 0.0
@@ -168,21 +172,85 @@ class LiveViewChartWindow(
         grid {
             xLines = generator(xStepSize.toLong())
             xPainter {
-                label = if (value - 200 == xOrigin) "" else dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                paintLine = if (value - 200 == xOrigin) {
+                    false
+                } else {
+                    val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
+                        .truncatedTo(ChronoUnit.MINUTES)
+                    val lineTime = Instant.ofEpochMilli(value).truncatedTo(ChronoUnit.MINUTES)
+                    val minutesBetween = ChronoUnit.MINUTES.between(latestTime, lineTime)
+
+                    if (latestTime == lineTime) {
+                        true
+                    } else if (reservoirSize == 30 || reservoirSize == 60) {
+                        (minutesBetween % 5).toInt() == 0
+                    } else if (reservoirSize == 120) {
+                        (minutesBetween % 10).toInt() == 0
+                    } else if (reservoirSize == 240) {
+                        (minutesBetween % 20).toInt() == 0
+                    } else if (reservoirSize == 480) {
+                        (minutesBetween % 40).toInt() == 0
+                    } else if (reservoirSize >= 720) {
+                        (minutesBetween % 60).toInt() == 0
+                    } else {
+                        true
+                    }
+                }
+                majorLine = false
+                label = if (hoverOverlay.mouseLocation != null) {
+                    ""
+                } else if (value - 200 == xOrigin) {
+                    ""
+                } else {
+                    val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
+                        .truncatedTo(ChronoUnit.MINUTES)
+                    val lineTime = Instant.ofEpochMilli(value).truncatedTo(ChronoUnit.MINUTES)
+                    val minutesBetween = ChronoUnit.MINUTES.between(latestTime, lineTime)
+
+                    if (latestTime == lineTime) {
+                        dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                    } else if (reservoirSize == 30 || reservoirSize == 60) {
+                        if ((minutesBetween % 5).toInt() == 0) {
+                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                        } else ""
+                    } else if (reservoirSize == 120) {
+                        if ((minutesBetween % 10).toInt() == 0) {
+                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                        } else ""
+                    } else if (reservoirSize == 240) {
+                        if ((minutesBetween % 20).toInt() == 0) {
+                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                        } else ""
+                    } else if (reservoirSize == 480) {
+                        if ((minutesBetween % 40).toInt() == 0) {
+                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                        } else ""
+                    } else if (reservoirSize >= 720) {
+                        if ((minutesBetween % 60).toInt() == 0) {
+                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                        } else ""
+                    } else {
+                        dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                    }
+                }
                 verticalAlignment = SwingConstants.BOTTOM
                 horizontalAlignment = SwingConstants.CENTER
             }
             yLines = generator(10.0)
             yPainter {
                 majorLine = value == 100.0
-                label = "${value.toInt()}" + if (metricType.requiresConversion) "%" else ""
+                label = if (metricType.requiresConversion) {
+                    "${value.toInt()}%"
+                } else {
+                    format(value)
+                }
                 verticalAlignment = SwingConstants.CENTER
                 horizontalAlignment = SwingConstants.RIGHT
             }
         }
         overlays = listOf(
             titleOverlay("${metricType.simpleName} (${metricType.unitType}) - $entityName"),
-            ValueDotPainter(dataset, metricType)
+            hoverOverlay
         )
         datasets = listOf(dataset)
     }
@@ -261,7 +329,7 @@ class LiveViewChartWindow(
         }
 
         private val suffix = arrayOf("", "k", "m", "b", "t")
-        private const val MAX_LENGTH = 3
+        private const val MAX_LENGTH = 4
 
         private fun format(number: Double): String {
             var r: String = DecimalFormat("##0E0").format(number)
