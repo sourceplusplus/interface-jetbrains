@@ -55,7 +55,7 @@ import javax.swing.SortOrder
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCollection() {
+class LiveEndpointsWindow(val project: Project, service: Service) : ResumableViewCollection() {
 
     private val model = ListTableModel<ServiceEndpointRow>(
         arrayOf(
@@ -114,7 +114,9 @@ class LiveEndpointsWindow(project: Project, service: Service) : ResumableViewCol
             LiveSourceLocation("", 0, service.id),
             LiveViewConfig("LiveEndpointsWindow", listenMetrics, refreshInterval)
         )
-        addView(EndpointRowView(viewService, liveView, endpoint, model) { consumerCreator(vertx, it, endpoint) })
+        addView(EndpointRowView(project, viewService, liveView, endpoint, model) {
+            consumerCreator(vertx, it, endpoint)
+        })
     }
 
     private fun consumerCreator(

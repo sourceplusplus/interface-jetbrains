@@ -18,6 +18,7 @@ package spp.jetbrains.sourcemarker.view.window.util
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import com.intellij.util.ui.ListTableModel
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
@@ -37,6 +38,7 @@ import java.time.temporal.ChronoUnit
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class EndpointRowView(
+    val project: Project,
     private val viewService: LiveViewService,
     var liveView: LiveView,
     private val endpoint: ServiceEndpointRow,
@@ -105,6 +107,9 @@ class EndpointRowView(
         consumer?.unregister()
         consumer = null
         liveView.subscriptionId?.let {
+            if (project.isDisposed) {
+                return //no need to remove view
+            }
             viewService.removeLiveView(it).onFailure {
                 log.error("Failed to pause live view", it)
             }
