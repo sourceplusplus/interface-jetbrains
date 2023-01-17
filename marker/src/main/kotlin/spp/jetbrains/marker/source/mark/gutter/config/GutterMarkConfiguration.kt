@@ -29,6 +29,7 @@ import javax.swing.Icon
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 data class GutterMarkConfiguration(
+    var preferShowOnAnnotations: Boolean = true,
     var tooltipText: (() -> String)? = null,
     var icon: Icon? = null,
     var activateOnMouseHover: Boolean = true,

@@ -20,7 +20,7 @@ import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
 import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment.CENTER
-import com.intellij.psi.PsiElement
+import com.intellij.psi.*
 import com.intellij.util.Function
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.service.ArtifactMarkService
@@ -35,7 +35,27 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
+        if (element is PsiAnnotation && element.owner is PsiModifierList) {
+            val owner = element.owner as PsiModifierList
+            if (owner.parent is PsiNameIdentifierOwner) {
+                val gutterMark = (owner.parent as PsiNameIdentifierOwner).nameIdentifier
+                    ?.getUserData(GutterMark.KEY)
+                if (gutterMark?.configuration?.preferShowOnAnnotations == true) {
+                    return getLineMarkerInfo(gutterMark, element)
+                }
+            }
+        }
+
         val gutterMark = element.getUserData(GutterMark.KEY) ?: return null
+        val hasAnnotations = (gutterMark.getPsiElement() as? PsiModifierListOwner)?.annotations?.isNotEmpty() == true
+        return if (hasAnnotations && gutterMark.configuration.preferShowOnAnnotations) {
+            null
+        } else {
+            getLineMarkerInfo(gutterMark, element)
+        }
+    }
+
+    private fun getLineMarkerInfo(gutterMark: GutterMark, element: PsiElement): LineMarkerInfo<PsiElement>? {
         if (!gutterMark.isVisible()) {
             return null
         }
@@ -77,5 +97,5 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         }
     }
 
-    override fun getName(): String = "Source++ line markers"
+    override fun getName(): String = "Line markers"
 }
