@@ -71,14 +71,6 @@ class LiveViewChartWindow(
     private val metricType = MetricType(liveView.viewConfig.viewMetrics.first())
     private var chartColor = defaultChartColor(metricType)
     private val timeFormat = SimpleDateFormat("h:mm a")
-    private val timeWithSecondsFormat = SimpleDateFormat("h:mm:ss a")
-    private val dateFormat: SimpleDateFormat
-        get() = if (metricType.isRealtime) {
-            timeWithSecondsFormat
-        } else {
-            timeFormat
-        }
-
     private var histogramSize = 1000 //todo: optimize
     override var isRunning: Boolean = false
     private var histogram = Histogram(SlidingWindowReservoir(histogramSize))
@@ -209,29 +201,29 @@ class LiveViewChartWindow(
                     val minutesBetween = ChronoUnit.MINUTES.between(latestTime, lineTime)
 
                     if (latestTime == lineTime) {
-                        dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
                     } else if (reservoirSize == 30 || reservoirSize == 60) {
                         if ((minutesBetween % 5).toInt() == 0) {
-                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
                         } else ""
                     } else if (reservoirSize == 120) {
                         if ((minutesBetween % 10).toInt() == 0) {
-                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
                         } else ""
                     } else if (reservoirSize == 240) {
                         if ((minutesBetween % 20).toInt() == 0) {
-                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
                         } else ""
                     } else if (reservoirSize == 480) {
                         if ((minutesBetween % 40).toInt() == 0) {
-                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
                         } else ""
                     } else if (reservoirSize >= 720) {
                         if ((minutesBetween % 60).toInt() == 0) {
-                            dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
                         } else ""
                     } else {
-                        dateFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
                     }
                 }
                 verticalAlignment = SwingConstants.BOTTOM
