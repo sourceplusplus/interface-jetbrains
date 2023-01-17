@@ -40,7 +40,7 @@ class ValueDotPainter(
 
     private val shortFormatter = DateTimeFormatter.ofPattern("h:mm a")
         .withZone(ZoneId.systemDefault())
-    private val fullFormatter = DateTimeFormatter.ofPattern("h:mm:ss.SSS a")
+    private val fullFormatter = DateTimeFormatter.ofPattern("h:mm:ss a")
         .withZone(ZoneId.systemDefault())
     private val postfix: String = if (metricType.requiresConversion) "%" else ""
     private var paintTime = true
