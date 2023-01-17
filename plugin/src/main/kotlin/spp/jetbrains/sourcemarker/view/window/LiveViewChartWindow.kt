@@ -104,7 +104,8 @@ class LiveViewChartWindow(
 
     private fun getHistoricalData() {
         val stop = Instant.now()
-        val start = stop.truncatedTo(ChronoUnit.SECONDS).minusSeconds((getHistoricalMinutes() * 60).toLong())
+        val start = stop.truncatedTo(ChronoUnit.SECONDS)
+            .minusSeconds(60 + (getHistoricalMinutes() * 60).toLong())
         viewService.getHistoricalMetrics(
             liveView.entityIds.toList(),
             liveView.viewConfig.viewMetrics,
@@ -266,9 +267,9 @@ class LiveViewChartWindow(
 
     private fun marginInsets(): Insets.() -> Unit {
         return {
-            top = 30
+            top = 40
             left = 40
-            bottom = 30
+            bottom = 25
             right = 40
         }
     }
