@@ -44,6 +44,7 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.swing.JComponent
 import javax.swing.SwingConstants
+import kotlin.math.ceil
 
 //todo: MergingUpdateQueue that handles all the view updates atomically
 /**
@@ -102,9 +103,8 @@ class LiveViewChartWindow(
     }
 
     private fun getHistoricalData() {
-        val reservoirSize = if (step == MetricStep.MINUTE) 60 else 24
         val stop = Instant.now()
-        val start = stop.minusSeconds((reservoirSize * step.seconds).toLong())
+        val start = stop.truncatedTo(ChronoUnit.SECONDS).minusSeconds((getHistoricalMinutes() * 60).toLong())
         viewService.getHistoricalMetrics(
             liveView.entityIds.toList(),
             liveView.viewConfig.viewMetrics,
@@ -172,7 +172,7 @@ class LiveViewChartWindow(
         grid {
             xLines = generator(xStepSize.toLong())
             xPainter {
-                paintLine = if (value - 200 == xOrigin) {
+                paintLine = if (value - (keepTimeSize / 25) == xOrigin) {
                     false
                 } else {
                     val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
@@ -199,7 +199,7 @@ class LiveViewChartWindow(
                 majorLine = false
                 label = if (hoverOverlay.mouseLocation != null) {
                     ""
-                } else if (value - 200 == xOrigin) {
+                } else if (value - (keepTimeSize / 25) == xOrigin) {
                     ""
                 } else {
                     val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
@@ -267,9 +267,9 @@ class LiveViewChartWindow(
     private fun marginInsets(): Insets.() -> Unit {
         return {
             top = 30
-            left = 55
+            left = 40
             bottom = 30
-            right = 50
+            right = 40
         }
     }
 
@@ -286,7 +286,7 @@ class LiveViewChartWindow(
             //only for SLA
             chart.ranges.yMax = (histogram.snapshot.max / metricType.unitConversion) * 1.01
         } else {
-            val step = histogram.snapshot.max / 10.0
+            val step = ceil((histogram.snapshot.max / 10.0) / 5.0) * 5
             if (step >= 1) {
                 chart.ranges.yMax = histogram.snapshot.max.toDouble() * 1.01
                 chart.grid.yLines = generator(step)
@@ -313,7 +313,7 @@ class LiveViewChartWindow(
 
         chart.ranges.xMax = timeBucket
         chart.ranges.xMin = timeBucket - keepTimeSize
-        chart.grid.xOrigin = chart.ranges.xMin - 200
+        chart.grid.xOrigin = chart.ranges.xMin - (keepTimeSize / 25)
         chart.update()
     }
 
