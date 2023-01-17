@@ -19,11 +19,12 @@ package spp.jetbrains.icons
 import com.intellij.openapi.util.IconLoader
 
 /**
- * Defines the various visual icons Source++ may display.
+ * Defines the various visual icons the plugin may display.
  *
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 object PluginIcons {
+
     object Nodes {
         @JvmField
         val variable = IconLoader.getIcon("/nodes/variable.png", PluginIcons::class.java)
@@ -35,43 +36,29 @@ object PluginIcons {
     }
 
     object Instrument {
-        @JvmField
         val save = IconLoader.getIcon("/icons/instrument/live-log/save.svg", PluginIcons::class.java)
-
-        @JvmField
         val saveHovered = IconLoader.getIcon("/icons/instrument/live-log/saveHovered.svg", PluginIcons::class.java)
-
-        @JvmField
         val savePressed = IconLoader.getIcon("/icons/instrument/live-log/savePressed.svg", PluginIcons::class.java)
     }
 
     object Breakpoint {
-        @JvmField
         val active = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-active.svg", PluginIcons::class.java)
-
-        @JvmField
         val complete = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-complete.svg", PluginIcons::class.java)
-
-        @JvmField
         val disabled = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-disabled.svg", PluginIcons::class.java)
-
-        @JvmField
         val error = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-error.svg", PluginIcons::class.java)
-
-        @JvmField
         val pending = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-pending.svg", PluginIcons::class.java)
     }
 
-    @JvmField
+    object ToolWindow {
+        val chartArea = IconLoader.getIcon("/icons/tool-window/chart-area.svg", PluginIcons::class.java)
+        val listTree = IconLoader.getIcon("/icons/tool-window/list-tree.svg", PluginIcons::class.java)
+        val memo = IconLoader.getIcon("/icons/tool-window/memo.svg", PluginIcons::class.java)
+        val satelliteDish = IconLoader.getIcon("/icons/tool-window/satellite-dish.svg", PluginIcons::class.java)
+    }
+
     val statusEnabled = IconLoader.getIcon("/icons/statusBar/status-enabled.svg", PluginIcons::class.java)
-
-    @JvmField
     val statusPending = IconLoader.getIcon("/icons/statusBar/status-pending.svg", PluginIcons::class.java)
-
-    @JvmField
     val statusDisabled = IconLoader.getIcon("/icons/statusBar/status-disabled.svg", PluginIcons::class.java)
-
-    @JvmField
     val statusFailed = IconLoader.getIcon("/icons/statusBar/status-failed.svg", PluginIcons::class.java)
 
     @JvmField
@@ -113,66 +100,25 @@ object PluginIcons {
     @JvmField
     val spanConfig = IconLoader.getIcon("/icons/span-config.svg", PluginIcons::class.java)
 
-    @JvmField
     val count = IconLoader.getIcon("/icons/count.svg", PluginIcons::class.java)
-
-    @JvmField
     val gauge = IconLoader.getIcon("/icons/gauge.svg", PluginIcons::class.java)
-
-    @JvmField
     val histogram = IconLoader.getIcon("/icons/histogram.svg", PluginIcons::class.java)
-
-    @JvmField
     val server = IconLoader.getIcon("/icons/server.svg", PluginIcons::class.java)
-
-    @JvmField
     val chartArea = IconLoader.getIcon("/icons/chart-area.svg", PluginIcons::class.java)
-
-    @JvmField
     val earthAmericas = IconLoader.getIcon("/icons/earth-americas.svg", PluginIcons::class.java)
-
-    @JvmField
     val diagramSubtask = IconLoader.getIcon("/icons/diagram-subtask.svg", PluginIcons::class.java)
-
-    @JvmField
     val squareCheck = IconLoader.getIcon("/icons/square-check.svg", PluginIcons::class.java)
-
-    @JvmField
     val squareDashed = IconLoader.getIcon("/icons/square-dashed.svg", PluginIcons::class.java)
-
-    @JvmField
     val chartMixed = IconLoader.getIcon("/icons/chart-mixed.svg", PluginIcons::class.java)
-
-    @JvmField
     val clockRotateLeft = IconLoader.getIcon("/icons/clock-rotate-left.svg", PluginIcons::class.java)
-
-    @JvmField
     val messageLines = IconLoader.getIcon("/icons/message-lines.svg", PluginIcons::class.java)
-
-    @JvmField
     val play = IconLoader.getIcon("/icons/play.svg", PluginIcons::class.java)
-
-    @JvmField
     val pause = IconLoader.getIcon("/icons/pause.svg", PluginIcons::class.java)
-
-    @JvmField
     val stop = IconLoader.getIcon("/icons/stop.svg", PluginIcons::class.java)
-
-    @JvmField
     val bolt = IconLoader.getIcon("/icons/bolt.svg", PluginIcons::class.java)
-
-    @JvmField
     val boltSlash = IconLoader.getIcon("/icons/bolt-slash.svg", PluginIcons::class.java)
-
-    @JvmField
     val errorBug = IconLoader.getIcon("/icons/error-bug.svg", PluginIcons::class.java)
-
-    @JvmField
     val check = IconLoader.getIcon("/icons/check.svg", PluginIcons::class.java)
-
-    @JvmField
     val rotate = IconLoader.getIcon("/icons/rotate.svg", PluginIcons::class.java)
-
-    @JvmField
     val triangleExclamation = IconLoader.getIcon("/icons/triangle-exclamation.svg", PluginIcons::class.java)
 }

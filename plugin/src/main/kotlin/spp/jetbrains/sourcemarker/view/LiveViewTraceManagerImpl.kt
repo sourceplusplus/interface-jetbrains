@@ -68,7 +68,7 @@ class LiveViewTraceManagerImpl(
 
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow: ToolWindow = ToolWindowManager.getInstance(project)
-        .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.diagramSubtask))
+        .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.ToolWindow.listTree))
     private var contentManager: ContentManager = toolWindow.contentManager
     override var currentView: ResumableView? = null
     override val refreshInterval: Int?

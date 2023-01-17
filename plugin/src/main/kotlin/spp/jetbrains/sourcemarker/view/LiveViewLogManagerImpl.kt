@@ -64,7 +64,7 @@ class LiveViewLogManagerImpl(
 
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow = ToolWindowManager.getInstance(project)
-        .registerToolWindow(RegisterToolWindowTask.closable("Live Logs", PluginIcons.messageLines))
+        .registerToolWindow(RegisterToolWindowTask.closable("Live Logs", PluginIcons.ToolWindow.memo))
     private var contentManager = toolWindow.contentManager
     override var currentView: ResumableView? = null
     override val refreshInterval: Int?

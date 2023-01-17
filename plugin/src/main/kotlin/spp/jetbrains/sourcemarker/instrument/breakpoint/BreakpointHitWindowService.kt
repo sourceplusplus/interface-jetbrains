@@ -59,7 +59,7 @@ class BreakpointHitWindowService(private val project: Project) : Disposable {
             _toolWindow = toolWindow
         } else {
             _toolWindow = toolWindowManager.registerToolWindow(
-                RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, PluginIcons.Breakpoint.disabled)
+                RegisterToolWindowTask.closable(LIVE_BREAKPOINT_NAME, PluginIcons.ToolWindow.satelliteDish)
             )
 
             _toolWindow!!.contentManager.addContentManagerListener(object : ContentManagerListener {
