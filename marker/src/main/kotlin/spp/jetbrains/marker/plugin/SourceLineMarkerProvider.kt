@@ -39,6 +39,7 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         if (!gutterMark.isVisible()) {
             return null
         }
+        val icon = gutterMark.configuration.icon ?: return null
 
         var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
         if (gutterMark.configuration.activateOnMouseClick) {
@@ -46,10 +47,11 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 element.getUserData(GutterMark.KEY)!!.displayPopup()
             }
         }
+
         return LineMarkerInfo(
             ArtifactMarkService.getFirstLeaf(element),
             element.textRange,
-            gutterMark.configuration.icon,
+            icon,
             gutterMark.configuration.tooltipText.let { tooltipText ->
                 if (tooltipText != null) {
                     Function { tooltipText.invoke() }
@@ -59,7 +61,7 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
             },
             navigationHandler,
             CENTER
-        )
+        ) { "spp.line-marker" }
     }
 
     override fun collectSlowLineMarkers(
