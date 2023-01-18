@@ -19,6 +19,7 @@ package spp.jetbrains.status
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.Pair
+import spp.protocol.platform.general.Service
 
 /**
  * Service for getting the current status of the Source++ plugin.
@@ -40,4 +41,7 @@ interface SourceStatusService {
 
     fun getCurrentStatus(): Pair<SourceStatus, String?>
     fun update(status: SourceStatus, message: String? = null)
+
+    fun setCurrentService(service: Service)
+    fun setActiveServices(services: List<Service>)
 }

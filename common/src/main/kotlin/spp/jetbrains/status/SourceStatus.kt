@@ -29,12 +29,13 @@ enum class SourceStatus {
     Enabled,
     Disabled,
     Pending,
-    ConnectionError;
+    ConnectionError,
+    ServiceChange;
 
     val icon: Icon
         get() {
             return when (this) {
-                Ready -> PluginIcons.statusEnabled
+                Ready, ServiceChange -> PluginIcons.statusEnabled
                 Enabled -> PluginIcons.statusPending
                 Disabled -> PluginIcons.statusDisabled
                 Pending -> PluginIcons.statusPending
@@ -44,7 +45,7 @@ enum class SourceStatus {
     val presentableText: String
         get() {
             return when (this) {
-                Ready -> "Click to disable Source++"
+                Ready, ServiceChange -> "Click to disable Source++"
                 Enabled -> "Click to disable Source++"
                 Disabled -> "Click to enable Source++"
                 Pending -> "Booting Source++"

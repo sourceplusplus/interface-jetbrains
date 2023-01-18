@@ -32,6 +32,7 @@ import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.status.SourceStatusService
+import spp.protocol.platform.general.Service
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
@@ -44,6 +45,8 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     private var message: String? = null
     private val reconnectionLock = Any()
     private var reconnectionJob: Job? = null
+    private var currentService: Service? = null
+    private var activeServices = mutableListOf<Service>()
 
     override fun isReady(): Boolean {
         return getCurrentStatus().first == Ready
@@ -72,10 +75,12 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
             }
 
             if (oldStatus != status) {
-                this.status = status
-                this.message = message
+                if (status != ServiceChange) {
+                    this.status = status
+                    this.message = message
+                    log.info("Status changed from $oldStatus to $status")
+                }
 
-                log.info("Status changed from $oldStatus to $status")
                 project.messageBus.syncPublisher(SourceStatusListener.TOPIC).onStatusChanged(status)
                 safeGlobalLaunch {
                     onStatusChanged(status)
@@ -84,6 +89,15 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
         }
 
         updateAllStatusBarIcons()
+    }
+
+    override fun setCurrentService(service: Service) {
+        currentService = service
+        update(ServiceChange)
+    }
+
+    override fun setActiveServices(services: List<Service>) {
+        activeServices = services.toMutableList()
     }
 
     private suspend fun onStatusChanged(status: SourceStatus) = when (status) {

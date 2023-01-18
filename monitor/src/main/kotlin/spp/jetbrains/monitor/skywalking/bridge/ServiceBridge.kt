@@ -27,8 +27,7 @@ import kotlinx.coroutines.launch
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.DurationStep
-import spp.jetbrains.status.SourceStatus.Pending
-import spp.jetbrains.status.SourceStatus.Ready
+import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.general.Service
 import java.time.ZonedDateTime
@@ -105,7 +104,12 @@ class ServiceBridge(
                     false
                 } else {
                     vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
-                    SourceStatusService.getInstance(project).update(Ready)
+                    SourceStatusService.getInstance(project).apply {
+                        setActiveServices(activeServices)
+                        setCurrentService(currentService!!)
+                        update(ServiceChange)
+                        update(Ready)
+                    }
                     true
                 }
             }
@@ -113,7 +117,12 @@ class ServiceBridge(
                 currentService = activeServices[0]
                 log.info("Current service set to: ${currentService!!.name}")
                 vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
-                SourceStatusService.getInstance(project).update(Ready)
+                SourceStatusService.getInstance(project).apply {
+                    setActiveServices(activeServices)
+                    setCurrentService(currentService!!)
+                    update(ServiceChange)
+                    update(Ready)
+                }
                 return true
             }
         } else {
