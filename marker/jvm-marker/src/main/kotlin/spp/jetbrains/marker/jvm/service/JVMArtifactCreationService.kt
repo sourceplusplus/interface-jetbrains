@@ -17,7 +17,6 @@
 package spp.jetbrains.marker.jvm.service
 
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.PsiStatement
@@ -185,27 +184,21 @@ class JVMArtifactCreationService : IArtifactCreationService {
         autoApply: Boolean = false
     ): ExpressionInlayMark? {
         log.trace("getOrCreateExpressionInlayMark: $element")
-        var lookupExpression: PsiElement = element
-        if (lookupExpression is PsiDeclarationStatement) {
-            //todo: support for multi-declaration statements
-            lookupExpression = lookupExpression.firstChild
-        }
-
-        var inlayMark = lookupExpression.getUserData(InlayMark.KEY)?.firstOrNull() as ExpressionInlayMark?
+        var inlayMark = element.getUserData(InlayMark.KEY)?.firstOrNull() as ExpressionInlayMark?
         if (inlayMark == null) {
             inlayMark = fileMarker.getExpressionSourceMark(
-                lookupExpression,
+                element,
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark?
             if (inlayMark != null) {
                 if (inlayMark.updatePsiExpression(
-                        lookupExpression,
-                        JVMMarkerUtils.getFullyQualifiedName(lookupExpression)
+                        element,
+                        JVMMarkerUtils.getFullyQualifiedName(element)
                     )
                 ) {
-                    lookupExpression.putUserData(
+                    element.putUserData(
                         InlayMark.KEY,
-                        lookupExpression.getUserData(InlayMark.KEY)?.plus(inlayMark) ?: setOf(inlayMark)
+                        element.getUserData(InlayMark.KEY)?.plus(inlayMark) ?: setOf(inlayMark)
                     )
                 } else {
                     inlayMark = null
@@ -215,7 +208,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
 
         return if (inlayMark == null) {
             inlayMark = fileMarker.createExpressionSourceMark(
-                lookupExpression,
+                element,
                 SourceMark.Type.INLAY
             ) as ExpressionInlayMark
             return if (autoApply) {
@@ -226,7 +219,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(inlayMark)) {
-                lookupExpression.putUserData(InlayMark.KEY, null)
+                element.putUserData(InlayMark.KEY, null)
                 null
             } else {
                 inlayMark
@@ -305,25 +298,19 @@ class JVMArtifactCreationService : IArtifactCreationService {
         autoApply: Boolean = false
     ): ExpressionGutterMark? {
         log.trace("getOrCreateExpressionGutterMark: $element")
-        var lookupExpression: PsiElement = element
-        if (lookupExpression is PsiDeclarationStatement) {
-            //todo: support for multi-declaration statements
-            lookupExpression = lookupExpression.firstChild
-        }
-
-        var gutterMark = lookupExpression.getUserData(GutterMark.KEY) as ExpressionGutterMark?
+        var gutterMark = element.getUserData(GutterMark.KEY) as ExpressionGutterMark?
         if (gutterMark == null) {
             gutterMark = fileMarker.getExpressionSourceMark(
-                lookupExpression,
+                element,
                 SourceMark.Type.GUTTER
             ) as ExpressionGutterMark?
             if (gutterMark != null) {
                 if (gutterMark.updatePsiExpression(
-                        lookupExpression,
-                        JVMMarkerUtils.getFullyQualifiedName(lookupExpression)
+                        element,
+                        JVMMarkerUtils.getFullyQualifiedName(element)
                     )
                 ) {
-                    lookupExpression.putUserData(GutterMark.KEY, gutterMark)
+                    element.putUserData(GutterMark.KEY, gutterMark)
                 } else {
                     gutterMark = null
                 }
@@ -332,7 +319,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
 
         return if (gutterMark == null) {
             gutterMark = fileMarker.createExpressionSourceMark(
-                lookupExpression,
+                element,
                 SourceMark.Type.GUTTER
             ) as ExpressionGutterMark
             return if (autoApply) {
@@ -343,7 +330,7 @@ class JVMArtifactCreationService : IArtifactCreationService {
             }
         } else {
             if (fileMarker.removeIfInvalid(gutterMark)) {
-                lookupExpression.putUserData(GutterMark.KEY, null)
+                element.putUserData(GutterMark.KEY, null)
                 null
             } else {
                 gutterMark
