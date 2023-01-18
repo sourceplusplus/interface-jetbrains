@@ -37,6 +37,7 @@ import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
+import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscription
 import spp.protocol.view.HistoricalView
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
@@ -123,7 +124,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                 eventData.toString()
             )
             vertx.eventBus().publish(toLiveViewSubscriberAddress(developerId), JsonObject.mapFrom(event))
-            vertx.eventBus().send(toLiveViewSubscriberAddress(subscription.subscriptionId!!), JsonObject.mapFrom(event))
+            vertx.eventBus().publish(toLiveViewSubscription(subscription.subscriptionId!!), JsonObject.mapFrom(event))
         }
     }
 
@@ -154,7 +155,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
                     )
                     vertx.eventBus().publish(toLiveViewSubscriberAddress(developerId), JsonObject.mapFrom(viewEvent))
                     vertx.eventBus()
-                        .send(toLiveViewSubscriberAddress(subscription.subscriptionId!!), JsonObject.mapFrom(viewEvent))
+                        .publish(toLiveViewSubscription(subscription.subscriptionId!!), JsonObject.mapFrom(viewEvent))
                 }
             }
         } else {
@@ -245,7 +246,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             value.toString()
         )
         vertx.eventBus().publish(toLiveViewSubscriberAddress(developerId), JsonObject.mapFrom(event))
-        vertx.eventBus().send(toLiveViewSubscriberAddress(subscription.subscriptionId!!), JsonObject.mapFrom(event))
+        vertx.eventBus().publish(toLiveViewSubscription(subscription.subscriptionId!!), JsonObject.mapFrom(event))
     }
 
     override fun saveRule(rule: LiveViewRule): Future<LiveViewRule> {

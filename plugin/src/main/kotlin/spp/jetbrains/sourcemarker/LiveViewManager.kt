@@ -28,6 +28,7 @@ import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
+import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscription
 import spp.protocol.view.LiveViewEvent
 
 class LiveViewManager(
@@ -53,7 +54,7 @@ class LiveViewManager(
             SourceMarkSearch.findBySubscriptionId(project, event.subscriptionId)
                 ?.getUserData(SourceMarkerKeys.VIEW_EVENT_LISTENERS)?.forEach { it.accept(event) }
 
-            vertx.eventBus().publish(toLiveViewSubscriberAddress(event.subscriptionId), it.body())
+            vertx.eventBus().publish(toLiveViewSubscription(event.subscriptionId), it.body())
         }
 
         FrameHelper.sendFrame(

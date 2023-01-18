@@ -42,7 +42,7 @@ import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 import spp.protocol.instrument.location.LiveSourceLocation
-import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
+import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscription
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewEvent
@@ -105,7 +105,7 @@ class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : So
             )
         ).onSuccess {
             val subscriptionId = it.subscriptionId!!
-            vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(subscriptionId)) {
+            vertx.eventBus().consumer<JsonObject>(toLiveViewSubscription(subscriptionId)) {
                 val viewEvent = LiveViewEvent(it.body())
                 val metricsData = JsonObject(viewEvent.metricsData)
                 val responseTime = metricsData.getLong("value")
