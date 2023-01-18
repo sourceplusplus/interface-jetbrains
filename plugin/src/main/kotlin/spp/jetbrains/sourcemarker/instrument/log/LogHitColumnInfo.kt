@@ -18,10 +18,10 @@ package spp.jetbrains.sourcemarker.instrument.log
 
 import com.intellij.util.ui.ColumnInfo
 import spp.jetbrains.PluginBundle.message
+import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
 import spp.protocol.instrument.event.LiveInstrumentRemoved
 import spp.protocol.instrument.event.LiveLogHit
-import spp.protocol.instrument.event.TrackedLiveEvent
 import spp.protocol.utils.toPrettyDuration
 import java.time.Instant
 
@@ -31,11 +31,11 @@ import java.time.Instant
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LogHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, String>(name) {
+class LogHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(name) {
 
-    override fun getComparator(): Comparator<TrackedLiveEvent>? {
+    override fun getComparator(): Comparator<LiveInstrumentEvent>? {
         return when (name) {
-            "Time" -> Comparator { t: TrackedLiveEvent, t2: TrackedLiveEvent ->
+            "Time" -> Comparator { t: LiveInstrumentEvent, t2: LiveInstrumentEvent ->
                 val obj1 = if (t.eventType == LiveInstrumentEventType.LOG_HIT) {
                     t as LiveLogHit
                 } else if (t.eventType == LiveInstrumentEventType.LOG_REMOVED) {
@@ -52,11 +52,12 @@ class LogHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, String>(name
                 }
                 obj1.occurredAt.compareTo(obj2.occurredAt)
             }
+
             else -> null
         }
     }
 
-    override fun valueOf(event: TrackedLiveEvent): String {
+    override fun valueOf(event: LiveInstrumentEvent): String {
         if (event.eventType == LiveInstrumentEventType.LOG_HIT) {
             val item = event as LiveLogHit
             return when (name) {
@@ -64,6 +65,7 @@ class LogHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, String>(name
                 "Time" ->
                     (Instant.now().toEpochMilli() - item.occurredAt.toEpochMilli())
                         .toPrettyDuration() + " " + message("ago")
+
                 else -> item.toString()
             }
         } else {
@@ -72,6 +74,7 @@ class LogHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, String>(name
                 "Message" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Instant.now().toEpochMilli() - item.occurredAt.toEpochMilli())
                     .toPrettyDuration() + " " + message("ago")
+
                 else -> item.toString()
             }
         }

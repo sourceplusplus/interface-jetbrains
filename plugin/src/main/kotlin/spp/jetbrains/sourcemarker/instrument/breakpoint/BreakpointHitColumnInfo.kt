@@ -20,9 +20,9 @@ import com.intellij.util.ui.ColumnInfo
 import io.vertx.core.json.Json
 import spp.jetbrains.PluginBundle.message
 import spp.protocol.instrument.event.LiveBreakpointHit
+import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
 import spp.protocol.instrument.event.LiveInstrumentRemoved
-import spp.protocol.instrument.event.TrackedLiveEvent
 import spp.protocol.utils.toPrettyDuration
 import java.time.Instant
 
@@ -32,11 +32,11 @@ import java.time.Instant
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class BreakpointHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, String>(name) {
+class BreakpointHitColumnInfo(name: String) : ColumnInfo<LiveInstrumentEvent, String>(name) {
 
-    override fun getComparator(): Comparator<TrackedLiveEvent>? {
+    override fun getComparator(): Comparator<LiveInstrumentEvent>? {
         return when (name) {
-            "Time" -> Comparator { t: TrackedLiveEvent, t2: TrackedLiveEvent ->
+            "Time" -> Comparator { t: LiveInstrumentEvent, t2: LiveInstrumentEvent ->
                 val obj1 = if (t.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
                     t as LiveBreakpointHit
                 } else if (t.eventType == LiveInstrumentEventType.BREAKPOINT_REMOVED) {
@@ -53,11 +53,12 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, Strin
                 }
                 obj1.occurredAt.compareTo(obj2.occurredAt)
             }
+
             else -> null
         }
     }
 
-    override fun valueOf(event: TrackedLiveEvent): String {
+    override fun valueOf(event: LiveInstrumentEvent): String {
         val breakpointData = mutableListOf<Map<String, Any?>>()
         if (event.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
             val item = event as LiveBreakpointHit
@@ -69,6 +70,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, Strin
                 "Time" ->
                     (Instant.now().toEpochMilli() - item.occurredAt.toEpochMilli())
                         .toPrettyDuration() + " " + message("ago")
+
                 else -> item.toString()
             }
         } else {
@@ -77,6 +79,7 @@ class BreakpointHitColumnInfo(name: String) : ColumnInfo<TrackedLiveEvent, Strin
                 "Breakpoint Data" -> item.cause!!.message ?: item.cause!!.exceptionType
                 "Time" -> (Instant.now().toEpochMilli() - item.occurredAt.toEpochMilli())
                     .toPrettyDuration() + " " + message("ago")
+
                 else -> item.toString()
             }
         }

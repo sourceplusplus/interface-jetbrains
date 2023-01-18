@@ -19,7 +19,6 @@ package spp.jetbrains.sourcemarker.command.status.ui;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -29,8 +28,6 @@ import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
 import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.protocol.instrument.LiveMeter;
-import spp.protocol.instrument.event.LiveInstrumentEvent;
-import spp.protocol.instrument.event.LiveInstrumentEventType;
 import spp.protocol.service.listen.LiveInstrumentListener;
 import spp.protocol.service.listen.LiveViewEventListener;
 import spp.protocol.view.LiveViewEvent;
@@ -85,8 +82,9 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
         LiveStatusBarManager.getInstance(gutterMark.getProject()).addViewEventListener(gutterMark, this);
     }
 
-    public void accept(@NotNull LiveInstrumentEvent event) {
-        JsonObject rawMetrics = new JsonObject(new JsonObject(event.getData()).getString("metricsData"));
+    @Override
+    public void accept(@NotNull LiveViewEvent event) {
+        JsonObject rawMetrics = new JsonObject(event.getMetricsData());
         String meterValue = rawMetrics.getValue("value").toString();
         if (NumberUtils.isCreatable(meterValue)) {
             minuteValueLabel.setText(getShortNumber(meterValue));
@@ -95,11 +93,6 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
         }
 //        hourValueLabel.setText(getShortNumber(rawMetrics.getString("last_hour")));
 //        dayValueLabel.setText(getShortNumber(rawMetrics.getString("last_day")));
-    }
-
-    @Override
-    public void accept(@NotNull LiveViewEvent event) {
-        accept(new LiveInstrumentEvent(LiveInstrumentEventType.METER_UPDATED, Json.encode(event)));
     }
 
     private String getShortNumber(String number) {

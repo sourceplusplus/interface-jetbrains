@@ -32,9 +32,8 @@ import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
-import spp.protocol.instrument.LiveBreakpoint
-import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.LiveBreakpointHit
+import spp.protocol.instrument.event.LiveInstrumentAdded
 import spp.protocol.instrument.event.LiveInstrumentRemoved
 import spp.protocol.instrument.event.LiveLogHit
 import spp.protocol.service.SourceServices.Subscribe.toLiveInstrumentSubscriberAddress
@@ -84,31 +83,31 @@ class LiveInstrumentManager(
         }
     }
 
-    override fun onLogAddedEvent(event: LiveLog) {
+    override fun onLogAddedEvent(event: LiveInstrumentAdded) {
         ApplicationManager.getApplication().invokeLater {
-            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.location.source)
+            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.liveInstrument.location.source)
             if (fileMarker != null) {
-                val smId = event.meta["original_source_mark"] as String? ?: return@invokeLater
+                val smId = event.liveInstrument.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.id)
-                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event)
+                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.liveInstrument.id)
+                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.liveInstrument)
             } else {
-                LiveStatusBarManager.getInstance(project).addActiveLiveInstrument(event)
+                LiveStatusBarManager.getInstance(project).addActiveLiveInstrument(event.liveInstrument)
             }
         }
     }
 
-    override fun onBreakpointAddedEvent(event: LiveBreakpoint) {
+    override fun onBreakpointAddedEvent(event: LiveInstrumentAdded) {
         ApplicationManager.getApplication().invokeLater {
             log.debug("Breakpoint added: $event")
-            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.location.source)
+            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.liveInstrument.location.source)
             if (fileMarker != null) {
-                val smId = event.meta["original_source_mark"] as String? ?: return@invokeLater
+                val smId = event.liveInstrument.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.id)
-                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event)
+                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.liveInstrument.id)
+                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.liveInstrument)
             } else {
-                log.debug("No file marker found for ${event.location.source}")
+                log.debug("No file marker found for ${event.liveInstrument.location.source}")
             }
         }
     }

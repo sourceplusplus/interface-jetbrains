@@ -51,7 +51,7 @@ import spp.protocol.instrument.LiveBreakpoint;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.event.LiveBreakpointHit;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
-import spp.protocol.instrument.event.TrackedLiveEvent;
+import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.location.LiveSourceLocation;
 import spp.protocol.instrument.throttle.InstrumentThrottle;
 import spp.protocol.instrument.throttle.ThrottleStep;
@@ -266,7 +266,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
                         AtomicReference<LiveBreakpointHit> shownBreakpointHit = new AtomicReference<>();
                         table.getSelectionModel().addListSelectionListener(event -> ApplicationManager.getApplication().invokeLater(() -> {
                             if (table.getSelectedRow() > -1) {
-                                TrackedLiveEvent selectedEvent = (TrackedLiveEvent) commandModel.getItem(
+                                LiveInstrumentEvent selectedEvent = (LiveInstrumentEvent) commandModel.getItem(
                                         table.convertRowIndexToModel(table.getSelectedRow())
                                 );
                                 if (selectedEvent.getEventType() == BREAKPOINT_REMOVED) return;

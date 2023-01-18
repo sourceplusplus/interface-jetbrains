@@ -316,7 +316,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
             log.remove("formattedMessage");
         });
 
-        LiveInstrumentEvent liveInstrumentEvent = new LiveInstrumentEvent(LOG_HIT, logJson.toString());
+        LiveInstrumentEvent liveInstrumentEvent = LiveInstrumentEvent.fromJson(logJson);
         commandModel.insertRow(0, liveInstrumentEvent);
     }
 
