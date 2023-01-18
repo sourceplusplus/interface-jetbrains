@@ -85,11 +85,14 @@ class JVMArtifactNamingService : IArtifactNamingService {
     }
 
     override fun getVariableName(element: PsiElement): String? {
-        return if (element is PsiDeclarationStatement) {
-            val localVar = element.firstChild as? PsiLocalVariable
-            localVar?.name
-        } else {
-            null
+        return when (element) {
+            is PsiDeclarationStatement -> {
+                val localVar = element.firstChild as? PsiLocalVariable
+                localVar?.name
+            }
+
+            is PsiLocalVariable -> element.name
+            else -> null
         }
     }
 
