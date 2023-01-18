@@ -535,7 +535,7 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
-            "0[fill]" +
+            "0[fill]0" +
             "[grow,fill]" +
             "[fill]",
             // rows

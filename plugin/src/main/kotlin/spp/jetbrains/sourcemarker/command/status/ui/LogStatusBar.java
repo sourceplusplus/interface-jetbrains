@@ -729,7 +729,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         setLayout(new MigLayout(
                 "hidemode 3",
                 // columns
-                "0[fill]" +
+                "0[fill]0" +
                         "[fill]" +
                         "[grow,fill]" +
                         "[fill]",

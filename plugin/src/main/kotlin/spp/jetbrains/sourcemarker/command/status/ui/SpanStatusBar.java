@@ -434,7 +434,7 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
-            "0[fill]" +
+            "0[fill]0" +
             "[grow,fill]" +
             "[fill]",
             // rows
