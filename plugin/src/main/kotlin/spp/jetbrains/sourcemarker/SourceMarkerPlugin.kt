@@ -482,7 +482,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
 
                 discoverAvailableServices(vertx, config)
             } else {
-                throw Exception("Error getting service token: ${resp.statusCode()} ${resp.statusMessage()}")
+                error("Error getting service token: ${resp.statusCode()} ${resp.statusMessage()}")
             }
         } else {
             //try default local access
