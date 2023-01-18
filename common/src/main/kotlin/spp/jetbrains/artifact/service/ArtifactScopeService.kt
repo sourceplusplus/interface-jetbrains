@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.artifact.service
 
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
@@ -88,6 +89,10 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
 
     override fun canShowControlBar(element: PsiElement): Boolean {
         return getService(element.language).canShowControlBar(element)
+    }
+
+    override fun findSourceFile(element: PsiFile): VirtualFile? {
+        return getService(element.language).findSourceFile(element)
     }
 }
 

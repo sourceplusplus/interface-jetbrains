@@ -25,6 +25,7 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
+import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.protocol.artifact.exception.sourceAsLineNumber
 
@@ -50,16 +51,15 @@ class ExecutionPointManager(
         val psiFile = stackFrameManager.stackTrace.language?.let {
             ArtifactNamingService.getService(it).findPsiFile(it, project, currentFrame)
         } ?: return
-        val virtualFile = psiFile.containingFile.virtualFile ?: return
+        val virtualFile = ArtifactScopeService.findSourceFile(psiFile) ?: return
         val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return
         val lineStartOffset = currentFrame.sourceAsLineNumber()?.let {
             document.getLineStartOffset(it) - 1
         } ?: return
-
         ApplicationManager.getApplication().invokeLater {
             try {
                 FileEditorManager.getInstance(project).openTextEditor(
-                    OpenFileDescriptor(project, virtualFile, lineStartOffset), true
+                    OpenFileDescriptor(project, virtualFile, lineStartOffset), false
                 )
                 executionPointHighlighter.hide()
                 executionPointHighlighter.show(

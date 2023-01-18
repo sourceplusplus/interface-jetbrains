@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.jvm.service
 
+import com.intellij.codeEditor.JavaEditorFileSwapper
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
@@ -24,6 +25,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.ThrowableComputable
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.scope.processor.VariablesProcessor
 import com.intellij.psi.scope.util.PsiScopesUtil
@@ -174,6 +176,10 @@ class JVMArtifactScopeService : IArtifactScopeService {
 
             else -> super.canShowControlBar(element)
         }
+    }
+
+    override fun findSourceFile(element: PsiFile): VirtualFile? {
+        return JavaEditorFileSwapper.findSourceFile(element.project, element.virtualFile) ?: element.virtualFile
     }
 
     private fun getResolvedCalls(element: PsiElement): Sequence<PsiNameIdentifierOwner> {

@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.artifact.service.define
 
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
@@ -47,4 +48,5 @@ interface IArtifactScopeService : ISourceMarkerService {
     fun isInsideFunction(element: PsiElement): Boolean
     fun isInsideEndlessLoop(element: PsiElement): Boolean = false
     fun canShowControlBar(element: PsiElement): Boolean = true
+    fun findSourceFile(element: PsiFile): VirtualFile? = element.virtualFile
 }
