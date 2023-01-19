@@ -85,14 +85,14 @@ class LiveInstrumentManager(
 
     override fun onLogAddedEvent(event: LiveInstrumentAdded) {
         ApplicationManager.getApplication().invokeLater {
-            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.liveInstrument.location.source)
+            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.instrument.location.source)
             if (fileMarker != null) {
-                val smId = event.liveInstrument.meta["original_source_mark"] as String? ?: return@invokeLater
+                val smId = event.instrument.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.liveInstrument.id)
-                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.liveInstrument)
+                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.instrument.id)
+                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.instrument)
             } else {
-                LiveStatusBarManager.getInstance(project).addActiveLiveInstrument(event.liveInstrument)
+                LiveStatusBarManager.getInstance(project).addActiveLiveInstrument(event.instrument)
             }
         }
     }
@@ -100,21 +100,21 @@ class LiveInstrumentManager(
     override fun onBreakpointAddedEvent(event: LiveInstrumentAdded) {
         ApplicationManager.getApplication().invokeLater {
             log.debug("Breakpoint added: $event")
-            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.liveInstrument.location.source)
+            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.instrument.location.source)
             if (fileMarker != null) {
-                val smId = event.liveInstrument.meta["original_source_mark"] as String? ?: return@invokeLater
+                val smId = event.instrument.meta["original_source_mark"] as String? ?: return@invokeLater
                 val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.liveInstrument.id)
-                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.liveInstrument)
+                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.instrument.id)
+                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.instrument)
             } else {
-                log.debug("No file marker found for ${event.liveInstrument.location.source}")
+                log.debug("No file marker found for ${event.instrument.location.source}")
             }
         }
     }
 
     override fun onInstrumentRemovedEvent(event: LiveInstrumentRemoved) {
         ApplicationManager.getApplication().invokeLater {
-            val inlayMark = SourceMarkSearch.findByInstrumentId(project, event.liveInstrument.id!!)
+            val inlayMark = SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
             if (inlayMark != null) {
                 val eventListeners = inlayMark.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
@@ -128,13 +128,13 @@ class LiveInstrumentManager(
         ApplicationManager.getApplication().invokeLater {
             BreakpointHitWindowService.getInstance(project).addBreakpointHit(event)
 
-            SourceMarkSearch.findByInstrumentId(project, event.breakpointId)
+            SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
                 ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onBreakpointHitEvent(event) }
         }
     }
 
     override fun onLogHitEvent(event: LiveLogHit) {
-        SourceMarkSearch.findByInstrumentId(project, event.logId)
+        SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
             ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
     }
 }

@@ -154,7 +154,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
 
     @Override
     public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
-        LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(event.getLiveInstrument());
+        LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(event.getInstrument());
         this.liveBreakpoint = null;
     }
 
