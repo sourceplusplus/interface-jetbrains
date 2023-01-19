@@ -81,7 +81,6 @@ import java.util.stream.Collectors;
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
-import static spp.protocol.instrument.event.LiveInstrumentEventType.LOG_HIT;
 
 public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener,
         LiveInstrumentListener, LiveViewEventListener {
@@ -309,7 +308,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         setLatestLog(Instant.now(), latestLog);
 
         JsonObject logJson = JsonObject.mapFrom(new LiveLogHit( //todo: real hit info
-                "-1", latestLog.getTimestamp(), "null", "null", logResult
+              liveLog, logResult, latestLog.getTimestamp(), "null", "null"
         ));
         logJson.getJsonObject("logResult").getJsonArray("logs").forEach(it -> {
             JsonObject log = (JsonObject) it;
