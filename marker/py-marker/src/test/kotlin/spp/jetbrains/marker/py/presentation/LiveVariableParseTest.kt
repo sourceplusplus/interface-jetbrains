@@ -21,15 +21,15 @@ import io.vertx.core.json.JsonObject
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import spp.protocol.instrument.event.LiveBreakpointHit
+import spp.protocol.artifact.exception.LiveStackTrace
 
 class LiveVariableParseTest {
 
     @Test
     fun testDictParse() {
-        val bpHitJson = Resources.getResource("breakpointHit/dictParse.json").readText()
-        val bpHit = LiveBreakpointHit(JsonObject(bpHitJson))
-        val builtInsVar = bpHit.stackTrace.elements.first().variables.find { it.name == "__builtins__" }
+        val stackTraceJson = Resources.getResource("breakpointHit/dictParse.json").readText()
+        val stackTrace = LiveStackTrace(JsonObject(stackTraceJson))
+        val builtInsVar = stackTrace.elements.first().variables.find { it.name == "__builtins__" }
         assertNotNull(builtInsVar)
 
         val parsedDict = PythonVariableNode.parseDict(builtInsVar!!.value as String)
