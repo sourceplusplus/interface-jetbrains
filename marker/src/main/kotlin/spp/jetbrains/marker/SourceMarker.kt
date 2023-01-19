@@ -99,10 +99,10 @@ class SourceMarker(private val project: Project) {
         if (fileMarker != null) {
             return fileMarker
         } else if (!SourceFileMarker.isFileSupported(psiFile)) {
-            log.warn("File type not setup: ${psiFile.fileType.name}")
+            log.trace("File type not setup: ${psiFile.fileType.name}")
             return null
         } else if (psiFile.virtualFile == null || !psiFile.virtualFile.isInLocalFileSystem) {
-            log.warn("Skipping in-memory/non-local file: $psiFile")
+            log.trace("Skipping in-memory/non-local file: $psiFile")
             return null
         } else if (!ApplicationManager.getApplication().isUnitTestMode) {
             if (!SourceStatusService.getInstance(project).isConnected()) {
