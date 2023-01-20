@@ -19,7 +19,6 @@ package spp.jetbrains.marker.plugin
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
-import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment.LINE_NUMBERS
 import com.intellij.psi.*
 import com.intellij.util.Function
 import spp.jetbrains.marker.SourceMarker
@@ -82,7 +81,7 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 }
             },
             navigationHandler,
-            LINE_NUMBERS //todo: config
+            gutterMark.configuration.iconAlignment
         ) { "spp.line-marker" }
     }
 
