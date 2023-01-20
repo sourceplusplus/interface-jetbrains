@@ -25,9 +25,8 @@ import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import spp.jetbrains.marker.service.ArtifactNamingService
-import spp.jetbrains.sourcemarker.instrument.breakpoint.DebugStackFrameListener
-import spp.jetbrains.sourcemarker.instrument.breakpoint.StackFrameManager
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindow
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTraceListener
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.exception.sourceAsLineNumber
 import java.awt.BorderLayout
@@ -42,14 +41,14 @@ import javax.swing.event.ListSelectionEvent
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class FramesTab(
+class FramesPanel(
     private val project: Project,
-    private val tab: BreakpointHitWindow,
-) : DebugStackFrameListener, Disposable {
+    private val tab: BreakpointHitTab,
+) : ActiveStackTraceListener, Disposable {
 
     val component: JPanel = JPanel(BorderLayout())
     private val stackFrameList: JList<LiveStackTraceElement>
-    private var stackFrameManager: StackFrameManager? = null
+    private var activeStackTrace: ActiveStackTrace? = null
 
     init {
         stackFrameList = JBList()
@@ -58,11 +57,11 @@ class FramesTab(
         component.add(JBScrollPane(stackFrameList), "Center")
     }
 
-    override fun onChanged(stackFrameManager: StackFrameManager) {
-        this.stackFrameManager = stackFrameManager
+    override fun onChanged(activeStackTrace: ActiveStackTrace) {
+        this.activeStackTrace = activeStackTrace
 
-        val currentFrame = stackFrameManager.currentFrame
-        stackFrameList.model = CollectionListModel(stackFrameManager.stackTrace.getElements(true))
+        val currentFrame = activeStackTrace.currentFrame
+        stackFrameList.model = CollectionListModel(activeStackTrace.stackTrace.getElements(true))
         stackFrameList.setSelectedValue(currentFrame, true)
     }
 
@@ -77,7 +76,7 @@ class FramesTab(
             ) {
                 this.icon = AllIcons.Debugger.Frame
 
-                val psiFile = stackFrameManager?.stackTrace?.language?.let {
+                val psiFile = activeStackTrace?.stackTrace?.language?.let {
                     ArtifactNamingService.getService(it).findPsiFile(it, project, frame)
                 }
                 if (psiFile?.isWritable == true && frame.sourceAsLineNumber() != null) {
@@ -92,8 +91,8 @@ class FramesTab(
                 val stackFrame = stackFrameList.selectedValue
                 if (stackFrame != null) {
                     stackFrameList.setSelectedValue(stackFrame, true)
-                    tab.stackFrameManager.currentFrame = stackFrame
-                    tab.stackFrameManager.currentFrameIndex = stackFrameList.selectedIndex
+                    tab.activeStack.currentFrame = stackFrame
+                    tab.activeStack.currentFrameIndex = stackFrameList.selectedIndex
                     tab.onStackFrameUpdated()
                 }
             }

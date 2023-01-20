@@ -14,14 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.breakpoint
+package spp.jetbrains.sourcemarker.instrument.breakpoint.model
+
+import spp.protocol.artifact.exception.LiveStackTrace
+import spp.protocol.artifact.exception.LiveStackTraceElement
 
 /**
- * todo: description.
+ * The currently selected [LiveStackTrace].
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface DebugStackFrameListener {
-    fun onChanged(stackFrameManager: StackFrameManager)
-}
+data class ActiveStackTrace(
+    val stackTrace: LiveStackTrace,
+    var currentFrame: LiveStackTraceElement? = null,
+    var currentFrameIndex: Int = 0
+)

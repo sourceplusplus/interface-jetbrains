@@ -25,8 +25,8 @@ import com.intellij.ui.tree.StructureTreeModel
 import com.intellij.ui.tree.ui.DefaultTreeUI
 import com.intellij.ui.treeStructure.Tree
 import org.joor.Reflect
-import spp.jetbrains.sourcemarker.instrument.breakpoint.DebugStackFrameListener
-import spp.jetbrains.sourcemarker.instrument.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTraceListener
 import spp.jetbrains.sourcemarker.instrument.breakpoint.tree.VariableSimpleTreeStructure
 import java.awt.BorderLayout
 import javax.swing.JPanel
@@ -40,7 +40,7 @@ import javax.swing.tree.DefaultTreeModel
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class VariableTab : DebugStackFrameListener, Disposable {
+class VariablesPanel : ActiveStackTraceListener, Disposable {
 
     val component: JPanel
     private val treeStructure: VariableSimpleTreeStructure = VariableSimpleTreeStructure()
@@ -59,8 +59,8 @@ class VariableTab : DebugStackFrameListener, Disposable {
         ClientProperty.put(tree, autoExpandAllowedKey, false)
     }
 
-    override fun onChanged(stackFrameManager: StackFrameManager) {
-        treeStructure.setStackFrameManager(stackFrameManager)
+    override fun onChanged(activeStack: ActiveStackTrace) {
+        treeStructure.setActiveStackFrame(activeStack)
         treeModel.invalidate()
     }
 

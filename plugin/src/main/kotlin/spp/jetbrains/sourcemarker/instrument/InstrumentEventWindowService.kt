@@ -27,7 +27,7 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindow
+import spp.jetbrains.sourcemarker.instrument.breakpoint.ui.BreakpointHitTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentEventTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentOverviewTab
 import spp.jetbrains.sourcemarker.instrument.ui.action.ClearInstrumentsAction
@@ -57,7 +57,7 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
         .registerToolWindow(RegisterToolWindowTask.closable("Live Instruments", PluginIcons.ToolWindow.satelliteDish))
     private var contentManager = toolWindow.contentManager
     private val executionPointHighlighter = ExecutionPointHighlighter(project)
-    private lateinit var hitWindow: BreakpointHitWindow
+    private lateinit var breakpointHitTab: BreakpointHitTab
     private lateinit var overviewTab: InstrumentOverviewTab
     val selectedTab: Disposable?
         get() = contentManager.selectedContent?.disposer
@@ -85,7 +85,7 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
         contentManager.addContentManagerListener(object : ContentManagerListener {
             override fun selectionChanged(event: ContentManagerEvent) {
                 val disposable = event.content.disposer
-                if (disposable is BreakpointHitWindow) {
+                if (disposable is BreakpointHitTab) {
                     if (event.operation == ContentManagerEvent.ContentOperation.add) {
                         disposable.showExecutionLine()
                     }
@@ -187,7 +187,7 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
 
     fun showBreakpointHit(hit: LiveBreakpointHit, showExecutionPoint: Boolean = true) {
         if (showExecutionPoint) removeExecutionShower()
-        hitWindow = BreakpointHitWindow(project, executionPointHighlighter, showExecutionPoint)
+        breakpointHitTab = BreakpointHitTab(project, executionPointHighlighter, showExecutionPoint)
 
         //grab first non-skywalking frame and add real variables from skywalking frame
         val firstFrame = hit.stackTrace.first()
@@ -196,12 +196,12 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
             firstNonSkyWalkingFrame.variables.addAll(hit.stackTrace.first().variables)
         }
 
-        hitWindow.showFrames(hit.stackTrace, firstNonSkyWalkingFrame)
+        breakpointHitTab.showFrames(hit.stackTrace, firstNonSkyWalkingFrame)
         val content = contentFactory.createContent(
-            hitWindow.layoutComponent, firstNonSkyWalkingFrame.source + " at #0", false
+            breakpointHitTab.layoutComponent, firstNonSkyWalkingFrame.source + " at #0", false
         )
-        content.setDisposer(hitWindow)
-        hitWindow.content = content
+        content.setDisposer(breakpointHitTab)
+        breakpointHitTab.content = content
         contentManager.addContent(content)
         contentManager.setSelectedContent(content)
         toolWindow.setAvailable(true, null)
@@ -216,9 +216,9 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
         executionPointHighlighter.hide()
     }
 
-    fun getHitWindow(): BreakpointHitWindow? {
-        return if (::hitWindow.isInitialized) {
-            hitWindow
+    fun getBreakpointHitTab(): BreakpointHitTab? {
+        return if (::breakpointHitTab.isInitialized) {
+            breakpointHitTab
         } else {
             null
         }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.breakpoint.painter
+package spp.jetbrains.sourcemarker.instrument.breakpoint
 
 import com.intellij.openapi.editor.EditorLinePainter
 import com.intellij.openapi.editor.LineExtensionInfo
@@ -26,26 +26,24 @@ import com.intellij.ui.Gray
 import com.intellij.ui.JBColor
 import com.intellij.xdebugger.ui.DebuggerColors
 import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
+import spp.protocol.instrument.variable.LiveVariable
 import java.awt.Color
 import java.awt.Font
 
 /**
- * todo: description.
+ * Displays [LiveVariable] values directly in the editor for the [ActiveStackTrace.currentFrame].
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class VariableEditorLinePainter : EditorLinePainter() {
 
-    override fun getLineExtensions(
-        project: Project,
-        file: VirtualFile,
-        lineNumber: Int
-    ): Collection<LineExtensionInfo> {
-        val lineInfos: MutableList<LineExtensionInfo> = ArrayList()
-        val bpWindow = InstrumentEventWindowService.getInstance(project).getHitWindow()
-        if (bpWindow?.stackFrameManager?.currentFrame != null) {
-            val vars = bpWindow.stackFrameManager.currentFrame!!.variables
+    override fun getLineExtensions(project: Project, file: VirtualFile, lineNumber: Int): List<LineExtensionInfo> {
+        val lineInfos = mutableListOf<LineExtensionInfo>()
+        val bpHitTab = InstrumentEventWindowService.getInstance(project).getBreakpointHitTab()
+        if (bpHitTab?.activeStack?.currentFrame != null) {
+            val vars = bpHitTab.activeStack.currentFrame!!.variables
             val attributes = normalAttributes
             vars.forEach {
                 if (it.lineNumber == lineNumber + 1) {
@@ -59,12 +57,11 @@ class VariableEditorLinePainter : EditorLinePainter() {
     companion object {
         private val normalAttributes: TextAttributes
             get() {
-                val attributes =
-                    EditorColorsManager.getInstance().globalScheme.getAttributes(DebuggerColors.INLINED_VALUES)
+                val colorsManager = EditorColorsManager.getInstance()
+                val attributes = colorsManager.globalScheme.getAttributes(DebuggerColors.INLINED_VALUES)
                 return if (attributes == null || attributes.foregroundColor == null) {
                     TextAttributes(JBColor.lazy {
-                        if (EditorColorsManager.getInstance().isDarkEditor
-                        ) Color(0x3d8065) else Gray._135
+                        if (colorsManager.isDarkEditor) Color(0x3d8065) else Gray._135
                     }, null, null, null, Font.ITALIC)
                 } else attributes
             }

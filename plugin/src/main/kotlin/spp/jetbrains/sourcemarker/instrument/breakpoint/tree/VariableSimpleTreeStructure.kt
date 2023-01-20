@@ -17,7 +17,7 @@
 package spp.jetbrains.sourcemarker.instrument.breakpoint.tree
 
 import com.intellij.ui.treeStructure.SimpleTreeStructure
-import spp.jetbrains.sourcemarker.instrument.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
 
 /**
  * todo: description.
@@ -33,7 +33,7 @@ class VariableSimpleTreeStructure : SimpleTreeStructure() {
         return simpleRoot
     }
 
-    fun setStackFrameManager(stackFrameManager: StackFrameManager) {
-        simpleRoot.setStackFrameManager(stackFrameManager)
+    fun setActiveStackFrame(activeStack: ActiveStackTrace) {
+        simpleRoot.setActiveStackTrace(activeStack)
     }
 }
