@@ -43,7 +43,6 @@ interface LiveStatusBarManager {
     fun addViewEventListener(sourceMark: SourceMark, listener: LiveViewEventListener)
 
     fun addActiveLiveInstrument(instrument: LiveInstrument)
-    fun addActiveLiveInstruments(instruments: List<LiveInstrument>)
     fun removeActiveLiveInstrument(instrument: LiveInstrument)
     fun getLogData(inlayMark: InlayMark): List<*>
     fun removeLogData(inlayMark: InlayMark)

@@ -21,11 +21,9 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiDocumentManager
 import io.vertx.core.Vertx
 import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.ArtifactScopeService
-import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS
@@ -39,10 +37,6 @@ import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
-import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
-import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
@@ -71,53 +65,11 @@ import javax.swing.JPanel
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveStatusBarManager, SourceMarkEventListener {
+class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveStatusBarManager {
 
     private val log = logger<LiveStatusBarManagerImpl>()
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
     private val logData = ConcurrentHashMap<String, List<*>>()
-
-    override fun handleEvent(event: SourceMarkEvent) {
-        when (event.eventCode) {
-            SourceMarkEventCode.MARK_ADDED -> {
-                //wait for method guide marks as they indicate a method currently is or may become visible
-                if (event.sourceMark !is MethodGuideMark) return
-
-                //display status bar(s) for method
-                ApplicationManager.getApplication().runReadAction {
-                    val methodSourceMark = event.sourceMark as MethodGuideMark
-                    val fileMarker = event.sourceMark.sourceFileMarker
-
-                    val textRange = methodSourceMark.getPsiElement().textRange
-                    val document = PsiDocumentManager.getInstance(methodSourceMark.project)
-                        .getDocument(methodSourceMark.sourceFileMarker.psiFile) ?: return@runReadAction
-                    val startLine = document.getLineNumber(textRange.startOffset) + 1
-                    val endLine = document.getLineNumber(textRange.endOffset) + 1
-
-                    val locationSource = if (ArtifactTypeService.isJvm(methodSourceMark.getPsiElement())) {
-                        methodSourceMark.artifactQualifiedName.toClass()?.identifier
-                    } else {
-                        fileMarker.psiFile.virtualFile.name
-                    }
-                    if (locationSource == null) {
-                        log.error("Unable to determine location source of: ${methodSourceMark.artifactQualifiedName}")
-                        return@runReadAction
-                    }
-
-                    activeStatusBars.forEach {
-                        if (locationSource == it.location.source && it.location.line in startLine..endLine) {
-                            when (it) {
-                                is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
-                                is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
-                                is LiveMeter -> showMeterStatusIcon(it, event.sourceMark.sourceFileMarker)
-                                else -> Unit
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * Invoked via control bar. Force visible.
@@ -418,16 +370,8 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
         activeStatusBars.add(instrument)
     }
 
-    override fun addActiveLiveInstruments(instruments: List<LiveInstrument>) {
-        activeStatusBars.addAll(instruments)
-    }
-
     override fun removeActiveLiveInstrument(instrument: LiveInstrument) {
         activeStatusBars.remove(instrument)
-    }
-
-    fun removeActiveLiveInstrument(instrumentId: String) {
-        activeStatusBars.removeIf { it.id == instrumentId }
     }
 
     override fun getLogData(inlayMark: InlayMark): List<*> {

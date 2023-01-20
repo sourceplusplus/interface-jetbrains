@@ -76,8 +76,8 @@ import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
 import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.jetbrains.sourcemarker.instrument.LiveInstrumentEventListener
-import spp.jetbrains.sourcemarker.vcs.CodeChangeListener
 import spp.jetbrains.sourcemarker.status.SourceStatusServiceImpl
+import spp.jetbrains.sourcemarker.vcs.CodeChangeListener
 import spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewEventListener
 import spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl
@@ -367,7 +367,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         //live instrument
         if (availableRecords.any { it.name == SourceServices.LIVE_INSTRUMENT }) {
             log.info("Live instruments available")
-            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(liveStatusManager)
 
             val liveInstrument = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
@@ -380,6 +379,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             }
             val eventListener = LiveInstrumentEventListener(project, config)
             vertx.deployVerticle(eventListener).await()
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(eventListener)
         } else {
             log.warn("Live instruments unavailable")
         }
