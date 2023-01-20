@@ -74,7 +74,7 @@ import spp.jetbrains.sourcemarker.config.getServicePortNormalized
 import spp.jetbrains.sourcemarker.config.isSsl
 import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
 import spp.jetbrains.sourcemarker.status.SourceStatusServiceImpl
 import spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl
@@ -374,7 +374,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             UserData.liveInstrumentService(project, liveInstrument)
 
             ApplicationManager.getApplication().invokeLater {
-                BreakpointHitWindowService.getInstance(project).showEventsWindow()
+                InstrumentEventWindowService.getInstance(project).makeOverviewTab()
             }
             val breakpointListener = LiveInstrumentManager(project, config)
             vertx.deployVerticle(breakpointListener).await()

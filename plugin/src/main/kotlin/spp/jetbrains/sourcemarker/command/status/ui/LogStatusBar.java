@@ -23,11 +23,7 @@ import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.Pair;
 import com.intellij.ui.DocumentAdapter;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.table.JBTable;
-import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
 import net.miginfocom.swing.MigLayout;
@@ -41,7 +37,6 @@ import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.jetbrains.sourcemarker.command.status.ui.config.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteFieldRow;
-import spp.jetbrains.sourcemarker.instrument.log.LogHitColumnInfo;
 import spp.jetbrains.sourcemarker.instrument.log.VariableParser;
 import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.artifact.log.Log;
@@ -49,7 +44,6 @@ import spp.protocol.artifact.log.LogOrderType;
 import spp.protocol.artifact.log.LogResult;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveLog;
-import spp.protocol.instrument.event.LiveInstrumentEvent;
 import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.event.LiveLogHit;
 import spp.protocol.instrument.location.LiveSourceLocation;
@@ -88,10 +82,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
             .withZone(ZoneId.systemDefault());
     private static final String WAITING_FOR_LIVE_LOG_DATA = message("waiting_for_live_log_data");
-    private static final String MESSAGE = message("message");
-    private static final String TIME = message("time");
     private static final String QUOTE_CURLY_BRACES = Pattern.quote("{}");
-
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
     private final List<AutocompleteFieldRow> scopeVars;
@@ -104,13 +95,9 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
     private JWindow popup;
     private LiveLogConfigurationPanel configurationPanel;
     private boolean disposed = false;
-    private JLabel expandLabel;
-    private boolean expanded;
-    private JPanel panel;
     private JPanel wrapper;
     private boolean errored = false;
     private boolean removed = false;
-    private ListTableModel commandModel = null;
     private final Pattern varPattern;
 
     public LogStatusBar(LiveSourceLocation sourceLocation, List<String> scopeVars, InlayMark inlayMark) {
@@ -180,7 +167,6 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         initCommandModel();
         removeActiveDecorations();
         displayTimeField();
-        addExpandButton();
         repaint();
         LiveStatusBarManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
     }
@@ -194,11 +180,6 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
             Instant logTime = logHit.getOccurredAt();
             setLatestLog(logTime, logHit.getLogResult().getLogs().get(0));
         }
-        commandModel = new ListTableModel(
-                new ColumnInfo[]{
-                        new LogHitColumnInfo(MESSAGE),
-                        new LogHitColumnInfo(TIME)
-                }, logData, 0, SortOrder.DESCENDING);
     }
 
     public void setWrapperPanel(JPanel wrapperPanel) {
@@ -266,8 +247,6 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
 
     @Override
     public void onLogHitEvent(@NotNull LiveLogHit event) {
-        commandModel.insertRow(0, event);
-
         setLatestLog(
                 event.getLogResult().getTimestamp(),
                 event.getLogResult().getLogs().get(0)
@@ -279,8 +258,6 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         removed = true;
 
         if (event.getCause() != null) {
-            commandModel.insertRow(0, event);
-
             errored = true;
             liveLogTextField.setText(VariableParser.EMPTY);
             liveLogTextField.setPlaceHolderText(event.getCause().getMessage());
@@ -306,83 +283,10 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         );
         Log latestLog = logResult.getLogs().get(0);
         setLatestLog(Instant.now(), latestLog);
-
-        JsonObject logJson = JsonObject.mapFrom(new LiveLogHit( //todo: real hit info
-              liveLog, logResult, latestLog.getTimestamp(), "null", "null"
-        ));
-        logJson.getJsonObject("logResult").getJsonArray("logs").forEach(it -> {
-            JsonObject log = (JsonObject) it;
-            log.remove("formattedMessage");
-        });
-
-        LiveInstrumentEvent liveInstrumentEvent = LiveInstrumentEvent.fromJson(logJson);
-        commandModel.insertRow(0, liveInstrumentEvent);
-    }
-
-    private void addExpandButton() {
-        if (expandLabel != null) {
-            remove(expandLabel);
-        }
-        expandLabel = new JLabel();
-        expandLabel.setCursor(Cursor.getDefaultCursor());
-        expandLabel.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                expandLabel.setIcon(PluginIcons.expandHovered);
-            }
-        });
-        addRecursiveMouseListener(expandLabel, new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (!expanded) {
-                    expanded = true;
-
-                    panel = new JPanel();
-                    panel.setLayout(new BorderLayout());
-                    JBTable table = new JBTable();
-                    JScrollPane scrollPane = new JBScrollPane(table);
-                    table.setRowHeight(30);
-                    table.setShowColumns(true);
-                    table.setModel(commandModel);
-                    table.setStriped(true);
-                    table.setShowColumns(true);
-
-                    table.setBackground(getBackgroundColor());
-                    panel.add(scrollPane);
-                    panel.setPreferredSize(new Dimension(0, 250));
-                    wrapper.add(panel, BorderLayout.NORTH);
-                } else {
-                    expanded = false;
-                    wrapper.remove(panel);
-                }
-
-                JViewport viewport = editor.getScrollPane().getViewport();
-                viewport.dispatchEvent(new ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED));
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                expandLabel.setIcon(PluginIcons.expandPressed);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                expandLabel.setIcon(PluginIcons.expandHovered);
-            }
-        }, () -> {
-            removeActiveDecorations();
-            return null;
-        });
-
-        remove(closeLabel);
-        expandLabel.setIcon(PluginIcons.expand);
-        add(expandLabel, "cell 3 0");
-        add(closeLabel, "cell 3 0");
     }
 
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
-            if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
             configPanel.setBackground(getInputBackgroundColor());
 

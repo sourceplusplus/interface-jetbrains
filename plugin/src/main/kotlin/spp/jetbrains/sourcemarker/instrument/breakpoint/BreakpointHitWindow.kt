@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.breakpoint.ui
+package spp.jetbrains.sourcemarker.instrument.breakpoint
 
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.PlaceInGrid
@@ -26,10 +26,8 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.content.Content
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
-import spp.jetbrains.sourcemarker.instrument.breakpoint.DebugStackFrameListener
-import spp.jetbrains.sourcemarker.instrument.breakpoint.ExecutionPointManager
-import spp.jetbrains.sourcemarker.instrument.breakpoint.LiveBreakpointConstants
-import spp.jetbrains.sourcemarker.instrument.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.instrument.breakpoint.ui.FramesTab
+import spp.jetbrains.sourcemarker.instrument.breakpoint.ui.VariableTab
 import spp.protocol.artifact.exception.LiveStackTrace
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import java.util.concurrent.CopyOnWriteArrayList
@@ -47,6 +45,10 @@ class BreakpointHitWindow(
     showExecutionPoint: Boolean
 ) : Disposable {
 
+    companion object {
+        const val LIVE_RUNNER = "Live Runner"
+    }
+
     lateinit var stackFrameManager: StackFrameManager
     var content: Content? = null
     val layoutComponent: JComponent
@@ -57,10 +59,7 @@ class BreakpointHitWindow(
     init {
         listeners = CopyOnWriteArrayList()
         layoutUi = RunnerLayoutUi.Factory.getInstance(project).create(
-            LiveBreakpointConstants.LIVE_RUNNER,
-            LiveBreakpointConstants.LIVE_RUNNER,
-            LiveBreakpointConstants.LIVE_RUNNER,
-            this
+            LIVE_RUNNER, LIVE_RUNNER, LIVE_RUNNER, this
         )
         layoutComponent = layoutUi.component
 
@@ -74,7 +73,7 @@ class BreakpointHitWindow(
     private fun addFramesTab() {
         val framesTab = FramesTab(project, this)
         val content = layoutUi.createContent(
-            LiveBreakpointConstants.LIVE_RECORDER_STACK_FRAMES, framesTab.component, "Frames",
+            "Live Stack Frames", framesTab.component, "Frames",
             AllIcons.Debugger.Frame, null
         )
         content.isCloseable = false
@@ -86,7 +85,7 @@ class BreakpointHitWindow(
     private fun addVariableTab() {
         val variableTab = VariableTab()
         val content = layoutUi.createContent(
-            LiveBreakpointConstants.LIVE_RECORDER_VARIABLES, variableTab.component, "Variables",
+            "Live Variables", variableTab.component, "Variables",
             AllIcons.Debugger.VariablesTab, null
         )
         content.isCloseable = false

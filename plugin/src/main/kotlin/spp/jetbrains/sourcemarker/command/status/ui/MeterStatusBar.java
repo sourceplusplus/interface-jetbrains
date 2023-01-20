@@ -22,15 +22,10 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.table.JBTable;
-import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
@@ -42,16 +37,13 @@ import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.jetbrains.sourcemarker.command.status.ui.config.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteFieldRow;
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitColumnInfo;
 import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.instrument.LiveInstrument;
 import spp.protocol.instrument.LiveMeter;
-import spp.protocol.instrument.event.LiveInstrumentRemoved;
 import spp.protocol.instrument.location.LiveSourceLocation;
 import spp.protocol.instrument.meter.MeterType;
 import spp.protocol.instrument.meter.MetricValue;
 import spp.protocol.instrument.meter.MetricValueType;
-import spp.protocol.service.listen.LiveInstrumentListener;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -82,17 +74,6 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
     private final String meterName = message("meter_name");
     private final String placeHolderText = message("metric_value");
     private LiveMeter liveMeter;
-    private LiveBreakpointStatusPanel statusPanel;
-    private JPanel wrapper;
-    private JPanel panel;
-    private JLabel expandLabel;
-    private boolean expanded = false;
-    private final ListTableModel commandModel = new ListTableModel<>(
-            new ColumnInfo[]{
-                    new BreakpointHitColumnInfo(message("meter_data")),
-                    new BreakpointHitColumnInfo(message("time"))
-            },
-            new ArrayList<>(), 0, SortOrder.DESCENDING);
     private final List<AutocompleteFieldRow> scopeVars;
     private final Function<String, List<AutocompleteFieldRow>> lookup;
 
@@ -146,11 +127,6 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
 
     public void setLiveInstrument(LiveInstrument liveInstrument) {
         this.liveMeter = (LiveMeter) liveInstrument;
-        setupAsActive();
-    }
-
-    public void setWrapperPanel(JPanel wrapperPanel) {
-        this.wrapper = wrapperPanel;
     }
 
     @Override
@@ -173,7 +149,6 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
 
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
-            if (expandLabel != null) expandLabel.setIcon(PluginIcons.expand);
             closeLabel.setIcon(PluginIcons.close);
             configPanel.setBackground(getInputBackgroundColor());
 
@@ -184,91 +159,6 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
                 meterIdField.setBackground(PluginUI.getEditCompleteColor());
                 meterIdField.setEditable(false);
             }
-        });
-    }
-
-    private void setupAsActive() {
-        LiveStatusBarManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, new LiveInstrumentListener() {
-            @Override
-            public void onInstrumentRemovedEvent(@NotNull LiveInstrumentRemoved event) {
-                if (statusPanel == null) return;
-                configLabel.setIcon(PluginIcons.eyeSlash);
-
-                if (event.getCause() == null) {
-                    statusPanel.setStatus(message("complete"), COMPLETE_COLOR_PURPLE);
-                } else {
-                    commandModel.insertRow(0, event);
-                    statusPanel.setStatus(message("error"), SELECT_COLOR_RED);
-                }
-            }
-        });
-        statusPanel = new LiveBreakpointStatusPanel();
-        statusPanel.setHitLimit(liveMeter.getHitLimit());
-
-        meterIdField.setEditMode(false);
-        removeActiveDecorations();
-        configDropdownLabel.setVisible(false);
-        SwingUtilities.invokeLater(() -> {
-            mainPanel.removeAll();
-            mainPanel.setLayout(new BorderLayout());
-            //statusPanel.setExpires(liveMeter.getExpiresAt());
-            mainPanel.add(statusPanel);
-
-            remove(closeLabel);
-
-            expandLabel = new JLabel();
-            expandLabel.setCursor(Cursor.getDefaultCursor());
-            expandLabel.addMouseMotionListener(new MouseAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    expandLabel.setIcon(PluginIcons.expandHovered);
-                }
-            });
-            addRecursiveMouseListener(expandLabel, new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (!expanded) {
-                        expanded = true;
-
-                        panel = new JPanel();
-                        panel.setLayout(new BorderLayout());
-                        JBTable table = new JBTable();
-                        JScrollPane scrollPane = new JBScrollPane(table);
-                        table.setRowHeight(30);
-                        table.setShowColumns(true);
-                        table.setModel(commandModel);
-                        table.setStriped(true);
-                        table.setShowColumns(true);
-
-                        table.setBackground(getBackgroundColor());
-                        panel.add(scrollPane);
-                        panel.setPreferredSize(new Dimension(0, 250));
-                        wrapper.add(panel, BorderLayout.NORTH);
-                    } else {
-                        expanded = false;
-                        wrapper.remove(panel);
-                    }
-
-                    JViewport viewport = editor.getScrollPane().getViewport();
-                    viewport.dispatchEvent(new ComponentEvent(viewport, ComponentEvent.COMPONENT_RESIZED));
-                }
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    expandLabel.setIcon(PluginIcons.expandPressed);
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    expandLabel.setIcon(PluginIcons.expandHovered);
-                }
-            }, () -> {
-                removeActiveDecorations();
-                return null;
-            });
-            expandLabel.setIcon(PluginIcons.expand);
-            add(expandLabel, "cell 2 0");
-            add(closeLabel);
         });
     }
 

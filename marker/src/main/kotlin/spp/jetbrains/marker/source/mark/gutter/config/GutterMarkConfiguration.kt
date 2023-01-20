@@ -16,6 +16,8 @@
  */
 package spp.jetbrains.marker.source.mark.gutter.config
 
+import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
+import com.intellij.psi.PsiElement
 import spp.jetbrains.marker.source.mark.api.component.api.SourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.api.component.jcef.SourceMarkJcefComponentProvider
 import spp.jetbrains.marker.source.mark.api.config.SourceMarkConfiguration
@@ -32,8 +34,9 @@ data class GutterMarkConfiguration(
     var preferShowOnAnnotations: Boolean = true,
     var tooltipText: (() -> String)? = null,
     var icon: Icon? = null,
-    var activateOnMouseHover: Boolean = true,
+    var activateOnMouseHover: Boolean = false,
     var activateOnMouseClick: Boolean = false,
     override var activateOnKeyboardShortcut: Boolean = false,
-    override var componentProvider: SourceMarkComponentProvider = SourceMarkJcefComponentProvider()
+    override var componentProvider: SourceMarkComponentProvider = SourceMarkJcefComponentProvider(),
+    var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
 ) : SourceMarkConfiguration

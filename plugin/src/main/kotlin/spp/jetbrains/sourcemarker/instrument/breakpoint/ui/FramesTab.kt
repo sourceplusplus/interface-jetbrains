@@ -27,6 +27,7 @@ import com.intellij.ui.components.JBScrollPane
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.sourcemarker.instrument.breakpoint.DebugStackFrameListener
 import spp.jetbrains.sourcemarker.instrument.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindow
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.exception.sourceAsLineNumber
 import java.awt.BorderLayout

@@ -25,6 +25,7 @@ import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.platform.general.Service
 
+@Deprecated("Use LiveViewService instead")
 interface SkywalkingMonitorService {
     companion object {
         val KEY = Key.create<SkywalkingMonitorService>("SPP_SKYWALKING_MONITOR_SERVICE")

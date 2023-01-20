@@ -26,7 +26,7 @@
                 serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl"/>
 
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService"/>
         <editor.linePainter
                 implementation="spp.jetbrains.sourcemarker.instrument.breakpoint.painter.VariableEditorLinePainter"/>
         <projectConfigurable

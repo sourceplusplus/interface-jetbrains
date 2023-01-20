@@ -14,24 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.view.window.renderer
+package spp.jetbrains.sourcemarker.instrument.ui.renderer
 
+import com.intellij.openapi.project.Project
 import com.intellij.ui.ColoredTableCellRenderer
-import com.intellij.ui.DarculaColors
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.ui.ListTableModel
-import spp.jetbrains.PluginUI
+import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.view.model.ServiceEndpointRow
+import spp.jetbrains.sourcemarker.instrument.ui.model.InstrumentOverview
 import javax.swing.JTable
 
 /**
  * todo: description.
  *
- * @since 0.7.6
+ * @since 0.7.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class EndpointAvailabilityTableCellRenderer : ColoredTableCellRenderer() {
+class CreatedByTableCellRenderer(val project: Project) : ColoredTableCellRenderer() {
 
     override fun customizeCellRenderer(
         table: JTable,
@@ -41,28 +41,21 @@ class EndpointAvailabilityTableCellRenderer : ColoredTableCellRenderer() {
         row: Int,
         column: Int
     ) {
-        val endpointRow = (table.model as ListTableModel<ServiceEndpointRow>)
-            .getRowValue(table.rowSorter.convertRowIndexToModel(row))
+        val instrumentOverview = (table.model as ListTableModel<InstrumentOverview>)
+            .getRowValue(table.convertRowIndexToModel(row))
 
-        if (endpointRow.sla < 80.0) {
+        if (instrumentOverview.createdBy == UserData.selfInfo(project)?.developer?.id) {
             append(
-                endpointRow.sla.toString() + "%",
-                SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DarculaColors.RED)
+                instrumentOverview.createdBy,
+                SimpleTextAttributes.REGULAR_ATTRIBUTES
             )
-            icon = PluginIcons.errorBug
-        } else if (endpointRow.sla < 90.0) {
-            append(
-                endpointRow.sla.toString() + "%",
-                SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, PluginUI.yellow)
-            )
-            icon = PluginIcons.triangleExclamation
+            icon = PluginIcons.user
+            isTransparentIconBackground = true
         } else {
             append(
-                endpointRow.sla.toString() + "%",
-                SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, PluginUI.green)
+                instrumentOverview.createdBy,
+                SimpleTextAttributes.REGULAR_ATTRIBUTES
             )
-            icon = PluginIcons.check
         }
-        isTransparentIconBackground = true
     }
 }

@@ -17,11 +17,11 @@
 package spp.jetbrains.sourcemarker.view.trace.column
 
 import com.intellij.util.ui.ColumnInfo
+import spp.jetbrains.sourcemarker.view.trace.renderer.TraceDurationTableCellRenderer
+import spp.jetbrains.sourcemarker.view.trace.renderer.TraceErrorTableCellRenderer
 import spp.protocol.artifact.trace.Trace
-import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import javax.swing.Icon
 
 /**
  * todo: description.
@@ -36,8 +36,8 @@ class TraceRowColumnInfo(name: String) : ColumnInfo<Trace, String>(name) {
 
     override fun getColumnClass(): Class<*> {
         return when (name) {
-            "Duration" -> Duration::class.java
-            "Status" -> Icon::class.java
+            "Duration" -> TraceDurationTableCellRenderer::class.java
+            "Status" -> TraceErrorTableCellRenderer::class.java
             else -> super.getColumnClass()
         }
     }

@@ -25,7 +25,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.Gray
 import com.intellij.ui.JBColor
 import com.intellij.xdebugger.ui.DebuggerColors
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import java.awt.Color
 import java.awt.Font
 
@@ -43,7 +43,7 @@ class VariableEditorLinePainter : EditorLinePainter() {
         lineNumber: Int
     ): Collection<LineExtensionInfo> {
         val lineInfos: MutableList<LineExtensionInfo> = ArrayList()
-        val bpWindow = BreakpointHitWindowService.getInstance(project).getBreakpointWindow()
+        val bpWindow = InstrumentEventWindowService.getInstance(project).getHitWindow()
         if (bpWindow?.stackFrameManager?.currentFrame != null) {
             val vars = bpWindow.stackFrameManager.currentFrame!!.variables
             val attributes = normalAttributes

@@ -46,6 +46,7 @@ object UserData {
         return project.getUserData(VERTX) != null
     }
 
+    @Deprecated("Use LiveViewService instead")
     fun skywalkingMonitorService(project: Project): SkywalkingMonitorService {
         return project.getUserData(SkywalkingMonitorService.KEY)!!
     }
@@ -78,8 +79,8 @@ object UserData {
         return liveInstrumentService
     }
 
-    fun selfInfo(project: Project): SelfInfo {
-        return project.getUserData(SELF_INFO)!!
+    fun selfInfo(project: Project): SelfInfo? {
+        return project.getUserData(SELF_INFO)
     }
 
     fun selfInfo(project: Project, selfInfo: SelfInfo): SelfInfo {

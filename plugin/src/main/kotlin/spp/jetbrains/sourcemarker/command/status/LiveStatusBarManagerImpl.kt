@@ -113,7 +113,7 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                                 is LiveLog -> showLogStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveBreakpoint -> showBreakpointStatusBar(it, event.sourceMark.sourceFileMarker)
                                 is LiveMeter -> showMeterStatusIcon(it, event.sourceMark.sourceFileMarker)
-                                else -> throw UnsupportedOperationException(it.javaClass.simpleName)
+                                else -> Unit
                             }
                         }
                     }
@@ -146,7 +146,6 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
-            statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
             editor.scrollingModel.addVisibleAreaListener(statusBar)
@@ -225,7 +224,6 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                 inlayMark
             )
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
-            statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
             editor.scrollingModel.addVisibleAreaListener(statusBar)
@@ -258,7 +256,6 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
 
             val statusBar = SpanStatusBar(location, inlayMark)
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
-            statusBar.setWrapperPanel(wrapperPanel)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
             editor.scrollingModel.addVisibleAreaListener(statusBar)
@@ -293,7 +290,6 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                         inlayMark
                     )
                     inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
-                    statusBar.setWrapperPanel(wrapperPanel)
                     wrapperPanel.add(statusBar)
                     statusBar.setEditor(editor)
                     statusBar.setLiveInstrument(liveBreakpoint)

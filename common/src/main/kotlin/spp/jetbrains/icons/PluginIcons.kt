@@ -39,14 +39,32 @@ object PluginIcons {
         val save = IconLoader.getIcon("/icons/instrument/live-log/save.svg", PluginIcons::class.java)
         val saveHovered = IconLoader.getIcon("/icons/instrument/live-log/saveHovered.svg", PluginIcons::class.java)
         val savePressed = IconLoader.getIcon("/icons/instrument/live-log/savePressed.svg", PluginIcons::class.java)
+
+        object Overview {
+            val active = IconLoader.getIcon(
+                "/icons/instrument/overview/plug-circle-bolt.svg", PluginIcons::class.java
+            )
+            val complete = IconLoader.getIcon(
+                "/icons/instrument/overview/plug-circle-check.svg", PluginIcons::class.java
+            )
+            val pending = IconLoader.getIcon(
+                "/icons/instrument/overview/plug-circle-exclamation.svg", PluginIcons::class.java
+            )
+            val error = IconLoader.getIcon(
+                "/icons/instrument/overview/plug-circle-xmark.svg", PluginIcons::class.java
+            )
+        }
+    }
+
+    object Log {
+        val foreign = IconLoader.getIcon("/icons/instrument/live-log/live-log-foreign.svg", PluginIcons::class.java)
     }
 
     object Breakpoint {
         val active = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-active.svg", PluginIcons::class.java)
         val complete = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-complete.svg", PluginIcons::class.java)
-        val disabled = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-disabled.svg", PluginIcons::class.java)
         val error = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-error.svg", PluginIcons::class.java)
-        val pending = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-pending.svg", PluginIcons::class.java)
+        val foreign = IconLoader.getIcon("/icons/breakpoint/live-breakpoint-foreign.svg", PluginIcons::class.java)
     }
 
     object ToolWindow {
@@ -113,4 +131,9 @@ object PluginIcons {
     val check = IconLoader.getIcon("/icons/check.svg", PluginIcons::class.java)
     val rotate = IconLoader.getIcon("/icons/rotate.svg", PluginIcons::class.java)
     val triangleExclamation = IconLoader.getIcon("/icons/triangle-exclamation.svg", PluginIcons::class.java)
+    val trash = IconLoader.getIcon("/icons/trash.svg", PluginIcons::class.java)
+    val trashList = IconLoader.getIcon("/icons/trash-list.svg", PluginIcons::class.java)
+    val trashCan = IconLoader.getIcon("/icons/trash-can.svg", PluginIcons::class.java)
+    val xmark = IconLoader.getIcon("/icons/xmark-large.svg", PluginIcons::class.java)
+    val user = IconLoader.getIcon("/icons/user.svg", PluginIcons::class.java)
 }

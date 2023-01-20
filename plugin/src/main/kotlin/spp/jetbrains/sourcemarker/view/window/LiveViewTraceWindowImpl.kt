@@ -36,8 +36,6 @@ import java.awt.BorderLayout
 import java.awt.Point
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.time.Duration
-import javax.swing.Icon
 import javax.swing.JPanel
 import javax.swing.SortOrder
 
@@ -76,8 +74,8 @@ class LiveViewTraceWindowImpl(
     init {
         val table = JBTable(model)
         table.setShowColumns(true)
-        table.setDefaultRenderer(Duration::class.java, TraceDurationTableCellRenderer())
-        table.setDefaultRenderer(Icon::class.java, TraceErrorTableCellRenderer())
+        table.setDefaultRenderer(TraceDurationTableCellRenderer::class.java, TraceDurationTableCellRenderer())
+        table.setDefaultRenderer(TraceErrorTableCellRenderer::class.java, TraceErrorTableCellRenderer())
         table.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(mouseEvent: MouseEvent) {
                 val point: Point = mouseEvent.point

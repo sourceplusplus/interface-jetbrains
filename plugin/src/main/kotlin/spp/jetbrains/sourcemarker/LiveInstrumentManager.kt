@@ -25,17 +25,21 @@ import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import spp.jetbrains.UserData
+import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys
+import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_ID
+import spp.jetbrains.marker.service.ArtifactCreationService.createExpressionGutterMark
+import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService
+import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
+import spp.jetbrains.sourcemarker.instrument.breakpoint.InstrumentNavigationHandler
 import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
-import spp.protocol.instrument.event.LiveBreakpointHit
-import spp.protocol.instrument.event.LiveInstrumentAdded
-import spp.protocol.instrument.event.LiveInstrumentRemoved
-import spp.protocol.instrument.event.LiveLogHit
+import spp.protocol.instrument.LiveBreakpoint
+import spp.protocol.instrument.LiveLog
+import spp.protocol.instrument.event.*
 import spp.protocol.service.SourceServices.Subscribe.toLiveInstrumentSubscriberAddress
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.addLiveInstrumentListener
@@ -83,29 +87,35 @@ class LiveInstrumentManager(
         }
     }
 
-    override fun onLogAddedEvent(event: LiveInstrumentAdded) {
+    override fun onInstrumentAddedEvent(event: LiveInstrumentAdded) {
         ApplicationManager.getApplication().invokeLater {
-            val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.instrument.location.source)
-            if (fileMarker != null) {
-                val smId = event.instrument.meta["original_source_mark"] as String? ?: return@invokeLater
-                val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.instrument.id)
-                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.instrument)
-            } else {
-                LiveStatusBarManager.getInstance(project).addActiveLiveInstrument(event.instrument)
-            }
-        }
-    }
+            log.debug("Instrument added: $event")
+            InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
 
-    override fun onBreakpointAddedEvent(event: LiveInstrumentAdded) {
-        ApplicationManager.getApplication().invokeLater {
-            log.debug("Breakpoint added: $event")
             val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.instrument.location.source)
             if (fileMarker != null) {
-                val smId = event.instrument.meta["original_source_mark"] as String? ?: return@invokeLater
-                val inlayMark = SourceMarker.getInstance(project).getSourceMark(smId) ?: return@invokeLater
-                inlayMark.putUserData(SourceMarkerKeys.INSTRUMENT_ID, event.instrument.id)
-                inlayMark.getUserData(SourceMarkerKeys.STATE_BAR)!!.setLiveInstrument(event.instrument)
+                if (SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!) != null) {
+                    return@invokeLater
+                }
+
+                val gutterMark = createExpressionGutterMark(fileMarker, event.instrument.location.line)
+                gutterMark.putUserData(INSTRUMENT_ID, event.instrument.id)
+                if (event.instrument is LiveBreakpoint) {
+                    if (event.instrument.meta["created_by"] != UserData.selfInfo(project)?.developer?.id) {
+                        gutterMark.configuration.icon = PluginIcons.Breakpoint.foreign
+                        gutterMark.configuration.navigationHandler = InstrumentNavigationHandler(gutterMark, false)
+                    } else {
+                        gutterMark.configuration.icon = PluginIcons.Breakpoint.active
+                        gutterMark.configuration.navigationHandler = InstrumentNavigationHandler(gutterMark, true)
+
+                        InstrumentEventWindowService.getInstance(gutterMark.project)
+                            .selectInOverviewTab(event.instrument.id!!)
+                    }
+                } else if (event.instrument is LiveLog) {
+                    gutterMark.configuration.icon = PluginIcons.Log.foreign
+                    gutterMark.configuration.navigationHandler = InstrumentNavigationHandler(gutterMark, false)
+                }
+                gutterMark.applyIfMissing()
             } else {
                 log.debug("No file marker found for ${event.instrument.location.source}")
             }
@@ -114,8 +124,25 @@ class LiveInstrumentManager(
 
     override fun onInstrumentRemovedEvent(event: LiveInstrumentRemoved) {
         ApplicationManager.getApplication().invokeLater {
+            log.debug("Instrument removed: $event")
+            InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
+
             val inlayMark = SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
             if (inlayMark != null) {
+                if (inlayMark is GutterMark) {
+                    if (event.instrument.meta["created_by"] != UserData.selfInfo(project)?.developer?.id) {
+                        //just remove foreign instrument icons
+                        inlayMark.dispose()
+                    } else {
+                        if (event.cause == null) {
+                            inlayMark.configuration.icon = PluginIcons.Breakpoint.complete
+                        } else {
+                            inlayMark.configuration.icon = PluginIcons.Breakpoint.error
+                        }
+                        inlayMark.sourceFileMarker.refresh()
+                    }
+                }
+
                 val eventListeners = inlayMark.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
                 if (eventListeners?.isNotEmpty() == true) {
                     eventListeners.forEach { it.onInstrumentRemovedEvent(event) }
@@ -124,17 +151,24 @@ class LiveInstrumentManager(
         }
     }
 
-    override fun onBreakpointHitEvent(event: LiveBreakpointHit) {
+    override fun onInstrumentHitEvent(event: LiveInstrumentHit) {
         ApplicationManager.getApplication().invokeLater {
-            BreakpointHitWindowService.getInstance(project).addBreakpointHit(event)
+            InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
 
-            SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
-                ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onBreakpointHitEvent(event) }
+            if (event is LiveBreakpointHit) {
+                SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
+                    ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
+                    ?.forEach { it.onBreakpointHitEvent(event) }
+            } else if (event is LiveLogHit) {
+                SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
+                    ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
+            }
         }
     }
 
-    override fun onLogHitEvent(event: LiveLogHit) {
-        SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
-            ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
+    override fun onInstrumentAppliedEvent(event: LiveInstrumentApplied) {
+        ApplicationManager.getApplication().invokeLater {
+            InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
+        }
     }
 }

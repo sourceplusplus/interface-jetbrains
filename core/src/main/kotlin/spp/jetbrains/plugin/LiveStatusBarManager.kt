@@ -37,9 +37,11 @@ interface LiveStatusBarManager {
     fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker)
     fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker)
     fun showMeterStatusIcon(liveMeter: LiveMeter, sourceFileMarker: SourceFileMarker)
-
     fun addStatusBar(sourceMark: SourceMark, listener: LiveInstrumentListener)
+
+    @Deprecated("Subscribe to view id instead")
     fun addViewEventListener(sourceMark: SourceMark, listener: LiveViewEventListener)
+
     fun addActiveLiveInstrument(instrument: LiveInstrument)
     fun addActiveLiveInstruments(instruments: List<LiveInstrument>)
     fun removeActiveLiveInstrument(instrument: LiveInstrument)
