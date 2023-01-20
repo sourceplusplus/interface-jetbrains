@@ -34,6 +34,7 @@ import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.artifact.trace.TraceStack
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
@@ -264,6 +265,10 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
         start: Instant,
         stop: Instant?
     ): Future<HistoricalView> {
+        return Future.failedFuture(UnsupportedOperationException())
+    }
+
+    override fun getTraceStack(traceId: String): Future<TraceStack?> {
         return Future.failedFuture(UnsupportedOperationException())
     }
 
