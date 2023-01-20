@@ -18,6 +18,7 @@ package spp.jetbrains.sourcemarker.command
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.util.TextRange
 import liveplugin.implementation.common.toFilePath
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.artifact.service.ArtifactScopeService
@@ -30,11 +31,13 @@ import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
+import spp.jetbrains.marker.source.mark.guide.ClassGuideMark
+import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.sourcemarker.command.ui.ControlBar
-import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.jetbrains.status.SourceStatusService
 import java.awt.BorderLayout
 import javax.swing.JComponent
@@ -85,7 +88,7 @@ object CommandBarController {
                 val args = if (argsString.isEmpty()) emptyList() else argsString.split(" ")
                 val variableName = ArtifactNamingService.getVariableName(prevCommandBar.getPsiElement())
 
-                val guideMark = SourceMarkSearch.getClosestGuideMark(prevCommandBar.sourceFileMarker, editor)
+                val guideMark = getClosestGuideMark(prevCommandBar.sourceFileMarker, editor)
                 it.trigger(
                     LiveCommandContext(
                         args,
@@ -169,5 +172,29 @@ object CommandBarController {
             }
         }
         return null
+    }
+
+    private fun getClosestGuideMark(sourceFileMarker: SourceFileMarker, editor: Editor): GuideMark? {
+        var classSourceMark: ClassGuideMark? = null
+        val sourceMark = sourceFileMarker.getSourceMarks().filterIsInstance<GuideMark>().find {
+            if (it is ClassGuideMark) {
+                classSourceMark = it //todo: probably doesn't handle inner classes well
+                false
+            } else if (it is MethodGuideMark) {
+                if (it.configuration.activateOnKeyboardShortcut) {
+                    //+1 on end offset so match is made even right after method end
+                    val incTextRange = TextRange(
+                        it.getPsiMethod().textRange.startOffset,
+                        it.getPsiMethod().textRange.endOffset + 1
+                    )
+                    incTextRange.contains(editor.logicalPositionToOffset(editor.caretModel.logicalPosition))
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+        return sourceMark ?: classSourceMark
     }
 }

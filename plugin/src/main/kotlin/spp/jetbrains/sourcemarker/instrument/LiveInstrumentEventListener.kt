@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker
+package spp.jetbrains.sourcemarker.instrument
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
@@ -34,9 +34,6 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
-import spp.jetbrains.sourcemarker.instrument.breakpoint.InstrumentNavigationHandler
-import spp.jetbrains.sourcemarker.mark.SourceMarkSearch
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.*
@@ -50,13 +47,13 @@ import spp.protocol.service.listen.addLiveInstrumentListener
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveInstrumentManager(
+class LiveInstrumentEventListener(
     private val project: Project,
     private val pluginConfig: SourceMarkerConfig
 ) : CoroutineVerticle(), LiveInstrumentListener {
 
     companion object {
-        private val log = logger<LiveInstrumentManager>()
+        private val log = logger<LiveInstrumentEventListener>()
     }
 
     override suspend fun start() {
@@ -94,7 +91,7 @@ class LiveInstrumentManager(
 
             val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.instrument.location.source)
             if (fileMarker != null) {
-                if (SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!) != null) {
+                if (SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!) != null) {
                     return@invokeLater
                 }
 
@@ -127,7 +124,7 @@ class LiveInstrumentManager(
             log.debug("Instrument removed: $event")
             InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
 
-            val inlayMark = SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
+            val inlayMark = SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!)
             if (inlayMark != null) {
                 if (inlayMark is GutterMark) {
                     if (event.instrument.meta["created_by"] != UserData.selfInfo(project)?.developer?.id) {
@@ -156,11 +153,11 @@ class LiveInstrumentManager(
             InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
 
             if (event is LiveBreakpointHit) {
-                SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
+                SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!)
                     ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
                     ?.forEach { it.onBreakpointHitEvent(event) }
             } else if (event is LiveLogHit) {
-                SourceMarkSearch.findByInstrumentId(project, event.instrument.id!!)
+                SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!)
                     ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
             }
         }

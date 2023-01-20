@@ -75,8 +75,8 @@
     </projectListeners>
 
     <actions>
-        <action id="spp.jetbrains.sourcemarker.command.CommandBarAction"
-                class="spp.jetbrains.sourcemarker.command.CommandBarAction"
+        <action id="spp.jetbrains.sourcemarker.command.action.CommandBarAction"
+                class="spp.jetbrains.sourcemarker.command.action.CommandBarAction"
                 text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>

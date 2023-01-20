@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.mark
+package spp.jetbrains.sourcemarker.vcs
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.Disposable
@@ -48,9 +48,9 @@ import spp.jetbrains.safeLaunch
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class PluginSourceMarkEventListener(val project: Project) : CoroutineVerticle(), Disposable {
+class CodeChangeListener(val project: Project) : CoroutineVerticle(), Disposable {
 
-    private val log = logger<PluginSourceMarkEventListener>()
+    private val log = logger<CodeChangeListener>()
     private val codeChangeQueue = MergingUpdateQueue(
         "SPP_CODE_CHANGED", 200, true, null, this
     ).setRestartTimerOnAdd(true)

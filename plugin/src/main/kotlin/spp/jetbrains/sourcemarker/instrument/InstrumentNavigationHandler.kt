@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.breakpoint
+package spp.jetbrains.sourcemarker.instrument
 
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.openapi.actionSystem.*
@@ -23,7 +23,6 @@ import com.intellij.psi.PsiElement
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
-import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import java.awt.event.MouseEvent
 import javax.swing.SwingUtilities
 

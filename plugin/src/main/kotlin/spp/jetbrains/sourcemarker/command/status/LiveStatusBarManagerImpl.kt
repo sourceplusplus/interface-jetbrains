@@ -73,10 +73,7 @@ import javax.swing.JPanel
  */
 class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveStatusBarManager, SourceMarkEventListener {
 
-    companion object {
-        private val log = logger<LiveStatusBarManagerImpl>()
-    }
-
+    private val log = logger<LiveStatusBarManagerImpl>()
     private val activeStatusBars = CopyOnWriteArrayList<LiveInstrument>()
     private val logData = ConcurrentHashMap<String, List<*>>()
 

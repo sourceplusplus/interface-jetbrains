@@ -28,6 +28,7 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.openapi.wm.impl.status.EditorBasedStatusBarPopup
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
+import spp.jetbrains.sourcemarker.status.action.SourceStatusItemAction
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatus.Ready

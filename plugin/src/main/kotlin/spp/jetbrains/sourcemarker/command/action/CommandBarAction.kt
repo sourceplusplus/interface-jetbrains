@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.command
+package spp.jetbrains.sourcemarker.command.action
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.project.Project
+import spp.jetbrains.sourcemarker.command.CommandBarController
 
 /**
  * Shows the Live Command Palette on keyboard shortcut.
