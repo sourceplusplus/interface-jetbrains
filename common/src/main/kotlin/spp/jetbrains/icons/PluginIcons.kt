@@ -80,22 +80,22 @@ object PluginIcons {
     val statusFailed = IconLoader.getIcon("/icons/statusBar/status-failed.svg", PluginIcons::class.java)
 
     @JvmField
-    val expand = IconLoader.getIcon("/icons/expand.svg", PluginIcons::class.java)
+    val minimize = IconLoader.getIcon("/icons/minimize.svg", PluginIcons::class.java)
 
     @JvmField
-    val expandHovered = IconLoader.getIcon("/icons/expandHovered.svg", PluginIcons::class.java)
+    val minimizeHovered = IconLoader.getIcon("/icons/minimizeHovered.svg", PluginIcons::class.java)
 
     @JvmField
-    val expandPressed = IconLoader.getIcon("/icons/expandPressed.svg", PluginIcons::class.java)
+    val minimizePressed = IconLoader.getIcon("/icons/minimizePressed.svg", PluginIcons::class.java)
 
     @JvmField
-    val close = IconLoader.getIcon("/icons/closeIcon.svg", PluginIcons::class.java)
+    val close = IconLoader.getIcon("/icons/close.svg", PluginIcons::class.java)
 
     @JvmField
-    val closeHovered = IconLoader.getIcon("/icons/closeIconHovered.svg", PluginIcons::class.java)
+    val closeHovered = IconLoader.getIcon("/icons/closeHovered.svg", PluginIcons::class.java)
 
     @JvmField
-    val closePressed = IconLoader.getIcon("/icons/closeIconPressed.svg", PluginIcons::class.java)
+    val closePressed = IconLoader.getIcon("/icons/closePressed.svg", PluginIcons::class.java)
 
     @JvmField
     val clock = IconLoader.getIcon("/icons/clock.svg", PluginIcons::class.java)
