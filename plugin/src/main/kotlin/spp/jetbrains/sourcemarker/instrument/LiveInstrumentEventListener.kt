@@ -94,7 +94,7 @@ class LiveInstrumentEventListener(
                 //wait for method guide marks as they indicate a method currently is or may become visible
                 if (event.sourceMark !is MethodGuideMark) return
 
-                //display status bar(s) for method
+                //display status icon(s) for method
                 ApplicationManager.getApplication().runReadAction {
                     val methodSourceMark = event.sourceMark as MethodGuideMark
                     val fileMarker = event.sourceMark.sourceFileMarker
@@ -140,6 +140,9 @@ class LiveInstrumentEventListener(
             val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(event.instrument.location.source)
             if (fileMarker != null) {
                 addGutterMark(fileMarker, event.instrument)
+
+                InstrumentEventWindowService.getInstance(project)
+                    .selectInOverviewTab(event.instrument.id!!)
             } else {
                 log.debug("No file marker found for ${event.instrument.location.source}")
             }
@@ -147,7 +150,7 @@ class LiveInstrumentEventListener(
     }
 
     private fun addGutterMark(fileMarker: SourceFileMarker, instrument: LiveInstrument) {
-        if (SourceMarker.getInstance(project).findByInstrumentId(instrument.id!!) != null) {
+        if (fileMarker.getGutterMarks().any { it.getUserData(INSTRUMENT_ID) == instrument.id }) {
             return
         }
 
@@ -160,13 +163,15 @@ class LiveInstrumentEventListener(
             } else {
                 gutterMark.configuration.icon = PluginIcons.Breakpoint.active
                 gutterMark.configuration.navigationHandler = InstrumentNavigationHandler(gutterMark, true)
-
-                InstrumentEventWindowService.getInstance(gutterMark.project)
-                    .selectInOverviewTab(instrument.id!!)
             }
         } else if (instrument is LiveLog) {
-            gutterMark.configuration.icon = PluginIcons.Log.foreign
-            gutterMark.configuration.navigationHandler = InstrumentNavigationHandler(gutterMark, false)
+            if (instrument.meta["created_by"] != UserData.selfInfo(project)?.developer?.id) {
+                gutterMark.configuration.icon = PluginIcons.Log.foreign
+                gutterMark.configuration.navigationHandler = InstrumentNavigationHandler(gutterMark, false)
+            } else {
+                gutterMark.configuration.icon = PluginIcons.Log.active
+                gutterMark.configuration.navigationHandler = InstrumentNavigationHandler(gutterMark, true)
+            }
         }
         gutterMark.applyIfMissing()
     }
@@ -182,6 +187,9 @@ class LiveInstrumentEventListener(
                 if (inlayMark is GutterMark) {
                     if (event.instrument.meta["created_by"] != UserData.selfInfo(project)?.developer?.id) {
                         //just remove foreign instrument icons
+                        inlayMark.dispose()
+                    } else if (event.instrument !is LiveBreakpoint) {
+                        //just remove non-breakpoint icons
                         inlayMark.dispose()
                     } else {
                         if (event.cause == null) {

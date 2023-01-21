@@ -95,6 +95,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
     private JWindow popup;
     private LiveLogConfigurationPanel configurationPanel;
     private boolean disposed = false;
+    private JLabel minimizeLabel;
     private JPanel wrapper;
     private boolean errored = false;
     private boolean removed = false;
@@ -167,6 +168,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         initCommandModel();
         removeActiveDecorations();
         displayTimeField();
+        addMinimizeButton();
         repaint();
         LiveStatusBarManager.getInstance(inlayMark.getProject()).addStatusBar(inlayMark, this);
     }
@@ -285,8 +287,48 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         setLatestLog(Instant.now(), latestLog);
     }
 
+    private void addMinimizeButton() {
+        if (minimizeLabel != null) {
+            remove(minimizeLabel);
+        }
+        minimizeLabel = new JLabel();
+        minimizeLabel.setCursor(Cursor.getDefaultCursor());
+        minimizeLabel.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                minimizeLabel.setIcon(PluginIcons.minimizeHovered);
+                closeLabel.setIcon(PluginIcons.close);
+            }
+        });
+        addRecursiveMouseListener(minimizeLabel, new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                inlayMark.dispose();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                minimizeLabel.setIcon(PluginIcons.minimizePressed);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                minimizeLabel.setIcon(PluginIcons.minimizeHovered);
+            }
+        }, () -> {
+            removeActiveDecorations();
+            return null;
+        });
+
+        remove(closeLabel);
+        minimizeLabel.setIcon(PluginIcons.minimize);
+        add(minimizeLabel, "cell 3 0,gapx 0 0");
+        add(closeLabel, "cell 3 0,gapx 0 0");
+    }
+
     private void removeActiveDecorations() {
         SwingUtilities.invokeLater(() -> {
+            if (minimizeLabel != null) minimizeLabel.setIcon(PluginIcons.minimize);
             closeLabel.setIcon(PluginIcons.close);
             configPanel.setBackground(getInputBackgroundColor());
 
@@ -407,6 +449,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
             @Override
             public void mouseMoved(MouseEvent e) {
                 closeLabel.setIcon(PluginIcons.closeHovered);
+                if (minimizeLabel != null) minimizeLabel.setIcon(PluginIcons.minimize);
             }
         });
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
@@ -569,6 +612,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         liveLogTextField.setPlaceHolderText(WAITING_FOR_LIVE_LOG_DATA);
         removeActiveDecorations();
         displayTimeField();
+        addMinimizeButton();
         wrapper.grabFocus();
 
         UserData.liveInstrumentService(inlayMark.getProject()).addLiveInstrument(instrument).onComplete(it -> {

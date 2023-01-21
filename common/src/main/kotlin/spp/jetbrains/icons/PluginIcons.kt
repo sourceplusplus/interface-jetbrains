@@ -57,6 +57,7 @@ object PluginIcons {
     }
 
     object Log {
+        val active = IconLoader.getIcon("/icons/instrument/live-log/live-log-active.svg", PluginIcons::class.java)
         val foreign = IconLoader.getIcon("/icons/instrument/live-log/live-log-foreign.svg", PluginIcons::class.java)
     }
 
