@@ -117,7 +117,7 @@ class SourceInlayComponentProvider(val editor: EditorImpl) : Disposable {
 
         init {
             val metrics = editor.getFontMetrics(Font.PLAIN)
-            val spaceWidth = FontLayoutService.getInstance().charWidth2D(metrics, ' '.toInt())
+            val spaceWidth = FontLayoutService.getInstance().charWidth2D(metrics, ' '.code)
             @Suppress("MagicNumber") // -4 to create some space
             maximumEditorTextWidth = ceil(spaceWidth * (editor.settings.getRightMargin(editor.project)) - 4).toInt()
 
