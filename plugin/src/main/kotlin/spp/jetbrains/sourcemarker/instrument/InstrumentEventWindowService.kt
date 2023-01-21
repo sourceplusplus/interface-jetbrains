@@ -27,6 +27,7 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.sourcemarker.instrument.breakpoint.ui.BreakpointHitTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentEventTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentOverviewTab
@@ -34,6 +35,7 @@ import spp.jetbrains.sourcemarker.instrument.ui.action.ClearInstrumentsAction
 import spp.jetbrains.sourcemarker.instrument.ui.action.RemoveInstrumentAction
 import spp.jetbrains.sourcemarker.instrument.ui.model.InstrumentOverview
 import spp.jetbrains.status.SourceStatusListener
+import spp.protocol.artifact.exception.sourceAsLineNumber
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 
@@ -46,7 +48,6 @@ import spp.protocol.instrument.event.LiveInstrumentEvent
 class InstrumentEventWindowService(val project: Project) : Disposable {
 
     companion object {
-        @JvmStatic
         fun getInstance(project: Project): InstrumentEventWindowService {
             return project.getService(InstrumentEventWindowService::class.java)
         }
@@ -190,13 +191,32 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
         breakpointHitTab = BreakpointHitTab(project, executionPointHighlighter, showExecutionPoint)
 
         //grab first non-skywalking frame and add real variables from skywalking frame
-        val firstFrame = hit.stackTrace.first()
-        val firstNonSkyWalkingFrame = hit.stackTrace.getElements(true).first()
+        val stackTrace = hit.stackTrace.copy(
+            elements = hit.stackTrace.elements.map { it.copy(variables = it.variables.toMutableList()) }.toMutableList()
+        )
+        val filteredStackTrace = stackTrace.copy(
+            elements = stackTrace.getElements(true).toMutableList()
+        )
+        var firstNonSkyWalkingFrame = filteredStackTrace.first()
+        val firstFrame = stackTrace.first()
         if (firstFrame != firstNonSkyWalkingFrame) {
-            firstNonSkyWalkingFrame.variables.addAll(hit.stackTrace.first().variables)
+            firstNonSkyWalkingFrame.variables.addAll(firstFrame.variables)
         }
 
-        breakpointHitTab.showFrames(hit.stackTrace, firstNonSkyWalkingFrame)
+        if (firstNonSkyWalkingFrame.source.contains("Unknown Source")) {
+            val psiFile = filteredStackTrace.language?.let {
+                ArtifactNamingService.getService(it).findPsiFile(it, project, firstNonSkyWalkingFrame)
+            }
+            if (psiFile != null) {
+                //replace first frame source with actual source
+                firstNonSkyWalkingFrame = firstNonSkyWalkingFrame.copy(
+                    source = psiFile.virtualFile.name + firstNonSkyWalkingFrame.sourceAsLineNumber()?.let { ":$it" }
+                )
+                filteredStackTrace.elements[0] = firstNonSkyWalkingFrame
+            }
+        }
+
+        breakpointHitTab.showFrames(filteredStackTrace, firstNonSkyWalkingFrame)
         val content = contentFactory.createContent(
             breakpointHitTab.layoutComponent, firstNonSkyWalkingFrame.source + " at #0", false
         )

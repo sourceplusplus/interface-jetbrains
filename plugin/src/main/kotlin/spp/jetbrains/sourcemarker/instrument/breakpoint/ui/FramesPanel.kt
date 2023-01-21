@@ -61,7 +61,7 @@ class FramesPanel(
         this.activeStackTrace = activeStackTrace
 
         val currentFrame = activeStackTrace.currentFrame
-        stackFrameList.model = CollectionListModel(activeStackTrace.stackTrace.getElements(true))
+        stackFrameList.model = CollectionListModel(activeStackTrace.stackTrace.elements)
         stackFrameList.setSelectedValue(currentFrame, true)
     }
 
