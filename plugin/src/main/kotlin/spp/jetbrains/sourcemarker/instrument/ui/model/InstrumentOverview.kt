@@ -67,4 +67,7 @@ data class InstrumentOverview(
 
     val isFinished: Boolean
         get() = events.any { it is LiveInstrumentRemoved }
+
+    fun isRemovable(selfId: String): Boolean =
+        events.none { it is LiveInstrumentRemoved } && events.first().instrument.meta["created_by"] == selfId
 }

@@ -21,6 +21,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.logger
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentOverviewTab
 
@@ -39,10 +40,18 @@ class ClearInstrumentsAction(val service: InstrumentEventWindowService) : AnActi
     }
 
     override fun update(e: AnActionEvent) {
-        if (service.selectedTab is InstrumentOverviewTab) {
-            e.presentation.isEnabled = service.allOverviews.any { !it.isFinished }
-        } else {
-            e.presentation.isEnabled = false
+        UserData.vertx(service.project).safeLaunch {
+            val selfInfo = UserData.selfInfo(service.project)
+            if (selfInfo == null) {
+                e.presentation.isEnabled = false
+                return@safeLaunch
+            }
+
+            if (service.selectedTab is InstrumentOverviewTab) {
+                e.presentation.isEnabled = service.allOverviews.any { it.isRemovable(selfInfo.developer.id) }
+            } else {
+                e.presentation.isEnabled = false
+            }
         }
     }
 
