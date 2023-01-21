@@ -377,7 +377,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
             popup.dispose();
             popup = null;
         }
-        inlayMark.dispose(true);
+        inlayMark.dispose();
         List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkerKeys.getGROUPED_MARKS());
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 

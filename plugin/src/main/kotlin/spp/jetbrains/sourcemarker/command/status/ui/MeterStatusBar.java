@@ -382,7 +382,7 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
             popup.dispose();
             popup = null;
         }
-        inlayMark.dispose(true);
+        inlayMark.dispose();
         List<SourceMark> groupedMarks = inlayMark.getUserData(SourceMarkerKeys.getGROUPED_MARKS());
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 

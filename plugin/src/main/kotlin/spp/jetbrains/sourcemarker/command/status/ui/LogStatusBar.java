@@ -604,7 +604,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
                 }
             });
         }
-        inlayMark.dispose(true);
+        inlayMark.dispose();
     }
 
     public static String substringAfterLast(String delimiter, String value) {
