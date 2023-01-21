@@ -18,43 +18,19 @@ package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo3.api.Optional
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
-import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
-import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.*
-import spp.jetbrains.monitor.skywalking.model.*
-import spp.jetbrains.monitor.skywalking.model.ServiceInstance
+import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.model.TimeInfo
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
-import spp.protocol.artifact.metrics.ArtifactMetricResult
-import spp.protocol.artifact.metrics.ArtifactMetrics
-import spp.protocol.artifact.metrics.MetricType
+import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.artifact.trace.*
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.platform.general.Service
 import java.time.Instant
-
-fun toProtocol(
-    metricsRequest: GetEndpointMetrics,
-    metrics: List<GetLinearIntValuesQuery.Result>
-): ArtifactMetricResult {
-    return ArtifactMetricResult(
-        start = metricsRequest.zonedDuration.start.toInstant(),
-        stop = metricsRequest.zonedDuration.stop.toInstant(),
-        step = metricsRequest.zonedDuration.step.name,
-        artifactMetrics = metrics.mapIndexed { i, result -> result.toProtocol(metricsRequest.metricIds[i]) }
-    )
-}
-
-fun GetLinearIntValuesQuery.Result.toProtocol(metricType: String): ArtifactMetrics {
-    return ArtifactMetrics(
-        metricType = MetricType(metricType),
-        values = values.map { (it.value as Int).toDouble() }
-    )
-}
 
 fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
     return Trace(
@@ -67,12 +43,11 @@ fun QueryBasicTracesQuery.Trace.toProtocol(): Trace {
     )
 }
 
-//todo: correctly
 fun QueryTraceQuery.Log.toProtocol(): TraceSpanLogEntry {
     if (data!!.find { it.key == "stack" } != null) {
         return TraceSpanLogEntry(
             time = Instant.ofEpochMilli(time as Long),
-            data = data.find { it.key == "stack" }!!.value!! //todo: correctly
+            data = data.find { it.key == "stack" }!!.value!!
         )
     }
     return TraceSpanLogEntry(
@@ -98,7 +73,7 @@ fun QueryTraceQuery.Span.toProtocol(): TraceSpan {
         parentSpanId = parentSpanId,
         refs = refs.map { it.toProtocol() },
         serviceCode = serviceCode,
-        //serviceInstanceName = serviceInstanceName, //todo: this
+        //serviceInstanceName = serviceInstanceName,
         startTime = Instant.ofEpochMilli(startTime as Long),
         endTime = Instant.ofEpochMilli(endTime as Long),
         endpointName = endpointName,
@@ -130,10 +105,6 @@ fun Iterable<GetLinearIntValuesQuery.Value>.average(): Double {
     return map { it.value as Int }.average()
 }
 
-fun GetMultipleLinearIntValuesQuery.Value.toProtocol(): Double {
-    return (value as Int).toDouble()
-}
-
 fun GetAllServicesQuery.Result.toProtocol(): Service {
     return Service(id, name)
 }
@@ -148,10 +119,6 @@ fun ZonedDuration.toDuration(skywalkingClient: SkywalkingClient): Duration {
     }
 }
 
-fun List<GetLinearIntValuesQuery.Result>.toProtocol(metricsRequest: GetEndpointMetrics): List<ArtifactMetrics> {
-    return mapIndexed { i, result -> result.toProtocol(metricsRequest.metricIds[i]) }
-}
-
 fun TopNCondition.fromProtocol(): monitor.skywalking.protocol.type.TopNCondition {
     return monitor.skywalking.protocol.type.TopNCondition(
         name,
@@ -161,18 +128,6 @@ fun TopNCondition.fromProtocol(): monitor.skywalking.protocol.type.TopNCondition
         topN,
         Order.valueOf(order.name)
     )
-}
-
-fun List<GetServiceInstancesQuery.Result>.toProtocol(): List<ServiceInstance> {
-    return map {
-        ServiceInstance(
-            it.id,
-            it.name,
-            it.language.let { ServiceInstance.Language.valueOf(it.name) },
-            it.instanceUUID,
-            it.attributes.map { ServiceInstance.Attribute(it.name, it.value) }
-        )
-    }
 }
 
 fun GetTimeInfoQuery.Data.toProtocol(): TimeInfo {

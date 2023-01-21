@@ -22,12 +22,10 @@ import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
 import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
-import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.TimeInfo
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
-import spp.protocol.artifact.trace.TraceResult
 import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.platform.general.Service
 
@@ -47,10 +45,6 @@ class SkywalkingMonitorServiceImpl(
 
     override suspend fun getEndpoints(serviceId: String, limit: Int, cache: Boolean): JsonArray {
         return skywalkingClient.searchEndpoint("", serviceId, limit, cache)
-    }
-
-    override suspend fun getTraces(request: GetEndpointTraces): TraceResult {
-        return EndpointTracesBridge.getTraces(request, skywalkingClient.vertx)
     }
 
     override suspend fun getTraceStack(traceId: String): List<TraceSpan> {
