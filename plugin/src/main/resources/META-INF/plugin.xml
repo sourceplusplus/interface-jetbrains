@@ -28,7 +28,7 @@
         <projectService
                 serviceImplementation="spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService"/>
         <editor.linePainter
-                implementation="spp.jetbrains.sourcemarker.instrument.breakpoint.painter.VariableEditorLinePainter"/>
+                implementation="spp.jetbrains.sourcemarker.instrument.breakpoint.VariableEditorLinePainter"/>
         <projectConfigurable
                 instance="spp.jetbrains.sourcemarker.config.SourceMarkerConfigurable"
                 groupId="tools"
