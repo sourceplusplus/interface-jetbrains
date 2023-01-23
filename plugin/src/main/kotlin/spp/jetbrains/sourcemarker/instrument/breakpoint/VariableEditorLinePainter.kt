@@ -27,6 +27,7 @@ import com.intellij.ui.JBColor
 import com.intellij.xdebugger.ui.DebuggerColors
 import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
+import spp.jetbrains.sourcemarker.instrument.breakpoint.ui.BreakpointHitTab
 import spp.protocol.instrument.variable.LiveVariable
 import java.awt.Color
 import java.awt.Font
@@ -41,11 +42,13 @@ class VariableEditorLinePainter : EditorLinePainter() {
 
     override fun getLineExtensions(project: Project, file: VirtualFile, lineNumber: Int): List<LineExtensionInfo> {
         val lineInfos = mutableListOf<LineExtensionInfo>()
-        val bpHitTab = InstrumentEventWindowService.getInstance(project).getBreakpointHitTab()
-        if (bpHitTab?.activeStack?.currentFrame != null) {
-            val vars = bpHitTab.activeStack.currentFrame!!.variables
+        val selectedTab = InstrumentEventWindowService.getInstance(project).selectedTab
+        if (selectedTab !is BreakpointHitTab) return emptyList()
+
+        val activeFrame = selectedTab.activeStack.currentFrame
+        if (activeFrame != null) {
             val attributes = normalAttributes
-            vars.forEach {
+            activeFrame.variables.forEach {
                 if (it.lineNumber == lineNumber + 1) {
                     lineInfos.add(LineExtensionInfo("  ${it.name} = ${it.value}", attributes))
                 }
