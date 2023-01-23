@@ -39,11 +39,11 @@ class VariableRootSimpleNode : SimpleNode() {
             return emptyArray() //wait till initialized
         }
 
-        return if (activeStack.currentFrame?.variables.isNullOrEmpty()) {
+        val currentFrame = activeStack.currentFrame
+        return if (currentFrame == null || currentFrame.variables.isEmpty()) {
             NO_CHILDREN
         } else {
-            val vars = activeStack.currentFrame!!.variables
-            ArtifactMarkService.toPresentationNodes(activeStack.stackTrace.language!!, vars)
+            ArtifactMarkService.toPresentationNodes(activeStack.stackTrace.language!!, currentFrame.variables)
         }
     }
 }
