@@ -20,11 +20,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
-import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.content.ContentFactory
-import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import io.vertx.core.eventbus.MessageConsumer
@@ -67,9 +65,9 @@ class LiveViewTraceManagerImpl(
     }
 
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
-    private var toolWindow: ToolWindow = ToolWindowManager.getInstance(project)
+    private var toolWindow = ToolWindowManager.getInstance(project)
         .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.ToolWindow.listTree))
-    private var contentManager: ContentManager = toolWindow.contentManager
+    private var contentManager = toolWindow.contentManager
     override var currentView: ResumableView? = null
     override val refreshInterval: Int?
         get() = currentView?.refreshInterval

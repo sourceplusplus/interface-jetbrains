@@ -74,10 +74,12 @@ import spp.jetbrains.sourcemarker.config.getServicePortNormalized
 import spp.jetbrains.sourcemarker.config.isSsl
 import spp.jetbrains.sourcemarker.config.serviceHostNormalized
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
-import spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService
-import spp.jetbrains.sourcemarker.mark.PluginSourceMarkEventListener
+import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
+import spp.jetbrains.sourcemarker.instrument.LiveInstrumentEventListener
 import spp.jetbrains.sourcemarker.status.SourceStatusServiceImpl
+import spp.jetbrains.sourcemarker.vcs.CodeChangeListener
 import spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl
+import spp.jetbrains.sourcemarker.view.LiveViewEventListener
 import spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
@@ -365,7 +367,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         //live instrument
         if (availableRecords.any { it.name == SourceServices.LIVE_INSTRUMENT }) {
             log.info("Live instruments available")
-            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(liveStatusManager)
 
             val liveInstrument = ServiceProxyBuilder(vertx)
                 .apply { config.serviceToken?.let { setToken(it) } }
@@ -374,10 +375,11 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             UserData.liveInstrumentService(project, liveInstrument)
 
             ApplicationManager.getApplication().invokeLater {
-                BreakpointHitWindowService.getInstance(project).showEventsWindow()
+                InstrumentEventWindowService.getInstance(project).makeOverviewTab()
             }
-            val breakpointListener = LiveInstrumentManager(project, config)
-            vertx.deployVerticle(breakpointListener).await()
+            val eventListener = LiveInstrumentEventListener(project, config)
+            vertx.deployVerticle(eventListener).await()
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(eventListener)
         } else {
             log.warn("Live instruments unavailable")
         }
@@ -391,8 +393,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 .build(LiveViewService::class.java)
             UserData.liveViewService(project, liveView)
 
-            val viewListener = LiveViewManager(project, config)
-            vertx.deployVerticle(viewListener).await()
+            val eventListener = LiveViewEventListener(project, config)
+            vertx.deployVerticle(eventListener).await()
         } else {
             log.warn("Live views unavailable")
         }
@@ -596,7 +598,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
 
-        vertx.deployVerticle(PluginSourceMarkEventListener(project)).await()
+        vertx.deployVerticle(CodeChangeListener(project)).await()
 
         SourceMarker.getInstance(project).apply {
             addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)

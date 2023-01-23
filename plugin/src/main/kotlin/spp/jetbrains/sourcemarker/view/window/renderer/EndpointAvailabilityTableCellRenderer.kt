@@ -63,5 +63,6 @@ class EndpointAvailabilityTableCellRenderer : ColoredTableCellRenderer() {
             )
             icon = PluginIcons.check
         }
+        isTransparentIconBackground = true
     }
 }

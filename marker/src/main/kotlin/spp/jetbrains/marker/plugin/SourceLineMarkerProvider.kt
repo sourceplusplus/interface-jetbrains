@@ -19,7 +19,6 @@ package spp.jetbrains.marker.plugin
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
-import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment.CENTER
 import com.intellij.psi.*
 import com.intellij.util.Function
 import spp.jetbrains.marker.SourceMarker
@@ -62,7 +61,9 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
         val icon = gutterMark.configuration.icon ?: return null
 
         var navigationHandler: GutterIconNavigationHandler<PsiElement>? = null
-        if (gutterMark.configuration.activateOnMouseClick) {
+        if (gutterMark.configuration.navigationHandler != null) {
+            navigationHandler = gutterMark.configuration.navigationHandler
+        } else if (gutterMark.configuration.activateOnMouseClick) {
             navigationHandler = GutterIconNavigationHandler { _, _ ->
                 element.getUserData(GutterMark.KEY)!!.displayPopup()
             }
@@ -80,7 +81,7 @@ class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
                 }
             },
             navigationHandler,
-            CENTER
+            gutterMark.configuration.iconAlignment
         ) { "spp.line-marker" }
     }
 

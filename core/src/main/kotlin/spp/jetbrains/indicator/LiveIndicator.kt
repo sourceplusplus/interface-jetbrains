@@ -40,13 +40,15 @@ abstract class LiveIndicator(val project: Project) {
     private var periodicTimerId = -1L
     val dumbService = DumbService.getInstance(project)
     val vertx = UserData.vertx(project)
+
+    @Deprecated("Use LiveViewService instead")
     val skywalkingMonitorService = UserData.skywalkingMonitorService(project)
     val managementService = UserData.liveManagementService(project)!!
     val viewService = UserData.liveViewService(project)!!
     val statusManager = LiveStatusBarManager.getInstance(project)
     val instrumentService = UserData.liveInstrumentService(project)
     val selfInfo: SelfInfo
-        get() = UserData.selfInfo(project)
+        get() = UserData.selfInfo(project)!!
 
     open suspend fun onRegister() {
         vertx.setPeriodic(5000) { timerId ->

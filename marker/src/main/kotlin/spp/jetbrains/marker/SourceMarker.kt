@@ -188,4 +188,16 @@ class SourceMarker(private val project: Project) {
     fun getGuideMarks(): List<GuideMark> {
         return getSourceMarks().filterIsInstance<GuideMark>()
     }
+
+    fun findByInstrumentId(instrumentId: String): SourceMark? {
+        return getSourceMarks().firstOrNull {
+            it.getUserData(SourceMarkerKeys.INSTRUMENT_ID) == instrumentId
+        }
+    }
+
+    fun findBySubscriptionId(subscriptionId: String): SourceMark? {
+        return getSourceMarks().firstOrNull {
+            it.getUserData(SourceMarkerKeys.VIEW_SUBSCRIPTION_ID) == subscriptionId
+        }
+    }
 }

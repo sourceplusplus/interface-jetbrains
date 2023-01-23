@@ -18,7 +18,7 @@ package spp.jetbrains.sourcemarker.instrument.breakpoint.tree
 
 import com.intellij.ui.treeStructure.SimpleNode
 import spp.jetbrains.marker.service.ArtifactMarkService
-import spp.jetbrains.sourcemarker.instrument.breakpoint.StackFrameManager
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
 
 /**
  * todo: description.
@@ -28,22 +28,22 @@ import spp.jetbrains.sourcemarker.instrument.breakpoint.StackFrameManager
  */
 class VariableRootSimpleNode : SimpleNode() {
 
-    private lateinit var stackFrameManager: StackFrameManager
+    private lateinit var activeStack: ActiveStackTrace
 
-    fun setStackFrameManager(currentStackFrameManager: StackFrameManager) {
-        stackFrameManager = currentStackFrameManager
+    fun setActiveStackTrace(activeStack: ActiveStackTrace) {
+        this.activeStack = activeStack
     }
 
     override fun getChildren(): Array<SimpleNode> {
-        if (!this::stackFrameManager.isInitialized) {
+        if (!this::activeStack.isInitialized) {
             return emptyArray() //wait till initialized
         }
 
-        return if (stackFrameManager.currentFrame?.variables.isNullOrEmpty()) {
+        val currentFrame = activeStack.currentFrame
+        return if (currentFrame == null || currentFrame.variables.isEmpty()) {
             NO_CHILDREN
         } else {
-            val vars = stackFrameManager.currentFrame!!.variables
-            ArtifactMarkService.toPresentationNodes(stackFrameManager.stackTrace.language!!, vars)
+            ArtifactMarkService.toPresentationNodes(activeStack.stackTrace.language!!, currentFrame.variables)
         }
     }
 }

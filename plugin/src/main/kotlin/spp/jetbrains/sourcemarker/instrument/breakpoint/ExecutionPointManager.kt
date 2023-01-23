@@ -27,6 +27,8 @@ import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.marker.service.ArtifactNamingService
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
+import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTraceListener
 import spp.protocol.artifact.exception.sourceAsLineNumber
 
 /**
@@ -39,16 +41,16 @@ class ExecutionPointManager(
     private val project: Project,
     private val executionPointHighlighter: ExecutionPointHighlighter,
     private val showExecutionPoint: Boolean = true
-) : DebugStackFrameListener, Disposable {
+) : ActiveStackTraceListener, Disposable {
 
     companion object {
         private val log = logger<ExecutionPointManager>()
     }
 
-    override fun onChanged(stackFrameManager: StackFrameManager) {
+    override fun onChanged(activeStackTrace: ActiveStackTrace) {
         if (!showExecutionPoint) return
-        val currentFrame = stackFrameManager.currentFrame ?: return
-        val psiFile = stackFrameManager.stackTrace.language?.let {
+        val currentFrame = activeStackTrace.currentFrame ?: return
+        val psiFile = activeStackTrace.stackTrace.language?.let {
             ArtifactNamingService.getService(it).findPsiFile(it, project, currentFrame)
         } ?: return
         val virtualFile = ArtifactScopeService.findSourceFile(psiFile) ?: return

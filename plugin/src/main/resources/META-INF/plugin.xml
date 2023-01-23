@@ -26,9 +26,9 @@
                 serviceImplementation="spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl"/>
 
         <projectService
-                serviceImplementation="spp.jetbrains.sourcemarker.instrument.breakpoint.BreakpointHitWindowService"/>
+                serviceImplementation="spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService"/>
         <editor.linePainter
-                implementation="spp.jetbrains.sourcemarker.instrument.breakpoint.painter.VariableEditorLinePainter"/>
+                implementation="spp.jetbrains.sourcemarker.instrument.breakpoint.VariableEditorLinePainter"/>
         <projectConfigurable
                 instance="spp.jetbrains.sourcemarker.config.SourceMarkerConfigurable"
                 groupId="tools"
@@ -75,8 +75,8 @@
     </projectListeners>
 
     <actions>
-        <action id="spp.jetbrains.sourcemarker.command.CommandBarAction"
-                class="spp.jetbrains.sourcemarker.command.CommandBarAction"
+        <action id="spp.jetbrains.sourcemarker.command.action.CommandBarAction"
+                class="spp.jetbrains.sourcemarker.command.action.CommandBarAction"
                 text="SourceCommand Action" description="Source command action">
             <keyboard-shortcut first-keystroke="control shift S" keymap="$default"/>
         </action>
