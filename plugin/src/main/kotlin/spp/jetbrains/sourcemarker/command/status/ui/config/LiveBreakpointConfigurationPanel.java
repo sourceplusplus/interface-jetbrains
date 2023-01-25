@@ -17,7 +17,6 @@
 package spp.jetbrains.sourcemarker.command.status.ui.config;
 
 import net.miginfocom.swing.MigLayout;
-import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,27 +27,13 @@ import static spp.jetbrains.PluginUI.*;
 
 public class LiveBreakpointConfigurationPanel extends JPanel {
 
-    private int expirationInMinutes = 15;
-    private int rateLimitCount = 1;
-    private String rateLimitStep = "second";
     private int maxObjectDepth = 5;
     private int maxObjectSize = 1024 * 1024;
     private int maxCollectionLength = 100;
 
-    public LiveBreakpointConfigurationPanel(AutocompleteField autocompleteField) {
+    public LiveBreakpointConfigurationPanel() {
         initComponents();
 
-        expiration15MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        expiration30MinButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        expiration1HrButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        expiration3HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        expiration6HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        expiration12HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        expiration24HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-
-        rateLimitCountSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        rateLimitStepCombobox.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
-        
         //todo: set max defaults from probe
         maxObjectSizeComboBox.setSelectedItem("megabytes");
     }
@@ -74,8 +59,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
     }
 
     public void setExpirationInMinutes(int value) {
-        this.expirationInMinutes = value;
-
         if (value == 15) {
             expiration15MinButton.setSelected(true);
         } else if (value == 30) {
@@ -100,7 +83,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
     }
 
     public void setRateLimitCount(int count) {
-        this.rateLimitCount = count;
         rateLimitCountSpinner.setValue(count);
     }
 
@@ -109,7 +91,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
     }
 
     public void setRateLimitStep(String step) {
-        this.rateLimitStep = step;
         rateLimitStepCombobox.setSelectedItem(message(step));
     }
 
@@ -159,13 +140,6 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
         return maxObjectDepth != getMaxObjectDepth()
                 || maxObjectSize != getMaxObjectSize()
                 || maxCollectionLength != getMaxCollectionLength();
-    }
-
-    public boolean isChanged() {
-        return expirationInMinutes != getExpirationInMinutes()
-                || rateLimitCount != getRateLimitCount()
-                || !Objects.equals(rateLimitStep, getRateLimitStep())
-                || isVariableControlChanged();
     }
 
     public void setNewDefaults() {

@@ -89,11 +89,7 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                 config.serviceName
             ) ?: return
 
-            val statusBar = BreakpointStatusBar(
-                location,
-                ArtifactScopeService.getScopeVariables(fileMarker.psiFile, lineNumber),
-                inlayMark
-            )
+            val statusBar = BreakpointStatusBar(location, inlayMark)
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
             wrapperPanel.add(statusBar)
             statusBar.setEditor(editor)
@@ -233,11 +229,7 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                     val wrapperPanel = JPanel()
                     wrapperPanel.layout = BorderLayout()
 
-                    val statusBar = BreakpointStatusBar(
-                        liveBreakpoint.location,
-                        emptyList(),
-                        inlayMark
-                    )
+                    val statusBar = BreakpointStatusBar(liveBreakpoint.location, inlayMark)
                     inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
                     wrapperPanel.add(statusBar)
                     statusBar.setEditor(editor)
@@ -310,6 +302,7 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                     MeterType.COUNT -> gutterMark.get().configuration.icon = PluginIcons.count
                     MeterType.GAUGE -> gutterMark.get().configuration.icon = PluginIcons.gauge
                     MeterType.HISTOGRAM -> gutterMark.get().configuration.icon = PluginIcons.histogram
+                    else -> gutterMark.get().configuration.icon = PluginIcons.count
                 }
                 gutterMark.get().configuration.activateOnMouseHover = true
                 gutterMark.get().configuration.activateOnMouseClick = true

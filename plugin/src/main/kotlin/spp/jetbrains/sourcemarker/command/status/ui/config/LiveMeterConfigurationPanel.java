@@ -19,20 +19,16 @@ package spp.jetbrains.sourcemarker.command.status.ui.config;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.psi.PsiFile;
 import com.intellij.ui.EditorTextField;
-import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.XExpression;
-import com.intellij.xdebugger.XSourcePosition;
-import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
-import spp.jetbrains.marker.SourceMarkerUtils;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
+import spp.jetbrains.sourcemarker.command.util.ExpressionUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,42 +44,9 @@ public class LiveMeterConfigurationPanel extends JPanel {
     private int expirationInMinutes = 15;
 
     public LiveMeterConfigurationPanel(AutocompleteField<?> autocompleteField, InlayMark inlayMark) {
-        PsiFile psiFile = inlayMark.getSourceFileMarker().getPsiFile();
-        XSourcePosition sourcePosition = XDebuggerUtil.getInstance().createPosition(
-                psiFile.getVirtualFile(), inlayMark.getLineNumber()
-        );
-
-        XDebuggerEditorsProvider editorsProvider;
-        if (SourceMarkerUtils.isPython(inlayMark.getLanguage())) {
-            try {
-                editorsProvider = (XDebuggerEditorsProvider) Class.forName(
-                        "com.jetbrains.python.debugger.PyDebuggerEditorsProvider"
-                ).newInstance();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        } else if (SourceMarkerUtils.isJvm(inlayMark.getLanguage())) {
-            try {
-                editorsProvider = (XDebuggerEditorsProvider) Class.forName(
-                        "org.jetbrains.java.debugger.JavaDebuggerEditorsProvider"
-                ).newInstance();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        } else if (SourceMarkerUtils.isJavaScript(inlayMark.getLanguage())) {
-            try {
-                editorsProvider = (XDebuggerEditorsProvider) Class.forName(
-                        "com.intellij.javascript.debugger.JSDebuggerEditorsProvider"
-                ).getDeclaredConstructor().newInstance();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        } else {
-            throw new UnsupportedOperationException("Unsupported language: " + inlayMark.getLanguage());
-        }
-        comboBox = new XDebuggerExpressionComboBox(
-                psiFile.getProject(), editorsProvider, "LiveMeterCondition",
-                sourcePosition, false, false
+        comboBox = ExpressionUtils.getExpressionComboBox(
+                inlayMark.getSourceFileMarker().getPsiFile(), inlayMark.getLineNumber(),
+                null, null, null
         );
 
         initComponents();
