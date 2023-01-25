@@ -20,6 +20,7 @@ import com.intellij.util.ui.ColumnInfo
 import spp.jetbrains.sourcemarker.instrument.ui.renderer.InstrumentTypeTableCellRenderer
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
+import spp.protocol.instrument.event.LiveInstrumentRemoved
 import spp.protocol.instrument.event.LiveLogHit
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -46,10 +47,28 @@ class LiveInstrumentEventColumnInfo(name: String) : ColumnInfo<LiveInstrumentEve
         return when (name) {
             "Occurred At" -> Comparator.comparing { it.occurredAt }
             "Event Type" -> Comparator.comparing { it.eventType }
-            "Message" -> Comparator { o1, o2 ->
-                val o1Message = if (o1 is LiveLogHit) o1.logResult.logs.first().toFormattedMessage() else ""
-                val o2Message = if (o2 is LiveLogHit) o2.logResult.logs.first().toFormattedMessage() else ""
-                o1Message.compareTo(o2Message)
+            "Data" -> Comparator { o1, o2 ->
+                when {
+                    o1 is LiveLogHit && o2 is LiveLogHit -> {
+                        o1.logResult.logs.first().toFormattedMessage()
+                            .compareTo(o2.logResult.logs.first().toFormattedMessage())
+                    }
+
+                    o1 is LiveBreakpointHit && o2 is LiveBreakpointHit -> {
+                        o1.stackTrace.first().variables.joinToString(", ") { it.name + "=" + it.value }
+                            .compareTo(o2.stackTrace.first().variables.joinToString(", ") { it.name + "=" + it.value })
+                    }
+
+                    o1 is LiveInstrumentRemoved && o2 is LiveInstrumentRemoved -> {
+                        if (o1.cause != null && o2.cause != null) {
+                            o1.cause.toString().compareTo(o2.cause.toString())
+                        } else {
+                            0
+                        }
+                    }
+
+                    else -> 0
+                }
             }
 
             else -> null
@@ -63,17 +82,17 @@ class LiveInstrumentEventColumnInfo(name: String) : ColumnInfo<LiveInstrumentEve
                 item.eventType.name.substringAfter("_").lowercase().replaceFirstChar { it.titlecase() }
             }
 
-            "Message" -> {
+            "Data" -> {
                 if (item is LiveLogHit) {
                     item.logResult.logs.first().toFormattedMessage()
-                } else {
-                    ""
-                }
-            }
-
-            "Variables" -> {
-                if (item is LiveBreakpointHit) {
+                } else if (item is LiveBreakpointHit) {
                     item.stackTrace.first().variables.joinToString(", ") { it.name + "=" + it.value }
+                } else if (item is LiveInstrumentRemoved) {
+                    if (item.cause != null) {
+                        item.cause.toString()
+                    } else {
+                        ""
+                    }
                 } else {
                     ""
                 }

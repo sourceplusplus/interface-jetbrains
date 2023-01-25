@@ -26,7 +26,6 @@ import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.jetbrains.sourcemarker.instrument.ui.column.LiveInstrumentEventColumnInfo
 import spp.jetbrains.sourcemarker.instrument.ui.model.InstrumentOverview
 import spp.jetbrains.sourcemarker.instrument.ui.renderer.InstrumentTypeTableCellRenderer
-import spp.protocol.instrument.LiveInstrumentType
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import java.awt.BorderLayout
@@ -46,16 +45,11 @@ import javax.swing.*
 class InstrumentEventTab(val project: Project, val overview: InstrumentOverview) : Disposable {
 
     val model = ListTableModel<LiveInstrumentEvent>(
-        mutableListOf(
+        arrayOf(
             LiveInstrumentEventColumnInfo("Occurred At"),
             LiveInstrumentEventColumnInfo("Event Type"),
-        ).apply {
-            if (overview.instrumentType == LiveInstrumentType.LOG) {
-                add(LiveInstrumentEventColumnInfo("Message"))
-            } else if (overview.instrumentType == LiveInstrumentType.BREAKPOINT) {
-                add(LiveInstrumentEventColumnInfo("Variables"))
-            }
-        }.toTypedArray(),
+            LiveInstrumentEventColumnInfo("Data")
+        ),
         ArrayList(), 0, SortOrder.DESCENDING
     )
     private val table = JBTable(model)
