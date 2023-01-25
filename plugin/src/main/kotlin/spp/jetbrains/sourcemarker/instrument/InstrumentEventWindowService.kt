@@ -186,9 +186,9 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
         }
     }
 
-    fun showBreakpointHit(hit: LiveBreakpointHit, showExecutionPoint: Boolean = true) {
-        if (showExecutionPoint) removeExecutionShower()
-        breakpointHitTab = BreakpointHitTab(project, executionPointHighlighter, showExecutionPoint)
+    fun showBreakpointHit(hit: LiveBreakpointHit) {
+        removeExecutionShower()
+        breakpointHitTab = BreakpointHitTab(project, executionPointHighlighter)
 
         //grab first non-skywalking frame and add real variables from skywalking frame
         val stackTrace = hit.stackTrace.copy(
@@ -234,14 +234,6 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
 
     private fun removeExecutionShower() {
         executionPointHighlighter.hide()
-    }
-
-    fun getBreakpointHitTab(): BreakpointHitTab? {
-        return if (::breakpointHitTab.isInitialized) {
-            breakpointHitTab
-        } else {
-            null
-        }
     }
 
     override fun dispose() = Unit

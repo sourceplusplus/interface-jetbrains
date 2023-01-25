@@ -39,8 +39,7 @@ import spp.protocol.artifact.exception.sourceAsLineNumber
  */
 class ExecutionPointManager(
     private val project: Project,
-    private val executionPointHighlighter: ExecutionPointHighlighter,
-    private val showExecutionPoint: Boolean = true
+    private val executionPointHighlighter: ExecutionPointHighlighter
 ) : ActiveStackTraceListener, Disposable {
 
     companion object {
@@ -48,7 +47,6 @@ class ExecutionPointManager(
     }
 
     override fun onChanged(activeStackTrace: ActiveStackTrace) {
-        if (!showExecutionPoint) return
         val currentFrame = activeStackTrace.currentFrame ?: return
         val psiFile = activeStackTrace.stackTrace.language?.let {
             ArtifactNamingService.getService(it).findPsiFile(it, project, currentFrame)

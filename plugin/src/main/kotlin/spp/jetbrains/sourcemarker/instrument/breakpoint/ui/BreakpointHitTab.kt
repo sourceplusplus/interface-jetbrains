@@ -41,15 +41,14 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class BreakpointHitTab(
     val project: Project,
-    executionPointHighlighter: ExecutionPointHighlighter,
-    showExecutionPoint: Boolean
+    executionPointHighlighter: ExecutionPointHighlighter
 ) : Disposable {
 
     companion object {
         const val LIVE_RUNNER = "Live Runner"
     }
 
-    private val executionPointManager = ExecutionPointManager(project, executionPointHighlighter, showExecutionPoint)
+    private val executionPointManager = ExecutionPointManager(project, executionPointHighlighter)
     private val listeners = CopyOnWriteArrayList<ActiveStackTraceListener>()
     private val layoutUi = RunnerLayoutUi.Factory.getInstance(project).create(
         LIVE_RUNNER, LIVE_RUNNER, LIVE_RUNNER, this
