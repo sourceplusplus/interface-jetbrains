@@ -27,6 +27,8 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.sourcemarker.instrument.breakpoint.ui.BreakpointHitTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentEventTab
@@ -176,6 +178,13 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
         content.isCloseable = true
         contentManager.addContent(content)
         contentManager.setSelectedContent(content)
+
+        //remove gutter mark if finished
+        if (overview.isFinished) {
+            SourceMarker.getInstance(project).getGutterMarks()
+                .find { it.getUserData(SourceMarkerKeys.INSTRUMENT_ID) == overview.instrumentId }
+                ?.dispose()
+        }
     }
 
     fun showInstrumentEvents(instrumentId: String) {
