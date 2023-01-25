@@ -18,9 +18,12 @@ package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
 
+/**
+ * Represents if/elif/else control structures.
+ */
 abstract class IfArtifact(psiElement: PsiElement) : ArtifactElement(psiElement), ControlStructureArtifact {
 
-    abstract override val condition: ArtifactElement?
+    abstract val condition: ArtifactElement?
     abstract val thenBranch: ArtifactElement?
     abstract val elseBranch: ArtifactElement?
 

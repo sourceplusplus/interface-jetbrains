@@ -16,7 +16,13 @@
  */
 package spp.jetbrains.artifact.model
 
+/**
+ * A control structure artifact refers to things that control the flow of a program:
+ * - conditionals (i.e. if/elif/else)
+ * - for-loops, while-loops, do-while loops
+ * - try-catch-finally
+ * - switch statements
+ */
 interface ControlStructureArtifact {
-    val condition: ArtifactElement?
     val childArtifacts: List<ArtifactElement>
 }
