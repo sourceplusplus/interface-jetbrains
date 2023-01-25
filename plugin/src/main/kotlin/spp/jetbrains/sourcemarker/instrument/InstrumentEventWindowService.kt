@@ -22,6 +22,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
@@ -47,7 +48,9 @@ import spp.protocol.instrument.event.LiveInstrumentEvent
  * @since 0.7.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class InstrumentEventWindowService(val project: Project) : Disposable {
+class InstrumentEventWindowService(
+    val project: Project
+) : Disposable, ContentManagerListener {
 
     companion object {
         fun getInstance(project: Project): InstrumentEventWindowService {
@@ -63,7 +66,10 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
     private lateinit var breakpointHitTab: BreakpointHitTab
     private lateinit var overviewTab: InstrumentOverviewTab
     val selectedTab: Disposable?
-        get() = contentManager.selectedContent?.disposer
+        get() {
+            if (!toolWindow.isVisible) return null
+            return contentManager.selectedContent?.disposer
+        }
     val selectedInstrumentOverview: InstrumentOverview?
         get() {
             return when (val selectedTab = selectedTab) {
@@ -85,16 +91,16 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
                 }
             }
         })
-        contentManager.addContentManagerListener(object : ContentManagerListener {
-            override fun selectionChanged(event: ContentManagerEvent) {
-                val disposable = event.content.disposer
-                if (disposable is BreakpointHitTab) {
-                    if (event.operation == ContentManagerEvent.ContentOperation.add) {
-                        disposable.showExecutionLine()
-                    }
+        contentManager.addContentManagerListener(this)
+
+        project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
+            override fun stateChanged(toolWindowManager: ToolWindowManager) {
+                if (!toolWindow.isVisible) {
+                    executionPointHighlighter.hide()
                 }
             }
         })
+
         Disposer.register(this, contentManager)
 
         toolWindow.setTitleActions(
@@ -103,6 +109,15 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
                 ClearInstrumentsAction(this)
             )
         )
+    }
+
+    override fun selectionChanged(event: ContentManagerEvent) {
+        val disposable = event.content.disposer
+        if (disposable is BreakpointHitTab) {
+            if (event.operation == ContentManagerEvent.ContentOperation.add) {
+                disposable.showExecutionLine()
+            }
+        }
     }
 
     fun makeOverviewTab() {
@@ -196,7 +211,7 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
     }
 
     fun showBreakpointHit(hit: LiveBreakpointHit) {
-        removeExecutionShower()
+        executionPointHighlighter.hide()
         breakpointHitTab = BreakpointHitTab(project, executionPointHighlighter)
 
         //grab first non-skywalking frame and add real variables from skywalking frame
@@ -239,10 +254,6 @@ class InstrumentEventWindowService(val project: Project) : Disposable {
         } else {
             toolWindow.activate(null)
         }
-    }
-
-    private fun removeExecutionShower() {
-        executionPointHighlighter.hide()
     }
 
     override fun dispose() = Unit
