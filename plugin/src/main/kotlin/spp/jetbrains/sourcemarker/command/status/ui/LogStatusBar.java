@@ -21,6 +21,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.util.ui.JBUI;
@@ -384,7 +385,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
-                    dispose();
+                    Disposer.dispose(LogStatusBar.this);
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     saveLiveLog();
                 }
@@ -455,7 +456,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                dispose();
+                Disposer.dispose(LogStatusBar.this);
             }
 
             @Override
@@ -629,7 +630,8 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         });
     }
 
-    private void dispose() {
+    @Override
+    public void dispose() {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);

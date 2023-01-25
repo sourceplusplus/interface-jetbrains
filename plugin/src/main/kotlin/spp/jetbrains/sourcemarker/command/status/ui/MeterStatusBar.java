@@ -21,6 +21,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
@@ -189,7 +190,7 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
-                    dispose();
+                    Disposer.dispose(MeterStatusBar.this);
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER && meterIdField.getText().length() > 0) {
                     meterConditionField.requestFocus();
                 }
@@ -209,7 +210,7 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
-                    dispose();
+                    Disposer.dispose(MeterStatusBar.this);
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER && meterConditionField.getText().length() > 0) {
                     meterTypeComboBox.requestFocus();
                 }
@@ -235,7 +236,7 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                dispose();
+                Disposer.dispose(MeterStatusBar.this);
             }
 
             @Override
@@ -374,7 +375,8 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
         });
     }
 
-    private void dispose() {
+    @Override
+    public void dispose() {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);

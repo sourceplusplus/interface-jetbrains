@@ -21,6 +21,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -132,7 +133,7 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
-                    dispose();
+                    Disposer.dispose(SpanStatusBar.this);
                 } else if (e.getKeyChar() == KeyEvent.VK_ENTER && spanOperationNameField.getText().length() > 0) {
                     ApplicationManager.getApplication().runWriteAction(() -> saveLiveSpan());
                 }
@@ -157,7 +158,7 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
         addRecursiveMouseListener(closeLabel, new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                dispose();
+                Disposer.dispose(SpanStatusBar.this);
             }
 
             @Override
@@ -281,7 +282,8 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
         });
     }
 
-    private void dispose() {
+    @Override
+    public void dispose() {
         if (disposed) return;
         disposed = true;
         editor.getScrollingModel().removeVisibleAreaListener(this);

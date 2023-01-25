@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.state
 
+import com.intellij.openapi.Disposable
 import spp.protocol.instrument.LiveInstrument
 
 /**
@@ -24,7 +25,7 @@ import spp.protocol.instrument.LiveInstrument
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-interface LiveStateBar {
+interface LiveStateBar : Disposable {
 
     fun setLiveInstrument(liveInstrument: LiveInstrument)
 }
