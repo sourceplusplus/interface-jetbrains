@@ -141,8 +141,12 @@ class LiveInstrumentEventListener(
             if (fileMarker != null) {
                 addGutterMark(fileMarker, event.instrument)
 
-                InstrumentEventWindowService.getInstance(project)
-                    .selectInOverviewTab(event.instrument.id!!)
+                if (event.instrument is LiveBreakpoint) {
+                    if (event.instrument.meta["created_by"] == UserData.selfInfo(project)?.developer?.id) {
+                        InstrumentEventWindowService.getInstance(project)
+                            .selectInOverviewTab(event.instrument.id!!)
+                    }
+                }
             } else {
                 log.debug("No file marker found for ${event.instrument.location.source}")
             }
