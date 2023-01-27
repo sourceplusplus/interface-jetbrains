@@ -20,14 +20,11 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getCalls
-import spp.jetbrains.artifact.service.getChildIfs
 import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
 import spp.jetbrains.marker.service.*
-import spp.protocol.insight.InsightType
-import spp.protocol.insight.InsightValue
 
 @TestDataPath("\$CONTENT_ROOT/testData/")
 class BranchProbabilityTest : BasePlatformTestCase() {
@@ -55,23 +52,16 @@ class BranchProbabilityTest : BasePlatformTestCase() {
     private fun doOneFourthProbability(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/BranchProbability.$extension")
 
-        psi.getChildIfs().forEach {
-            it.putUserData(
-                InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
-                InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, 0.5)
-            )
-        }
-
         val callExpression = psi.getCalls().find { it.text.contains("true", true) }!!
         val paths = ProceduralAnalyzer().analyzeUp(callExpression.toArtifact()!!)
         assertEquals(1, paths.size)
 
         val path = paths.first()
         assertEquals(4, path.descendants.size)
-        assertEquals(1.0, path.descendants[0].getPathExecutionProbability().value)
-        assertEquals(0.5, path.descendants[0].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
-        assertEquals(0.5, path.descendants[1].getPathExecutionProbability().value)
-        assertEquals(0.25, path.descendants[1].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(1.0, path.descendants[0].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.5, path.descendants[0].getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)?.value)
+        assertEquals(0.5, path.descendants[1].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.5, path.descendants[1].getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)?.value)
         assertEquals(0.25, path.descendants[2].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 }

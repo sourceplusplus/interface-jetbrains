@@ -33,19 +33,13 @@ import spp.protocol.insight.InsightValue
  */
 class PathProbabilityPass : ProceduralPathPass {
 
-    private lateinit var conditionOrder: Iterator<Boolean>
-
     override fun analyze(path: ProceduralPath) {
-        conditionOrder = path.evaluations.iterator()
-
         path.artifacts.forEach {
+            it.data[InsightKeys.PATH_EXECUTION_PROBABILITY] =
+                InsightValue.of(PATH_EXECUTION_PROBABILITY, 1.0)
+
             if (it is IfArtifact) {
-                analyze(it, conditionOrder.next(), 1.0)
-            } else {
-                it.data.put(
-                    InsightKeys.PATH_EXECUTION_PROBABILITY,
-                    InsightValue.of(PATH_EXECUTION_PROBABILITY, 1.0)
-                )
+                analyze(it, it.getData(InsightKeys.CONDITION_EVALUATION)!!, 1.0)
             }
         }
     }
@@ -53,53 +47,42 @@ class PathProbabilityPass : ProceduralPathPass {
     private fun analyze(ifArtifact: IfArtifact, condition: Boolean, probability: Double) {
         val probability = calculateProbability(ifArtifact, probability, condition)
         ifArtifact.childArtifacts.forEach {
+            it.data[InsightKeys.PATH_EXECUTION_PROBABILITY] =
+                InsightValue.of(PATH_EXECUTION_PROBABILITY, probability)
+
             if (it is IfArtifact) {
-                analyze(it, conditionOrder.next(), probability)
-            } else {
-                it.data.put(
-                    InsightKeys.PATH_EXECUTION_PROBABILITY,
-                    InsightValue.of(PATH_EXECUTION_PROBABILITY, probability)
-                )
+                analyze(it, it.getData(InsightKeys.CONDITION_EVALUATION)!!, probability)
             }
         }
     }
 
     private fun calculateProbability(element: ArtifactElement, baseProbability: Double, condition: Boolean): Double {
         var selfProbability = Double.NaN
-        if (element.getUserData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey()) != null) {
-            selfProbability = element.getUserData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey())!!.value
-        } else if (element.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY) != null) {
+        if (element.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY) != null) {
             selfProbability = element.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)!!.value
         }
 
         //see if probability can be determined statically
-        if (element is IfArtifact) {
+        if (element is IfArtifact && selfProbability.isNaN()) {
             val staticProbability = element.getStaticProbability()
             if (!staticProbability.isNaN()) {
                 selfProbability = staticProbability
+
+                //todo: move to getStaticProbability()
+                //flip self probability if condition is false
+                if (!condition) {
+                    selfProbability = 1 - selfProbability
+                }
+
+                element.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                    InsightValue.of(CONTROL_STRUCTURE_PROBABILITY, selfProbability)
             }
         }
 
-        if (selfProbability.isNaN()) {
-            return baseProbability
+        return if (selfProbability.isNaN()) {
+            baseProbability
+        } else {
+            baseProbability * selfProbability
         }
-
-        //flip self probability if condition is false
-        if (!condition) {
-            selfProbability = 1 - selfProbability
-        }
-
-        element.putUserData(
-            InsightKeys.PATH_EXECUTION_PROBABILITY.asPsiKey(),
-            InsightValue.of(PATH_EXECUTION_PROBABILITY, baseProbability)
-        )
-
-        val childProbability = baseProbability * selfProbability
-        element.data.put(
-            InsightKeys.PATH_EXECUTION_PROBABILITY,
-            InsightValue.of(PATH_EXECUTION_PROBABILITY, childProbability)
-        )
-
-        return childProbability
     }
 }

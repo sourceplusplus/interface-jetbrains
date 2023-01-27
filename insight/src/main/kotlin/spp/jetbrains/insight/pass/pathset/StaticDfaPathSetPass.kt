@@ -60,7 +60,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
         }
 
         listener.constantConditions.forEach {
-            if (it.key is KotlinAnchor.KotlinExpressionAnchor) {
+            if (it.key is KotlinAnchor.KotlinExpressionAnchor && it.value != ConstantValue.UNKNOWN) {
                 val anchor = it.key as KotlinAnchor.KotlinExpressionAnchor
                 val value = it.value
                 val expression = anchor.expression
@@ -69,15 +69,19 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
                                 val probability = if (value == ConstantValue.TRUE) 1.0 else 0.0
-                                it.data.put(
-                                    InsightKeys.CONTROL_STRUCTURE_PROBABILITY,
-                                    InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)
-                                )
+                                val conditionEvaluation = it.getData(InsightKeys.CONDITION_EVALUATION)!!
+                                if (conditionEvaluation) {
+                                    it.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                                        InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)
+                                } else {
+                                    it.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                                        InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, 1 - probability)
+                                }
                             }
                         }
                     }
                 }
-            } else if (it.key is JavaExpressionAnchor) {
+            } else if (it.key is JavaExpressionAnchor && it.value != ConstantValue.UNKNOWN) {
                 val anchor = it.key as JavaExpressionAnchor
                 val value = it.value
                 val expression = anchor.expression
@@ -86,10 +90,14 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
                                 val probability = if (value == ConstantValue.TRUE) 1.0 else 0.0
-                                it.data.put(
-                                    InsightKeys.CONTROL_STRUCTURE_PROBABILITY,
-                                    InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)
-                                )
+                                val conditionEvaluation = it.getData(InsightKeys.CONDITION_EVALUATION)!!
+                                if (conditionEvaluation) {
+                                    it.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                                        InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)
+                                } else {
+                                    it.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                                        InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, 1 - probability)
+                                }
                             }
                         }
                     }

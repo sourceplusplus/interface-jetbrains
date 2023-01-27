@@ -113,6 +113,8 @@ class ProceduralAnalyzer {
 
             if (artifactElement is IfArtifact) {
                 val bool = path.evaluations[boolIndex.getAndIncrement()]
+                artifactElement.data.put(InsightKeys.CONDITION_EVALUATION, bool)
+
                 if (bool) {
                     val childArtifacts = processArtifacts[index + 1] as List<Any>
                     processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)

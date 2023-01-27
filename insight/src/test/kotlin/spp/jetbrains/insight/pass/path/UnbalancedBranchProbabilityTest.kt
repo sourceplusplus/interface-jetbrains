@@ -20,10 +20,8 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.model.CallArtifact
-import spp.jetbrains.artifact.service.getChildIfs
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
-import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.insight.getInsights
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
@@ -31,7 +29,6 @@ import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
 import spp.jetbrains.marker.service.*
 import spp.protocol.insight.InsightType
-import spp.protocol.insight.InsightValue
 
 @TestDataPath("\$CONTENT_ROOT/testData/")
 class UnbalancedBranchProbabilityTest : BasePlatformTestCase() {
@@ -58,14 +55,6 @@ class UnbalancedBranchProbabilityTest : BasePlatformTestCase() {
 
     private fun doTest(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/UnbalancedBranchProbability.$extension")
-
-        psi.getChildIfs().forEach {
-            it.putUserData(
-                InsightKeys.CONTROL_STRUCTURE_PROBABILITY.asPsiKey(),
-                InsightValue.of(InsightType.CONTROL_STRUCTURE_PROBABILITY, 0.75)
-            )
-        }
-
         val paths = ProceduralAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
         assertEquals(2, paths.size)
 
@@ -73,12 +62,12 @@ class UnbalancedBranchProbabilityTest : BasePlatformTestCase() {
         val trueInsights = truePath.find { it is CallArtifact }?.getInsights()!!
         assertEquals(1, trueInsights.size)
         assertEquals(InsightType.PATH_EXECUTION_PROBABILITY, trueInsights.first().type)
-        assertEquals(0.75, trueInsights.first().value)
+        assertEquals(0.25, trueInsights.first().value)
 
         val falsePath = paths.find { !it.conditions.first().first }!!
         val falseInsights = falsePath.find { it is CallArtifact }?.getInsights()!!
         assertEquals(1, falseInsights.size)
         assertEquals(InsightType.PATH_EXECUTION_PROBABILITY, falseInsights.first().type)
-        assertEquals(0.25, falseInsights.first().value)
+        assertEquals(0.75, falseInsights.first().value)
     }
 }

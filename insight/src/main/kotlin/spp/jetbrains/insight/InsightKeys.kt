@@ -33,6 +33,7 @@ object InsightKeys {
     val PATH_EXECUTION_PROBABILITY = SourceKey<InsightValue<Double>>(InsightType.PATH_EXECUTION_PROBABILITY.name)
     val PATH_DURATION = SourceKey<InsightValue<Double>>(InsightType.PATH_DURATION.name)
     val RECURSIVE_CALL = SourceKey<InsightValue<Boolean>>(InsightType.RECURSIVE_CALL.name)
+    val CONDITION_EVALUATION = SourceKey<Boolean>("CONDITION_EVALUATION")
 
     val ALL_INSIGHTS: List<SourceKey<out InsightValue<out Any>>> = listOf(
         FUNCTION_DURATION,

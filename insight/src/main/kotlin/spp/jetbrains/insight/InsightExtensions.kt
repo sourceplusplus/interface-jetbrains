@@ -34,7 +34,3 @@ fun ArtifactElement.getDuration(includingPredictions: Boolean = true): Long? {
 
     return getUserData(InsightKeys.FUNCTION_DURATION.asPsiKey())?.value
 }
-
-fun ArtifactElement.getPathExecutionProbability(): InsightValue<Double> {
-    return getUserData(InsightKeys.PATH_EXECUTION_PROBABILITY.asPsiKey())!!
-}

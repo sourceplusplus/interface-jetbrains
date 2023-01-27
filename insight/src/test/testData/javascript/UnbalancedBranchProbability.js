@@ -1,7 +1,7 @@
 function unbalancedBranchProbability() {
     if (Math.random() > 0.75) {
-        console.log(true) //75% probability
+        console.log(true) //25% probability
     } else {
-        console.log(false) //25% probability
+        console.log(false) //75% probability
     }
 }

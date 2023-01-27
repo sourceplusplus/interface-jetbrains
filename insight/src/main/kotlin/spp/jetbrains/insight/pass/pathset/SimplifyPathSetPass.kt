@@ -16,12 +16,10 @@
  */
 package spp.jetbrains.insight.pass.pathset
 
-import spp.jetbrains.artifact.model.ControlStructureArtifact
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralPathSetPass
-import java.util.*
 
 /**
  * Removes paths caused by conditional branches that are never taken.
@@ -31,30 +29,17 @@ class SimplifyPathSetPass : ProceduralPathSetPass {
     override fun postProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
         val simplifiedPaths = mutableSetOf<ProceduralPath>()
         for (path in pathSet) {
-            path.artifacts.removeIf {
+            val possiblePath = path.artifacts.all {
                 if (it is IfArtifact) {
-                    val probability = it.getData(InsightKeys.PATH_EXECUTION_PROBABILITY)
-                    probability?.value == 0.0 || it.childArtifacts.isEmpty()
+                    val probability = it.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)
+                    probability?.value != 0.0
                 } else {
-                    false
+                    true
                 }
             }
 
-            if (path.artifacts.isNotEmpty()) {
+            if (possiblePath) {
                 simplifiedPaths.add(path)
-            }
-        }
-
-        for (path in pathSet.toMutableSet()) {
-            //sublist check
-            val pathArtifacts = path.artifacts
-            val dupePath = simplifiedPaths.any {
-                it !== path && pathArtifacts.none { it is ControlStructureArtifact }
-                        && Collections.indexOfSubList(it.artifacts, pathArtifacts) != -1
-            }
-
-            if (dupePath) {
-                simplifiedPaths.remove(path)
             }
         }
 

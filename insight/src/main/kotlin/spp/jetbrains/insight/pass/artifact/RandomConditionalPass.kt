@@ -62,9 +62,14 @@ class RandomConditionalPass : ArtifactPass {
 
             else -> 0.0
         }.let { if (it > 1.0) 1.0 else if (it < 0.0) 0.0 else it }
-        ifArtifact.data.put(
-            InsightKeys.CONTROL_STRUCTURE_PROBABILITY,
-            InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)
-        )
+
+        val conditionEvaluation = ifArtifact.getData(InsightKeys.CONDITION_EVALUATION)!!
+        if (conditionEvaluation) {
+            ifArtifact.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)
+        } else {
+            ifArtifact.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, 1 - probability)
+        }
     }
 }

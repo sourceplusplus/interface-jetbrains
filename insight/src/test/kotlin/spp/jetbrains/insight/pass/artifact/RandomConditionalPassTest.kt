@@ -55,9 +55,16 @@ class RandomConditionalPassTest : BasePlatformTestCase() {
     private fun doTest(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/RandomConditional.$extension")
         val paths = ProceduralAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
-        assertEquals(1, paths.size)
+        assertEquals(2, paths.size)
 
-        val ifArtifact = paths.first().artifacts.first() as IfArtifact
-        assertEquals(0.26, ifArtifact.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)!!.value)
+        val falsePath = paths.first { !it.conditions.first().first }
+        val ifArtifactFalse = falsePath.artifacts.first() as IfArtifact
+        assertEquals(1.0, ifArtifactFalse.getData(InsightKeys.PATH_EXECUTION_PROBABILITY)!!.value)
+        assertEquals(0.74, ifArtifactFalse.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)!!.value)
+
+        val truePath = paths.first { it.conditions.first().first }
+        val ifArtifactTrue = truePath.artifacts.first() as IfArtifact
+        assertEquals(1.0, ifArtifactTrue.getData(InsightKeys.PATH_EXECUTION_PROBABILITY)!!.value)
+        assertEquals(0.26, ifArtifactTrue.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)!!.value)
     }
 }

@@ -62,6 +62,7 @@ class InnerBranchProbabilityTest : BasePlatformTestCase() {
         val falsePath = ProceduralAnalyzer().apply {
             passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
         }.analyzeUp(callExpression2.toArtifact()!!)
-        assertEquals(0.0, falsePath.first().artifacts.last().getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(1.0, falsePath.first().artifacts.last().getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
+        assertEquals(0.0, falsePath.first().artifacts.last().getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)?.value)
     }
 }

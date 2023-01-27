@@ -46,21 +46,21 @@ class SimplifyBranchTest : BasePlatformTestCase() {
     }
 
     @Test
-    fun testBranchSimplify() {
-        doBranchSimplify("kotlin", "kt")
-        doBranchSimplify("java", "java")
-        doBranchSimplify("javascript", "js")
-        doBranchSimplify("python", "py")
+    fun testSimplifyBranch() {
+        doSimplifyBranch("kotlin", "kt")
+        doSimplifyBranch("java", "java")
+        doSimplifyBranch("javascript", "js")
+        doSimplifyBranch("python", "py")
     }
 
-    private fun doBranchSimplify(language: String, extension: String) {
+    private fun doSimplifyBranch(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/SimplifyBranch.$extension")
 
         val unsimplifiedPaths = ProceduralAnalyzer().apply {
             passProvider = InsightPassProvider().apply {
                 passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
             }
-        }.analyze(psi.getFunctions().first().toArtifact()!!)
+        }.analyze(psi.getFunctions().first { it.name == "simplifyBranch" }.toArtifact()!!)
         assertEquals(2, unsimplifiedPaths.size)
         val truePath = unsimplifiedPaths.find { it.conditions.first().first }!!
         assertEquals(2, truePath.artifacts.size)
@@ -76,12 +76,60 @@ class SimplifyBranchTest : BasePlatformTestCase() {
         val falseIfChildren = (falsePath.artifacts.toList()[0] as IfArtifact).childArtifacts
         assertEquals(0, falseIfChildren.size)
 
-        val simplifiedPaths = ProceduralAnalyzer().analyze(psi.getFunctions().first().toArtifact()!!)
+        val simplifiedPaths = ProceduralAnalyzer().analyze(
+            psi.getFunctions().first { it.name == "simplifyBranch" }.toArtifact()!!
+        )
         assertEquals(1, simplifiedPaths.size)
         assertEquals(2, simplifiedPaths.first().artifacts.size)
         assertTrue(simplifiedPaths.first().artifacts.toList()[0] is IfArtifact)
         assertTrue(simplifiedPaths.first().artifacts.toList()[1] is CallArtifact)
         val ifChildren = (simplifiedPaths.first().artifacts.toList()[0] as IfArtifact).childArtifacts
+        assertEquals(1, ifChildren.size)
+        assertTrue(ifChildren[0] is CallArtifact)
+    }
+
+    @Test
+    fun testSimplifyBranch2() {
+        doSimplifyBranch2("kotlin", "kt")
+        doSimplifyBranch2("java", "java")
+        doSimplifyBranch2("javascript", "js")
+        doSimplifyBranch2("python", "py")
+    }
+
+    private fun doSimplifyBranch2(language: String, extension: String) {
+        val psi = myFixture.configureByFile("$language/SimplifyBranch.$extension")
+
+        val unsimplifiedPaths = ProceduralAnalyzer().apply {
+            passProvider = InsightPassProvider().apply {
+                passProvider = InsightPassProvider.FULL_NO_SIMPLIFY
+            }
+        }.analyze(psi.getFunctions().first { it.name == "simplifyBranch2" }.toArtifact()!!)
+        assertEquals(2, unsimplifiedPaths.size)
+        val truePath = unsimplifiedPaths.find { it.conditions.first().first }!!
+        assertEquals(3, truePath.artifacts.size)
+        assertTrue(truePath.artifacts.toList()[0] is CallArtifact)
+        assertTrue(truePath.artifacts.toList()[1] is IfArtifact)
+        assertTrue(truePath.artifacts.toList()[2] is CallArtifact)
+        val trueIfChildren = (truePath.artifacts.toList()[1] as IfArtifact).childArtifacts
+        assertEquals(1, trueIfChildren.size)
+        assertTrue(trueIfChildren[0] is CallArtifact)
+        val falsePath = unsimplifiedPaths.find { !it.conditions.first().first }!!
+        assertEquals(3, falsePath.artifacts.size)
+        assertTrue(falsePath.artifacts.toList()[0] is CallArtifact)
+        assertTrue(falsePath.artifacts.toList()[1] is IfArtifact)
+        assertTrue(falsePath.artifacts.toList()[2] is CallArtifact)
+        val falseIfChildren = (falsePath.artifacts.toList()[1] as IfArtifact).childArtifacts
+        assertEquals(0, falseIfChildren.size)
+
+        val simplifiedPaths = ProceduralAnalyzer().analyze(
+            psi.getFunctions().first { it.name == "simplifyBranch2" }.toArtifact()!!
+        )
+        assertEquals(1, simplifiedPaths.size)
+        assertEquals(3, simplifiedPaths.first().artifacts.size)
+        assertTrue(simplifiedPaths.first().artifacts.toList()[0] is CallArtifact)
+        assertTrue(simplifiedPaths.first().artifacts.toList()[1] is IfArtifact)
+        assertTrue(simplifiedPaths.first().artifacts.toList()[2] is CallArtifact)
+        val ifChildren = (simplifiedPaths.first().artifacts.toList()[1] as IfArtifact).childArtifacts
         assertEquals(1, ifChildren.size)
         assertTrue(ifChildren[0] is CallArtifact)
     }
