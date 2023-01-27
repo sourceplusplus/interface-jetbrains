@@ -51,8 +51,9 @@ class LiveViewEventListener(
             if (log.isTraceEnabled) log.trace("Received live event: $event")
 
             //todo: remove in favor of sending events to individual subscribers
-            SourceMarker.getInstance(project).findBySubscriptionId(event.subscriptionId)
-                ?.getUserData(SourceMarkerKeys.VIEW_EVENT_LISTENERS)?.forEach { it.accept(event) }
+            SourceMarker.getInstance(project).findBySubscriptionId(event.subscriptionId).forEach {
+                it.getUserData(SourceMarkerKeys.VIEW_EVENT_LISTENERS)?.forEach { it.accept(event) }
+            }
 
             vertx.eventBus().publish(toLiveViewSubscription(event.subscriptionId), it.body())
         }

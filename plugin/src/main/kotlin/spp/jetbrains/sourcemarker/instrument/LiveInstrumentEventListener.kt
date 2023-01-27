@@ -186,44 +186,40 @@ class LiveInstrumentEventListener(
             activeInstruments.remove(event.instrument)
             InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
 
-            val inlayMark = SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!)
-            if (inlayMark != null) {
-                if (inlayMark is GutterMark) {
+            SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!).forEach {
+                if (it is GutterMark) {
                     if (event.instrument.meta["created_by"] != UserData.selfInfo(project)?.developer?.id) {
                         //just remove foreign instrument icons
-                        inlayMark.dispose()
+                        it.dispose()
                     } else if (event.instrument !is LiveBreakpoint) {
                         //just remove non-breakpoint icons
-                        inlayMark.dispose()
+                        it.dispose()
                     } else {
                         if (event.cause == null) {
-                            inlayMark.configuration.icon = PluginIcons.Breakpoint.complete
+                            it.configuration.icon = PluginIcons.Breakpoint.complete
                         } else {
-                            inlayMark.configuration.icon = PluginIcons.Breakpoint.error
+                            it.configuration.icon = PluginIcons.Breakpoint.error
                         }
-                        inlayMark.sourceFileMarker.refresh()
+                        it.sourceFileMarker.refresh()
                     }
                 }
 
-                val eventListeners = inlayMark.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
-                if (eventListeners?.isNotEmpty() == true) {
-                    eventListeners.forEach { it.onInstrumentRemovedEvent(event) }
-                }
+                it.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
+                    ?.forEach { it.onInstrumentRemovedEvent(event) }
             }
         }
     }
 
-    override fun onInstrumentHitEvent(event: LiveInstrumentHit) {
-        ApplicationManager.getApplication().invokeLater {
-            InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
+    override fun onInstrumentHitEvent(event: LiveInstrumentHit) = ApplicationManager.getApplication().invokeLater {
+        InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
 
-            if (event is LiveBreakpointHit) {
-                SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!)
-                    ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)
-                    ?.forEach { it.onBreakpointHitEvent(event) }
-            } else if (event is LiveLogHit) {
-                SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!)
-                    ?.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
+        if (event is LiveBreakpointHit) {
+            SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!).forEach {
+                it.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onBreakpointHitEvent(event) }
+            }
+        } else if (event is LiveLogHit) {
+            SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!).forEach {
+                it.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
             }
         }
     }
