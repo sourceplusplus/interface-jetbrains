@@ -25,8 +25,8 @@ import spp.jetbrains.insight.pass.ProceduralPathSetPass
  */
 class SavePsiPathSetPass : ProceduralPathSetPass {
 
-    override fun postProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
-        pathSet.forEach { it.rootArtifact.putUserData(InsightKeys.RUNTIME_PATHS.asPsiKey(), pathSet) }
-        return super.postProcess(pathSet)
+    override fun postProcess(paths: List<ProceduralPath>): List<ProceduralPath> {
+        paths.forEach { it.rootArtifact.putUserData(InsightKeys.PROCEDURAL_PATHS.asPsiKey(), paths) }
+        return super.postProcess(paths)
     }
 }

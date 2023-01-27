@@ -42,13 +42,13 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
 
     private val log = logger<StaticDfaPathSetPass>()
 
-    override fun preProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
-        val project = pathSet.first().rootArtifact.project
+    override fun preProcess(paths: List<ProceduralPath>): List<ProceduralPath> {
+        val project = paths.first().rootArtifact.project
         val factory = DfaValueFactory(project)
         val flow = DataFlowIRProvider.forElement(
-            (pathSet.first().rootArtifact as FunctionArtifact).bodyBlock!!.psiElement,
+            (paths.first().rootArtifact as FunctionArtifact).bodyBlock!!.psiElement,
             factory
-        ) ?: return pathSet
+        ) ?: return paths
 
         val listener = ConstantConditionDfaListener()
         val interpreter = StandardDataFlowInterpreter(flow, listener)
@@ -56,7 +56,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
         if (interpreter.interpret(states.map { s ->
                 DfaInstructionState(flow.getInstruction(0), s)
             }) != RunnerResult.OK) {
-            log.warn("Failed to interpret function ${(pathSet.first().rootArtifact as FunctionArtifact).name}")
+            log.warn("Failed to interpret function ${(paths.first().rootArtifact as FunctionArtifact).name}")
         }
 
         listener.constantConditions.forEach {
@@ -64,7 +64,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
                 val anchor = it.key as KotlinAnchor.KotlinExpressionAnchor
                 val value = it.value
                 val expression = anchor.expression
-                pathSet.forEach {
+                paths.forEach {
                     it.artifacts.forEach {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
@@ -85,7 +85,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
                 val anchor = it.key as JavaExpressionAnchor
                 val value = it.value
                 val expression = anchor.expression
-                pathSet.forEach {
+                paths.forEach {
                     it.artifacts.forEach {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
@@ -105,7 +105,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
             }
         }
 
-        return pathSet
+        return paths
     }
 
     enum class ConstantValue {

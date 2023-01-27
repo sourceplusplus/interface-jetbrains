@@ -22,7 +22,7 @@ import spp.jetbrains.insight.ProceduralPath
  * A pass that analyzes a set of [ProceduralPath]s and adds data to them.
  */
 interface ProceduralPathSetPass : IPass {
-    fun preProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> = pathSet
-    fun analyze(pathSet: Set<ProceduralPath>): Set<ProceduralPath> = pathSet
-    fun postProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> = pathSet
+    fun preProcess(paths: List<ProceduralPath>): List<ProceduralPath> = paths
+    fun analyze(paths: List<ProceduralPath>): List<ProceduralPath> = paths
+    fun postProcess(paths: List<ProceduralPath>): List<ProceduralPath> = paths
 }

@@ -26,7 +26,6 @@ import spp.protocol.insight.InsightValue
  * Represents an inter/intra-procedural path through the given [rootArtifact].
  */
 data class ProceduralPath(
-    val evaluations: List<Boolean>,
     val rootArtifact: ArtifactElement,
     val artifacts: MutableList<ArtifactElement>,
     internal val insights: MutableList<InsightValue<*>> = mutableListOf()
@@ -46,7 +45,7 @@ data class ProceduralPath(
             val conditionals = descendants.filterIsInstance<IfArtifact>()
             val conditions = mutableListOf<Pair<Boolean, IfArtifact>>()
             for (i in conditionals.indices) {
-                conditions.add(Pair(this.evaluations[i], conditionals[i]))
+                conditions.add(Pair(conditionals[i].getData(InsightKeys.CONDITION_EVALUATION)!!, conditionals[i]))
             }
             return conditions
         }

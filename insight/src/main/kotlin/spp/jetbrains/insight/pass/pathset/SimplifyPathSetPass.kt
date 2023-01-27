@@ -26,9 +26,9 @@ import spp.jetbrains.insight.pass.ProceduralPathSetPass
  */
 class SimplifyPathSetPass : ProceduralPathSetPass {
 
-    override fun postProcess(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
-        val simplifiedPaths = mutableSetOf<ProceduralPath>()
-        for (path in pathSet) {
+    override fun postProcess(paths: List<ProceduralPath>): List<ProceduralPath> {
+        val simplifiedPaths = mutableListOf<ProceduralPath>()
+        for (path in paths) {
             val possiblePath = path.artifacts.all {
                 if (it is IfArtifact) {
                     val probability = it.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)

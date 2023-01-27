@@ -20,7 +20,6 @@ import spp.jetbrains.artifact.model.*
 import spp.jetbrains.artifact.service.getParentFunction
 import spp.jetbrains.artifact.service.toArtifact
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 import java.util.stream.IntStream
 
@@ -36,20 +35,20 @@ class ProceduralAnalyzer {
      *
      * @param element the [ArtifactElement] to analyze
      */
-    fun analyze(element: ArtifactElement): Set<ProceduralPath> {
+    fun analyze(element: ArtifactElement): List<ProceduralPath> {
         val parent = mutableListOf<Any>()
         walkDown(element, parent)
 
         val ifCount = getIfArtifactCount(parent, 0)
         val boolPermutations = makeBoolPermutations(ifCount)
-        val paths = mutableSetOf<ProceduralPath>()
-        for (boolSet in boolPermutations) {
-            val path = ProceduralPath(boolSet.toList(), element, mutableListOf())
-            processPath(path, path.artifacts, parent, AtomicInteger(0))
+        val paths = mutableListOf<ProceduralPath>()
+        for (boolArray in boolPermutations) {
+            val path = ProceduralPath(element, mutableListOf())
+            processPath(path, path.artifacts, parent, boolArray.iterator())
             paths.add(path)
         }
 
-        return passProvider.analyze(paths.toSet())
+        return passProvider.analyze(paths)
     }
 
     /**
@@ -58,12 +57,12 @@ class ProceduralAnalyzer {
      *
      * @param element the [ArtifactElement] to analyze
      */
-    fun analyzeUp(element: ArtifactElement): Set<ProceduralPath> {
+    fun analyzeUp(element: ArtifactElement): List<ProceduralPath> {
         //todo: do this more efficiently
         val paths = analyze(element.getParentFunction().toArtifact()!!)
         return paths.filter {
             it.descendants.contains(element)
-        }.toSet()
+        }
     }
 
     private fun walkDown(element: ArtifactElement, parent: MutableList<Any>) {
@@ -106,7 +105,7 @@ class ProceduralAnalyzer {
         path: ProceduralPath,
         nextArtifacts: MutableList<ArtifactElement>,
         processArtifacts: List<Any>,
-        boolIndex: AtomicInteger
+        boolIterator: BooleanIterator
     ) {
         processArtifacts.forEachIndexed { index, it ->
             var artifactElement: ArtifactElement? = null
@@ -116,19 +115,19 @@ class ProceduralAnalyzer {
             }
 
             if (artifactElement is IfArtifact) {
-                val bool = path.evaluations[boolIndex.getAndIncrement()]
-                artifactElement.data.put(InsightKeys.CONDITION_EVALUATION, bool)
+                val bool = boolIterator.next()
+                artifactElement.data[InsightKeys.CONDITION_EVALUATION] = bool
 
                 if (bool) {
                     val childArtifacts = processArtifacts[index + 1] as List<Any>
-                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
+                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIterator)
                 } else {
                     val childArtifacts = processArtifacts[index + 2] as List<Any>
-                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
+                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIterator)
                 }
             } else if (artifactElement is LoopArtifact) {
                 val childArtifacts = processArtifacts[index + 1] as List<Any>
-                processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
+                processPath(path, artifactElement.childArtifacts, childArtifacts, boolIterator)
             }
         }
     }

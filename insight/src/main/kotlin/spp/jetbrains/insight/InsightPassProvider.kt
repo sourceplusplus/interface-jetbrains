@@ -88,11 +88,11 @@ class InsightPassProvider {
         pathPasses.forEach { it.analyze(path) }
     }
 
-    fun analyze(pathSet: Set<ProceduralPath>): Set<ProceduralPath> {
+    fun analyze(pathSet: List<ProceduralPath>): List<ProceduralPath> {
         val preProcessedPathSet = pathSetPasses.fold(pathSet) { acc, pass ->
             pass.preProcess(acc)
         }
-        preProcessedPathSet.map { analyze(it) }.toSet()
+        preProcessedPathSet.map { analyze(it) }
         val analyzedPathSetSet = pathSetPasses.fold(preProcessedPathSet) { acc, pass ->
             pass.analyze(acc)
         }
