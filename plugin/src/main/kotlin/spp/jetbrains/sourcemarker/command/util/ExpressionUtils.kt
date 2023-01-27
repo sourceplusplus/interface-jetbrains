@@ -108,7 +108,7 @@ object ExpressionUtils {
             override fun actionPerformed(e: AnActionEvent) {
                 val hasErrors = checkForErrors(psiFile.project, comboBox.editor!!.document)
                 if (hasErrors) {
-                    return  //expression has error(s)
+                    return //expression has error(s)
                 }
                 nextFocus?.let { IdeFocusManager.getInstance(psiFile.project).requestFocus(it, true) }
             }
@@ -120,7 +120,7 @@ object ExpressionUtils {
             override fun actionPerformed(e: AnActionEvent) {
                 val hasErrors = checkForErrors(psiFile.project, comboBox.editor!!.document)
                 if (hasErrors) {
-                    return  //expression has error(s)
+                    return //expression has error(s)
                 }
                 nextFocus?.let { IdeFocusManager.getInstance(psiFile.project).requestFocus(it, true) }
             }
