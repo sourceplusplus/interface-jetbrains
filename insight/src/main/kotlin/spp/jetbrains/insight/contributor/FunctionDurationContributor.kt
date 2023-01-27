@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.coupler
+package spp.jetbrains.insight.contributor
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.PsiNameIdentifierOwner
@@ -48,14 +48,14 @@ import spp.protocol.view.LiveViewConfig
 import spp.protocol.view.LiveViewEvent
 
 /**
- * Provides the [FUNCTION_DURATION_PREDICTION] insight. This insight is only calculated for
+ * Contributes the [FUNCTION_DURATION_PREDICTION] insight. This insight is only calculated for
  * functions that have or call functions with VCS modifications (i.e. [VCS_MODIFIED] flag).
  */
-class FunctionDurationCoupler(private val remoteInsightsAvailable: Boolean) : SourceMarkEventListener {
+class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) : SourceMarkEventListener {
 
-    private val log = logger<FunctionDurationCoupler>()
+    private val log = logger<FunctionDurationContributor>()
     private val updateInsightQueue = MergingUpdateQueue(
-        FunctionDurationCoupler::javaClass.name, 200, true, null, null
+        FunctionDurationContributor::javaClass.name, 200, true, null, null
     )
 
     override fun handleEvent(event: SourceMarkEvent) {

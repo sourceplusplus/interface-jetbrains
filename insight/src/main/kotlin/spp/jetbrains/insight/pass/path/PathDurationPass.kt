@@ -21,9 +21,9 @@ import spp.jetbrains.artifact.model.CountingLoopArtifact
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.artifact.model.LoopArtifact
 import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ProceduralPathPass
+import spp.jetbrains.insight.path.ProceduralPath
 import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
 

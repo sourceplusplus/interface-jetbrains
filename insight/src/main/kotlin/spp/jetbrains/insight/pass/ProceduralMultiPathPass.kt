@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.insight.pass
 
-import spp.jetbrains.insight.ProceduralMultiPath
+import spp.jetbrains.insight.path.ProceduralMultiPath
 
 /**
  * A pass that analyzes a [ProceduralMultiPath].

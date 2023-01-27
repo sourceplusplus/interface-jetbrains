@@ -21,7 +21,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import spp.jetbrains.insight.coupler.FunctionDurationCoupler
+import spp.jetbrains.insight.contributor.FunctionDurationContributor
 import spp.jetbrains.marker.source.mark.api.ClassSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode
@@ -43,8 +43,8 @@ class LiveInsightManager(
 
     //    private lateinit var insightService: LiveInsightService
 //    private lateinit var workspace: InsightWorkspace
-    private val insights = listOf(
-        FunctionDurationCoupler(remoteInsightsAvailable)
+    private val contributors = listOf(
+        FunctionDurationContributor(remoteInsightsAvailable)
     )
 
     override suspend fun start() {
@@ -102,7 +102,7 @@ class LiveInsightManager(
             }
         }
 
-        insights.forEach { it.handleEvent(event) }
+        contributors.forEach { it.handleEvent(event) }
     }
 
     private suspend fun downloadInsights(classMark: ClassSourceMark) {

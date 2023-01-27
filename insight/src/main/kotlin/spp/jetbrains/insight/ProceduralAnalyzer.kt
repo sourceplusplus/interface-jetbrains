@@ -19,6 +19,8 @@ package spp.jetbrains.insight
 import spp.jetbrains.artifact.model.*
 import spp.jetbrains.artifact.service.getParentFunction
 import spp.jetbrains.artifact.service.toArtifact
+import spp.jetbrains.insight.path.ProceduralMultiPath
+import spp.jetbrains.insight.path.ProceduralPath
 import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.IntStream

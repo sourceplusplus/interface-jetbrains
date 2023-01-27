@@ -19,8 +19,8 @@ package spp.jetbrains.insight.pass.artifact
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ArtifactPass
+import spp.jetbrains.insight.path.ProceduralPath
 
 /**
  * Loads the [ProceduralPath] set from [CallArtifact]s that have already been processed. Allows for basic

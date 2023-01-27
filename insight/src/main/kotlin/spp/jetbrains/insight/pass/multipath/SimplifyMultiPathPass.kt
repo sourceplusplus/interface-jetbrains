@@ -18,9 +18,9 @@ package spp.jetbrains.insight.pass.multipath
 
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralMultiPath
-import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralMultiPathPass
+import spp.jetbrains.insight.path.ProceduralMultiPath
+import spp.jetbrains.insight.path.ProceduralPath
 
 /**
  * Removes paths caused by conditional branches that are never taken.

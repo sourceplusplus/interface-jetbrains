@@ -16,7 +16,7 @@
  */
 package spp.jetbrains.insight.pass
 
-import spp.jetbrains.insight.ProceduralPath
+import spp.jetbrains.insight.path.ProceduralPath
 
 /**
  * A pass that analyzes an [ProceduralPath] and adds data to it.

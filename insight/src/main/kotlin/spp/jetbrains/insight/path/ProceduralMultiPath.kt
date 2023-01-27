@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight
+package spp.jetbrains.insight.path
 
 /**
  * A collection of [ProceduralPath]s that are all possible paths through a function.

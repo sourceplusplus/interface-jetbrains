@@ -17,9 +17,9 @@
 package spp.jetbrains.insight.pass.multipath
 
 import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralMultiPath
-import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.pass.ProceduralMultiPathPass
+import spp.jetbrains.insight.path.ProceduralMultiPath
+import spp.jetbrains.insight.path.ProceduralPath
 
 /**
  * Saves the [ProceduralPath] set to the root artifact PSI element for later use.

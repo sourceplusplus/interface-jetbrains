@@ -17,6 +17,7 @@
 package spp.jetbrains.insight
 
 import spp.jetbrains.SourceKey
+import spp.jetbrains.insight.path.ProceduralMultiPath
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 

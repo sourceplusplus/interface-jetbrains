@@ -33,8 +33,8 @@ import org.jetbrains.kotlin.idea.inspections.dfa.KotlinAnchor
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralMultiPath
 import spp.jetbrains.insight.pass.ProceduralMultiPathPass
+import spp.jetbrains.insight.path.ProceduralMultiPath
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 

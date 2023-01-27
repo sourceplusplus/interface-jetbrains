@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight
+package spp.jetbrains.insight.path
 
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.insight.InsightKeys
 import spp.protocol.insight.InsightValue
 
 /**
