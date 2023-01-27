@@ -31,16 +31,11 @@ import com.intellij.psi.scope.processor.VariablesProcessor
 import com.intellij.psi.scope.util.PsiScopesUtil
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
-import com.intellij.psi.util.descendantsOfType
-import com.intellij.psi.util.findParentOfType
-import com.intellij.psi.util.parentOfType
-import com.intellij.psi.util.parentOfTypes
+import com.intellij.psi.util.*
 import com.siyeh.ig.psiutils.ControlFlowUtils
 import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtIfExpression
-import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.psi.*
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
 import org.joor.Reflect
 import spp.jetbrains.artifact.service.ArtifactTypeService
@@ -138,19 +133,41 @@ class JVMArtifactScopeService : IArtifactScopeService {
     }
 
     override fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String> {
-        //determine available vars
+        //skip blank lines (if present) till valid minimum scope
         var checkLine = lineNumber
-        val scopeVars = mutableListOf<String>()
         var minScope: PsiElement? = null
         while (minScope == null) {
             minScope = SourceMarkerUtils.getElementAtLine(file, --checkLine)
         }
-        val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
-            override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+
+        return if (file is KtFile) {
+            getScopeVariables(minScope)
+        } else {
+            val scopeVars = mutableListOf<String>()
+            val variablesProcessor: VariablesProcessor = object : VariablesProcessor(false) {
+                override fun check(`var`: PsiVariable, state: ResolveState): Boolean = true
+            }
+            PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
+            for (i in 0 until variablesProcessor.size()) {
+                scopeVars.add(variablesProcessor.getResult(i).name!!)
+            }
+            scopeVars
         }
-        PsiScopesUtil.treeWalkUp(variablesProcessor, minScope, null)
-        for (i in 0 until variablesProcessor.size()) {
-            scopeVars.add(variablesProcessor.getResult(i).name!!)
+    }
+
+    private fun getScopeVariables(minScope: PsiElement): List<String> {
+        val scopeVars = mutableListOf<String>()
+        minScope.parents(true).filterIsInstance<KtBlockExpression>().forEach {
+            it.statements.filterIsInstance<KtProperty>().forEach {
+                if (it.textRange.startOffset <= minScope.textRange.startOffset) {
+                    it.name?.let { scopeVars.add(it) }
+                }
+            }
+        }
+        minScope.parents(true).filterIsInstance<KtCatchClause>().forEach {
+            it.parameterList?.parameters?.forEach {
+                it.name?.let { scopeVars.add(it) }
+            }
         }
         return scopeVars
     }
