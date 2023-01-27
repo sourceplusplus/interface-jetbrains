@@ -18,13 +18,4 @@ package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
 
-/**
- * A control structure artifact refers to things that control the flow of a program:
- * - conditionals (i.e. if/elif/else)
- * - for-loops, while-loops, do-while loops
- * - try-catch-finally
- * - switch statements
- */
-abstract class ControlStructureArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
-    abstract val childArtifacts: MutableList<ArtifactElement>
-}
+abstract class ForLoopArtifact(psiElement: PsiElement) : LoopArtifact(psiElement)

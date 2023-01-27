@@ -16,10 +16,7 @@
  */
 package spp.jetbrains.insight
 
-import spp.jetbrains.artifact.model.ArtifactElement
-import spp.jetbrains.artifact.model.BlockArtifact
-import spp.jetbrains.artifact.model.FunctionArtifact
-import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.model.*
 import spp.jetbrains.artifact.service.getParentFunction
 import spp.jetbrains.artifact.service.toArtifact
 import java.util.*
@@ -91,6 +88,13 @@ class ProceduralAnalyzer {
                         walkDown(elseBranch, elseArtifacts)
                     }
                     parent.add(elseArtifacts)
+                } else if (descendant is LoopArtifact) {
+                    val loopBody = descendant.body
+                    val loopBodyArtifacts = mutableListOf<Any>()
+                    if (loopBody != null) {
+                        walkDown(loopBody, loopBodyArtifacts)
+                    }
+                    parent.add(loopBodyArtifacts)
                 } else {
                     walkDown(descendant, parent)
                 }
@@ -122,6 +126,9 @@ class ProceduralAnalyzer {
                     val childArtifacts = processArtifacts[index + 2] as List<Any>
                     processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
                 }
+            } else if (artifactElement is LoopArtifact) {
+                val childArtifacts = processArtifacts[index + 1] as List<Any>
+                processPath(path, artifactElement.childArtifacts, childArtifacts, boolIndex)
             }
         }
     }

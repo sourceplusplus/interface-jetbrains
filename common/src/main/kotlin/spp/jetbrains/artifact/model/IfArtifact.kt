@@ -21,7 +21,7 @@ import com.intellij.psi.PsiElement
 /**
  * Represents if/elif/else control structures.
  */
-abstract class IfArtifact(psiElement: PsiElement) : ArtifactElement(psiElement), ControlStructureArtifact {
+abstract class IfArtifact(psiElement: PsiElement) : ControlStructureArtifact(psiElement) {
 
     abstract val condition: ArtifactElement?
     abstract val thenBranch: ArtifactElement?

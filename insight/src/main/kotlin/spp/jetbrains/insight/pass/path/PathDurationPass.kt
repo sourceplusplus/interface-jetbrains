@@ -17,7 +17,9 @@
 package spp.jetbrains.insight.pass.path
 
 import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.CountingLoopArtifact
 import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.model.LoopArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralPath
 import spp.jetbrains.insight.getDuration
@@ -52,6 +54,20 @@ class PathDurationPass : ProceduralPathPass {
                 val executionProbability = it.getData(InsightKeys.PATH_EXECUTION_PROBABILITY)
                 if (executionProbability == null || executionProbability.value > 0.0) {
                     analyze(it.childArtifacts, duration)?.let { duration = it }
+                }
+            } else if (it is LoopArtifact) {
+                val bodyDuration = it.childArtifacts.mapNotNull { it.getDuration() }
+                    .takeIf { it.isNotEmpty() }?.sum()
+                if (it is CountingLoopArtifact) {
+                    val repetitionCount = it.getRepetitionCount()
+                    duration = if (repetitionCount != null) {
+                        duration?.plus(bodyDuration?.times(repetitionCount) ?: 0)
+                            ?: bodyDuration?.times(repetitionCount)
+                    } else {
+                        duration?.plus(bodyDuration ?: 0) ?: bodyDuration
+                    }
+                } else {
+                    duration = duration?.plus(bodyDuration ?: 0) ?: bodyDuration
                 }
             } else {
                 val artifactDuration = it.getDuration()

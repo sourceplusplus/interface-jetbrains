@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.jvm.service
 
 import com.intellij.psi.*
+import com.siyeh.ig.psiutils.CountingLoop
 import org.jetbrains.kotlin.psi.*
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.service.define.IArtifactModelService
@@ -44,6 +45,15 @@ class JVMArtifactModelService : IArtifactModelService {
             is PsiCall -> JVMCallArtifact(element)
             is PsiCodeBlock -> JVMBlockArtifact(element)
             is PsiBlockStatement -> JVMBlockArtifact(element.codeBlock)
+            is PsiForStatement -> {
+                val countingLoop = CountingLoop.from(element)
+                if (countingLoop != null) {
+                    JVMCountingLoop(countingLoop)
+                } else {
+                    null
+                }
+            }
+
             else -> null
         }
     }
