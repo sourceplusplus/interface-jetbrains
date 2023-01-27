@@ -33,9 +33,9 @@ class LoadPsiPass : ArtifactPass {
 
         val resolvedFunction = element.getResolvedFunction()
         if (resolvedFunction != null) {
-            val paths = resolvedFunction.getUserData(InsightKeys.PROCEDURAL_PATHS.asPsiKey())
-            if (paths != null) {
-                element.data[InsightKeys.PROCEDURAL_PATHS] = paths
+            val multiPath = resolvedFunction.getUserData(InsightKeys.PROCEDURAL_MULTI_PATH.asPsiKey())
+            if (multiPath != null) {
+                element.data[InsightKeys.PROCEDURAL_MULTI_PATH] = multiPath
             }
         }
     }

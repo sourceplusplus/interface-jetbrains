@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.pass.pathset
+package spp.jetbrains.insight.pass.multipath
 
 import com.intellij.codeInspection.dataFlow.interpreter.RunnerResult
 import com.intellij.codeInspection.dataFlow.interpreter.StandardDataFlowInterpreter
@@ -33,22 +33,22 @@ import org.jetbrains.kotlin.idea.inspections.dfa.KotlinAnchor
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralPath
-import spp.jetbrains.insight.pass.ProceduralPathSetPass
+import spp.jetbrains.insight.ProceduralMultiPath
+import spp.jetbrains.insight.pass.ProceduralMultiPathPass
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 
-class StaticDfaPathSetPass : ProceduralPathSetPass {
+class StaticDfaMultiPathPass : ProceduralMultiPathPass {
 
-    private val log = logger<StaticDfaPathSetPass>()
+    private val log = logger<StaticDfaMultiPathPass>()
 
-    override fun preProcess(paths: List<ProceduralPath>): List<ProceduralPath> {
-        val project = paths.first().rootArtifact.project
+    override fun preProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath {
+        val project = multiPath.first().rootArtifact.project
         val factory = DfaValueFactory(project)
         val flow = DataFlowIRProvider.forElement(
-            (paths.first().rootArtifact as FunctionArtifact).bodyBlock!!.psiElement,
+            (multiPath.first().rootArtifact as FunctionArtifact).bodyBlock!!.psiElement,
             factory
-        ) ?: return paths
+        ) ?: return multiPath
 
         val listener = ConstantConditionDfaListener()
         val interpreter = StandardDataFlowInterpreter(flow, listener)
@@ -56,7 +56,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
         if (interpreter.interpret(states.map { s ->
                 DfaInstructionState(flow.getInstruction(0), s)
             }) != RunnerResult.OK) {
-            log.warn("Failed to interpret function ${(paths.first().rootArtifact as FunctionArtifact).name}")
+            log.warn("Failed to interpret function ${(multiPath.first().rootArtifact as FunctionArtifact).name}")
         }
 
         listener.constantConditions.forEach {
@@ -64,7 +64,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
                 val anchor = it.key as KotlinAnchor.KotlinExpressionAnchor
                 val value = it.value
                 val expression = anchor.expression
-                paths.forEach {
+                multiPath.forEach {
                     it.artifacts.forEach {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
@@ -85,7 +85,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
                 val anchor = it.key as JavaExpressionAnchor
                 val value = it.value
                 val expression = anchor.expression
-                paths.forEach {
+                multiPath.forEach {
                     it.artifacts.forEach {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
@@ -105,7 +105,7 @@ class StaticDfaPathSetPass : ProceduralPathSetPass {
             }
         }
 
-        return paths
+        return multiPath
     }
 
     enum class ConstantValue {

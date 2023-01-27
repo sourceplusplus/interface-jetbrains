@@ -61,20 +61,20 @@ class FunctionDurationTest : BasePlatformTestCase() {
         )
 
         //calculate
-        val oneCallPath =
+        val oneCallMultiPath =
             ProceduralAnalyzer().analyze(psi.getFunctions().first { it.name == "oneCall" }.toArtifact()!!)
-        val twoCallsPath =
+        val twoCallsMultiPath =
             ProceduralAnalyzer().analyze(psi.getFunctions().first { it.name == "twoCalls" }.toArtifact()!!)
 
         //assert
-        assertEquals(1, oneCallPath.size)
-        assertEquals(1, oneCallPath.first().artifacts.size)
-        assertEquals(1, oneCallPath.first().getInsights().size)
-        assertEquals(500L, oneCallPath.first().getInsights()[0].value)
+        assertEquals(1, oneCallMultiPath.size)
+        assertEquals(1, oneCallMultiPath.first().artifacts.size)
+        assertEquals(1, oneCallMultiPath.first().getInsights().size)
+        assertEquals(500L, oneCallMultiPath.first().getInsights()[0].value)
 
-        assertEquals(1, twoCallsPath.size)
-        assertEquals(2, twoCallsPath.first().artifacts.size)
-        assertEquals(1, twoCallsPath.first().getInsights().size)
-        assertEquals(1000L, twoCallsPath.first().getInsights()[0].value)
+        assertEquals(1, twoCallsMultiPath.size)
+        assertEquals(2, twoCallsMultiPath.first().artifacts.size)
+        assertEquals(1, twoCallsMultiPath.first().getInsights().size)
+        assertEquals(1000L, twoCallsMultiPath.first().getInsights()[0].value)
     }
 }

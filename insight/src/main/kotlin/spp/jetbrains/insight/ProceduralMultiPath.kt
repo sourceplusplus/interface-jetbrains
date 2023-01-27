@@ -14,19 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.pass.pathset
-
-import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralPath
-import spp.jetbrains.insight.pass.ProceduralPathSetPass
+package spp.jetbrains.insight
 
 /**
- * Saves the [ProceduralPath] set to the root artifact PSI element for later use.
+ * A collection of [ProceduralPath]s that are all possible paths through a function.
  */
-class SavePsiPathSetPass : ProceduralPathSetPass {
-
-    override fun postProcess(paths: List<ProceduralPath>): List<ProceduralPath> {
-        paths.forEach { it.rootArtifact.putUserData(InsightKeys.PROCEDURAL_PATHS.asPsiKey(), paths) }
-        return super.postProcess(paths)
-    }
+data class ProceduralMultiPath(
+    val paths: List<ProceduralPath>
+) : Iterable<ProceduralPath> {
+    override fun iterator(): Iterator<ProceduralPath> = paths.iterator()
+    val size = paths.size
 }

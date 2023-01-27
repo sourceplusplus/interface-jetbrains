@@ -36,10 +36,10 @@ class CallDurationPass : ArtifactPass {
 
         val resolvedFunction = element.getResolvedFunction()
         if (resolvedFunction != null) {
-            val paths = element.getData(InsightKeys.PROCEDURAL_PATHS)
-            if (paths != null) {
+            val multiPath = element.getData(InsightKeys.PROCEDURAL_MULTI_PATH)
+            if (multiPath != null) {
                 //artifact has already been analyzed, use pre-determined duration (if available)
-                val duration = paths.mapNotNull {
+                val duration = multiPath.mapNotNull {
                     it.getInsights().find { it.type == PATH_DURATION }?.value as Long?
                 }.ifNotEmpty { sum() }
                 if (duration != null) {

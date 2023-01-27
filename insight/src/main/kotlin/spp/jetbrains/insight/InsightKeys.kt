@@ -25,7 +25,7 @@ import spp.protocol.insight.InsightValue
  */
 object InsightKeys {
 
-    val PROCEDURAL_PATHS = SourceKey<List<ProceduralPath>>("PROCEDURAL_PATHS")
+    val PROCEDURAL_MULTI_PATH = SourceKey<ProceduralMultiPath>("PROCEDURAL_MULTI_PATH")
 
     val FUNCTION_DURATION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION.name)
     val FUNCTION_DURATION_PREDICTION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION_PREDICTION.name)

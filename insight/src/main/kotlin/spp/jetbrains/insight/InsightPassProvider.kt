@@ -20,7 +20,7 @@ import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.insight.pass.ArtifactPass
 import spp.jetbrains.insight.pass.IPass
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.insight.pass.ProceduralPathSetPass
+import spp.jetbrains.insight.pass.ProceduralMultiPathPass
 import spp.jetbrains.insight.pass.artifact.CallDurationPass
 import spp.jetbrains.insight.pass.artifact.LoadPsiPass
 import spp.jetbrains.insight.pass.artifact.RandomConditionalPass
@@ -29,12 +29,12 @@ import spp.jetbrains.insight.pass.path.PathDurationPass
 import spp.jetbrains.insight.pass.path.PathProbabilityPass
 import spp.jetbrains.insight.pass.path.PruneArtifactsPass
 import spp.jetbrains.insight.pass.path.RecursivePathPass
-import spp.jetbrains.insight.pass.pathset.SavePsiPathSetPass
-import spp.jetbrains.insight.pass.pathset.SimplifyPathSetPass
-import spp.jetbrains.insight.pass.pathset.StaticDfaPathSetPass
+import spp.jetbrains.insight.pass.multipath.SavePsiMultiPathPass
+import spp.jetbrains.insight.pass.multipath.SimplifyMultiPathPass
+import spp.jetbrains.insight.pass.multipath.StaticDfaMultiPathPass
 
 /**
- * Used to process passes over [ProceduralPath] sets, [ProceduralPath]s, and [ArtifactElement]s.
+ * Used to process passes over [ProceduralMultiPath]s, [ProceduralPath]s, and [ArtifactElement]s.
  */
 class InsightPassProvider {
 
@@ -52,29 +52,29 @@ class InsightPassProvider {
             PathDurationPass(),
             RecursivePathPass(),
 
-            //path set passes
-            StaticDfaPathSetPass(),
-            SimplifyPathSetPass(),
-            SavePsiPathSetPass()
+            //multi path passes
+            StaticDfaMultiPathPass(),
+            SimplifyMultiPathPass(),
+            SavePsiMultiPathPass()
         )
 
         val FULL = InsightPassProvider().apply {
             ALL_PASSES.forEach { registerPass(it) }
         }
         val FULL_NO_SIMPLIFY = InsightPassProvider().apply {
-            ALL_PASSES.filter { it !is SimplifyPathSetPass }.forEach { registerPass(it) }
+            ALL_PASSES.filter { it !is SimplifyMultiPathPass }.forEach { registerPass(it) }
         }
     }
 
     private val artifactPasses = mutableListOf<ArtifactPass>()
     private val pathPasses = mutableListOf<ProceduralPathPass>()
-    private val pathSetPasses = mutableListOf<ProceduralPathSetPass>()
+    private val multiPathPasses = mutableListOf<ProceduralMultiPathPass>()
 
     fun registerPass(pass: IPass) {
         when (pass) {
             is ArtifactPass -> artifactPasses.add(pass)
             is ProceduralPathPass -> pathPasses.add(pass)
-            is ProceduralPathSetPass -> pathSetPasses.add(pass)
+            is ProceduralMultiPathPass -> multiPathPasses.add(pass)
             else -> throw IllegalArgumentException("Unknown pass type: ${pass::class}")
         }
     }
@@ -88,15 +88,15 @@ class InsightPassProvider {
         pathPasses.forEach { it.analyze(path) }
     }
 
-    fun analyze(pathSet: List<ProceduralPath>): List<ProceduralPath> {
-        val preProcessedPathSet = pathSetPasses.fold(pathSet) { acc, pass ->
+    fun analyze(multiPath: ProceduralMultiPath): ProceduralMultiPath {
+        val preProcessedMultiPath = multiPathPasses.fold(multiPath) { acc, pass ->
             pass.preProcess(acc)
         }
-        preProcessedPathSet.map { analyze(it) }
-        val analyzedPathSetSet = pathSetPasses.fold(preProcessedPathSet) { acc, pass ->
+        preProcessedMultiPath.map { analyze(it) }
+        val analyzedMultiPath = multiPathPasses.fold(preProcessedMultiPath) { acc, pass ->
             pass.analyze(acc)
         }
-        return pathSetPasses.fold(analyzedPathSetSet) { acc, pass ->
+        return multiPathPasses.fold(analyzedMultiPath) { acc, pass ->
             pass.postProcess(acc)
         }
     }

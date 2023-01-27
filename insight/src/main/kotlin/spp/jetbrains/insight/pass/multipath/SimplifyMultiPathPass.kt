@@ -14,21 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.pass.pathset
+package spp.jetbrains.insight.pass.multipath
 
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.insight.InsightKeys
+import spp.jetbrains.insight.ProceduralMultiPath
 import spp.jetbrains.insight.ProceduralPath
-import spp.jetbrains.insight.pass.ProceduralPathSetPass
+import spp.jetbrains.insight.pass.ProceduralMultiPathPass
 
 /**
  * Removes paths caused by conditional branches that are never taken.
  */
-class SimplifyPathSetPass : ProceduralPathSetPass {
+class SimplifyMultiPathPass : ProceduralMultiPathPass {
 
-    override fun postProcess(paths: List<ProceduralPath>): List<ProceduralPath> {
+    override fun postProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath {
         val simplifiedPaths = mutableListOf<ProceduralPath>()
-        for (path in paths) {
+        for (path in multiPath) {
             val possiblePath = path.artifacts.all {
                 if (it is IfArtifact) {
                     val probability = it.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)
@@ -43,6 +44,6 @@ class SimplifyPathSetPass : ProceduralPathSetPass {
             }
         }
 
-        return simplifiedPaths
+        return ProceduralMultiPath(simplifiedPaths)
     }
 }

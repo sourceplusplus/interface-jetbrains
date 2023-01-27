@@ -35,7 +35,7 @@ class ProceduralAnalyzer {
      *
      * @param element the [ArtifactElement] to analyze
      */
-    fun analyze(element: ArtifactElement): List<ProceduralPath> {
+    fun analyze(element: ArtifactElement): ProceduralMultiPath {
         val parent = mutableListOf<Any>()
         walkDown(element, parent)
 
@@ -48,7 +48,7 @@ class ProceduralAnalyzer {
             paths.add(path)
         }
 
-        return passProvider.analyze(paths)
+        return passProvider.analyze(ProceduralMultiPath(paths))
     }
 
     /**
