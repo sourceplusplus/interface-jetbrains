@@ -42,6 +42,7 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.jetbrains.sourcemarker.command.status.ui.config.LiveBreakpointConfigurationPanel;
 import spp.jetbrains.sourcemarker.command.util.ExpressionUtils;
+import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService;
 import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.instrument.LiveBreakpoint;
 import spp.protocol.instrument.LiveInstrument;
@@ -59,6 +60,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static spp.jetbrains.PluginBundle.message;
@@ -332,13 +334,12 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
         if (groupedMarks != null) groupedMarks.forEach(SourceMark::dispose);
 
         if (liveBreakpoint != null) {
-            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveBreakpoint.getId()).onComplete(it -> {
-                if (it.succeeded()) {
-                    LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveBreakpoint);
-                } else {
-                    it.cause().printStackTrace();
-                }
-            });
+            String instrumentId = Objects.requireNonNull(liveBreakpoint.getId());
+            if (!InstrumentEventWindowService.getInstance(inlayMark.getProject()).isFinished(instrumentId)) {
+                UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(instrumentId)
+                        .onSuccess(it -> LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveBreakpoint))
+                        .onFailure(Throwable::printStackTrace);
+            }
         }
     }
 

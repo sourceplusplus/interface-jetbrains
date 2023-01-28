@@ -53,6 +53,7 @@ class InstrumentEventWindowService(
 ) : Disposable, ContentManagerListener {
 
     companion object {
+        @JvmStatic
         fun getInstance(project: Project): InstrumentEventWindowService {
             return project.getService(InstrumentEventWindowService::class.java)
         }
@@ -254,6 +255,10 @@ class InstrumentEventWindowService(
         } else {
             toolWindow.activate(null)
         }
+    }
+
+    fun isFinished(id: String): Boolean {
+        return overviewTab.model.items.find { it.instrumentId == id }?.isFinished ?: false
     }
 
     override fun dispose() = Unit

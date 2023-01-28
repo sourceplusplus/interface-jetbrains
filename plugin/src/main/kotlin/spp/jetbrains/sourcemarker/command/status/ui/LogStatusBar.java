@@ -38,6 +38,7 @@ import spp.jetbrains.plugin.LiveStatusBarManager;
 import spp.jetbrains.sourcemarker.command.status.ui.config.LiveLogConfigurationPanel;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteFieldRow;
+import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService;
 import spp.jetbrains.sourcemarker.instrument.log.VariableParser;
 import spp.jetbrains.state.LiveStateBar;
 import spp.protocol.artifact.log.Log;
@@ -67,6 +68,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -642,13 +644,12 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
 
         if (liveLog != null) {
             LiveStatusBarManager.getInstance(inlayMark.getProject()).removeLogData(inlayMark);
-            UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(liveLog.getId()).onComplete(it -> {
-                if (it.succeeded()) {
-                    LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveLog);
-                } else {
-                    it.cause().printStackTrace();
-                }
-            });
+            String instrumentId = Objects.requireNonNull(liveLog.getId());
+            if (!InstrumentEventWindowService.getInstance(inlayMark.getProject()).isFinished(instrumentId)) {
+                UserData.liveInstrumentService(inlayMark.getProject()).removeLiveInstrument(instrumentId)
+                        .onSuccess(it -> LiveStatusBarManager.getInstance(inlayMark.getProject()).removeActiveLiveInstrument(liveLog))
+                        .onFailure(Throwable::printStackTrace);
+            }
         }
         inlayMark.dispose();
     }

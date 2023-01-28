@@ -55,12 +55,14 @@ class InstrumentNavigationHandler(
             if (canRemove) {
                 actions.add(object : AnAction("Remove Instrument") {
                     override fun actionPerformed(e: AnActionEvent) {
+                        if (InstrumentEventWindowService.getInstance(gutterMark.project).isFinished(instrumentId)) {
+                            gutterMark.dispose()
+                            return
+                        }
+
                         UserData.liveInstrumentService(gutterMark.project)?.removeLiveInstrument(instrumentId)
-                            ?.onSuccess {
-                                gutterMark.dispose()
-                            }?.onFailure {
-                                log.error("Failed to remove live instrument", it)
-                            }
+                            ?.onSuccess { gutterMark.dispose() }
+                            ?.onFailure { log.error("Failed to remove live instrument", it) }
                     }
                 })
             }
