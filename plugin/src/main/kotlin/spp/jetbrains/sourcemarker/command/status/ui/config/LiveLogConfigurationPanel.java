@@ -31,6 +31,7 @@ import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 import spp.jetbrains.sourcemarker.command.util.ExpressionUtils;
 
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.util.Objects;
 
@@ -70,6 +71,8 @@ public class LiveLogConfigurationPanel extends JPanel {
         expiration24HrsButton.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
 
         hitLimitSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
+        ((NumberFormatter) ((JSpinner.DefaultEditor) hitLimitSpinner.getEditor()).getTextField().getFormatter())
+                .setCommitsOnValidEdit(true);
 
         rateLimitCountSpinner.addChangeListener(changeEvent -> autocompleteField.setShowSaveButton(isChanged()));
         rateLimitStepCombobox.addActionListener(actionEvent -> autocompleteField.setShowSaveButton(isChanged()));
