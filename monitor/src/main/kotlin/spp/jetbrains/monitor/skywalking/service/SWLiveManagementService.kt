@@ -68,7 +68,7 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
     /**
      * Requires Source++ platform. Fails in SkyWalking-only environments.
      */
-    override fun addDeveloper(developerId: String): Future<Developer> {
+    override fun addDeveloper(developerId: String, accessToken: String?): Future<Developer> {
         return Future.failedFuture(UnsupportedOperationException("Not implemented"))
     }
 
