@@ -40,7 +40,7 @@ class JavascriptArtifactTypeService : IArtifactTypeService {
     override fun getType(element: PsiElement): ArtifactType? {
         return when (element) {
             is JSClass -> ArtifactType.CLASS
-            is JSFunction -> ArtifactType.METHOD
+            is JSFunction -> ArtifactType.FUNCTION
             is JSExpression -> ArtifactType.EXPRESSION
 
             else -> null

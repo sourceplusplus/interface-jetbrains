@@ -50,7 +50,7 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     }
 
     fun isFunction(element: PsiElement): Boolean {
-        return getType(element) == ArtifactType.METHOD
+        return getType(element) == ArtifactType.FUNCTION
     }
 
     fun isPython(element: PsiElement): Boolean {

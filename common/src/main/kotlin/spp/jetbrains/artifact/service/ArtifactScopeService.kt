@@ -72,7 +72,7 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
     }
 
     fun isOnFunction(qualifiedName: ArtifactQualifiedName): Boolean {
-        return qualifiedName.type == ArtifactType.METHOD
+        return qualifiedName.type == ArtifactType.FUNCTION
     }
 
     override fun isInsideFunction(element: PsiElement): Boolean {

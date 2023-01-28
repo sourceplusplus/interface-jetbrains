@@ -43,7 +43,7 @@ class ExpressionInlayMark constructor(
 
     init {
         //show above element by default for method and class artifacts
-        if (artifactQualifiedName.type in listOf(ArtifactType.METHOD, ArtifactType.CLASS)) {
+        if (artifactQualifiedName.type in listOf(ArtifactType.FUNCTION, ArtifactType.CLASS)) {
             showAboveExpression = true
         }
     }

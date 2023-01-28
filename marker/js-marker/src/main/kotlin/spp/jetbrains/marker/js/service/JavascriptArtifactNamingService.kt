@@ -88,7 +88,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
             is JSFunctionExpression -> getStatementOrExpressionQualifiedName(element, ArtifactType.EXPRESSION)
             is JSFunction -> ArtifactQualifiedName(
                 element.containingFile.virtualFile.path + ":" + element.qualifiedName!! + "()",
-                type = ArtifactType.METHOD,
+                type = ArtifactType.FUNCTION,
                 lineNumber = SourceMarkerUtils.getLineNumber(element)
             )
 

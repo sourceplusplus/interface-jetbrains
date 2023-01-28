@@ -118,7 +118,7 @@ object JVMMarkerUtils {
         }
         return ArtifactQualifiedName(
             "$classQualifiedName.${getQualifiedName(method)}",
-            type = ArtifactType.METHOD,
+            type = ArtifactType.FUNCTION,
             lineNumber = method.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
         )
     }
@@ -129,7 +129,7 @@ object JVMMarkerUtils {
         }
         return ArtifactQualifiedName(
             "$classQualifiedName.${getQualifiedName(method)}",
-            type = ArtifactType.METHOD,
+            type = ArtifactType.FUNCTION,
             lineNumber = method.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
         )
     }

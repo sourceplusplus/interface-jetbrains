@@ -177,13 +177,13 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         val foo1 = methods[0]
         val name = JVMArtifactNamingService().getFullyQualifiedName(foo1)
         assertEquals("$className.foo1()", name.identifier)
-        assertEquals(ArtifactType.METHOD, name.type)
+        assertEquals(ArtifactType.FUNCTION, name.type)
         assertNotNull(name.lineNumber)
 
         val foo2 = methods[1]
         val name2 = JVMArtifactNamingService().getFullyQualifiedName(foo2)
         assertEquals("$className.foo2(java.lang.String)", name2.identifier)
-        assertEquals(ArtifactType.METHOD, name2.type)
+        assertEquals(ArtifactType.FUNCTION, name2.type)
         assertNotNull(name2.lineNumber)
 
         val foo3 = methods[2]
@@ -192,13 +192,13 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
             "$className.foo3(java.lang.String,int,long,double,float,boolean,char,byte,short)",
             name3.identifier
         )
-        assertEquals(ArtifactType.METHOD, name3.type)
+        assertEquals(ArtifactType.FUNCTION, name3.type)
         assertNotNull(name3.lineNumber)
 
         val foo4 = methods[3]
         val name4 = JVMArtifactNamingService().getFullyQualifiedName(foo4)
         assertEquals("$className.foo4($className\$MyObject)", name4.identifier)
-        assertEquals(ArtifactType.METHOD, name4.type)
+        assertEquals(ArtifactType.FUNCTION, name4.type)
         assertNotNull(name4.lineNumber)
 
         val foo5 = methods[4]
@@ -207,7 +207,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
             "$className.foo5(java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[])",
             name5.identifier
         )
-        assertEquals(ArtifactType.METHOD, name5.type)
+        assertEquals(ArtifactType.FUNCTION, name5.type)
         assertNotNull(name5.lineNumber)
     }
 
@@ -226,7 +226,7 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val name = JVMArtifactNamingService().getFullyQualifiedName(method!!)
         assertEquals("$className\$ClassName.foo()", name.identifier)
-        assertEquals(ArtifactType.METHOD, name.type)
+        assertEquals(ArtifactType.FUNCTION, name.type)
         assertNotNull(name.lineNumber)
     }
 

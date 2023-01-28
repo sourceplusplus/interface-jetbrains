@@ -74,7 +74,7 @@ class PythonArtifactNamingService : IArtifactNamingService {
                 ArtifactQualifiedName(
                     "$qualifiedName()",
                     null,
-                    ArtifactType.METHOD,
+                    ArtifactType.FUNCTION,
                     lineNumber = SourceMarkerUtils.getLineNumber(element)
                 )
             }

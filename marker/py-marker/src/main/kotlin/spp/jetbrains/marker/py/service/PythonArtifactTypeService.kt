@@ -51,7 +51,7 @@ class PythonArtifactTypeService : IArtifactTypeService {
     override fun getType(element: PsiElement): ArtifactType? {
         return when (element) {
             is PyClass -> ArtifactType.CLASS
-            is PyFunction -> ArtifactType.METHOD
+            is PyFunction -> ArtifactType.FUNCTION
             is PyExpression -> ArtifactType.EXPRESSION
 
             else -> null
