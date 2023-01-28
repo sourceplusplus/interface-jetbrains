@@ -45,6 +45,7 @@ import spp.jetbrains.sourcemarker.command.util.CircularList
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
+import spp.protocol.instrument.location.LiveSourceLocation
 import spp.protocol.instrument.meter.MeterType
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
@@ -193,12 +194,13 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
             wrapperPanel.layout = BorderLayout()
 
             val config = SourceMarkerPlugin.getInstance(editor.project!!).getConfig()
-            val location = ArtifactNamingService.getLiveSourceLocation(
-                inlayMark,
-                lineNumber,
-                config.serviceName
-            ) ?: return
+            val functionIdentifier = inlayMark.artifactQualifiedName.toFunction()?.identifier
+            if (functionIdentifier == null) {
+                log.warn("Unable to determine function identifier for: ${inlayMark.artifactQualifiedName}")
+                return
+            }
 
+            val location = LiveSourceLocation(functionIdentifier, service = config.serviceName)
             val statusBar = SpanStatusBar(location, inlayMark)
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
             wrapperPanel.add(statusBar)
