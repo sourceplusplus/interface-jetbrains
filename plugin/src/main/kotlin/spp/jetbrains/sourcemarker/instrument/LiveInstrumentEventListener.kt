@@ -156,6 +156,8 @@ class LiveInstrumentEventListener(
     private fun addGutterMark(fileMarker: SourceFileMarker, instrument: LiveInstrument) {
         if (fileMarker.getGutterMarks().any { it.getUserData(INSTRUMENT_ID) == instrument.id }) {
             return
+        } else if (instrument.location.line == -1) {
+            return
         }
 
         val gutterMark = createExpressionGutterMark(fileMarker, instrument.location.line)
