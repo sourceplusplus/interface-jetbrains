@@ -2,7 +2,7 @@
 # https://github.com/detekt/detekt/blob/master/detekt-core/src/main/resources/default-detekt-config.yml
 
 build:
-  maxIssues: 18 #todo: zero out
+  maxIssues: 13 #todo: zero out
 
 formatting:
   Indentation:
@@ -41,6 +41,8 @@ exceptions:
     excludes: [ '**/test/**' ]
 
 complexity:
+  NestedBlockDepth:
+    threshold: 5
   TooManyFunctions:
     thresholdInClasses: 15
   LongParameterList:
