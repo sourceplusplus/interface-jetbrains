@@ -17,8 +17,8 @@
 package spp.jetbrains.sourcemarker.instrument.ui.model
 
 import spp.protocol.instrument.LiveInstrumentType
+import spp.protocol.instrument.event.LiveInstrumentApplied
 import spp.protocol.instrument.event.LiveInstrumentEvent
-import spp.protocol.instrument.event.LiveInstrumentHit
 import spp.protocol.instrument.event.LiveInstrumentRemoved
 import java.time.Instant
 
@@ -47,7 +47,7 @@ data class InstrumentOverview(
             "Complete"
         } else if (events.any { it is LiveInstrumentRemoved && it.cause != null }) {
             "Error"
-        } else if (events.any { it is LiveInstrumentHit }) {
+        } else if (events.any { it is LiveInstrumentApplied }) {
             "Active"
         } else {
             "Pending"
