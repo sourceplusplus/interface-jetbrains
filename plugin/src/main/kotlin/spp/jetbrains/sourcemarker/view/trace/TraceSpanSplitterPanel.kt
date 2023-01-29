@@ -44,8 +44,7 @@ class TraceSpanSplitterPanel(project: Project, spans: List<TraceSpan>) : OnePixe
 
         spanTreeTable.tree.addTreeSelectionListener {
             val selected =
-                (it.newLeadSelectionPath?.lastPathComponent as DefaultMutableTreeNode)
-                    .userObject as TraceSpanTreeNode
+                (it.newLeadSelectionPath?.lastPathComponent as DefaultMutableTreeNode).userObject as TraceSpanTreeNode
             spanInfoTable.setSpan(selected.value)
         }
     }
