@@ -17,11 +17,30 @@
 package spp.jetbrains.command
 
 import com.intellij.psi.PsiElement
+import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.protocol.artifact.ArtifactQualifiedName
 
 data class LiveLocationContext(
     val qualifiedName: ArtifactQualifiedName,
     val fileMarker: SourceFileMarker,
     val element: PsiElement,
-)
+) {
+    fun getFunctionGuideMark(): GuideMark? {
+        var qualifiedName: ArtifactQualifiedName? = qualifiedName
+        var guideMark: GuideMark? = null
+        do {
+            if (qualifiedName == null) continue
+            guideMark = SourceMarker.getInstance(fileMarker.project).getGuideMark(qualifiedName)
+
+            if (guideMark is MethodGuideMark) {
+                return guideMark
+            }
+            qualifiedName = qualifiedName.asParent()
+        } while (guideMark == null && qualifiedName != null)
+
+        return null
+    }
+}
