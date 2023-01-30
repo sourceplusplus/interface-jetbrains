@@ -252,10 +252,6 @@ class JVMArtifactCreationService : IArtifactCreationService {
         }
 
         return if (inlayMark == null) {
-            if (ArtifactTypeService.isGroovy(element) && element.text != "}") {
-                val uExpression = element.toUElement()
-                if (uExpression !is UExpression && uExpression !is UDeclaration) return null
-            }
             inlayMark = fileMarker.createExpressionSourceMark(
                 element,
                 SourceMark.Type.INLAY
