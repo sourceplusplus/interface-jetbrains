@@ -20,7 +20,6 @@ import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.model.IfArtifact
-import spp.jetbrains.insight.InsightKeys
 import spp.protocol.insight.InsightValue
 
 /**
@@ -46,7 +45,7 @@ data class ProceduralPath(
             val conditionals = descendants.filterIsInstance<IfArtifact>()
             val conditions = mutableListOf<Pair<Boolean, IfArtifact>>()
             for (i in conditionals.indices) {
-                conditions.add(Pair(conditionals[i].getData(InsightKeys.CONDITION_EVALUATION)!!, conditionals[i]))
+                conditions.add(Pair(conditionals[i].getConditionEvaluation()!!, conditionals[i]))
             }
             return conditions
         }

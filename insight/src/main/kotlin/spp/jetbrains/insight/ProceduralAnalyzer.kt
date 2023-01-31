@@ -118,7 +118,7 @@ class ProceduralAnalyzer {
 
             if (artifactElement is IfArtifact) {
                 val bool = boolIterator.next()
-                artifactElement.data[InsightKeys.CONDITION_EVALUATION] = bool
+                artifactElement.setConditionEvaluation(bool)
 
                 if (bool) {
                     val childArtifacts = processArtifacts[index + 1] as List<Any>

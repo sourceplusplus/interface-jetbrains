@@ -69,7 +69,7 @@ class StaticDfaMultiPathPass : ProceduralMultiPathPass {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
                                 val probability = if (value == ConstantValue.TRUE) 1.0 else 0.0
-                                val conditionEvaluation = it.getData(InsightKeys.CONDITION_EVALUATION)!!
+                                val conditionEvaluation = it.getConditionEvaluation()!!
                                 if (conditionEvaluation) {
                                     it.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
                                         InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)
@@ -90,7 +90,7 @@ class StaticDfaMultiPathPass : ProceduralMultiPathPass {
                         if (it is IfArtifact) {
                             if (it.condition?.psiElement == expression) {
                                 val probability = if (value == ConstantValue.TRUE) 1.0 else 0.0
-                                val conditionEvaluation = it.getData(InsightKeys.CONDITION_EVALUATION)!!
+                                val conditionEvaluation = it.getConditionEvaluation()!!
                                 if (conditionEvaluation) {
                                     it.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
                                         InsightValue(InsightType.CONTROL_STRUCTURE_PROBABILITY, probability)

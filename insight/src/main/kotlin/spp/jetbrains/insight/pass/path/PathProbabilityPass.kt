@@ -39,7 +39,7 @@ class PathProbabilityPass : ProceduralPathPass {
                 InsightValue.of(PATH_EXECUTION_PROBABILITY, 1.0)
 
             if (it is IfArtifact) {
-                analyze(it, it.getData(InsightKeys.CONDITION_EVALUATION)!!, 1.0)
+                analyze(it, it.getConditionEvaluation()!!, 1.0)
             }
         }
     }
@@ -51,7 +51,7 @@ class PathProbabilityPass : ProceduralPathPass {
                 InsightValue.of(PATH_EXECUTION_PROBABILITY, probability)
 
             if (it is IfArtifact) {
-                analyze(it, it.getData(InsightKeys.CONDITION_EVALUATION)!!, probability)
+                analyze(it, it.getConditionEvaluation()!!, probability)
             }
         }
     }

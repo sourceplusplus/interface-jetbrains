@@ -17,11 +17,16 @@
 package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
+import spp.jetbrains.SourceKey
 
 /**
  * Represents if/elif/else control structures.
  */
 abstract class IfArtifact(psiElement: PsiElement) : ControlStructureArtifact(psiElement) {
+
+    companion object {
+        private val CONDITION_EVALUATION = SourceKey<Boolean>("CONDITION_EVALUATION")
+    }
 
     abstract val condition: ArtifactElement?
     abstract val thenBranch: ArtifactElement?
@@ -55,6 +60,28 @@ abstract class IfArtifact(psiElement: PsiElement) : ControlStructureArtifact(psi
             "true" -> 1.0
             "false" -> 0.0
             else -> Double.NaN
+        }
+    }
+
+    fun setConditionEvaluation(value: Boolean) {
+        data[CONDITION_EVALUATION] = value
+    }
+
+    fun getConditionEvaluation(): Boolean? {
+        return getData(CONDITION_EVALUATION)
+    }
+
+    override fun toString(): String {
+        return buildString {
+            append("IfArtifact(conditionEvaluation=")
+            append(getConditionEvaluation())
+            append(", condition=")
+            append(condition)
+            append(", thenBranch=")
+            append(thenBranch)
+            append(", elseBranch=")
+            append(elseBranch)
+            append(")")
         }
     }
 
