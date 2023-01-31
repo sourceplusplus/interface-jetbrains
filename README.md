@@ -8,7 +8,10 @@
 
 <!-- Plugin description -->
 
-This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/sourceplusplus), the open-source live coding platform. This plugin also works with regular [Apache SkyWalking](https://github.com/apache/skywalking) installations, but only [Live View](https://docs.sourceplus.plus/features/live-views/) commands are supported.
+This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/sourceplusplus), the
+continuous feedback platform for developers. This plugin also works with
+regular [Apache SkyWalking](https://github.com/apache/skywalking) installations, but
+only [Live View](https://docs.sourceplus.plus/features/live-views/) commands are supported.
 
 <!-- Plugin description end -->
 
@@ -16,7 +19,11 @@ This project contains the JetBrains IDE plugin for [Source++](https://github.com
 
 Install this plugin via the JetBrains Marketplace by searching for: `Source++`.
 
-Once installed, this plugin adds the [Live Command Palette](https://docs.sourceplus.plus/features/live-commands/#live-command-palette) to the JetBrains IDE, which is accessible by typing `Ctrl+Shift+S`. The available commands are determined by the location of the live command palette and the accessibility of [Apache SkyWalking](https://github.com/apache/skywalking) or the [Source++ Platform](https://github.com/sourceplusplus/sourceplusplus).
+Once installed, this plugin adds
+the [Live Command Palette](https://docs.sourceplus.plus/features/live-commands/#live-command-palette) to the JetBrains
+IDE, which is accessible by typing `Ctrl+Shift+S`. The available commands are determined by the location of the live
+command palette and the accessibility of [Apache SkyWalking](https://github.com/apache/skywalking) or
+the [Source++ Platform](https://github.com/sourceplusplus/sourceplusplus).
 
 For more information, please see the [documentation](https://docs.sourceplus.plus/features/).
 
