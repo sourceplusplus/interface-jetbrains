@@ -18,6 +18,7 @@ package spp.jetbrains.artifact.service
 
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
 import spp.jetbrains.artifact.service.define.IArtifactTypeService
 import spp.protocol.artifact.ArtifactType
@@ -50,7 +51,7 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     }
 
     fun isFunction(element: PsiElement): Boolean {
-        return getType(element) == ArtifactType.FUNCTION
+        return element is FunctionArtifact || getType(element) == ArtifactType.FUNCTION
     }
 
     fun isPython(element: PsiElement): Boolean {
