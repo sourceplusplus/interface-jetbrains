@@ -9,11 +9,61 @@
 <!-- Plugin description -->
 
 This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/sourceplusplus), the
-continuous feedback platform for developers. This plugin also works with
-regular [Apache SkyWalking](https://github.com/apache/skywalking) installations, but
-only [Live View](https://docs.sourceplus.plus/features/live-views/) commands are supported.
+continuous feedback platform for developers. Add breakpoints, logs, metrics, and distributed tracing to
+live production software in real-time on-demand, right from your IDE. View metrics, AI-assisted suggestions, and more,
+all in the context of your code.
 
 <!-- Plugin description end -->
+
+
+<table>
+    <thead>
+    <tr>
+        <th width="1000px">
+            Live Insight
+        </th>
+        <th width="1000px">
+            Live Instrument
+        </th>
+    </tr>
+    <tr>
+        <th width="1000px">
+            <kbd>
+              <img src="https://raw.githubusercontent.com/sourceplusplus/sourceplusplus/master/.github/media/promo/live-insight.png"/>
+            </kbd>
+        </th>
+        <th width="1000px">
+            <kbd>
+              <img src="https://raw.githubusercontent.com/sourceplusplus/sourceplusplus/master/.github/media/promo/live-instrument.png"/>
+            </kbd>
+        </th>
+    </tr>
+    </thead>
+</table>
+<table>
+    <thead>
+    <tr>
+        <th width="1000px">
+            Live View
+        </th>
+        <th width="1000px">
+            Live Command
+        </th>
+    </tr>
+    <tr>
+        <th width="1000px">
+          <kbd>
+            <img src="https://raw.githubusercontent.com/sourceplusplus/sourceplusplus/master/.github/media/promo/live-view.png"/>
+          </kbd>
+        </th>
+        <th width="1000px">
+            <kbd>
+              <img src="https://raw.githubusercontent.com/sourceplusplus/sourceplusplus/master/.github/media/promo/live-command.png"/>
+            </kbd>
+        </th>
+    </tr>
+    </thead>
+</table>
 
 ## How to use?
 
