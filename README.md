@@ -11,7 +11,7 @@
 This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/sourceplusplus), the
 continuous feedback platform for developers. Increase code comprehension with developer-native
 observability technology, safely debug production applications with negligible to minimal overhead, and gain
-continuous insight into your application as it behaves in its natural environment.
+continuous insight into your application in its natural environment.
 
 <!-- Plugin description end -->
 
