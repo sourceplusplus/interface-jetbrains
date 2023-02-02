@@ -29,6 +29,7 @@ import spp.protocol.platform.developer.SelfInfo
 import spp.protocol.platform.general.Service
 import spp.protocol.platform.general.ServiceEndpoint
 import spp.protocol.platform.general.ServiceInstance
+import spp.protocol.platform.general.TimeInfo
 import spp.protocol.platform.status.InstanceConnection
 import spp.protocol.service.LiveManagementService
 
@@ -166,6 +167,10 @@ class SWLiveManagementService : CoroutineVerticle(), LiveManagementService {
     }
 
     override fun getVersion(): Future<String> {
+        return Future.failedFuture("Illegal operation")
+    }
+
+    override fun getTimeInfo(): Future<TimeInfo> {
         return Future.failedFuture("Illegal operation")
     }
 
