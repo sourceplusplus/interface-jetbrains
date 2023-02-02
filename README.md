@@ -11,7 +11,7 @@
 This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/sourceplusplus), the
 continuous feedback platform for developers. Add breakpoints, logs, metrics, and distributed tracing to
 live production software on-demand, right from your IDE. Understand code faster and deeper with developer-native
-observabilitytechnology, safely debug production applications with negligible to minimal overhead, and gain
+observability technology, safely debug production applications with negligible to minimal overhead, and gain
 continuous insight into your application as it behaves in its natural environment.
 
 <!-- Plugin description end -->
