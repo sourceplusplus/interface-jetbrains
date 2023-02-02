@@ -10,7 +10,7 @@
 
 This project contains the JetBrains IDE plugin for [Source++](https://github.com/sourceplusplus/sourceplusplus), the
 continuous feedback platform for developers. Add breakpoints, logs, metrics, and distributed tracing to
-live production software in on-demand, right from your IDE. View metrics, AI-assisted suggestions, and more,
+live production software on-demand, right from your IDE. View metrics, AI-assisted suggestions, and more,
 all in the context of your code.
 
 <!-- Plugin description end -->
