@@ -24,7 +24,6 @@ import eu.geekplace.javapinning.JavaPinning
 import eu.geekplace.javapinning.pin.Pin
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.await
-import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import okhttp3.Call
 import okhttp3.EventListener
 import okhttp3.OkHttpClient
@@ -126,33 +125,27 @@ class SkywalkingMonitor(
             .okHttpClient(httpBuilder.build())
             .build()
 
-        val response = client.query(GetTimeInfoQuery()).execute()
-        if (response.hasErrors()) {
-            response.errors!!.forEach { log.error(it.message) }
-            throw RuntimeException("Failed to get Apache SkyWalking time info")
-        } else {
-            val timezone = Integer.parseInt(response.data!!.result!!.timezone) / 100
-            val skywalkingClient = SkywalkingClient(vertx, client, timezone)
+        val timezone = Integer.parseInt(UserData.liveManagementService(project)!!.getTimeInfo().await().timezone) / 100
+        val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
-            vertx.deployVerticle(ServiceBridge(project, skywalkingClient, currentService)).await()
-            vertx.deployVerticle(ServiceInstanceBridge(skywalkingClient)).await()
-            vertx.deployVerticle(EndpointBridge(project, skywalkingClient)).await()
-            vertx.deployVerticle(EndpointMetricsBridge(skywalkingClient)).await()
-            vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
-            vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
+        vertx.deployVerticle(ServiceBridge(project, skywalkingClient, currentService)).await()
+        vertx.deployVerticle(ServiceInstanceBridge(skywalkingClient)).await()
+        vertx.deployVerticle(EndpointBridge(project, skywalkingClient)).await()
+        vertx.deployVerticle(EndpointMetricsBridge(skywalkingClient)).await()
+        vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
+        vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
 
-            if (UserData.liveManagementService(project) == null) {
-                val swLiveManagementService = SWLiveManagementService()
-                vertx.deployVerticle(swLiveManagementService).await()
-                UserData.liveManagementService(project, swLiveManagementService)
-            }
-            if (UserData.liveViewService(project) == null) {
-                val swLiveViewService = SWLiveViewService(project)
-                vertx.deployVerticle(swLiveViewService).await()
-                UserData.liveViewService(project, swLiveViewService)
-            }
-
-            project.putUserData(SkywalkingMonitorService.KEY, SkywalkingMonitorServiceImpl(project, skywalkingClient))
+        if (UserData.liveManagementService(project) == null) {
+            val swLiveManagementService = SWLiveManagementService()
+            vertx.deployVerticle(swLiveManagementService).await()
+            UserData.liveManagementService(project, swLiveManagementService)
         }
+        if (UserData.liveViewService(project) == null) {
+            val swLiveViewService = SWLiveViewService(project)
+            vertx.deployVerticle(swLiveViewService).await()
+            UserData.liveViewService(project, swLiveViewService)
+        }
+
+        project.putUserData(SkywalkingMonitorService.KEY, SkywalkingMonitorServiceImpl(project, skywalkingClient))
     }
 }

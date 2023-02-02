@@ -27,7 +27,6 @@ import io.vertx.core.json.JsonArray
 import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
-import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
@@ -84,25 +83,6 @@ class SkywalkingClient(
 
     init {
         registerCodecs(vertx)
-    }
-
-    suspend fun getTimeInfo(): GetTimeInfoQuery.Data {
-        metricRegistry.timer("getTimeInfo").time().use {
-            if (log.isTraceEnabled) {
-                log.trace("Get time info request")
-            }
-
-            val response = apolloClient.query(
-                GetTimeInfoQuery()
-            ).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Get time info response: ${response.data!!.result}")
-                return response.data!!
-            }
-        }
     }
 
     suspend fun queryBasicTraces(request: GetEndpointTraces): QueryBasicTracesQuery.Result? {

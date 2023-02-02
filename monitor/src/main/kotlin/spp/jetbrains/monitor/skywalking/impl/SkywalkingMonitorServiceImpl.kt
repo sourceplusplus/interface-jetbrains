@@ -21,20 +21,14 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
-import spp.jetbrains.monitor.skywalking.model.TimeInfo
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
-import spp.jetbrains.monitor.skywalking.toProtocol
 import spp.jetbrains.status.SourceStatusService
 
 class SkywalkingMonitorServiceImpl(
     private val project: Project,
     private val skywalkingClient: SkywalkingClient
 ) : SkywalkingMonitorService {
-
-    override suspend fun getTimeInfo(): TimeInfo {
-        return skywalkingClient.getTimeInfo().toProtocol()
-    }
 
     override suspend fun searchExactEndpoint(keyword: String, cache: Boolean): JsonObject? {
         val service = SourceStatusService.getCurrentService(project) ?: return null

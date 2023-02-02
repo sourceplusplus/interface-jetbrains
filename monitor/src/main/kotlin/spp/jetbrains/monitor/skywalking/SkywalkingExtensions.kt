@@ -18,13 +18,11 @@ package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo3.api.Optional
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
-import monitor.skywalking.protocol.metadata.GetTimeInfoQuery
 import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.*
 import spp.jetbrains.monitor.skywalking.model.DurationStep
-import spp.jetbrains.monitor.skywalking.model.TimeInfo
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.protocol.artifact.trace.*
@@ -127,12 +125,5 @@ fun TopNCondition.fromProtocol(): monitor.skywalking.protocol.type.TopNCondition
         Optional.presentIfNotNull(scope.let { if (it == null) null else Scope.valueOf(it.name) }),
         topN,
         Order.valueOf(order.name)
-    )
-}
-
-fun GetTimeInfoQuery.Data.toProtocol(): TimeInfo {
-    return TimeInfo(
-        timezone = result?.timezone,
-        currentTimestamp = result?.currentTimestamp
     )
 }

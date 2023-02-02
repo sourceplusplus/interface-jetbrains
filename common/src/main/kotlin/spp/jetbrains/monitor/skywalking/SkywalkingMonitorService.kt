@@ -32,7 +32,6 @@ interface SkywalkingMonitorService {
         }
     }
 
-    suspend fun getTimeInfo(): TimeInfo
     suspend fun searchExactEndpoint(keyword: String, cache: Boolean = false): JsonObject?
     suspend fun getEndpoints(
         serviceId: String,
