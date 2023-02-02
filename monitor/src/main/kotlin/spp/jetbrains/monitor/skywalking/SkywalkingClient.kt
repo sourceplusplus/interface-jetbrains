@@ -33,7 +33,6 @@ import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.SortMetricsQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
-import monitor.skywalking.protocol.trace.QueryTraceQuery
 import monitor.skywalking.protocol.type.*
 import spp.jetbrains.monitor.skywalking.model.*
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
@@ -102,23 +101,6 @@ class SkywalkingClient(
             } else {
                 if (log.isTraceEnabled) log.trace("Get time info response: ${response.data!!.result}")
                 return response.data!!
-            }
-        }
-    }
-
-    suspend fun queryTraceStack(
-        traceId: String,
-    ): QueryTraceQuery.Result? {
-        metricRegistry.timer("queryTraceStack").time().use {
-            if (log.isTraceEnabled) log.trace("Query trace stack request. Trace: $traceId")
-
-            val response = apolloClient.query(QueryTraceQuery(traceId)).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Query trace stack response: ${response.data!!.result}")
-                return response.data!!.result
             }
         }
     }

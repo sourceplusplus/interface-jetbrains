@@ -26,7 +26,6 @@ import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.toProtocol
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.artifact.trace.TraceResult
-import spp.protocol.artifact.trace.TraceSpan
 
 /**
  * todo: description.
@@ -59,32 +58,15 @@ class EndpointTracesBridge(private val skywalkingClient: SkywalkingClient) : Cor
                 )
             }
         }
-        vertx.eventBus().localConsumer<String>(getTraceStackAddress) {
-            launch(vertx.dispatcher()) {
-                val traceStack = skywalkingClient.queryTraceStack(it.body())
-                if (traceStack != null) {
-                    it.reply(traceStack.spans.map { it.toProtocol() })
-                } else {
-                    it.reply(null)
-                }
-            }
-        }
     }
 
     companion object {
         private const val rootAddress = "monitor.skywalking.endpoint.traces"
         private const val getTracesAddress = "$rootAddress.getTraces"
-        private const val getTraceStackAddress = "$rootAddress.getTraceStack"
 
         suspend fun getTraces(request: GetEndpointTraces, vertx: Vertx): TraceResult {
             return vertx.eventBus()
                 .request<TraceResult>(getTracesAddress, request)
-                .await().body()
-        }
-
-        suspend fun getTraceStack(traceId: String, vertx: Vertx): List<TraceSpan> {
-            return vertx.eventBus()
-                .request<List<TraceSpan>>(getTraceStackAddress, traceId)
                 .await().body()
         }
     }

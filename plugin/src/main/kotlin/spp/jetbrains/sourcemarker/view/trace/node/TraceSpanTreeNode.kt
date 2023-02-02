@@ -38,6 +38,7 @@ class TraceSpanTreeNode(
     }
 
     override fun getChildren(): Collection<TraceSpanTreeNode> {
+        //todo: move logic to TraceStack.getChildren()
         val childSpans = traceStack.filter {
             it.parentSpanId == value.spanId && it.segmentId == value.segmentId
         }.toMutableList()

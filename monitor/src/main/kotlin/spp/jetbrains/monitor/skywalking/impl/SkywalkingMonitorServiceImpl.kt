@@ -20,13 +20,11 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
-import spp.jetbrains.monitor.skywalking.bridge.EndpointTracesBridge
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.monitor.skywalking.model.TimeInfo
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
-import spp.protocol.artifact.trace.TraceSpan
 import spp.protocol.platform.general.Service
 
 class SkywalkingMonitorServiceImpl(
@@ -45,10 +43,6 @@ class SkywalkingMonitorServiceImpl(
 
     override suspend fun getEndpoints(serviceId: String, limit: Int, cache: Boolean): JsonArray {
         return skywalkingClient.searchEndpoint("", serviceId, limit, cache)
-    }
-
-    override suspend fun getTraceStack(traceId: String): List<TraceSpan> {
-        return EndpointTracesBridge.getTraceStack(traceId, skywalkingClient.vertx)
     }
 
     override suspend fun getCurrentService(): Service? {

@@ -27,6 +27,7 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
@@ -206,9 +207,9 @@ class LiveViewTraceManagerImpl(
         }
 
         UserData.vertx(project).safeLaunch {
-            val monitorService = UserData.skywalkingMonitorService(project)
-            val traceStack = monitorService.getTraceStack(trace.traceIds.first())
-            val traceWindow = TraceSpanSplitterPanel(project, traceStack)
+            val traceStack = UserData.liveViewService(project)!!.getTraceStack(trace.traceIds.first()).await()
+            val traceSpans = traceStack?.traceSpans ?: return@safeLaunch
+            val traceWindow = TraceSpanSplitterPanel(project, traceSpans)
 
             ApplicationManager.getApplication().invokeLater {
                 val content = contentFactory.createContent(
