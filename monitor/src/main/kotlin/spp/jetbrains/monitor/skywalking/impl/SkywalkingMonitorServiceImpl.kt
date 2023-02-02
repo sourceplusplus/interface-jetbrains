@@ -16,18 +16,19 @@
  */
 package spp.jetbrains.monitor.skywalking.impl
 
+import com.intellij.openapi.project.Project
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
-import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.monitor.skywalking.model.TimeInfo
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
 import spp.jetbrains.monitor.skywalking.toProtocol
-import spp.protocol.platform.general.Service
+import spp.jetbrains.status.SourceStatusService
 
 class SkywalkingMonitorServiceImpl(
+    private val project: Project,
     private val skywalkingClient: SkywalkingClient
 ) : SkywalkingMonitorService {
 
@@ -36,17 +37,13 @@ class SkywalkingMonitorServiceImpl(
     }
 
     override suspend fun searchExactEndpoint(keyword: String, cache: Boolean): JsonObject? {
-        val service = getCurrentService() ?: return null
+        val service = SourceStatusService.getCurrentService(project) ?: return null
         val endpoints = skywalkingClient.searchEndpoint(keyword, service.id, 10, cache)
         return endpoints.map { it as JsonObject }.find { it.getString("name") == keyword }
     }
 
     override suspend fun getEndpoints(serviceId: String, limit: Int, cache: Boolean): JsonArray {
         return skywalkingClient.searchEndpoint("", serviceId, limit, cache)
-    }
-
-    override suspend fun getCurrentService(): Service? {
-        return ServiceBridge.getCurrentService(skywalkingClient.vertx)
     }
 
     override suspend fun sortMetrics(condition: TopNCondition, duration: ZonedDuration, cache: Boolean): JsonArray {

@@ -50,7 +50,7 @@ class EndpointBridge(
 
         vertx.eventBus().localConsumer<String>(searchExactEndpointAddress) {
             launch(vertx.dispatcher()) {
-                val service = ServiceBridge.getCurrentService(vertx)
+                val service = SourceStatusService.getCurrentService(project)
                 if (service == null) {
                     log.warn("Unable to determine current service for endpoint search")
                     it.reply(null)

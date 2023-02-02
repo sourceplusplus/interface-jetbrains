@@ -21,7 +21,6 @@ import com.intellij.openapi.util.Key
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.monitor.skywalking.model.*
-import spp.protocol.platform.general.Service
 
 @Deprecated("Use LiveViewService instead")
 interface SkywalkingMonitorService {
@@ -40,8 +39,6 @@ interface SkywalkingMonitorService {
         limit: Int,
         cache: Boolean = true
     ): JsonArray
-
-    suspend fun getCurrentService(): Service?
 
     suspend fun sortMetrics(
         condition: TopNCondition,

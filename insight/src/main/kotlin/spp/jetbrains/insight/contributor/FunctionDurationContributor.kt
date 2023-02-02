@@ -38,6 +38,7 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.safeExecuteBlocking
 import spp.jetbrains.safeLaunch
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
@@ -84,10 +85,9 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
         }
     }
 
-    private suspend fun subscribeToResponseTime(guideMark: GuideMark) {
+    private fun subscribeToResponseTime(guideMark: GuideMark) {
         val viewService = UserData.liveViewService(guideMark.project) ?: return
-        val skywalkingMonitorService = UserData.skywalkingMonitorService(guideMark.project)
-        val service = skywalkingMonitorService.getCurrentService()
+        val service = SourceStatusService.getCurrentService(guideMark.project)
         if (service == null) {
             log.warn("No service selected, skipping response time subscription")
             return

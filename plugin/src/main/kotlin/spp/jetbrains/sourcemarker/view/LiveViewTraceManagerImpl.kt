@@ -30,7 +30,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
@@ -39,6 +38,7 @@ import spp.jetbrains.sourcemarker.view.trace.TraceSpanSplitterPanel
 import spp.jetbrains.sourcemarker.view.window.LiveViewTraceWindowImpl
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
+import spp.jetbrains.status.SourceStatusService
 import spp.jetbrains.view.LiveViewTraceManager
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.window.LiveTraceWindow
@@ -79,7 +79,7 @@ class LiveViewTraceManagerImpl(
             if (it == SourceStatus.Ready) {
                 val vertx = UserData.vertx(project)
                 vertx.safeLaunch {
-                    val service = ServiceBridge.getCurrentService(vertx)!!
+                    val service = SourceStatusService.getCurrentService(project)!!
                     showServiceWindow(service)
                 }
             } else {

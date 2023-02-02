@@ -147,12 +147,12 @@ class SkywalkingMonitor(
                 UserData.liveManagementService(project, swLiveManagementService)
             }
             if (UserData.liveViewService(project) == null) {
-                val swLiveViewService = SWLiveViewService()
+                val swLiveViewService = SWLiveViewService(project)
                 vertx.deployVerticle(swLiveViewService).await()
                 UserData.liveViewService(project, swLiveViewService)
             }
 
-            project.putUserData(SkywalkingMonitorService.KEY, SkywalkingMonitorServiceImpl(skywalkingClient))
+            project.putUserData(SkywalkingMonitorService.KEY, SkywalkingMonitorServiceImpl(project, skywalkingClient))
         }
     }
 }

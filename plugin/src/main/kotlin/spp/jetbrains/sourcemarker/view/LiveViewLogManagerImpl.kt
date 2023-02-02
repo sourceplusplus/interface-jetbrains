@@ -37,6 +37,7 @@ import spp.jetbrains.sourcemarker.view.action.StopViewAction
 import spp.jetbrains.sourcemarker.view.window.LiveLogWindowImpl
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
+import spp.jetbrains.status.SourceStatusService
 import spp.jetbrains.view.LiveViewLogManager
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.window.LiveLogWindow
@@ -76,7 +77,7 @@ class LiveViewLogManagerImpl(
             if (it == SourceStatus.Ready) {
                 val vertx = UserData.vertx(project)
                 vertx.safeLaunch {
-                    val service = ServiceBridge.getCurrentService(vertx)!!
+                    val service = SourceStatusService.getCurrentService(project)!!
                     showServicesWindow(service)
                 }
             } else {

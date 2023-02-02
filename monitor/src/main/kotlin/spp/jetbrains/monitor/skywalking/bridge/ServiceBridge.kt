@@ -90,8 +90,6 @@ class ServiceBridge(
         }
 
         if (activeServices.isNotEmpty()) {
-            vertx.eventBus().publish(activeServicesUpdatedAddress, activeServices)
-
             if (initServiceName != null) {
                 currentService = activeServices.find { it.name == initServiceName }
                 currentService?.let { log.info("Current service set to: ${it.name}") }
@@ -141,19 +139,9 @@ class ServiceBridge(
         private const val getCurrentServiceAddress = "$rootAddress.currentService"
         private const val getActiveServicesAddress = "$rootAddress.activeServices"
         private const val currentServiceUpdatedAddress = "$rootAddress.currentService-Updated"
-        private const val activeServicesUpdatedAddress = "$rootAddress.activeServices-Updated"
 
         fun currentServiceConsumer(vertx: Vertx): MessageConsumer<Service> {
             return vertx.eventBus().localConsumer(currentServiceUpdatedAddress)
-        }
-
-        fun activeServicesConsumer(vertx: Vertx): MessageConsumer<List<Service>> {
-            return vertx.eventBus().localConsumer(activeServicesUpdatedAddress)
-        }
-
-        suspend fun getCurrentService(vertx: Vertx): Service? {
-            return vertx.eventBus()
-                .request<Service>(getCurrentServiceAddress, true).await().body()
         }
 
         suspend fun getActiveServices(vertx: Vertx): List<Service> {

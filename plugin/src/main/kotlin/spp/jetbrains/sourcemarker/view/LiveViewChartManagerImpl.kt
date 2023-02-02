@@ -38,6 +38,7 @@ import spp.jetbrains.sourcemarker.view.window.LiveActivityWindow
 import spp.jetbrains.sourcemarker.view.window.LiveEndpointsWindow
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatusListener
+import spp.jetbrains.status.SourceStatusService
 import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.view.ResumableView
 import spp.protocol.artifact.metrics.MetricType
@@ -74,7 +75,7 @@ class LiveViewChartManagerImpl(
             if (it == SourceStatus.Ready) {
                 val vertx = UserData.vertx(project)
                 vertx.safeLaunch {
-                    val service = ServiceBridge.getCurrentService(vertx)!!
+                    val service = SourceStatusService.getCurrentService(project)!!
                     ApplicationManager.getApplication().invokeLater {
                         showServiceWindow(service)
                     }

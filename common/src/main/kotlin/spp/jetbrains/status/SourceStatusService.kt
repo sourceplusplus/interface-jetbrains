@@ -33,6 +33,10 @@ interface SourceStatusService {
         fun getInstance(project: Project): SourceStatusService {
             return project.getUserData(KEY)!!
         }
+
+        fun getCurrentService(project: Project): Service? {
+            return getInstance(project).getCurrentService()
+        }
     }
 
     fun isReady(): Boolean
@@ -42,6 +46,7 @@ interface SourceStatusService {
     fun getCurrentStatus(): Pair<SourceStatus, String?>
     fun update(status: SourceStatus, message: String? = null)
 
+    fun getCurrentService(): Service?
     fun setCurrentService(service: Service)
     fun setActiveServices(services: List<Service>)
 }

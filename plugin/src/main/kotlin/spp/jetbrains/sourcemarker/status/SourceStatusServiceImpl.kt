@@ -91,6 +91,10 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
         updateAllStatusBarIcons()
     }
 
+    override fun getCurrentService(): Service? {
+        return currentService
+    }
+
     override fun setCurrentService(service: Service) {
         currentService = service
         update(ServiceChange)

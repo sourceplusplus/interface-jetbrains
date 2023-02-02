@@ -17,6 +17,7 @@
 package spp.jetbrains.monitor.skywalking.service
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import io.vertx.core.Future
 import io.vertx.core.eventbus.ReplyException
 import io.vertx.core.json.JsonArray
@@ -32,6 +33,7 @@ import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.model.GetEndpointMetrics
 import spp.jetbrains.monitor.skywalking.model.GetEndpointTraces
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.artifact.trace.TraceStack
@@ -54,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Emulates a subscription-based [LiveViewService] for SkyWalking-standalone installations.
  */
-class SWLiveViewService : CoroutineVerticle(), LiveViewService {
+class SWLiveViewService(private val project: Project) : CoroutineVerticle(), LiveViewService {
 
     companion object {
         private val formatter = DateTimeFormatterBuilder()
@@ -86,7 +88,7 @@ class SWLiveViewService : CoroutineVerticle(), LiveViewService {
             }
         }
 
-        currentService = ServiceBridge.getCurrentService(vertx)
+        currentService = SourceStatusService.getCurrentService(project)
         ServiceBridge.currentServiceConsumer(vertx).handler {
             currentService = it.body()
         }

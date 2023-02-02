@@ -47,6 +47,7 @@ abstract class LiveIndicator(val project: Project) {
     val viewService = UserData.liveViewService(project)!!
     val statusManager = LiveStatusBarManager.getInstance(project)
     val instrumentService = UserData.liveInstrumentService(project)
+    val statusService = SourceStatusService.getInstance(project)
     val selfInfo: SelfInfo
         get() = UserData.selfInfo(project)!!
 
