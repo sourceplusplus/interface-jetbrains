@@ -28,7 +28,6 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ChangeTimeAction
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction

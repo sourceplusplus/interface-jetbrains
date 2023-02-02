@@ -29,7 +29,6 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
