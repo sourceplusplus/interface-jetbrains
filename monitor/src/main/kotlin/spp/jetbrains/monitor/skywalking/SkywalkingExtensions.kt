@@ -18,15 +18,18 @@ package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo3.api.Optional
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
-import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
 import monitor.skywalking.protocol.trace.QueryTraceQuery
-import monitor.skywalking.protocol.type.*
+import monitor.skywalking.protocol.type.Duration
+import monitor.skywalking.protocol.type.Order
+import monitor.skywalking.protocol.type.Scope
 import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.jetbrains.monitor.skywalking.model.ZonedDuration
-import spp.protocol.artifact.trace.*
 import spp.protocol.artifact.trace.Trace
+import spp.protocol.artifact.trace.TraceSpan
+import spp.protocol.artifact.trace.TraceSpanLogEntry
+import spp.protocol.artifact.trace.TraceSpanRef
 import spp.protocol.platform.general.Service
 import java.time.Instant
 
@@ -83,24 +86,6 @@ fun QueryTraceQuery.Span.toProtocol(): TraceSpan {
         tags = tags.associate { it.key to it.value!! },
         logs = logs.map { it.toProtocol() }
     )
-}
-
-fun TraceOrderType.toQueryOrder(): QueryOrder {
-    return when (this) {
-        TraceOrderType.SLOWEST_TRACES -> QueryOrder.BY_DURATION
-        else -> QueryOrder.BY_START_TIME
-    }
-}
-
-fun TraceOrderType.toTraceState(): TraceState {
-    return when (this) {
-        TraceOrderType.FAILED_TRACES -> TraceState.ERROR
-        else -> TraceState.ALL
-    }
-}
-
-fun Iterable<GetLinearIntValuesQuery.Value>.average(): Double {
-    return map { it.value as Int }.average()
 }
 
 fun GetAllServicesQuery.Result.toProtocol(): Service {

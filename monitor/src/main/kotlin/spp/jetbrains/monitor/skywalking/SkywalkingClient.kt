@@ -17,24 +17,20 @@
 package spp.jetbrains.monitor.skywalking
 
 import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.api.Optional
 import com.codahale.metrics.MetricRegistry
 import com.google.common.cache.CacheBuilder
 import com.intellij.openapi.diagnostic.logger
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
-import monitor.skywalking.protocol.log.QueryLogsQuery
 import monitor.skywalking.protocol.metadata.GetAllServicesQuery
 import monitor.skywalking.protocol.metadata.GetServiceInstancesQuery
 import monitor.skywalking.protocol.metadata.SearchEndpointQuery
-import monitor.skywalking.protocol.metrics.GetLinearIntValuesQuery
-import monitor.skywalking.protocol.metrics.GetMultipleLinearIntValuesQuery
 import monitor.skywalking.protocol.metrics.SortMetricsQuery
 import monitor.skywalking.protocol.trace.QueryBasicTracesQuery
-import monitor.skywalking.protocol.type.*
+import monitor.skywalking.protocol.type.Duration
+import monitor.skywalking.protocol.type.Step
 import spp.jetbrains.monitor.skywalking.model.*
-import spp.jetbrains.monitor.skywalking.model.TopNCondition
 import spp.protocol.marshall.LocalMessageCodec
 import spp.protocol.platform.general.Service
 import java.io.IOException
@@ -85,88 +81,6 @@ class SkywalkingClient(
         registerCodecs(vertx)
     }
 
-    suspend fun queryBasicTraces(request: GetEndpointTraces): QueryBasicTracesQuery.Result? {
-        metricRegistry.timer("queryBasicTraces").time().use {
-            if (log.isTraceEnabled) log.trace("Query basic traces request. Request: $request")
-
-            val response = apolloClient.query(
-                QueryBasicTracesQuery(
-                    TraceQueryCondition(
-                        serviceId = Optional.presentIfNotNull(request.serviceId),
-                        serviceInstanceId = Optional.presentIfNotNull(request.serviceInstanceId),
-                        endpointId = Optional.presentIfNotNull(request.endpointId),
-                        queryDuration = Optional.Present(request.zonedDuration.toDuration(this)),
-                        queryOrder = request.orderType.toQueryOrder(),
-                        traceState = request.orderType.toTraceState(),
-                        paging = Pagination(Optional.Present(request.pageNumber), request.pageSize)
-                    )
-                )
-            ).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Query basic traces response: ${response.data!!.result}")
-                return response.data!!.result
-            }
-        }
-    }
-
-    suspend fun getEndpointMetrics(
-        metricName: String,
-        endpointId: String,
-        duration: Duration
-    ): GetLinearIntValuesQuery.Result? {
-        metricRegistry.timer("getEndpointMetrics").time().use {
-            if (log.isTraceEnabled) {
-                log.trace(
-                    "Get endpoint metrics request. Metric: $metricName - Endpoint: $endpointId - Duration: $duration"
-                )
-            }
-
-            val response = apolloClient.query(
-                GetLinearIntValuesQuery(MetricCondition(metricName, Optional.Present(endpointId)), duration)
-            ).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Get endpoint metrics response: ${response.data!!.result}")
-                return response.data!!.result
-            }
-        }
-    }
-
-    suspend fun getMultipleEndpointMetrics(
-        metricName: String,
-        endpointId: String,
-        numOfLinear: Int,
-        duration: Duration
-    ): List<GetMultipleLinearIntValuesQuery.Result> {
-        metricRegistry.timer("getMultipleEndpointMetrics").time().use {
-            if (log.isTraceEnabled) {
-                log.trace(
-                    "Get multiple endpoint metrics request. Metric: $metricName - Endpoint: $endpointId - Number: $numOfLinear - Duration: $duration"
-                )
-            }
-
-            val response = apolloClient.query(
-                GetMultipleLinearIntValuesQuery(
-                    MetricCondition(metricName, Optional.Present(endpointId)),
-                    numOfLinear,
-                    duration
-                )
-            ).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Get multiple endpoint metrics response: ${response.data!!.result}")
-                return response.data!!.result
-            }
-        }
-    }
-
     suspend fun searchEndpoint(keyword: String, serviceId: String, limit: Int, cache: Boolean): JsonArray {
         if (cache) {
             oneMinRespCache.getIfPresent(Triple(keyword, serviceId, limit))?.let {
@@ -194,23 +108,6 @@ class SkywalkingClient(
         }
     }
 
-    suspend fun queryLogs(condition: LogQueryCondition): QueryLogsQuery.Result? {
-        metricRegistry.timer("queryLogs").time().use {
-            if (log.isTraceEnabled) log.trace("Query logs request. Condition: $condition")
-
-            val response = apolloClient.query(
-                QueryLogsQuery(Optional.Present(condition))
-            ).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Query logs response: ${response.data!!.result}")
-                return response.data!!.result //todo: change return type if this can never be null
-            }
-        }
-    }
-
     suspend fun getServices(duration: Duration): List<Service> {
         metricRegistry.timer("getServices").time().use {
             if (log.isTraceEnabled) log.trace("Get services request. Duration: $duration")
@@ -224,25 +121,6 @@ class SkywalkingClient(
             } else {
                 if (log.isTraceEnabled) log.trace("Get services response: ${response.data!!.result}")
                 return response.data!!.result.map { it.toProtocol() }
-            }
-        }
-    }
-
-    suspend fun getServiceInstances(serviceId: String, duration: Duration): List<GetServiceInstancesQuery.Result> {
-        metricRegistry.timer("getServiceInstances").time().use {
-            if (log.isTraceEnabled) {
-                log.trace("Get service instances request. Service: $serviceId - Duration: $duration")
-            }
-
-            val response = apolloClient.query(
-                GetServiceInstancesQuery(serviceId, duration)
-            ).execute()
-            if (response.hasErrors()) {
-                response.errors!!.forEach { log.warn(it.message) }
-                throw IOException(response.errors!![0].message)
-            } else {
-                if (log.isTraceEnabled) log.trace("Get service instances: $response.data!!.result")
-                return response.data!!.result
             }
         }
     }

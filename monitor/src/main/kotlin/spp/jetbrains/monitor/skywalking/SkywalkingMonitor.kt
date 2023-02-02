@@ -31,8 +31,6 @@ import okhttp3.Protocol
 import spp.jetbrains.UserData
 import spp.jetbrains.monitor.skywalking.bridge.*
 import spp.jetbrains.monitor.skywalking.impl.SkywalkingMonitorServiceImpl
-import spp.jetbrains.monitor.skywalking.service.SWLiveManagementService
-import spp.jetbrains.monitor.skywalking.service.SWLiveViewService
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
 import java.io.IOException
@@ -129,22 +127,6 @@ class SkywalkingMonitor(
         val skywalkingClient = SkywalkingClient(vertx, client, timezone)
 
         vertx.deployVerticle(ServiceBridge(project, skywalkingClient, currentService)).await()
-        vertx.deployVerticle(ServiceInstanceBridge(skywalkingClient)).await()
-        vertx.deployVerticle(EndpointBridge(project, skywalkingClient)).await()
-        vertx.deployVerticle(EndpointMetricsBridge(skywalkingClient)).await()
-        vertx.deployVerticle(EndpointTracesBridge(skywalkingClient)).await()
-        vertx.deployVerticle(LogsBridge(skywalkingClient)).await()
-
-        if (UserData.liveManagementService(project) == null) {
-            val swLiveManagementService = SWLiveManagementService()
-            vertx.deployVerticle(swLiveManagementService).await()
-            UserData.liveManagementService(project, swLiveManagementService)
-        }
-        if (UserData.liveViewService(project) == null) {
-            val swLiveViewService = SWLiveViewService(project)
-            vertx.deployVerticle(swLiveViewService).await()
-            UserData.liveViewService(project, swLiveViewService)
-        }
 
         project.putUserData(SkywalkingMonitorService.KEY, SkywalkingMonitorServiceImpl(project, skywalkingClient))
     }

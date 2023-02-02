@@ -56,12 +56,6 @@ class ServiceBridge(
             }
             msg.reply(currentService)
         }
-        vertx.eventBus().localConsumer<Boolean>(getActiveServicesAddress) { msg ->
-            if (activeServices.isEmpty()) {
-                log.warn("No active services set")
-            }
-            msg.reply(activeServices)
-        }
 
         //attempt to set current service
         SourceStatusService.getInstance(project).update(Pending, "Setting current service")
@@ -137,16 +131,10 @@ class ServiceBridge(
 
         private const val rootAddress = "monitor.skywalking.service"
         private const val getCurrentServiceAddress = "$rootAddress.currentService"
-        private const val getActiveServicesAddress = "$rootAddress.activeServices"
         private const val currentServiceUpdatedAddress = "$rootAddress.currentService-Updated"
 
         fun currentServiceConsumer(vertx: Vertx): MessageConsumer<Service> {
             return vertx.eventBus().localConsumer(currentServiceUpdatedAddress)
-        }
-
-        suspend fun getActiveServices(vertx: Vertx): List<Service> {
-            return vertx.eventBus()
-                .request<List<Service>>(getActiveServicesAddress, true).await().body()
         }
 
         fun getCurrentServiceAwait(vertx: Vertx): Service? {
