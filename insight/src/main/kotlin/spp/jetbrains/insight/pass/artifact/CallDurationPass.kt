@@ -27,7 +27,7 @@ import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
 
 /**
- * Sets the [FUNCTION_DURATION] on [CallArtifact]s which can be resolved and have a known method duration.
+ * Sets the [FUNCTION_DURATION] on [CallArtifact]s which can be resolved and have a known function duration.
  */
 class CallDurationPass : ArtifactPass {
 
