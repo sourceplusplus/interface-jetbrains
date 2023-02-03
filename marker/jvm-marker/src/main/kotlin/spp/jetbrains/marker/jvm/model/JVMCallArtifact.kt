@@ -30,7 +30,7 @@ import spp.jetbrains.artifact.service.toArtifact
 class JVMCallArtifact(psiElement: PsiElement) : CallArtifact(psiElement) {
 
     override fun resolveFunction(): FunctionArtifact? {
-        return when (psiElement) {
+        val function = when (psiElement) {
             is PsiCall -> psiElement.resolveMethod()?.toArtifact() as? FunctionArtifact
             is KtCallExpression -> {
                 (psiElement.calleeExpression as KtNameReferenceExpression).resolve()
@@ -39,6 +39,15 @@ class JVMCallArtifact(psiElement: PsiElement) : CallArtifact(psiElement) {
 
             else -> null
         }
+
+        //propagate call arguments to function parameters
+        if (function != null) {
+            getArguments().forEach {
+                function.parameters.add(it)
+            }
+        }
+
+        return function
     }
 
     override fun getArguments(): List<ArtifactElement> {

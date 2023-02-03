@@ -23,6 +23,7 @@ abstract class FunctionArtifact(
     override val psiElement: PsiNameIdentifierOwner
 ) : ArtifactElement(psiElement), PsiNameIdentifierOwner {
 
+    val parameters: MutableList<ArtifactElement> = mutableListOf()
     abstract val bodyBlock: BlockArtifact?
     override fun getName(): String? = psiElement.name
     override fun setName(name: String): PsiElement = psiElement.setName(name)

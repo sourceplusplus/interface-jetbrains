@@ -17,7 +17,9 @@
 package spp.jetbrains.insight.pass.path
 
 import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.model.ReferenceArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.pass.ProceduralPathPass
 import spp.jetbrains.insight.path.ProceduralPath
@@ -39,24 +41,29 @@ class PathProbabilityPass : ProceduralPathPass {
                 InsightValue.of(PATH_EXECUTION_PROBABILITY, 1.0)
 
             if (it is IfArtifact) {
-                analyze(it, it.getConditionEvaluation()!!, 1.0)
+                analyze(path, it, it.getConditionEvaluation()!!, 1.0)
             }
         }
     }
 
-    private fun analyze(ifArtifact: IfArtifact, condition: Boolean, probability: Double) {
-        val probability = calculateProbability(ifArtifact, probability, condition)
+    private fun analyze(path: ProceduralPath, ifArtifact: IfArtifact, condition: Boolean, probability: Double) {
+        val probability = calculateProbability(path, ifArtifact, probability, condition)
         ifArtifact.childArtifacts.forEach {
             it.data[InsightKeys.PATH_EXECUTION_PROBABILITY] =
                 InsightValue.of(PATH_EXECUTION_PROBABILITY, probability)
 
             if (it is IfArtifact) {
-                analyze(it, it.getConditionEvaluation()!!, probability)
+                analyze(path, it, it.getConditionEvaluation()!!, probability)
             }
         }
     }
 
-    private fun calculateProbability(element: ArtifactElement, baseProbability: Double, condition: Boolean): Double {
+    private fun calculateProbability(
+        path: ProceduralPath,
+        element: ArtifactElement,
+        baseProbability: Double,
+        condition: Boolean
+    ): Double {
         var selfProbability = Double.NaN
         if (element.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY) != null) {
             selfProbability = element.getData(InsightKeys.CONTROL_STRUCTURE_PROBABILITY)!!.value
@@ -76,6 +83,26 @@ class PathProbabilityPass : ProceduralPathPass {
 
                 element.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
                     InsightValue.of(CONTROL_STRUCTURE_PROBABILITY, selfProbability)
+            }
+
+            //see if probability comes from parameter
+            if (path.rootArtifact is FunctionArtifact && path.rootArtifact.parameters.isNotEmpty()) {
+                if ((element.condition as? ReferenceArtifact)?.isFunctionParameter() == true) {
+                    val parameter = path.rootArtifact.parameters.first() //todo: dynamic
+                    val staticProbability = element.getStaticProbability(parameter)
+                    if (!staticProbability.isNaN()) {
+                        selfProbability = staticProbability
+
+                        //todo: move to getStaticProbability()
+                        //flip self probability if condition is false
+                        if (!condition) {
+                            selfProbability = 1 - selfProbability
+                        }
+
+                        element.data[InsightKeys.CONTROL_STRUCTURE_PROBABILITY] =
+                            InsightValue.of(CONTROL_STRUCTURE_PROBABILITY, selfProbability)
+                    }
+                }
             }
         }
 

@@ -35,6 +35,10 @@ abstract class IfArtifact(psiElement: PsiElement) : ControlStructureArtifact(psi
     override val childArtifacts: MutableList<ArtifactElement> = mutableListOf()
 
     fun getStaticProbability(): Double {
+        return getStaticProbability(condition)
+    }
+
+    fun getStaticProbability(condition: ArtifactElement?): Double {
         if (condition == null) return Double.NaN
         return when (val artifact = condition) {
             is ArtifactLiteralValue -> constant(artifact)

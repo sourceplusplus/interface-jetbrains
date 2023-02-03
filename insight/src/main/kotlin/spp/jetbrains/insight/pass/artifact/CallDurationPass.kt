@@ -19,11 +19,14 @@ package spp.jetbrains.insight.pass.artifact
 import org.jetbrains.kotlin.utils.addToStdlib.ifNotEmpty
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.insight.InsightKeys
+import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ArtifactPass
+import spp.jetbrains.insight.path.ProceduralMultiPath
+import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightType.FUNCTION_DURATION
-import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
 
 /**
@@ -38,15 +41,24 @@ class CallDurationPass : ArtifactPass {
         if (resolvedFunction != null) {
             val multiPath = element.getData(InsightKeys.PROCEDURAL_MULTI_PATH)
             if (multiPath != null) {
-                //artifact has already been analyzed, use pre-determined duration (if available)
-                val duration = multiPath.mapNotNull {
-                    it.getInsights().find { it.type == PATH_DURATION }?.value as Long?
-                }.ifNotEmpty { sum() }
+                //artifact has already been analyzed
+                var duration = resolvedFunction.getDuration(multiPath)
                 if (duration != null) {
                     element.putUserData(
                         InsightKeys.FUNCTION_DURATION.asPsiKey(),
                         InsightValue.of(FUNCTION_DURATION, duration).asDerived()
                     )
+                } else {
+                    //fallback, just use the sum of pre-determined durations (if available)
+                    duration = multiPath.mapNotNull {
+                        it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
+                    }.ifNotEmpty { sum() }
+                    if (duration != null) {
+                        element.putUserData(
+                            InsightKeys.FUNCTION_DURATION.asPsiKey(),
+                            InsightValue.of(FUNCTION_DURATION, duration).asDerived()
+                        )
+                    }
                 }
             }
 
@@ -58,5 +70,16 @@ class CallDurationPass : ArtifactPass {
                 )
             }
         }
+    }
+
+    /**
+     * Determine params sent to function and use that to determine duration
+     */
+    private fun FunctionArtifact.getDuration(multiPath: ProceduralMultiPath): Long? {
+        val analyzed = ProceduralAnalyzer().analyze(this)
+        val duration = multiPath.mapNotNull {
+            it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
+        }.ifNotEmpty { sum() }
+        return duration?.let { it / analyzed.paths.size }
     }
 }

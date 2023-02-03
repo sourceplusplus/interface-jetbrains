@@ -18,6 +18,7 @@ package spp.jetbrains.marker.jvm.service
 
 import com.intellij.psi.*
 import com.siyeh.ig.psiutils.CountingLoop
+import org.jetbrains.kotlin.idea.references.mainReference
 import org.jetbrains.kotlin.psi.*
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.service.define.IArtifactModelService
@@ -54,6 +55,14 @@ class JVMArtifactModelService : IArtifactModelService {
                 }
             }
 
+            is PsiReferenceExpression -> {
+                if (element.resolve() != null) {
+                    JVMReferenceArtifact(element)
+                } else {
+                    null
+                }
+            }
+
             else -> null
         }
     }
@@ -69,6 +78,15 @@ class JVMArtifactModelService : IArtifactModelService {
             is KtDotQualifiedExpression -> {
                 if (element.selectorExpression is KtCallExpression) {
                     JVMCallArtifact(element)
+                } else {
+                    null
+                }
+            }
+
+            is KtNameReferenceExpression -> {
+                //todo: easier way to determine if this is a variable or literal reference (Boolean, String, etc)
+                if (element.mainReference.resolve() != null) {
+                    JVMReferenceArtifact(element)
                 } else {
                     null
                 }

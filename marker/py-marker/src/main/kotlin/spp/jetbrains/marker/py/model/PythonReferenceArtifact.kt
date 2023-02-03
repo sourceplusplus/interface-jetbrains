@@ -14,23 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.artifact.model
+package spp.jetbrains.marker.py.model
 
-import com.intellij.psi.PsiElement
+import com.jetbrains.python.psi.PyParameter
+import com.jetbrains.python.psi.PyReferenceExpression
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.ReferenceArtifact
 
-abstract class CallArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
-    abstract fun resolveFunction(): FunctionArtifact?
-    abstract fun getArguments(): List<ArtifactElement>
+class PythonReferenceArtifact(override val psiElement: PyReferenceExpression) : ReferenceArtifact(psiElement) {
 
-    private var resolvedFunction: FunctionArtifact? = null
-    fun getResolvedFunction(): FunctionArtifact? {
-        if (resolvedFunction == null || resolvedFunction?.isValid == false) {
-            resolvedFunction = resolveFunction()
-        }
-        return resolvedFunction
+    override fun isFunctionParameter(): Boolean {
+        return psiElement.reference.resolve() is PyParameter
     }
 
-    override fun toString(): String {
-        return "CallArtifact($text)"
+    override fun clone(): ArtifactElement {
+        return PythonReferenceArtifact(psiElement)
     }
 }

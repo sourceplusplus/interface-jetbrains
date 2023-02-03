@@ -14,23 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.artifact.model
+package spp.jetbrains.marker.js.model
 
-import com.intellij.psi.PsiElement
+import com.intellij.lang.javascript.psi.JSParameter
+import com.intellij.lang.javascript.psi.JSReferenceExpression
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.artifact.model.ReferenceArtifact
 
-abstract class CallArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
-    abstract fun resolveFunction(): FunctionArtifact?
-    abstract fun getArguments(): List<ArtifactElement>
+class JavascriptReferenceArtifact(override val psiElement: JSReferenceExpression) : ReferenceArtifact(psiElement) {
 
-    private var resolvedFunction: FunctionArtifact? = null
-    fun getResolvedFunction(): FunctionArtifact? {
-        if (resolvedFunction == null || resolvedFunction?.isValid == false) {
-            resolvedFunction = resolveFunction()
-        }
-        return resolvedFunction
+    override fun isFunctionParameter(): Boolean {
+        return psiElement.resolve() is JSParameter
     }
 
-    override fun toString(): String {
-        return "CallArtifact($text)"
+    override fun clone(): ArtifactElement {
+        return JavascriptReferenceArtifact(psiElement)
     }
 }
