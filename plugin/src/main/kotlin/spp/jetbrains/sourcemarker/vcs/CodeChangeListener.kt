@@ -74,7 +74,7 @@ class CodeChangeListener(val project: Project) : CoroutineVerticle(), Disposable
         }
 
         //refresh guide marks on code changes
-        val messageBusConnection = this.project.messageBus.connect(this)
+        val messageBusConnection = this.project.messageBus.connect(this as Disposable)
         messageBusConnection.subscribe(PsiModificationTracker.TOPIC, PsiModificationTracker.Listener {
             SourceMarker.getInstance(project).getSourceFileMarkers().forEach { fileMarker ->
                 codeChangeQueue.queue(Update.create(fileMarker.psiFile) {
