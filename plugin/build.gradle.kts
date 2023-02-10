@@ -110,6 +110,7 @@ tasks {
     patchPluginXml {
         version.set(projectVersion)
         sinceBuild.set(pluginSinceBuild)
+        untilBuild.set("223.*")
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
