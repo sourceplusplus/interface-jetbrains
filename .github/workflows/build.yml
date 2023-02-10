@@ -188,12 +188,16 @@ jobs:
             --jq '.[] | select(.draft == true) | .id' \
             | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
 
+      - name: output github sha
+        run: echo $GITHUB_SHA
+
       # Create new release draft - which is not publicly visible and requires manual acceptance
       - name: Create Release Draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create ${{ needs.build.outputs.release_version }} \
+            --target $GITHUB_SHA \
             --draft \
             --title "v${{ needs.build.outputs.release_version }}" \
             --notes "$(cat << 'EOM'
