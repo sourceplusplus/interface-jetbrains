@@ -13,7 +13,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt") apply false
-    id("org.jetbrains.intellij") version "1.8.1"
+    id("org.jetbrains.intellij") version "1.10.1"
     id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
 }
 
@@ -123,16 +123,16 @@ subprojects {
         }
 
         withType<JavaCompile> {
-            sourceCompatibility = "11"
-            targetCompatibility = "11"
+            sourceCompatibility = "17"
+            targetCompatibility = "17"
         }
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.jvmTarget = "11"
-            kotlinOptions.freeCompilerArgs +=
-                listOf(
-                    "-Xno-optimized-callable-references",
-                    "-Xjvm-default=compatibility"
-                )
+            kotlinOptions.jvmTarget = "17"
+//            kotlinOptions.freeCompilerArgs +=
+//                listOf(
+//                    "-Xno-optimized-callable-references",
+//                    "-Xjvm-default=compatibility"
+//                )
         }
 
         withType<Test> {

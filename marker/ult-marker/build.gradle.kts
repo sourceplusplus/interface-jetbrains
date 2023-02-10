@@ -50,13 +50,11 @@ configure<PublishingExtension> {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    implementation("plus.sourceplus:protocol:$protocolVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion") {
+        isTransitive = false
+    }
 
     compileOnly("io.vertx:vertx-core:$vertxVersion")
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
 }
 
 fun projectDependency(name: String): ProjectDependency {

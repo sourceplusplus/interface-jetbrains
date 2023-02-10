@@ -78,14 +78,18 @@ dependencies {
     runtimeOnly(projectDependency(":marker:py-marker"))
     runtimeOnly(projectDependency(":marker:ult-marker"))
     implementation(projectDependency(":monitor"))
-    implementation("plus.sourceplus:protocol:$protocolVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion") {
+        isTransitive = false
+    }
 
     implementation("org.jooq:joor:$joorVersion")
     implementation("org.apache.commons:commons-text:1.10.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
-    implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
+    implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
+        isTransitive = false
+    }
     implementation("io.vertx:vertx-web:$vertxVersion")
     implementation("io.vertx:vertx-service-discovery:$vertxVersion")
     implementation("io.vertx:vertx-service-proxy:$vertxVersion")

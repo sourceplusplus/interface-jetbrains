@@ -51,7 +51,9 @@ configure<PublishingExtension> {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    implementation("plus.sourceplus:protocol:$protocolVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion") {
+        isTransitive = false
+    }
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -59,11 +61,10 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
-    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    testImplementation("io.vertx:vertx-core:$vertxVersion")
+    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
+        isTransitive = false
+    }
 }
 
 fun projectDependency(name: String): ProjectDependency {

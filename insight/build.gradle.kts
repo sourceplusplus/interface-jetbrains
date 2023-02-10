@@ -14,7 +14,7 @@ group = "plus.sourceplus.interface"
 version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
-    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13", "JavaScript", "Pythonid:222.4167.29"))
+    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.3.18", "JavaScript", "Pythonid:223.8617.56", "intellij.grid.impl"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
@@ -53,7 +53,9 @@ configure<PublishingExtension> {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    implementation("plus.sourceplus:protocol:$protocolVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion") {
+        isTransitive = false
+    }
 
     implementation("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -62,14 +64,18 @@ dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
-    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
+    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
+        isTransitive = false
+    }
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
 
     testImplementation(projectDependency(":marker:js-marker"))
     testImplementation(projectDependency(":marker:jvm-marker"))
     testImplementation(projectDependency(":marker:py-marker"))
     testImplementation(projectDependency(":marker:ult-marker"))
-    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
+    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
+        isTransitive = false
+    }
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }
 
