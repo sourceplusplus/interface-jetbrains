@@ -14,7 +14,7 @@ group = "plus.sourceplus.interface"
 version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
-    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.3.18"))
+    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2023.1.7"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {

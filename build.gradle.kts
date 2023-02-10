@@ -35,7 +35,6 @@ allprojects {
     repositories {
         mavenCentral()
         maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
-        maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
     }
 
     apply(plugin = "org.jetbrains.intellij")
@@ -128,11 +127,6 @@ subprojects {
         }
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
             kotlinOptions.jvmTarget = "17"
-//            kotlinOptions.freeCompilerArgs +=
-//                listOf(
-//                    "-Xno-optimized-callable-references",
-//                    "-Xjvm-default=compatibility"
-//                )
         }
 
         withType<Test> {

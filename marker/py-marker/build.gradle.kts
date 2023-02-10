@@ -14,7 +14,7 @@ version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
     type.set("IC")
-    plugins.set(listOf("PythonCore:223.8617.56"))
+    plugins.set(listOf("PythonCore:231.6890.12"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
