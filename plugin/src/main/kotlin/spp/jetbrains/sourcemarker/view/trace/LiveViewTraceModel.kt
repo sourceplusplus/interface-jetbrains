@@ -42,6 +42,7 @@ import javax.swing.tree.TreePath
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 class LiveViewTraceModel(
     structure: LiveViewTraceTreeStructure
 ) : AbstractTreeModel(), TreeTableModel, SortableColumnModel, TreeModelListener, TreeVisitor.Acceptor {

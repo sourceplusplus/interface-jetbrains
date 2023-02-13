@@ -23,9 +23,6 @@ import com.intellij.psi.PsiStatement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.imports.GrImportStatement
 import org.jetbrains.plugins.groovy.lang.psi.api.toplevel.packaging.GrPackageDefinition
-import org.jetbrains.uast.UDeclaration
-import org.jetbrains.uast.UExpression
-import org.jetbrains.uast.toUElement
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.service.utils.JVMMarkerUtils
