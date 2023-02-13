@@ -547,30 +547,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
 
             config.notifiedConnection = true
             projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-        } else if (resp.statusCode() == 405) {
-            //found skywalking OAP server
-            if (ssl) {
-                config.serviceHost = "https://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
-            } else {
-                config.serviceHost = "http://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
-                config.verifyHost = false
-            }
-            val projectSettings = PropertiesComponent.getInstance(project)
-            projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-
-            //auto-established notification
-            Notifications.Bus.notify(
-                Notification(
-                    message("plugin_name"), "Connection auto-established",
-                    buildString {
-                        append("You have successfully auto-connected to Apache SkyWalking. ")
-                        append(message("plugin_name"))
-                        append(" is now fully activated.")
-                    },
-                    NotificationType.INFORMATION
-                ),
-                project
-            )
         }
     }
 
