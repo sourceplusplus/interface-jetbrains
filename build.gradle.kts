@@ -13,7 +13,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt") apply false
-    id("org.jetbrains.intellij") version "1.8.1"
+    id("org.jetbrains.intellij") version "1.13.0"
     id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
 }
 
