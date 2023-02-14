@@ -13,7 +13,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt") apply false
-    id("org.jetbrains.intellij") version "1.12.0"
+    id("org.jetbrains.intellij") version "1.13.0"
     id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
 }
 
@@ -34,10 +34,20 @@ version = projectVersion
 allprojects {
     repositories {
         mavenCentral()
-        maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
     }
 
     apply(plugin = "org.jetbrains.intellij")
+
+    configurations.all {
+        resolutionStrategy {
+            eachDependency {
+                if (requested.group == "org.jetbrains.kotlin") {
+                    println("Requested Kotlin: $requested")
+                    useVersion("1.8.10")
+                }
+            }
+        }
+    }
 
     intellij {
         pluginName.set("interface-jetbrains")
