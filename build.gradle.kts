@@ -46,8 +46,12 @@ allprojects {
                     useVersion(kotlinVersion)
                 }
             }
+            eachDependency {
+                if (requested.name == "kotlinx-coroutines-core-jvm") {
+                    useVersion("1.6.4")
+                }
+            }
         }
-        exclude(group = "org.jetbrains.kotlinx")
     }
 
     intellij {

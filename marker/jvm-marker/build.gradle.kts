@@ -53,9 +53,9 @@ configure<PublishingExtension> {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
+    implementation("plus.sourceplus:protocol:$protocolVersion")
+    implementation("org.jooq:joor:$joorVersion")
 
-    compileOnly("plus.sourceplus:protocol:$protocolVersion")
-    compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:$guavaVersion")

@@ -53,7 +53,7 @@ configure<PublishingExtension> {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    compileOnly("plus.sourceplus:protocol:$protocolVersion")
+    implementation("plus.sourceplus:protocol:$protocolVersion")
 
     compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")

@@ -192,7 +192,8 @@ object JVMMarkerUtils {
                 } ?: if (paramType != null && KotlinBuiltIns.isString(paramType)) {
                     "java.lang.String"
                 } else if (paramType?.unwrap()?.constructor?.declarationDescriptor?.psiElement is KtClass) {
-                    getFullyQualifiedName(paramType.unwrap().constructor.declarationDescriptor?.psiElement as KtClass).identifier
+                    val clazz = paramType.unwrap().constructor.declarationDescriptor?.psiElement as KtClass
+                    getFullyQualifiedName(clazz).identifier
                 } else {
                     paramType?.fqName?.toString()?.replace(".", "$")
                 }
