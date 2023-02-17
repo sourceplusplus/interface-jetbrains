@@ -44,11 +44,7 @@ configure<PublishingExtension> {
 }
 
 dependencies {
-    compileOnly("plus.sourceplus:protocol:$protocolVersion") {
-        isTransitive = false
-    }
+    compileOnly("plus.sourceplus:protocol:$protocolVersion")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
-    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
-        isTransitive = false
-    }
+    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
 }

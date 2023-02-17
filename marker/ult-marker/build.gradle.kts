@@ -50,10 +50,7 @@ configure<PublishingExtension> {
 dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
-    implementation("plus.sourceplus:protocol:$protocolVersion") {
-        isTransitive = false
-    }
-
+    compileOnly("plus.sourceplus:protocol:$protocolVersion")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 }
 
