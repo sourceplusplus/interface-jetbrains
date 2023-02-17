@@ -64,9 +64,7 @@ dependencies {
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
     testImplementation(projectDependency(":common"))
     testImplementation("io.vertx:vertx-core:$vertxVersion")
-    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
-        isTransitive = false
-    }
+    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }
 

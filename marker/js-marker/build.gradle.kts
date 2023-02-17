@@ -60,9 +60,7 @@ dependencies {
 
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
     testImplementation("io.vertx:vertx-core:$vertxVersion")
-    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
-        isTransitive = false
-    }
+    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
 }
 
 fun projectDependency(name: String): ProjectDependency {

@@ -47,6 +47,7 @@ allprojects {
                 }
             }
         }
+        exclude(group = "org.jetbrains.kotlinx")
     }
 
     intellij {

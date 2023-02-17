@@ -13,17 +13,13 @@ dependencies {
     compileOnly(projectDependency(":common"))
 
     compileOnly("plus.sourceplus:protocol:$protocolVersion")
-    implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion") {
-        exclude(group = "org.jetbrains.kotlinx")
-    }
+    implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
-    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
-        isTransitive = false
-    }
+    compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("io.dropwizard.metrics:metrics-core:4.2.15")
     compileOnly("eu.geekplace.javapinning:java-pinning-core:1.2.0")
     compileOnly("com.google.guava:guava:$guavaVersion")
