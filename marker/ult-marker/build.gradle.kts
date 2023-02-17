@@ -55,10 +55,6 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
-}
-
 fun projectDependency(name: String): ProjectDependency {
     return if (rootProject.name.contains("jetbrains")) {
         DependencyHandlerScope.of(rootProject.dependencies).project(name)

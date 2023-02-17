@@ -14,7 +14,7 @@ version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
     type.set("IC")
-    plugins.set(listOf("PythonCore:222.3739.68"))
+    plugins.set(listOf("PythonCore:231.6890.12"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
@@ -54,21 +54,18 @@ dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
     implementation("plus.sourceplus:protocol:$protocolVersion")
+    implementation("io.vertx:vertx-core:$vertxVersion")
+    implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
+        exclude(group = "org.jetbrains.kotlinx")
+    }
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:$guavaVersion")
     compileOnly("org.jetbrains:annotations:24.0.0")
-    compileOnly("io.vertx:vertx-core:$vertxVersion")
 
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
-    testImplementation(projectDependency(":common"))
-    testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
 }
 
 fun projectDependency(name: String): ProjectDependency {

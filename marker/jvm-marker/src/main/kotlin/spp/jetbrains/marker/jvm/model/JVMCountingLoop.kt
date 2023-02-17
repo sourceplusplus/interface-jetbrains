@@ -27,15 +27,13 @@ import spp.jetbrains.artifact.service.toArtifact
 
 class JVMCountingLoop(private val loop: CountingLoop) : CountingLoopArtifact(loop.loop) {
 
+    override val psiElement: PsiLoopStatement = loop.loop
     override val childArtifacts: MutableList<ArtifactElement> = mutableListOf()
     override val condition: ArtifactElement? = when (psiElement) {
         is PsiConditionalLoopStatement -> psiElement.condition?.let { it.toArtifact() }
         else -> null
     }
-    override val body: ArtifactElement? = when (psiElement) {
-        is PsiLoopStatement -> psiElement.body?.let { it.toArtifact() }
-        else -> null
-    }
+    override val body: ArtifactElement? = psiElement.body?.let { it.toArtifact() }
 
     override fun getCounter(): PsiLocalVariable = loop.counter
     override fun getInitializer(): PsiExpression = loop.initializer

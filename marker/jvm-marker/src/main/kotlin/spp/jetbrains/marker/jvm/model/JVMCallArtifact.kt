@@ -27,7 +27,7 @@ import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.service.toArtifact
 
-class JVMCallArtifact(psiElement: PsiElement) : CallArtifact(psiElement) {
+class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiElement) {
 
     override fun resolveFunction(): FunctionArtifact? {
         val function = when (psiElement) {

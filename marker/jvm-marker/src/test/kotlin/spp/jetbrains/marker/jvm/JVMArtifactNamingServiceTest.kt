@@ -211,6 +211,56 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
         assertNotNull(name5.lineNumber)
     }
 
+    fun testPackageMethodName() {
+        doTestPackageMethodName<PsiMethod>("java")
+        doTestPackageMethodName<KtFunction>("kt")
+        doTestPackageMethodName<PsiMethod>("groovy")
+    }
+
+    private inline fun <reified T : PsiElement> doTestPackageMethodName(extension: String) {
+        val className = getTestName(false)
+        val testDir = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_HYPHEN).convert(className)
+        val psiFile = myFixture.configureByFile("$testDir/$className.$extension")
+        val methods = psiFile.descendants().filterIsInstance<T>().toList()
+        assertEquals(5, methods.size)
+
+        val foo1 = methods[0]
+        val name = JVMArtifactNamingService().getFullyQualifiedName(foo1)
+        assertEquals("com.example.$className.foo1()", name.identifier)
+        assertEquals(ArtifactType.FUNCTION, name.type)
+        assertNotNull(name.lineNumber)
+
+        val foo2 = methods[1]
+        val name2 = JVMArtifactNamingService().getFullyQualifiedName(foo2)
+        assertEquals("com.example.$className.foo2(java.lang.String)", name2.identifier)
+        assertEquals(ArtifactType.FUNCTION, name2.type)
+        assertNotNull(name2.lineNumber)
+
+        val foo3 = methods[2]
+        val name3 = JVMArtifactNamingService().getFullyQualifiedName(foo3)
+        assertEquals(
+            "com.example.$className.foo3(java.lang.String,int,long,double,float,boolean,char,byte,short)",
+            name3.identifier
+        )
+        assertEquals(ArtifactType.FUNCTION, name3.type)
+        assertNotNull(name3.lineNumber)
+
+        val foo4 = methods[3]
+        val name4 = JVMArtifactNamingService().getFullyQualifiedName(foo4)
+        assertEquals("com.example.$className.foo4(com.example.$className\$MyObject)", name4.identifier)
+        assertEquals(ArtifactType.FUNCTION, name4.type)
+        assertNotNull(name4.lineNumber)
+
+        val foo5 = methods[4]
+        val name5 = JVMArtifactNamingService().getFullyQualifiedName(foo5)
+        assertEquals(
+            "com.example.$className.foo5(java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[])",
+            name5.identifier
+        )
+        assertEquals(ArtifactType.FUNCTION, name5.type)
+        assertNotNull(name5.lineNumber)
+    }
+
     fun testInnerClassMethodName() {
         doTestInnerClassMethodName<PsiMethod>("java")
         doTestInnerClassMethodName<KtFunction>("kt")
