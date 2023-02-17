@@ -60,12 +60,14 @@ import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_HIDDEN
 import spp.jetbrains.marker.source.mark.inlay.event.InlayMarkEventCode.INLAY_MARK_VISIBLE
 import spp.protocol.artifact.ArtifactQualifiedName
+import java.awt.Point
 import java.awt.event.ComponentEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.swing.JComponent
 import javax.swing.SwingUtilities
 import kotlin.concurrent.schedule
 
@@ -474,31 +476,14 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             if (sourceMarkComponent.configuration.useHeavyPopup) {
                 displayPoint.y -= popupComponentSize.height + 4
 
-                popup = JBPopupFactory.getInstance()
-                    .createComponentPopupBuilder(popupComponent, popupComponent)
-                    .setShowBorder(false)
-                    .setShowShadow(false)
-                    .setRequestFocus(true)
-                    .setCancelOnWindowDeactivation(false)
-                    .createPopup()
-                popup.addListener(this)
-                popup.show(RelativePoint(editor.contentComponent, displayPoint))
+                popup = makeHeavyweightPopup(popupComponent, editor, displayPoint)
             } else {
                 val width = (popupComponentSize.width / 2) + 10
                 val height = popupComponentSize.height / 2
                 displayPoint.x = (displayPoint.getX() + width).toInt() + 10
                 displayPoint.y = (displayPoint.getY() - height).toInt()
 
-                popup = JBPopupFactory.getInstance()
-                    .createBalloonBuilder(popupComponent)
-                    .setBorderInsets(JBUI.emptyInsets())
-                    .setDialogMode(true)
-                    .setFillColor(JBColor.background())
-                    .setAnimationCycle(0)
-                    .createBalloon() as BalloonImpl
-                popup.addListener(this)
-                popup.setShowPointer(false)
-                popup.show(RelativePoint(editor.contentComponent, displayPoint), Balloon.Position.atRight)
+                popup = makeLightweightPopup(popupComponent, editor, displayPoint)
             }
             visiblePopup = popup
             openedMarks.add(this)
@@ -515,6 +500,41 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 sourceMarkComponent.configuration.addedScrollListener = true
             }
         }
+    }
+
+    private fun makeHeavyweightPopup(
+        popupComponent: JComponent,
+        editor: Editor,
+        displayPoint: Point
+    ): Disposable {
+        val popup = JBPopupFactory.getInstance()
+            .createComponentPopupBuilder(popupComponent, popupComponent)
+            .setShowBorder(false)
+            .setShowShadow(false)
+            .setRequestFocus(true)
+            .setCancelOnWindowDeactivation(false)
+            .createPopup()
+        popup.addListener(this)
+        popup.show(RelativePoint(editor.contentComponent, displayPoint))
+        return popup
+    }
+
+    private fun makeLightweightPopup(
+        popupComponent: JComponent,
+        editor: Editor,
+        displayPoint: Point
+    ): Disposable {
+        val popup = JBPopupFactory.getInstance()
+            .createBalloonBuilder(popupComponent)
+            .setBorderInsets(JBUI.emptyInsets())
+            .setDialogMode(true)
+            .setFillColor(JBColor.background())
+            .setAnimationCycle(0)
+            .createBalloon() as BalloonImpl
+        popup.addListener(this)
+        popup.setShowPointer(false)
+        popup.show(RelativePoint(editor.contentComponent, displayPoint), Balloon.Position.atRight)
+        return popup
     }
 
     //region Popup Listeners

@@ -85,7 +85,10 @@ import spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl
 import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatus.Pending
 import spp.jetbrains.status.SourceStatusService
-import spp.protocol.service.*
+import spp.protocol.service.LiveInstrumentService
+import spp.protocol.service.LiveManagementService
+import spp.protocol.service.LiveViewService
+import spp.protocol.service.SourceServices
 import java.io.File
 import java.net.ConnectException
 import java.util.*
@@ -98,7 +101,6 @@ import javax.net.ssl.SSLHandshakeException
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("MagicNumber")
 class SourceMarkerPlugin : SourceMarkerStartupActivity() {
 
     companion object {
@@ -547,30 +549,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
 
             config.notifiedConnection = true
             projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-        } else if (resp.statusCode() == 405) {
-            //found skywalking OAP server
-            if (ssl) {
-                config.serviceHost = "https://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
-            } else {
-                config.serviceHost = "http://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
-                config.verifyHost = false
-            }
-            val projectSettings = PropertiesComponent.getInstance(project)
-            projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
-
-            //auto-established notification
-            Notifications.Bus.notify(
-                Notification(
-                    message("plugin_name"), "Connection auto-established",
-                    buildString {
-                        append("You have successfully auto-connected to Apache SkyWalking. ")
-                        append(message("plugin_name"))
-                        append(" is now fully activated.")
-                    },
-                    NotificationType.INFORMATION
-                ),
-                project
-            )
         }
     }
 
