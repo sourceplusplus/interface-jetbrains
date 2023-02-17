@@ -22,6 +22,7 @@ val pluginName: String by project
 val projectVersion: String by project
 val pluginSinceBuild: String by project
 val vertxVersion: String by project
+val kotlinVersion: String by project
 
 val platformType: String by project
 val ideVersion: String by project
@@ -42,8 +43,7 @@ allprojects {
         resolutionStrategy {
             eachDependency {
                 if (requested.group == "org.jetbrains.kotlin") {
-                    println("Requested Kotlin: $requested")
-                    useVersion("1.8.10")
+                    useVersion(kotlinVersion)
                 }
             }
         }

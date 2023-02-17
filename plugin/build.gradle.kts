@@ -82,9 +82,8 @@ dependencies {
         isTransitive = false
     }
 
-    implementation("org.jooq:joor:$joorVersion")
     implementation("org.apache.commons:commons-text:1.10.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
