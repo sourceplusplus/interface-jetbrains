@@ -12,9 +12,7 @@ val protocolVersion = project.properties["protocolVersion"] as String? ?: projec
 dependencies {
     compileOnly(projectDependency(":common"))
 
-    compileOnly("plus.sourceplus:protocol:$protocolVersion") {
-        isTransitive = false
-    }
+    compileOnly("plus.sourceplus:protocol:$protocolVersion")
     implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion") {
         exclude(group = "org.jetbrains.kotlinx")
     }

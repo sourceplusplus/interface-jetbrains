@@ -78,9 +78,7 @@ dependencies {
     runtimeOnly(projectDependency(":marker:py-marker"))
     runtimeOnly(projectDependency(":marker:ult-marker"))
     implementation(projectDependency(":monitor"))
-    implementation("plus.sourceplus:protocol:$protocolVersion") {
-        isTransitive = false
-    }
+    implementation("plus.sourceplus:protocol:$protocolVersion")
 
     implementation("org.apache.commons:commons-text:1.10.0")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
