@@ -24,7 +24,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseMotionListener
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.refactoring.suggested.endOffset
@@ -59,7 +59,7 @@ open class LiveTooltip(val guideMark: GuideMark, var panel: JPanel? = null) {
             if (installedListeners.compareAndSet(true, true)) return
 
             var mousePosition: VisualPosition? = null
-            FileEditorManagerEx.getInstance(project).selectedTextEditor?.let { editor ->
+            FileEditorManager.getInstance(project).selectedTextEditor?.let { editor ->
                 val keyListener: KeyListener = object : KeyAdapter() {
                     override fun keyPressed(e: KeyEvent) {
                         super.keyPressed(e)

@@ -13,7 +13,9 @@ dependencies {
     compileOnly(projectDependency(":common"))
 
     compileOnly("plus.sourceplus:protocol:$protocolVersion")
-    implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion")
+    implementation("com.apollographql.apollo3:apollo-runtime:$apolloVersion") {
+        exclude(group = "org.jetbrains.kotlinx")
+    }
     api("com.apollographql.apollo3:apollo-api:$apolloVersion")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
