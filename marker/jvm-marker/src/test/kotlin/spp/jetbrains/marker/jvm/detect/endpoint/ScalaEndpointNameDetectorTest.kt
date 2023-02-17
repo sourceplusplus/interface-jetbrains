@@ -38,10 +38,10 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(2, uFile.classes[0].methods.size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -60,10 +60,10 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(2, uFile.classes[0].methods.size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/", result.first().name)
             }
@@ -82,10 +82,10 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(2, uFile.classes[0].methods.size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -104,10 +104,10 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(2, uFile.classes[0].methods.size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -126,10 +126,10 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(2, uFile.classes[0].methods.size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
                 assertEquals(1, result.size)
                 assertEquals("doGet", result.first().name)
             }
@@ -148,10 +148,10 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
         ApplicationManager.getApplication().runReadAction {
             assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(2, uFile.classes[0].methods.size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
                 assertEquals(1, result.size)
                 assertEquals("TestController.doGet", result.first().name)
             }

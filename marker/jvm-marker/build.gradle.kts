@@ -14,7 +14,7 @@ group = "plus.sourceplus.interface"
 version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
-    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13"))
+    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2023.1.7"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
@@ -54,8 +54,8 @@ dependencies {
     implementation(projectDependency(":common"))
     implementation(projectDependency(":marker"))
     implementation("plus.sourceplus:protocol:$protocolVersion")
-
     implementation("org.jooq:joor:$joorVersion")
+
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:$guavaVersion")
@@ -66,6 +66,7 @@ dependencies {
     compileOnly("org.apache.commons:commons-lang3:3.12.0")
 
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
+    testImplementation("io.vertx:vertx-core:$vertxVersion")
     testImplementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
 }

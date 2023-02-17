@@ -20,9 +20,10 @@ import com.intellij.lang.jvm.util.JvmClassUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
+import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
+import org.jetbrains.kotlin.idea.base.psi.KotlinPsiHeuristics
 import org.jetbrains.kotlin.idea.base.utils.fqname.fqName
-import org.jetbrains.kotlin.idea.util.toJvmFqName
 import org.jetbrains.kotlin.nj2k.postProcessing.type
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
@@ -89,24 +90,11 @@ object JVMMarkerUtils {
     }
 
     private fun getFullyQualifiedName(theClass: KtClass): ArtifactQualifiedName {
-        var packageName = theClass.containingKtFile.packageFqName.asString()
-        if (packageName.isNotEmpty()) {
-            packageName += "."
-        }
-
-        val fqName = packageName + (theClass.fqName?.toJvmFqName)
-            ?.replace(packageName, "")
-            ?.replace(".", "$")
-        if (fqName.isNotEmpty()) {
-            return ArtifactQualifiedName(
-                fqName,
-                type = ArtifactType.CLASS,
-                lineNumber = theClass.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
-            )
-        }
+        val fullyQualifiedName = KotlinPsiHeuristics.getJvmName(theClass)
+            ?: throw IllegalArgumentException("Could not determine fully qualified name for class: $theClass")
 
         return ArtifactQualifiedName(
-            packageName + theClass.nameAsSafeName.identifier,
+            fullyQualifiedName,
             type = ArtifactType.CLASS,
             lineNumber = theClass.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
         )
@@ -203,8 +191,11 @@ object JVMMarkerUtils {
                     KotlinBuiltIns.getPrimitiveType(it)?.let { JvmPrimitiveType.get(it) }?.javaKeywordName
                 } ?: if (paramType != null && KotlinBuiltIns.isString(paramType)) {
                     "java.lang.String"
+                } else if (paramType?.unwrap()?.constructor?.declarationDescriptor?.psiElement is KtClass) {
+                    val clazz = paramType.unwrap().constructor.declarationDescriptor?.psiElement as KtClass
+                    getFullyQualifiedName(clazz).identifier
                 } else {
-                    paramType?.fqName?.toJvmFqName?.replace(".", "$")
+                    paramType?.fqName?.toString()?.replace(".", "$")
                 }
             }
             if (qualifiedType != null) {

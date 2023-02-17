@@ -13,7 +13,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt") apply false
-    id("org.jetbrains.intellij") version "1.8.1"
+    id("org.jetbrains.intellij") version "1.13.0"
     id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
 }
 
@@ -22,6 +22,7 @@ val pluginName: String by project
 val projectVersion: String by project
 val pluginSinceBuild: String by project
 val vertxVersion: String by project
+val kotlinVersion: String by project
 
 val platformType: String by project
 val ideVersion: String by project
@@ -34,11 +35,24 @@ version = projectVersion
 allprojects {
     repositories {
         mavenCentral()
-        maven(url = "https://www.jetbrains.com/intellij-repository/releases") { name = "intellij-releases" }
-        maven(url = "https://cache-redirector.jetbrains.com/intellij-dependencies/") { name = "intellij-dependencies" }
     }
 
     apply(plugin = "org.jetbrains.intellij")
+
+    configurations.all {
+        resolutionStrategy {
+            eachDependency {
+                if (requested.group == "org.jetbrains.kotlin") {
+                    useVersion(kotlinVersion)
+                }
+            }
+            eachDependency {
+                if (requested.name == "kotlinx-coroutines-core-jvm") {
+                    useVersion("1.6.4")
+                }
+            }
+        }
+    }
 
     intellij {
         pluginName.set("interface-jetbrains")
@@ -123,16 +137,11 @@ subprojects {
         }
 
         withType<JavaCompile> {
-            sourceCompatibility = "11"
-            targetCompatibility = "11"
+            sourceCompatibility = "17"
+            targetCompatibility = "17"
         }
         withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.jvmTarget = "11"
-            kotlinOptions.freeCompilerArgs +=
-                listOf(
-                    "-Xno-optimized-callable-references",
-                    "-Xjvm-default=compatibility"
-                )
+            kotlinOptions.jvmTarget = "17"
         }
 
         withType<Test> {

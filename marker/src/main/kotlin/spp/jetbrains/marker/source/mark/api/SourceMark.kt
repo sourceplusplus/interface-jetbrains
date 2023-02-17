@@ -539,7 +539,6 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
 
     //region Popup Listeners
 
-    @JvmDefault
     override fun beforeShown(event: LightweightWindowEvent) {
         log.trace("Before popup shown")
 
@@ -550,7 +549,6 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         }
     }
 
-    @JvmDefault
     override fun onClosed(event: LightweightWindowEvent) {
         closePopup()
     }
