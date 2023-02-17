@@ -1,4 +1,4 @@
-# GitHub Actions Workflow created for testing and preparing the plugin release in following steps:
+# GitHub Actions Workflow is created for testing and preparing the plugin release in the following steps:
 # - validate Gradle Wrapper,
 # - run 'test' and 'verifyPlugin' tasks,
 # - run Qodana inspections,
@@ -17,7 +17,7 @@ on:
   # Trigger the workflow on pushes to only the 'master' branch (this avoids duplicate checks being run e.g. for dependabot pull requests)
   push:
     branches:
-    - master
+      - master
     paths-ignore:
       - "**.md"
       - ".github/media/**"
@@ -47,6 +47,13 @@ jobs:
 
     steps:
 
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v3.3.0
@@ -57,13 +64,13 @@ jobs:
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1.0.5
 
-      # Setup Java 11 environment for the next steps
+      # Setup Java 17 environment for the next steps
       - name: Setup Java
         uses: actions/setup-java@v3
         timeout-minutes: 5
         with:
-          distribution: zulu
-          java-version: 11
+          distribution: temurin
+          java-version: 17
           cache: gradle
 
       # Set environment variables
@@ -80,11 +87,14 @@ jobs:
           CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
           CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
 
-          echo "::set-output name=version::$VERSION"
-          echo "::set-output name=release_version::$SPP_RELEASE_VERSION"
-          echo "::set-output name=name::$NAME"
-          echo "::set-output name=changelog::$CHANGELOG"
-          echo "::set-output name=pluginVerifierHomeDir::~/.pluginVerifier"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release_version=$SPP_RELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "pluginVerifierHomeDir=~/.pluginVerifier" >> $GITHUB_OUTPUT
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
 
@@ -99,6 +109,12 @@ jobs:
         with:
           name: tests-result
           path: ${{ github.workspace }}/plugin/build/reports/tests
+
+      # Upload Kover report to CodeCov
+      - name: Upload Code Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ${{ github.workspace }}/plugin/build/reports/kover/xml/report.xml
 
       # Cache Plugin Verifier IDEs
       - name: Setup Plugin Verifier IDEs Cache
@@ -119,11 +135,9 @@ jobs:
           name: pluginVerifier-result
           path: ${{ github.workspace }}/plugin/build/reports/pluginVerifier
 
-#       # Run Qodana inspections
-#       - name: Qodana - Code Inspection
-#         uses: JetBrains/qodana-action@v4.2.3
-#         with:
-#           upload-result: false
+#      # Run Qodana inspections
+#      - name: Qodana - Code Inspection
+#        uses: JetBrains/qodana-action@v2022.3.2
 
       # Prepare plugin archive content for creating artifact
       - name: Prepare Plugin Artifact
@@ -134,7 +148,7 @@ jobs:
           FILENAME=`ls *.zip`
           unzip "$FILENAME" -d content
 
-          echo "::set-output name=filename::${FILENAME:0:-4}"
+          echo "filename=${FILENAME:0:-4}" >> $GITHUB_OUTPUT
 
       # Store already-built plugin as an artifact for downloading
       - name: Upload artifact
@@ -173,13 +187,15 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
 
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v3.3.0
 
-      # Remove old release drafts by using the curl request for the available releases with draft flag
+      # Remove old release drafts by using the curl request for the available releases with a draft flag
       - name: Remove Old Release Drafts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -188,7 +204,7 @@ jobs:
             --jq '.[] | select(.draft == true) | .id' \
             | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
 
-      # Create new release draft - which is not publicly visible and requires manual acceptance
+      # Create a new release draft which is not publicly visible and requires manual acceptance
       - name: Create Release Draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

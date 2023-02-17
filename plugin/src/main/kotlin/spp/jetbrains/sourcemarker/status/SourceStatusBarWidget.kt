@@ -41,7 +41,7 @@ class SourceStatusBarWidget(project: Project) : EditorBasedStatusBarPopup(projec
 
         fun update(project: Project) {
             val widget = findWidget(project)
-            widget?.update { widget.myStatusBar.updateWidget(WIDGET_ID) }
+            widget?.update { widget.myStatusBar?.updateWidget(WIDGET_ID) }
         }
 
         private fun findWidget(project: Project): SourceStatusBarWidget? {

@@ -14,7 +14,7 @@ group = "plus.sourceplus.interface"
 version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
-    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2022.2.13", "JavaScript", "Pythonid:222.4167.29"))
+    plugins.set(listOf("java", "Groovy", "Kotlin", "org.intellij.scala:2023.1.7", "JavaScript", "Pythonid:231.6890.12", "intellij.grid.impl"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
@@ -55,7 +55,7 @@ dependencies {
     implementation(projectDependency(":marker"))
     implementation("plus.sourceplus:protocol:$protocolVersion")
 
-    implementation("org.jooq:joor:$joorVersion")
+    compileOnly("org.jooq:joor:$joorVersion")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:$guavaVersion")
