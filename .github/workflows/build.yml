@@ -67,7 +67,7 @@ jobs:
       # Setup Java 17 environment for the next steps
       - name: Setup Java
         uses: actions/setup-java@v3
-        timeout-minutes: 5
+        timeout-minutes: 10
         with:
           distribution: temurin
           java-version: 17
