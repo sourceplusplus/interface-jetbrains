@@ -162,7 +162,7 @@ tasks {
     }
 
     register<Copy>("getKotlinCompilerWrapper") {
-        mustRunAfter("buildSearchableOptions", "prepareSandbox")
+        mustRunAfter("prepareSandbox")
         if (findProject(":interfaces:jetbrains") != null) {
             dependsOn(":interfaces:jetbrains:commander:kotlin-compiler-wrapper:installDist")
         } else {
@@ -177,6 +177,12 @@ tasks {
         into(File(buildDir, "idea-sandbox/plugins/interface-jetbrains/kotlin-compiler"))
     }
     getByName("buildPlugin") {
+        dependsOn("getKotlinCompilerWrapper")
+    }
+    getByName("verifyPlugin") {
+        dependsOn("getKotlinCompilerWrapper")
+    }
+    getByName("buildSearchableOptions") {
         dependsOn("getKotlinCompilerWrapper")
     }
 
