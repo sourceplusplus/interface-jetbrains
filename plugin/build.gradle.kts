@@ -179,6 +179,12 @@ tasks {
     getByName("buildPlugin") {
         dependsOn("getKotlinCompilerWrapper")
     }
+    getByName("verifyPlugin") {
+        dependsOn("getKotlinCompilerWrapper")
+    }
+    getByName("buildSearchableOptions") {
+        dependsOn("getKotlinCompilerWrapper")
+    }
 
     register("getPluginChangelog") {
         doFirst {
