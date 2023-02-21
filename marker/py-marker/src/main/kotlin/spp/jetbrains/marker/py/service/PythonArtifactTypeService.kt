@@ -32,6 +32,17 @@ import spp.protocol.artifact.ArtifactType
  */
 class PythonArtifactTypeService : IArtifactTypeService {
 
+    override fun getAnnotations(element: PsiElement): List<PsiElement> {
+        return emptyList() //todo: implement
+    }
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement): PsiElement? {
+        if (element is PyDecorator) {
+            return element.target
+        }
+        return null
+    }
+
     override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
         if (element is PyDecorator && getLineNumber(element) == line) {
             return element.target

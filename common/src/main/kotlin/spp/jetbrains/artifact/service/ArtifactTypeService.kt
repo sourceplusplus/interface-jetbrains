@@ -30,6 +30,14 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
         return getService(element.language).getNameIdentifier(element)
     }
 
+    override fun getAnnotations(element: PsiElement): List<PsiElement> {
+        return getService(element.language).getAnnotations(element)
+    }
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement): PsiElement? {
+        return getService(element.language).getAnnotationOwnerIfAnnotation(element)
+    }
+
     override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
         return getService(element.language).getAnnotationOwnerIfAnnotation(element, line)
     }

@@ -45,6 +45,19 @@ class JVMArtifactTypeService : IArtifactTypeService {
         } else element
     }
 
+    override fun getAnnotations(element: PsiElement): List<PsiElement> {
+        return (element as? PsiModifierListOwner)?.annotations?.toList() ?: emptyList()
+    }
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement): PsiElement? {
+        if (element is PsiAnnotation) {
+            if (element.owner is PsiModifierList) {
+                return (element.owner as PsiModifierList).parent
+            }
+        }
+        return null
+    }
+
     override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
         val annotation = element.parentOfType<PsiAnnotation>()
         if (annotation != null && getLineNumber(annotation) == line) {
