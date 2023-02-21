@@ -33,7 +33,6 @@ import io.vertx.core.net.NetSocket
 import io.vertx.core.net.TrustOptions
 import io.vertx.ext.bridge.BridgeEventType
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
-import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
 import io.vertx.kotlin.coroutines.await
 import io.vertx.servicediscovery.Record
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend
@@ -49,7 +48,7 @@ import spp.protocol.platform.status.InstanceConnection
 import spp.protocol.service.SourceServices.LIVE_INSTRUMENT
 import spp.protocol.service.SourceServices.LIVE_MANAGEMENT
 import spp.protocol.service.SourceServices.LIVE_VIEW
-import spp.protocol.service.extend.TCPServiceFrameParser
+import spp.protocol.service.extend.TCPServiceSocket
 import java.util.*
 
 /**
@@ -130,8 +129,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             setupPromise.fail(ex)
             return
         }
-        socket!!.handler(FrameParser(TCPServiceFrameParser(vertx, socket!!)))
-        socket!!.exceptionHandler {
+
+        TCPServiceSocket(vertx, socket!!).exceptionHandler {
             log.warn("Service discovery socket exception", it)
             val project = ProjectManager.getInstance().openProjects.find {
                 it.locationHash == config.getString("project_location_hash")
@@ -141,8 +140,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             } else {
                 log.warn("Unable to find project. Failed to report status update")
             }
-        }
-        socket!!.closeHandler {
+        }.closeHandler {
             log.warn("Service discovery socket closed")
             val project = ProjectManager.getInstance().openProjects.find {
                 it.locationHash == config.getString("project_location_hash")
