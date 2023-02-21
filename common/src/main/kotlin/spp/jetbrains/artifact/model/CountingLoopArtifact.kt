@@ -17,8 +17,6 @@
 package spp.jetbrains.artifact.model
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiExpression
-import com.intellij.psi.PsiLocalVariable
 import spp.jetbrains.artifact.service.toArtifact
 
 abstract class CountingLoopArtifact(psiElement: PsiElement) : ForLoopArtifact(psiElement) {
@@ -26,17 +24,17 @@ abstract class CountingLoopArtifact(psiElement: PsiElement) : ForLoopArtifact(ps
     /**
      * @return loop counter variable
      */
-    abstract fun getCounter(): PsiLocalVariable
+    abstract fun getCounter(): PsiElement
 
     /**
      * @return counter variable initial value
      */
-    abstract fun getInitializer(): PsiExpression
+    abstract fun getInitializer(): PsiElement
 
     /**
      * @return loop bound
      */
-    abstract fun getBound(): PsiExpression
+    abstract fun getBound(): PsiElement
 
     /**
      * @return true if bound is including

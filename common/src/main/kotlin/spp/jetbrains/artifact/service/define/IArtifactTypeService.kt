@@ -18,7 +18,6 @@ package spp.jetbrains.artifact.service.define
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
-import com.intellij.psi.impl.light.LightIdentifier
 import spp.jetbrains.artifact.model.ArtifactLiteralValue
 import spp.protocol.artifact.ArtifactType
 
