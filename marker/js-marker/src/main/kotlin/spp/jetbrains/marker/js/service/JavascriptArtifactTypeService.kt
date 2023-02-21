@@ -31,6 +31,14 @@ import spp.protocol.artifact.ArtifactType
  */
 class JavascriptArtifactTypeService : IArtifactTypeService {
 
+    override fun getAnnotations(element: PsiElement): List<PsiElement> {
+        return emptyList() //todo: implement
+    }
+
+    override fun getAnnotationOwnerIfAnnotation(element: PsiElement): PsiElement? {
+        return null //todo: implement
+    }
+
     override fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement? {
         return null //todo: implement
     }

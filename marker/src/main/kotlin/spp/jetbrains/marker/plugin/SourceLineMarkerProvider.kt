@@ -19,10 +19,13 @@ package spp.jetbrains.marker.plugin
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
-import com.intellij.psi.*
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.util.Function
+import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.service.ArtifactMarkService
+import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 
 /**
@@ -34,19 +37,20 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        if (element is PsiAnnotation && element.owner is PsiModifierList) {
-            val owner = element.owner as PsiModifierList
-            if (owner.parent is PsiNameIdentifierOwner) {
-                val gutterMark = (owner.parent as PsiNameIdentifierOwner).nameIdentifier
-                    ?.getUserData(GutterMark.KEY)
-                if (gutterMark?.configuration?.preferShowOnAnnotations == true) {
-                    return getLineMarkerInfo(gutterMark, element)
-                }
+        if (!SourceFileMarker.isFileSupported(element.containingFile)) {
+            return null //not a supported file type
+        }
+
+        val annotationOwner = ArtifactTypeService.getAnnotationOwnerIfAnnotation(element)
+        if (annotationOwner is PsiNameIdentifierOwner) {
+            val gutterMark = annotationOwner.nameIdentifier?.getUserData(GutterMark.KEY)
+            if (gutterMark?.configuration?.preferShowOnAnnotations == true) {
+                return getLineMarkerInfo(gutterMark, element)
             }
         }
 
         val gutterMark = element.getUserData(GutterMark.KEY) ?: return null
-        val hasAnnotations = (gutterMark.getPsiElement() as? PsiModifierListOwner)?.annotations?.isNotEmpty() == true
+        val hasAnnotations = ArtifactTypeService.getAnnotations(gutterMark.getPsiElement()).isNotEmpty()
         return if (hasAnnotations && gutterMark.configuration.preferShowOnAnnotations) {
             null
         } else {

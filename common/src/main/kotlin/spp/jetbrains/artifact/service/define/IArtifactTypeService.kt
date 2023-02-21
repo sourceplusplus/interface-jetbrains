@@ -27,6 +27,8 @@ interface IArtifactTypeService : ISourceMarkerService {
      * Necessary because Groovy uses [LightIdentifier] for the name identifier.
      */
     fun getNameIdentifier(element: PsiElement): PsiElement = element
+    fun getAnnotations(element: PsiElement): List<PsiElement>
+    fun getAnnotationOwnerIfAnnotation(element: PsiElement): PsiElement?
     fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement?
     fun isComment(element: PsiElement): Boolean
     fun getType(element: PsiElement): ArtifactType?
