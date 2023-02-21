@@ -19,7 +19,6 @@ package spp.jetbrains.sourcemarker.command
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
-import liveplugin.implementation.common.toFilePath
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.command.LiveCommand
@@ -92,7 +91,7 @@ object CommandBarController {
                 it.trigger(
                     LiveCommandContext(
                         args,
-                        prevCommandBar.sourceFileMarker.psiFile.virtualFile.toFilePath().toFile(),
+                        prevCommandBar.sourceFileMarker.psiFile.virtualFile.toNioPath().toFile(),
                         prevCommandBar.lineNumber,
                         prevCommandBar.artifactQualifiedName,
                         prevCommandBar.sourceFileMarker,
