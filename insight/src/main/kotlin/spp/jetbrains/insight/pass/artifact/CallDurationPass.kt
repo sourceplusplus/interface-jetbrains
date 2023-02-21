@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.insight.pass.artifact
 
-import org.jetbrains.kotlin.utils.addToStdlib.ifNotEmpty
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.insight.InsightKeys
@@ -41,7 +40,7 @@ class CallDurationPass : ArtifactPass {
                 //artifact has already been analyzed, use pre-determined duration (if available)
                 val duration = multiPath.mapNotNull {
                     it.getInsights().find { it.type == PATH_DURATION }?.value as Long?
-                }.ifNotEmpty { sum() }
+                }.ifEmpty { null }?.sum()
                 if (duration != null) {
                     element.putUserData(
                         InsightKeys.FUNCTION_DURATION.asPsiKey(),
