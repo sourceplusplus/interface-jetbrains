@@ -148,7 +148,8 @@ class LiveViewLogManagerImpl(
 
     private fun serviceLogsConsumerCreator(logWindow: LiveLogWindow): MessageConsumer<JsonObject> {
         val vertx = UserData.vertx(project)
-        val consumer = vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress("system"))
+        val developerId = UserData.developerId(project)
+        val consumer = vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developerId))
         consumer.handler {
             val liveViewEvent = LiveViewEvent(it.body())
             if (liveViewEvent.subscriptionId != logWindow.liveView.subscriptionId) return@handler

@@ -124,9 +124,8 @@ class LiveEndpointsWindow(val project: Project, service: Service) : ResumableVie
         endpointRow: EndpointRowView,
         endpoint: ServiceEndpointRow
     ): MessageConsumer<JsonObject> {
-        val consumer = vertx.eventBus().consumer<JsonObject>(
-            toLiveViewSubscriberAddress("system")
-        )
+        val developerId = UserData.developerId(endpointRow.project)
+        val consumer = vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developerId))
         consumer.handler {
             val viewEvent = LiveViewEvent(it.body())
             if (viewEvent.subscriptionId != endpointRow.liveView.subscriptionId) return@handler
