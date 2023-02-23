@@ -100,4 +100,8 @@ object UserData {
         project.putUserData(LIVE_VIEW_SERVICE, null)
         project.putUserData(LIVE_INSTRUMENT_SERVICE, null)
     }
+
+    fun developerId(project: Project): String {
+        return selfInfo(project)?.developer?.id ?: "system"
+    }
 }

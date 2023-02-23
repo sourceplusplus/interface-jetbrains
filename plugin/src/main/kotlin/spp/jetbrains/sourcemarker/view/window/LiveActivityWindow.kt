@@ -90,9 +90,8 @@ class LiveActivityWindow(
     override fun supportsRealtime(): Boolean = scope != "Service"
 
     private fun consumerCreator(window: LiveViewChartWindow, vertx: Vertx): MessageConsumer<JsonObject> {
-        val consumer = vertx.eventBus().consumer<JsonObject>(
-            toLiveViewSubscriberAddress("system")
-        )
+        val developerId = UserData.developerId(window.project)
+        val consumer = vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developerId))
         return consumer.handler {
             val liveViewEvent = LiveViewEvent(it.body())
             if (window.liveView.subscriptionId != liveViewEvent.subscriptionId) return@handler
