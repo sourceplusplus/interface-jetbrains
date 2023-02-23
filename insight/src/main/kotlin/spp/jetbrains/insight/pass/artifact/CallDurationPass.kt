@@ -42,7 +42,7 @@ class CallDurationPass : ArtifactPass {
             if (multiPath != null) {
                 //artifact has already been analyzed, use pre-determined duration (if available)
                 var duration = multiPath.mapNotNull {
-                    it.getInsights().find { it.type == PATH_DURATION }?.value as Long?
+                    it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
                 }.ifEmpty { null }?.sum()
                 if (duration != null) {
                     element.putUserData(
@@ -80,7 +80,7 @@ class CallDurationPass : ArtifactPass {
         val analyzed = ProceduralAnalyzer().analyze(this)
         val duration = multiPath.mapNotNull {
             it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
-        }.ifNotEmpty { sum() }
+        }.takeIf { it.isNotEmpty() }?.sum()
         return duration?.let { it / analyzed.paths.size }
     }
 }

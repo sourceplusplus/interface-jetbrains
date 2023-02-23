@@ -27,7 +27,7 @@ import spp.jetbrains.artifact.model.ReferenceArtifact
 import spp.jetbrains.artifact.service.isFunction
 import spp.jetbrains.artifact.service.toArtifact
 
-class JVMReferenceArtifact(psiElement: PsiElement) : ReferenceArtifact(psiElement) {
+class JVMReferenceArtifact(override val psiElement: PsiElement) : ReferenceArtifact(psiElement) {
 
     override fun isFunctionParameter(): Boolean {
         if (psiElement is PsiReferenceExpression) {
