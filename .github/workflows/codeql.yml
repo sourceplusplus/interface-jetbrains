@@ -55,6 +55,9 @@ jobs:
         java-version: 17
         cache: gradle
 
+    - name: Delete CodeQL tool cache
+      run: rm -rf /opt/hostedtoolcache/CodeQL
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
