@@ -99,6 +99,8 @@ subprojects {
     repositories {
         mavenCentral()
         maven(url = "https://pkg.sourceplus.plus/sourceplusplus/protocol")
+        maven(url = "https://www.jetbrains.com/intellij-repository/releases")
+        maven(url = "https://www.jetbrains.com/intellij-repository/snapshots")
     }
 
     if (!this.toString().contains("commander")) {
