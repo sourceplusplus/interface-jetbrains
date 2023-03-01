@@ -60,7 +60,7 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
                 return@runReadAction
             }
             val router = method.firstChild as JSReferenceExpression
-            val routerVariable = router.resolve() as JSInitializerOwner? ?: run {
+            val routerVariable = router.resolve() as? JSInitializerOwner ?: run {
                 promise.complete(emptyList())
                 return@runReadAction
             }
