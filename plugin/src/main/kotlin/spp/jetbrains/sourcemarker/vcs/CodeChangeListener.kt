@@ -45,7 +45,7 @@ import spp.jetbrains.safeLaunch
 /**
  * Manages the [VCS_MODIFIED] flag and emits corresponding [CODE_CHANGED] events.
  *
- * @since 0.1.0
+ * @since 0.7.7
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class CodeChangeListener(val project: Project) : CoroutineVerticle(), Disposable {
