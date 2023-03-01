@@ -20,6 +20,8 @@ import com.intellij.lang.Language
 import com.intellij.lang.javascript.psi.*
 import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessModuleDir
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
@@ -48,6 +50,25 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
         serviceName: String?
     ): LiveSourceLocation {
         var locationSource = sourceMark.sourceFileMarker.psiFile.virtualFile.name
+
+        // First check if the file is in a module
+        val module = ProjectRootManager.getInstance(sourceMark.project).fileIndex
+            .getModuleForFile(sourceMark.sourceFileMarker.psiFile.virtualFile)
+        if (module != null) {
+            val moduleDir = module.guessModuleDir()
+            if (moduleDir != null) {
+                val relativePath = sourceMark.sourceFileMarker.psiFile.virtualFile.path.substringAfter(moduleDir.path)
+                locationSource = if (relativePath.startsWith("/")) {
+                    relativePath.substring(1)
+                } else {
+                    relativePath
+                }
+
+                return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+            }
+        }
+
+        // Otherwise take the path relative to the project
         val projectBasePath = sourceMark.project.basePath
         if (projectBasePath != null) {
             val relativePath = sourceMark.sourceFileMarker.psiFile.virtualFile.path.substringAfter(projectBasePath)
@@ -57,6 +78,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
                 relativePath
             }
         }
+
         return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
     }
 
