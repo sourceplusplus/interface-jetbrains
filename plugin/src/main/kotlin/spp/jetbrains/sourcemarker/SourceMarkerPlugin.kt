@@ -154,7 +154,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             }
         }
 
-        val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
+        val options = if (System.getProperty("spp.debug.unblocked_threads", "false")!!.toBoolean()) {
             log.info("Removed blocked thread checker")
             VertxOptions().setBlockedThreadCheckInterval(Int.MAX_VALUE.toLong())
         } else {
