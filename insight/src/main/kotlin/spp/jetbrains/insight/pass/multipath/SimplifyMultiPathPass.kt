@@ -25,7 +25,7 @@ import spp.jetbrains.insight.path.ProceduralPath
 /**
  * Removes paths caused by conditional branches that are never taken.
  */
-class SimplifyMultiPathPass : ProceduralMultiPathPass {
+class SimplifyMultiPathPass : ProceduralMultiPathPass() {
 
     override fun postProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath {
         val simplifiedPaths = mutableListOf<ProceduralPath>()

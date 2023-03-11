@@ -33,7 +33,7 @@ import spp.protocol.insight.InsightValue
  * in the path. For example, if the path contains two [IfArtifact]s with probability of 0.5, the
  * following artifacts will have a base probability of 0.25.
  */
-class PathProbabilityPass : ProceduralPathPass {
+class PathProbabilityPass : ProceduralPathPass() {
 
     override fun analyze(path: ProceduralPath) {
         path.artifacts.forEach {

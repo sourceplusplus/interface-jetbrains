@@ -14,15 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.insight.pass
+package spp.jetbrains.insight
 
-import spp.jetbrains.insight.path.ProceduralMultiPath
-
-/**
- * A pass that analyzes a [ProceduralMultiPath].
- */
-abstract class ProceduralMultiPathPass : InsightPass() {
-    open fun preProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
-    open fun analyze(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
-    open fun postProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
-}
+data class InsightPassConfig(
+    var analyzeResolvedFunctions: Boolean = true
+)

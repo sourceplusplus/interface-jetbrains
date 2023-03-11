@@ -24,7 +24,7 @@ import spp.jetbrains.insight.path.ProceduralPath
 /**
  * Saves the [ProceduralPath] set to the root artifact PSI element for later use.
  */
-class SavePsiMultiPathPass : ProceduralMultiPathPass {
+class SavePsiMultiPathPass : ProceduralMultiPathPass() {
 
     override fun postProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath {
         multiPath.forEach { it.rootArtifact.putUserData(InsightKeys.PROCEDURAL_MULTI_PATH.asPsiKey(), multiPath) }

@@ -16,7 +16,19 @@
  */
 package spp.jetbrains.insight.pass
 
+import spp.jetbrains.artifact.model.ArtifactElement
+import spp.jetbrains.insight.InsightPassConfig
+import spp.jetbrains.insight.InsightPassProvider
+import spp.jetbrains.insight.ProceduralAnalyzer
+
 /**
- * Interface for passes that analyze data.
+ * Abstract class for passes that analyze data.
  */
-interface IPass
+abstract class InsightPass {
+    lateinit var analyzer: ProceduralAnalyzer
+    lateinit var rootArtifact: ArtifactElement
+    val provider: InsightPassProvider
+        get() = analyzer.passProvider
+    val config: InsightPassConfig
+        get() = analyzer.passConfig
+}

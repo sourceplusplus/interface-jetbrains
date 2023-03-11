@@ -25,7 +25,7 @@ import spp.jetbrains.insight.path.ProceduralPath
 /**
  * Remove non-control structure, non-call artifacts from the paths.
  */
-class PruneArtifactsPass : ProceduralPathPass {
+class PruneArtifactsPass : ProceduralPathPass() {
 
     override fun analyze(path: ProceduralPath) {
         removeArtifacts(path.artifacts)

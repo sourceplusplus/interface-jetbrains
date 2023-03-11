@@ -20,22 +20,20 @@ import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.pass.ArtifactPass
-import spp.jetbrains.insight.path.ProceduralPath
+import spp.protocol.insight.InsightType.RECURSIVE_CALL
+import spp.protocol.insight.InsightValue
 
 /**
- * Loads the [ProceduralPath] set from [CallArtifact]s that have already been processed. Allows for basic
- * interprocedural analyses for artifacts with known [ProceduralPath]s.
+ * Adds the [RECURSIVE_CALL] insight to the [CallArtifact] if it is recursive.
  */
-class LoadPsiPass : ArtifactPass() {
+class RecursiveCallPass : ArtifactPass() {
 
+    //search for calls to the root function
     override fun analyze(element: ArtifactElement) {
-        if (element !is CallArtifact) return //only interested in calls
-
-        val resolvedFunction = element.getResolvedFunction()
-        if (resolvedFunction != null) {
-            val multiPath = resolvedFunction.getUserData(InsightKeys.PROCEDURAL_MULTI_PATH.asPsiKey())
-            if (multiPath != null) {
-                element.data[InsightKeys.PROCEDURAL_MULTI_PATH] = multiPath
+        if (element is CallArtifact) {
+            val recursiveCall = element.getResolvedFunction() == rootArtifact
+            if (recursiveCall) {
+                element.data[InsightKeys.RECURSIVE_CALL] = InsightValue.of(RECURSIVE_CALL, true)
             }
         }
     }

@@ -21,6 +21,6 @@ import spp.jetbrains.artifact.model.ArtifactElement
 /**
  * A pass that analyzes an [ArtifactElement] and adds data to it.
  */
-interface ArtifactPass : IPass {
-    fun analyze(element: ArtifactElement)
+abstract class ArtifactPass : InsightPass() {
+    abstract fun analyze(element: ArtifactElement)
 }

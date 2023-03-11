@@ -31,6 +31,7 @@ import java.util.stream.IntStream
 class ProceduralAnalyzer {
 
     var passProvider: InsightPassProvider = InsightPassProvider.FULL
+    val passConfig: InsightPassConfig = InsightPassConfig()
 
     /**
      * Performs an intraprocedural analysis of the given [ArtifactElement].
@@ -50,7 +51,7 @@ class ProceduralAnalyzer {
             paths.add(path)
         }
 
-        return passProvider.analyze(ProceduralMultiPath(paths))
+        return passProvider.analyze(this, ProceduralMultiPath(paths))
     }
 
     /**

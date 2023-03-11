@@ -8,4 +8,12 @@ public class PassVariable {
             Thread.sleep(200)
         }
     }
+
+    public void literalPass2() {
+        doSleep2(true);
+    }
+
+    private void doSleep2(boolean sleep) {
+        doSleep(sleep);
+    }
 }

@@ -31,14 +31,18 @@ import spp.protocol.insight.InsightValue
 /**
  * Sets the [FUNCTION_DURATION] on [CallArtifact]s which can be resolved and have a known function duration.
  */
-class CallDurationPass : ArtifactPass {
+class CallDurationPass : ArtifactPass() {
 
     override fun analyze(element: ArtifactElement) {
         if (element !is CallArtifact) return //only interested in calls
 
         val resolvedFunction = element.getResolvedFunction()
         if (resolvedFunction != null) {
-            val multiPath = element.getData(InsightKeys.PROCEDURAL_MULTI_PATH)
+            var multiPath = element.getData(InsightKeys.PROCEDURAL_MULTI_PATH)
+            if (multiPath == null && !element.isRecursive() && analyzer.passConfig.analyzeResolvedFunctions) {
+                multiPath = analyzer.analyze(resolvedFunction)
+            }
+
             if (multiPath != null) {
                 //artifact has already been analyzed, use pre-determined duration (if available)
                 var duration = multiPath.mapNotNull {
@@ -82,5 +86,9 @@ class CallDurationPass : ArtifactPass {
             it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
         }.takeIf { it.isNotEmpty() }?.sum()
         return duration?.let { it / analyzed.paths.size }
+    }
+
+    private fun CallArtifact.isRecursive(): Boolean {
+        return getData(InsightKeys.RECURSIVE_CALL)?.value == true
     }
 }

@@ -38,17 +38,16 @@ import spp.jetbrains.insight.path.ProceduralMultiPath
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 
-class StaticDfaMultiPathPass : ProceduralMultiPathPass {
+class StaticDfaMultiPathPass : ProceduralMultiPathPass() {
 
     private val log = logger<StaticDfaMultiPathPass>()
 
     override fun preProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath {
         val project = multiPath.first().rootArtifact.project
         val factory = DfaValueFactory(project)
-        val flow = DataFlowIRProvider.forElement(
-            (multiPath.first().rootArtifact as FunctionArtifact).bodyBlock!!.psiElement,
-            factory
-        ) ?: return multiPath
+        val rootArtifact = multiPath.first().rootArtifact as? FunctionArtifact ?: return multiPath
+        val bodyBlock = rootArtifact.bodyBlock?.psiElement ?: return multiPath
+        val flow = DataFlowIRProvider.forElement(bodyBlock, factory) ?: return multiPath
 
         val listener = ConstantConditionDfaListener()
         val interpreter = StandardDataFlowInterpreter(flow, listener)
@@ -56,7 +55,7 @@ class StaticDfaMultiPathPass : ProceduralMultiPathPass {
         if (interpreter.interpret(states.map { s ->
                 DfaInstructionState(flow.getInstruction(0), s)
             }) != RunnerResult.OK) {
-            log.warn("Failed to interpret function ${(multiPath.first().rootArtifact as FunctionArtifact).name}")
+            log.warn("Failed to interpret function ${rootArtifact.name}")
         }
 
         listener.constantConditions.forEach {

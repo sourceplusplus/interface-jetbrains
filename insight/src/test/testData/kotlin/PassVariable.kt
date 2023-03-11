@@ -8,4 +8,12 @@ class PassVariable {
             Thread.sleep(200)
         }
     }
+
+    fun literalPass2() {
+        doSleep2(true);
+    }
+
+    private fun doSleep2(sleep: Boolean) {
+        doSleep(sleep);
+    }
 }

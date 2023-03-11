@@ -30,7 +30,7 @@ import spp.protocol.insight.InsightValue
 /**
  * Calculates [PATH_DURATION] based on the sum of the durations of the artifacts in the runtime path.
  */
-class PathDurationPass : ProceduralPathPass {
+class PathDurationPass : ProceduralPathPass() {
 
     override fun analyze(path: ProceduralPath) {
         val duration = analyze(path.artifacts, null)

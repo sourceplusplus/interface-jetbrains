@@ -27,7 +27,7 @@ import spp.protocol.insight.InsightValue
 /**
  * Calculates [FUNCTION_DURATION] for Thread.sleep() [CallArtifact]s that can be statically determined.
  */
-class ThreadSleepPass : ArtifactPass {
+class ThreadSleepPass : ArtifactPass() {
 
     override fun analyze(element: ArtifactElement) {
         if (element !is CallArtifact) return //only interested in calls
