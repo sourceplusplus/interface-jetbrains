@@ -107,4 +107,35 @@ class PassVariableTest : BasePlatformTestCase() {
         assertEquals(InsightType.PATH_DURATION, pathInsights.first().type)
         assertEquals(200L, pathInsights.first().value)
     }
+
+    @Test
+    fun testLiteralPass3() {
+        doLiteralPass3("kotlin", "kt")
+        doLiteralPass3("java", "java")
+        doLiteralPass3("javascript", "js")
+        doLiteralPass3("python", "py")
+    }
+
+    private fun doLiteralPass3(language: String, extension: String) {
+        val psi = myFixture.configureByFile("$language/PassVariable.$extension")
+
+        //setup
+        psi.getCalls().filter { it.text.contains("false", true) }.forEach {
+            it.putUserData(
+                InsightKeys.FUNCTION_DURATION.asPsiKey(),
+                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
+            )
+        }
+
+        val paths = ProceduralAnalyzer().analyze(
+            psi.getFunctions().find { it.name!!.contains("literalPass3") }.toArtifact()!!
+        )
+        assertEquals(1, paths.size)
+
+        val path = paths.first()
+        val pathInsights = path.getInsights()
+        assertEquals(1, pathInsights.size)
+        assertEquals(InsightType.PATH_DURATION, pathInsights.first().type)
+        assertEquals(200L, pathInsights.first().value)
+    }
 }

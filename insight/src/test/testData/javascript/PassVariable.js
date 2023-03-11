@@ -15,3 +15,7 @@ function literalPass2() {
 function doSleep2(sleep) {
     doSleep(sleep);
 }
+
+function literalPass3() {
+    literalPass2();
+}

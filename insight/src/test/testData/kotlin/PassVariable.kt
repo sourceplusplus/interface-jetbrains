@@ -16,4 +16,8 @@ class PassVariable {
     private fun doSleep2(sleep: Boolean) {
         doSleep(sleep);
     }
+
+    fun literalPass3() {
+        literalPass2();
+    }
 }

@@ -13,3 +13,7 @@ def literalPass2():
 
 def doSleep2(sleep):
     doSleep(sleep)
+
+
+def literalPass3():
+    literalPass2()

@@ -16,4 +16,8 @@ public class PassVariable {
     private void doSleep2(boolean sleep) {
         doSleep(sleep);
     }
+
+    public void literalPass3() {
+        literalPass2();
+    }
 }
