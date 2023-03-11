@@ -115,7 +115,10 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
                         FUNCTION_DURATION,
                         InsightValue.of(InsightType.FUNCTION_DURATION, responseTime)
                     )
-                    log.info("Set method duration from $currentDuration to $responseTime. Artifact: ${guideMark.artifactQualifiedName}")
+                    log.info(
+                        "Set method duration from $currentDuration to $responseTime. "
+                                + "Artifact: ${guideMark.artifactQualifiedName}"
+                    )
 
                     //propagate to callers
                     vertx.safeExecuteBlocking {
@@ -191,7 +194,10 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
 
             //set function duration prediction insight
             if (methodDurationPrediction != null) {
-                log.info("Set method duration prediction to $methodDurationPrediction. Artifact: ${mark.artifactQualifiedName}")
+                log.info(
+                    "Set method duration prediction to $methodDurationPrediction. " +
+                            "Artifact: ${mark.artifactQualifiedName}"
+                )
                 mark.putUserData(
                     FUNCTION_DURATION_PREDICTION,
                     InsightValue(InsightType.FUNCTION_DURATION_PREDICTION, methodDurationPrediction).asDerived()
