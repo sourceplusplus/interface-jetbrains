@@ -18,12 +18,9 @@ package spp.jetbrains.insight.pass.artifact
 
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
-import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.insight.InsightKeys
-import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ArtifactPass
-import spp.jetbrains.insight.path.ProceduralMultiPath
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightType.FUNCTION_DURATION
 import spp.protocol.insight.InsightValue
@@ -44,48 +41,23 @@ class CallDurationPass : ArtifactPass() {
             }
 
             if (multiPath != null) {
-                //artifact has already been analyzed, use pre-determined duration (if available)
+                //use the average of pre-determined durations (if available)
+                val possiblePaths = multiPath
                 var duration = multiPath.mapNotNull {
                     it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
                 }.ifEmpty { null }?.average()?.toLong()
                 if (duration != null) {
-                    element.putUserData(
-                        InsightKeys.FUNCTION_DURATION.asPsiKey(),
+                    element.data[InsightKeys.FUNCTION_DURATION] =
                         InsightValue.of(FUNCTION_DURATION, duration).asDerived()
-                    )
-                } else {
-                    //fallback, just use the sum of pre-determined durations (if available)
-                    duration = multiPath.mapNotNull {
-                        it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
-                    }.ifEmpty { null }?.sum()
-                    if (duration != null) {
-                        element.putUserData(
-                            InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                            InsightValue.of(FUNCTION_DURATION, duration).asDerived()
-                        )
-                    }
                 }
             }
 
             val duration = resolvedFunction.getDuration()
             if (duration != null) {
-                element.putUserData(
-                    InsightKeys.FUNCTION_DURATION.asPsiKey(),
+                element.data[InsightKeys.FUNCTION_DURATION] =
                     InsightValue.of(FUNCTION_DURATION, duration).asDerived()
-                )
             }
         }
-    }
-
-    /**
-     * Determine params sent to function and use that to determine duration
-     */
-    private fun FunctionArtifact.getDuration(multiPath: ProceduralMultiPath): Long? {
-        val analyzed = ProceduralAnalyzer().analyze(this)
-        val duration = multiPath.mapNotNull {
-            it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
-        }.takeIf { it.isNotEmpty() }?.sum()
-        return duration?.let { it / analyzed.paths.size }
     }
 
     private fun CallArtifact.isRecursive(): Boolean {

@@ -19,17 +19,14 @@ package spp.jetbrains.insight.pass.path
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.artifact.service.getCalls
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
-import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
 import spp.jetbrains.marker.service.*
 import spp.protocol.insight.InsightType
-import spp.protocol.insight.InsightValue
 
 @TestDataPath("\$CONTENT_ROOT/testData/")
 class PassVariableTest : BasePlatformTestCase() {
@@ -57,14 +54,6 @@ class PassVariableTest : BasePlatformTestCase() {
     private fun doLiteralPass(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/PassVariable.$extension")
 
-        //setup
-        psi.getCalls().filter { it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
-            )
-        }
-
         val paths = ProceduralAnalyzer().analyze(
             psi.getFunctions().find { it.name!!.contains("literalPass") }.toArtifact()!!
         )
@@ -87,14 +76,6 @@ class PassVariableTest : BasePlatformTestCase() {
 
     private fun doLiteralPass2(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/PassVariable.$extension")
-
-        //setup
-        psi.getCalls().filter { it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
-            )
-        }
 
         val paths = ProceduralAnalyzer().analyze(
             psi.getFunctions().find { it.name!!.contains("literalPass2") }.toArtifact()!!
@@ -119,14 +100,6 @@ class PassVariableTest : BasePlatformTestCase() {
     private fun doLiteralPass3(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/PassVariable.$extension")
 
-        //setup
-        psi.getCalls().filter { it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
-            )
-        }
-
         val paths = ProceduralAnalyzer().analyze(
             psi.getFunctions().find { it.name!!.contains("literalPass3") }.toArtifact()!!
         )
@@ -149,14 +122,6 @@ class PassVariableTest : BasePlatformTestCase() {
 
     private fun doLiteralPass4(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/PassVariable.$extension")
-
-        //setup
-        psi.getCalls().filter { it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
-            )
-        }
 
         //pre-analyze
         val preAnalyzePaths = ProceduralAnalyzer().analyze(
@@ -181,5 +146,65 @@ class PassVariableTest : BasePlatformTestCase() {
         assertEquals(1, pathInsights.size)
         assertEquals(InsightType.PATH_DURATION, pathInsights.first().type)
         assertEquals(200L, pathInsights.first().value)
+    }
+
+//    @Test
+//    fun testLiteralPass5() {
+//        doLiteralPass5("kotlin", "kt")
+//        doLiteralPass5("java", "java")
+//        doLiteralPass5("javascript", "js")
+//        doLiteralPass5("python", "py")
+//    }
+//
+//    private fun doLiteralPass5(language: String, extension: String) {
+//        val psi = myFixture.configureByFile("$language/PassVariable.$extension")
+//
+//        //pre-analyze
+//        val preAnalyzePaths = ProceduralAnalyzer().analyze(
+//            psi.getFunctions().find { it.name!!.contains("doSleep5") }.toArtifact()!!
+//        )
+//        assertEquals(2, preAnalyzePaths.size)
+//
+//        preAnalyzePaths.apply {
+//            val truePath = find { it.conditions.first().first }!!
+//            assertEquals(InsightType.PATH_DURATION, truePath.getInsights().first().type)
+//            assertEquals(600L, truePath.getInsights().first().value)
+//
+//            val falsePath = find { !it.conditions.first().first }!!
+//            assertEquals(InsightType.PATH_DURATION, falsePath.getInsights().first().type)
+//            assertEquals(200L, falsePath.getInsights().first().value)
+//        }
+//
+//        val paths = ProceduralAnalyzer().analyze(
+//            psi.getFunctions().find { it.name!!.contains("literalPass5") }.toArtifact()!!
+//        )
+//        assertEquals(1, paths.size)
+//
+//        val path = paths.first()
+//        val pathInsights = path.getInsights()
+//        assertEquals(1, pathInsights.size)
+//        assertEquals(InsightType.PATH_DURATION, pathInsights.first().type)
+//        assertEquals(200L, pathInsights.first().value)
+//    }
+
+    @Test
+    fun testLiteralPass6() {
+        doLiteralPass6("kotlin", "kt")
+        doLiteralPass6("java", "java")
+        doLiteralPass6("javascript", "js")
+        doLiteralPass6("python", "py")
+    }
+
+    private fun doLiteralPass6(language: String, extension: String) {
+        val psi = myFixture.configureByFile("$language/PassVariable.$extension")
+
+        val paths = ProceduralAnalyzer().analyze(
+            psi.getFunctions().find { it.name!!.contains("literalPass6") }.toArtifact()!!
+        )
+        assertEquals(1, paths.size)
+
+        val path = paths.first()
+        val pathInsights = path.getInsights()
+        assertEquals(0, pathInsights.size)
     }
 }

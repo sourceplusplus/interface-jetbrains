@@ -4,7 +4,7 @@ function literalPass() {
 
 function doSleep(sleep) {
     if (sleep) {
-        console.log(false); //sleep 200ms
+        Thread.sleep(200);
     }
 }
 
@@ -27,5 +27,9 @@ function literalPass4() {
 function doSleep4(sleep) {
     if (sleep) {
     }
-    console.log(false); //sleep 200ms
+    Thread.sleep(200);
+}
+
+function literalPass6() {
+    doSleep(false);
 }

@@ -3,5 +3,5 @@ function code1() {
 }
 
 function code2() {
-    console.log(true); //sleep 200ms
+    Thread.sleep(200);
 }

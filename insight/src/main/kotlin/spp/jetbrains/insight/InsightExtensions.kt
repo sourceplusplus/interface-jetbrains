@@ -20,8 +20,9 @@ import spp.jetbrains.artifact.model.ArtifactElement
 import spp.protocol.insight.InsightValue
 
 fun ArtifactElement.getInsights(): List<InsightValue<*>> {
-    return InsightKeys.ALL_INSIGHTS.mapNotNull { getUserData(it.asPsiKey()) } +
-            InsightKeys.ALL_INSIGHTS.mapNotNull { getData(it) }
+    val localInsights = InsightKeys.ALL_INSIGHTS.mapNotNull { getData(it) }.toMutableSet()
+    val globalInsights = InsightKeys.ALL_INSIGHTS.mapNotNull { getUserData(it.asPsiKey()) }.toMutableSet()
+    return (localInsights + globalInsights).toList()
 }
 
 fun ArtifactElement.getDuration(includingPredictions: Boolean = true): Long? {
@@ -32,5 +33,12 @@ fun ArtifactElement.getDuration(includingPredictions: Boolean = true): Long? {
         }
     }
 
+    val duration = getData(InsightKeys.FUNCTION_DURATION)?.value
+    if (duration != null) {
+        return duration
+    }
+
+    //todo: remove, few scenarios where saving duration is global to function (regardless of input/state)
+    // mainly used for testing
     return getUserData(InsightKeys.FUNCTION_DURATION.asPsiKey())?.value
 }

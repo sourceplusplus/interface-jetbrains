@@ -53,7 +53,15 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
     override fun getArguments(): List<ArtifactElement> {
         return when (psiElement) {
             is PsiCall -> psiElement.argumentList?.expressions?.mapNotNull { it.toArtifact() } ?: emptyList()
-            is KtCallExpression -> psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
+            is KtCallExpression -> {
+                try {
+                    psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
+            }
+
             is KtDotQualifiedExpression -> {
                 if (psiElement.selectorExpression is KtCallExpression) {
                     (psiElement.selectorExpression as KtCallExpression).valueArguments.map {
@@ -66,6 +74,17 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
 
             else -> emptyList()
         }
+    }
+
+    override fun isSameArtifact(element: ArtifactElement): Boolean {
+        if (element is JVMCallArtifact) {
+            if (psiElement is KtCallExpression && element.psiElement is KtDotQualifiedExpression) {
+                return psiElement == (element.psiElement as KtDotQualifiedExpression).selectorExpression
+            } else if (psiElement is KtDotQualifiedExpression && element.psiElement is KtCallExpression) {
+                return psiElement.selectorExpression == element.psiElement
+            }
+        }
+        return super.isSameArtifact(element)
     }
 
     override fun clone(): JVMCallArtifact {

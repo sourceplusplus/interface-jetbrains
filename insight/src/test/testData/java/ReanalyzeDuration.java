@@ -4,6 +4,6 @@ public class ReanalyzeDuration {
     }
 
     public void code2() {
-        System.out.println(true); //sleep 200ms
+        Thread.sleep(200);
     }
 }

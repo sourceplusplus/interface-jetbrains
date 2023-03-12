@@ -63,9 +63,7 @@ class ProceduralAnalyzer {
     fun analyzeUp(element: ArtifactElement): List<ProceduralPath> {
         //todo: do this more efficiently
         val paths = analyze(element.getParentFunction().toArtifact()!!)
-        return paths.filter {
-            it.descendants.contains(element)
-        }
+        return paths.filter { it.containsDescendant(element) }
     }
 
     private fun walkDown(element: ArtifactElement, parent: MutableList<Any>) {

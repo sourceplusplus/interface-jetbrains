@@ -19,17 +19,14 @@ package spp.jetbrains.insight.pass.path
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.Test
-import spp.jetbrains.artifact.service.getCalls
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
-import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.py.PythonLanguageProvider
 import spp.jetbrains.marker.service.*
 import spp.protocol.insight.InsightType
-import spp.protocol.insight.InsightValue
 
 @TestDataPath("\$CONTENT_ROOT/testData/")
 class DeadCodeDurationTest : BasePlatformTestCase() {
@@ -57,14 +54,6 @@ class DeadCodeDurationTest : BasePlatformTestCase() {
     private fun doCode1Test(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/DeadCodeDuration.$extension")
 
-        //setup
-        psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
-            )
-        }
-
         val paths = ProceduralAnalyzer().analyze(
             psi.getFunctions().find { it.name!!.contains("code1") }.toArtifact()!!
         )
@@ -87,14 +76,6 @@ class DeadCodeDurationTest : BasePlatformTestCase() {
 
     private fun doCode2Test(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/DeadCodeDuration.$extension")
-
-        //setup
-        psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
-            )
-        }
 
         val paths = ProceduralAnalyzer().analyze(
             psi.getFunctions().find { it.name!!.contains("code2") }.toArtifact()!!

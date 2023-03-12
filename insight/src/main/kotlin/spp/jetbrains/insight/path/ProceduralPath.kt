@@ -60,6 +60,10 @@ data class ProceduralPath(
             return descendants
         }
 
+    fun containsDescendant(artifact: ArtifactElement): Boolean {
+        return descendants.any { it.isSameArtifact(artifact) }
+    }
+
     private fun getDescendants(element: ArtifactElement): List<ArtifactElement> {
         val descendants = mutableListOf<ArtifactElement>()
         if (element is IfArtifact) {

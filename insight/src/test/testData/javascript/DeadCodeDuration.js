@@ -1,16 +1,16 @@
 function code1() {
     if (false) {
-        console.log(true); //sleep 200ms
+        Thread.sleep(200);
     }
-    console.log(false); //sleep 200ms
+    Thread.sleep(200);
 }
 
 function code2() {
     if (false) {
-        console.log(true); //sleep 200ms
+        Thread.sleep(200);
     } else {
-        console.log(false); //sleep 200ms
-        console.log(false); //sleep 200ms
+        Thread.sleep(200);
+        Thread.sleep(200);
     }
-    console.log(false); //sleep 200ms
+    Thread.sleep(200);
 }

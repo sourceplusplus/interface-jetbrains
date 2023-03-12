@@ -36,13 +36,17 @@ abstract class ArtifactElement(open val psiElement: PsiElement) : PsiElement by 
         descendants {
             val artifact = it.toArtifact()
             var visitChildren = true
-            if (artifact != null) {
+            if (artifact != null && !artifact.isSameArtifact(this)) {
                 visitChildren = false
                 descendants.add(artifact)
             }
             visitChildren
         }.toList()
         descendants
+    }
+
+    open fun isSameArtifact(element: ArtifactElement): Boolean {
+        return this == element
     }
 
     fun <T> getData(key: SourceKey<T>): T? {

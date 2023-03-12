@@ -1,15 +1,15 @@
 def code1():
     if False:
-        print(True)  # sleep 200ms
+        Thread.sleep(200)
 
-    print(False)  # sleep 200ms
+    Thread.sleep(200)
 
 
 def code2():
     if False:
-        print(True)  # sleep 200ms
+        Thread.sleep(200)
     else:
-        print(False)  # sleep 200ms
-        print(False)  # sleep 200ms
+        Thread.sleep(200)
+        Thread.sleep(200)
 
-    print(False)  # sleep 200ms
+    Thread.sleep(200)

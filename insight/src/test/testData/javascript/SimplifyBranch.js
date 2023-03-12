@@ -1,14 +1,14 @@
 function simplifyBranch() {
     if (true) {
-        console.log(true); //sleep 100ms
+        Thread.sleep(100);
     }
-    console.log(false); //sleep 100ms
+    Thread.sleep(100);
 }
 
 function simplifyBranch2() {
-    console.log(true); //sleep 100ms
+    Thread.sleep(100);
     if (true) {
-        console.log(false); //sleep 100ms
+        Thread.sleep(100);
     }
-    console.log(true); //sleep 100ms
+    Thread.sleep(100);
 }

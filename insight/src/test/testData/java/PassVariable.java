@@ -30,4 +30,8 @@ public class PassVariable {
         }
         Thread.sleep(200);
     }
+
+    private void literalPass6() {
+        doSleep(false);
+    }
 }

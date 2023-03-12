@@ -4,7 +4,7 @@ def literalPass():
 
 def doSleep(sleep):
     if sleep:
-        print(False)  # sleep 200ms
+        Thread.sleep(200)
 
 
 def literalPass2():
@@ -27,4 +27,8 @@ def doSleep4(sleep):
     if sleep:
         pass
 
-    print(False)  # sleep 200ms
+    Thread.sleep(200)
+
+
+def literalPass6():
+    doSleep(False)
