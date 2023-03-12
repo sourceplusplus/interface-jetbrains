@@ -17,3 +17,14 @@ def doSleep2(sleep):
 
 def literalPass3():
     literalPass2()
+
+
+def literalPass4():
+    doSleep4(False)
+
+
+def doSleep4(sleep):
+    if sleep:
+        pass
+
+    print(False)  # sleep 200ms

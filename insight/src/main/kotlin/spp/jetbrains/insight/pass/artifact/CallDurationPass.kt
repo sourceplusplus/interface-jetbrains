@@ -47,7 +47,7 @@ class CallDurationPass : ArtifactPass() {
                 //artifact has already been analyzed, use pre-determined duration (if available)
                 var duration = multiPath.mapNotNull {
                     it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
-                }.ifEmpty { null }?.sum()
+                }.ifEmpty { null }?.average()?.toLong()
                 if (duration != null) {
                     element.putUserData(
                         InsightKeys.FUNCTION_DURATION.asPsiKey(),

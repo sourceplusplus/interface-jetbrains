@@ -19,3 +19,13 @@ function doSleep2(sleep) {
 function literalPass3() {
     literalPass2();
 }
+
+function literalPass4() {
+    doSleep4(false);
+}
+
+function doSleep4(sleep) {
+    if (sleep) {
+    }
+    console.log(false); //sleep 200ms
+}

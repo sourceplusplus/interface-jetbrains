@@ -20,4 +20,14 @@ public class PassVariable {
     public void literalPass3() {
         literalPass2();
     }
+
+    public void literalPass4() {
+        doSleep4(false);
+    }
+
+    private void doSleep4(boolean sleep) {
+        if (sleep) {
+        }
+        Thread.sleep(200);
+    }
 }
