@@ -18,18 +18,20 @@ package spp.jetbrains.marker.jvm.detect.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.util.Computable
+import com.intellij.psi.PsiLiteral
 import com.intellij.psi.PsiMethod
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import org.jetbrains.kotlin.idea.caches.resolve.analyze
+import org.jetbrains.kotlin.psi.KtAnnotated
+import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.uast.UAnnotation
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.expressions.UInjectionHost
-import org.jetbrains.uast.toUElementOfType
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
+import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
-import spp.jetbrains.marker.source.mark.guide.GuideMark
 
 /**
  * Detects Micronaut HTTP Server endpoints.
@@ -42,35 +44,37 @@ class MicronautEndpoint : JVMEndpointNameDetector {
     private val log = logger<MicronautEndpoint>()
     private val endpointAnnotationPrefix = "io.micronaut.http.annotation."
 
-    fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+    override fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
-            val annotation = uMethod.annotations.find {
+            val annotation = element.annotations.find {
                 it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
-            }.toUElementOfType<UAnnotation>()
-            if (annotation?.qualifiedName != null) {
+            }
+            if (annotation != null) {
                 val endpointType = annotation.qualifiedName!!.substringAfterLast(".").uppercase()
-                val endpointValue = annotation.attributeValues.find {
-                    it.name == null || it.name == "value"
+                var endpointValue = getAttributeValue(annotation, "value")
+                if (endpointValue == null) {
+                    endpointValue = getAttributeValue(annotation, "null")
                 }
-                val value = if (endpointValue is UInjectionHost) {
-                    endpointValue.evaluateToString()
+                val value = if (endpointValue is PsiLiteral) {
+                    endpointValue.value?.toString()
                 } else {
-                    endpointValue?.evaluate()
-                } as String?
+                    null
+                }
 
                 //get controller
-                val controllerAnnotation = uMethod.containingClass?.annotations?.find {
+                val controllerAnnotation = element.containingClass?.annotations?.find {
                     it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
-                }?.toUElementOfType<UAnnotation>()
-                val controllerValue = controllerAnnotation?.attributeValues?.find {
-                    it.name == null || it.name == "value"
                 }
-                val controller = if (controllerValue is UInjectionHost) {
-                    controllerValue.evaluateToString()
+                var controllerValue = controllerAnnotation?.let { getAttributeValue(it, "value") }
+                if (controllerValue == null) {
+                    controllerValue = controllerAnnotation?.let { getAttributeValue(it, "null") }
+                }
+                val controller = if (controllerValue is PsiLiteral) {
+                    controllerValue.value?.toString()
                 } else {
-                    controllerValue?.evaluate()
-                } as String?
+                    null
+                }
 
                 val endpoint = if (controller != null) "$controller$value" else value
                 if (endpoint?.isNotBlank() == true) {
@@ -85,23 +89,59 @@ class MicronautEndpoint : JVMEndpointNameDetector {
         return promise.future()
     }
 
-    override fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
-        TODO("Not yet implemented")
-    }
-
     override fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>> {
-        TODO("Not yet implemented")
+        val promise = Promise.promise<List<DetectedEndpoint>>()
+        ApplicationManager.getApplication().runReadAction {
+            val annotation = element.findAnnotationStartsWith(endpointAnnotationPrefix)
+            if (annotation != null) {
+                val endpointType = annotation.shortName!!.asString().uppercase()
+                var endpointValue = getAttributeValue(annotation, "value")
+                if (endpointValue == null) {
+                    endpointValue = getAttributeValue(annotation, null)
+                }
+                val value = if (endpointValue is KtStringTemplateExpression) {
+                    endpointValue.entries?.firstOrNull()?.text ?: endpointValue.text
+                } else {
+                    null
+                }
+
+                //get controller
+                val controllerAnnotation =
+                    element.containingClassOrObject?.findAnnotationStartsWith(endpointAnnotationPrefix)
+                var controllerValue = controllerAnnotation?.let { getAttributeValue(it, "value") }
+                if (controllerValue == null) {
+                    controllerValue = controllerAnnotation?.let { getAttributeValue(it, null) }
+                }
+                val controller = if (controllerValue is KtStringTemplateExpression) {
+                    controllerValue.entries?.firstOrNull()?.text ?: controllerValue.text
+                } else {
+                    null
+                }
+
+                val endpoint = if (controller != null) "$controller$value" else value
+                if (endpoint?.isNotBlank() == true) {
+                    val endpointName = "$endpointType:$endpoint"
+                    log.info("Detected Micronaut endpoint: $endpointName")
+                    promise.complete(listOf(DetectedEndpoint(endpointName, false)))
+                }
+            }
+
+            promise.tryComplete(emptyList())
+        }
+        return promise.future()
     }
 
-    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
-        if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(emptyList())
-        }
+    private fun KtAnnotated.findAnnotationStartsWith(annotationName: String): KtAnnotationEntry? {
+        if (annotationEntries.isEmpty()) return null
 
-        return ApplicationManager.getApplication().runReadAction(Computable {
-            val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
-                ?: return@Computable Future.succeededFuture(emptyList())
-            determineEndpointName(uMethod)
-        })
+        val context = analyze(bodyResolveMode = BodyResolveMode.PARTIAL)
+        val descriptor = context[BindingContext.DECLARATION_TO_DESCRIPTOR, this] ?: return null
+
+        // Make sure all annotations are resolved
+        descriptor.annotations.toList()
+
+        return annotationEntries.firstOrNull { entry ->
+            context.get(BindingContext.ANNOTATION, entry)?.fqName?.asString()?.startsWith(annotationName) == true
+        }
     }
 }

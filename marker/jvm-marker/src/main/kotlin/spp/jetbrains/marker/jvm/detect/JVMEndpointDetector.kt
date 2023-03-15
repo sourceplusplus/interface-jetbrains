@@ -16,7 +16,9 @@
  */
 package spp.jetbrains.marker.jvm.detect
 
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiMethod
 import io.vertx.core.CompositeFuture
@@ -32,6 +34,7 @@ import spp.jetbrains.marker.jvm.detect.endpoint.MicronautEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SkywalkingTraceEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
+import spp.jetbrains.marker.source.mark.guide.GuideMark
 
 /**
  * todo: description.
@@ -74,6 +77,22 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
     }
 
     interface JVMEndpointNameDetector : EndpointNameDetector {
+        override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
+            if (!guideMark.isMethodMark) {
+                return Future.succeededFuture(emptyList())
+            }
+
+            return DumbService.getInstance(guideMark.project).runReadActionInSmartMode(Computable {
+                if (guideMark.getPsiElement() is PsiMethod) {
+                    determineEndpointName(guideMark.getPsiElement() as PsiMethod)
+                } else if (guideMark.getPsiElement() is KtNamedFunction) {
+                    determineEndpointName(guideMark.getPsiElement() as KtNamedFunction)
+                } else {
+                    Future.succeededFuture(emptyList())
+                }
+            })
+        }
+
         fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>>
         fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>>
 

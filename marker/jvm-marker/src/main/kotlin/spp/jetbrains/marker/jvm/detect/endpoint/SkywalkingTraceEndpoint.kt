@@ -17,7 +17,6 @@
 package spp.jetbrains.marker.jvm.detect.endpoint
 
 import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiLiteral
 import com.intellij.psi.PsiMethod
 import io.vertx.core.Future
@@ -28,12 +27,8 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.psiUtil.containingClass
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.expressions.UInjectionHost
-import org.jetbrains.uast.toUElementOfType
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
-import spp.jetbrains.marker.source.mark.guide.GuideMark
 
 /**
  * todo: description.
@@ -44,42 +39,6 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
 
     private val skywalkingTraceAnnotation = "org.apache.skywalking.apm.toolkit.trace.Trace"
-
-    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
-        if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(emptyList())
-        }
-
-        return DumbService.getInstance(guideMark.project).runReadActionInSmartMode(Computable {
-            val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
-                ?: return@Computable Future.succeededFuture(emptyList())
-            determineEndpointName(uMethod)
-        })
-    }
-
-    fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
-        val promise = Promise.promise<List<DetectedEndpoint>>()
-        DumbService.getInstance(uMethod.project).runReadActionInSmartMode {
-            val annotation = uMethod.findAnnotation(skywalkingTraceAnnotation)
-            if (annotation != null) {
-                val operationNameExpr = annotation.attributeValues.find { it.name == "operationName" }
-                val value = if (operationNameExpr is UInjectionHost) {
-                    operationNameExpr.evaluateToString()
-                } else {
-                    operationNameExpr?.evaluate()
-                } as String?
-                if (value == null || value == "") {
-                    val endpointName = "${uMethod.containingClass!!.qualifiedName}.${uMethod.name}"
-                    promise.complete(listOf(DetectedEndpoint(endpointName, true)))
-                } else {
-                    promise.complete(listOf(DetectedEndpoint(value, true)))
-                }
-            }
-
-            promise.tryComplete(emptyList())
-        }
-        return promise.future()
-    }
 
     override fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()

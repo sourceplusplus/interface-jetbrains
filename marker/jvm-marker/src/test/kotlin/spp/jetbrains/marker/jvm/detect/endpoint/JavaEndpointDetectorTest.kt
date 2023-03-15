@@ -39,11 +39,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    public class TestController {
-                        @RequestMapping(value = "/doGet", method = RequestMethod.GET)
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping;
+                public class TestController {
+                    @RequestMapping(value = "/doGet", method = RequestMethod.GET)
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -63,12 +63,12 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with static import`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
-                    public class TestController {
-                        @RequestMapping(method = GET, value = "/doGet")
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping;
+                import static org.springframework.web.bind.annotation.RequestMethod.*;
+                public class TestController {
+                    @RequestMapping(method = GET, value = "/doGet")
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -88,12 +88,12 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with no value`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
-                    public class TestController {
-                        @RequestMapping(method = GET)
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping;
+                import static org.springframework.web.bind.annotation.RequestMethod.*;
+                public class TestController {
+                    @RequestMapping(method = GET)
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -113,13 +113,13 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with class request mapping`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
-                    @RequestMapping("/todos")
-                    public class TestController {
-                        @RequestMapping(method = GET)
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping;
+                import static org.springframework.web.bind.annotation.RequestMethod.*;
+                @RequestMapping("/todos")
+                public class TestController {
+                    @RequestMapping(method = GET)
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -139,13 +139,13 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with class request mapping 2`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
-                    @RequestMapping("/todos/")
-                    public class TestController {
-                        @RequestMapping(method = GET)
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping;
+                import static org.springframework.web.bind.annotation.RequestMethod.*;
+                @RequestMapping("/todos/")
+                public class TestController {
+                    @RequestMapping(method = GET)
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -165,13 +165,13 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with class request mapping 3`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping;
-                    import static org.springframework.web.bind.annotation.RequestMethod.*;
-                    @RequestMapping("/todos")
-                    public class TestController {
-                        @RequestMapping(method = GET, value = "/doGet")
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping;
+                import static org.springframework.web.bind.annotation.RequestMethod.*;
+                @RequestMapping("/todos")
+                public class TestController {
+                    @RequestMapping(method = GET, value = "/doGet")
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -191,11 +191,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC GetMapping method`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping;
-                    public class TestController {
-                        @GetMapping(name = "/doGet")
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.GetMapping;
+                public class TestController {
+                    @GetMapping(name = "/doGet")
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -215,11 +215,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC GetMapping method_value`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping;
-                    public class TestController {
-                        @GetMapping(value = "/doGet")
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.GetMapping;
+                public class TestController {
+                    @GetMapping(value = "/doGet")
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -239,11 +239,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC GetMapping method_path`() {
         @Language("Java") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping;
-                    public class TestController {
-                        @GetMapping(path = "/doGet")
-                        public void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.GetMapping;
+                public class TestController {
+                    @GetMapping(path = "/doGet")
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -263,11 +263,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SkyWalking Trace with operation name`() {
         @Language("Java") val code = """
-                    import org.apache.skywalking.apm.toolkit.trace.Trace;
-                    public class TestController {
-                        @Trace(operationName = "doGet")
-                        public void doGet() {}
-                    }
+                import org.apache.skywalking.apm.toolkit.trace.Trace;
+                public class TestController {
+                    @Trace(operationName = "doGet")
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -287,11 +287,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SkyWalking Trace no operation name`() {
         @Language("Java") val code = """
-                    import org.apache.skywalking.apm.toolkit.trace.Trace;
-                    public class TestController {
-                        @Trace
-                        public void doGet() {}
-                    }
+                import org.apache.skywalking.apm.toolkit.trace.Trace;
+                public class TestController {
+                    @Trace
+                    public void doGet() {}
+                }
                 """.trimIndent()
         val psiFile = myFixture.configureByText("TestController.java", code)
 
@@ -305,6 +305,32 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
                 ).await()
                 assertEquals(1, result.size)
                 assertEquals("TestController.doGet", result.first().name)
+            }
+        }
+    }
+
+    fun `test Micronaut endpoint`() {
+        @Language("Java") val code = """
+                import io.micronaut.http.annotation.Controller;
+                import io.micronaut.http.annotation.Get;
+                @Controller("/todos")
+                public class TestController {
+                    @Get("/doGet")
+                    public void doGet() {}
+                }
+                """.trimIndent()
+        val psiFile = myFixture.configureByText("TestController.java", code)
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
+
+            safeRunBlocking {
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
+                assertEquals(1, result.size)
+                assertEquals("GET:/todos/doGet", result.first().name)
             }
         }
     }

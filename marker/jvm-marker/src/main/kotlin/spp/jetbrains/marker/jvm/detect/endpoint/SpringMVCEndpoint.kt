@@ -19,7 +19,6 @@ package spp.jetbrains.marker.jvm.detect.endpoint
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
 import com.intellij.lang.jvm.annotation.JvmAnnotationEnumFieldValue
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.util.Computable
 import com.intellij.psi.*
 import io.vertx.core.Future
 import io.vertx.core.Promise
@@ -34,7 +33,6 @@ import spp.jetbrains.artifact.service.isScala
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
-import spp.jetbrains.marker.source.mark.guide.GuideMark
 
 /**
  * todo: description.
@@ -53,22 +51,6 @@ class SpringMVCEndpoint : JVMEndpointNameDetector {
         "org.springframework.web.bind.annotation.DeleteMapping",
         "org.springframework.web.bind.annotation.PatchMapping"
     )
-
-    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
-        if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(emptyList())
-        }
-
-        return ApplicationManager.getApplication().runReadAction(Computable {
-            if (guideMark.getPsiElement() is PsiMethod) {
-                determineEndpointName(guideMark.getPsiElement() as PsiMethod)
-            } else if (guideMark.getPsiElement() is KtNamedFunction) {
-                determineEndpointName(guideMark.getPsiElement() as KtNamedFunction)
-            } else {
-                Future.succeededFuture(emptyList())
-            }
-        })
-    }
 
     override fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
