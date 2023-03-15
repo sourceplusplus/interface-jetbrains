@@ -35,10 +35,7 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.parentOfTypes
 import com.jetbrains.python.codeInsight.controlflow.ControlFlowCache
 import com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil
-import com.jetbrains.python.psi.PyCallExpression
-import com.jetbrains.python.psi.PyFunction
-import com.jetbrains.python.psi.PyIfStatement
-import com.jetbrains.python.psi.PyReferenceExpression
+import com.jetbrains.python.psi.*
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
@@ -70,6 +67,11 @@ class PythonArtifactScopeService : IArtifactScopeService {
     override fun getParentFunction(element: PsiElement): PsiNamedElement? {
         require(ArtifactTypeService.isPython(element))
         return element.findParentOfType<PyFunction>()
+    }
+
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        require(ArtifactTypeService.isPython(element))
+        return element.findParentOfType<PyClass>()
     }
 
     override fun getCalls(element: PsiElement): List<PsiElement> {

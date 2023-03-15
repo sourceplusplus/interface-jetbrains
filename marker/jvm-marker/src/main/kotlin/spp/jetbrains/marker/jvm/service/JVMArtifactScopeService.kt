@@ -53,41 +53,43 @@ class JVMArtifactScopeService : IArtifactScopeService {
 
     override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
         return when {
-            ArtifactTypeService.isJava(element) -> element.descendantsOfType<PsiMethod>().toList()
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtNamedFunction>().toList()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.descendantsOfType<PsiMethod>().toList()
         }
     }
 
     override fun getChildIfs(element: PsiElement): List<PsiElement> {
         return when {
-            ArtifactTypeService.isJava(element) -> element.descendantsOfType<PsiIfStatement>().toList()
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtIfExpression>().toList()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.descendantsOfType<PsiIfStatement>().toList()
         }
     }
 
     override fun getParentIf(element: PsiElement): PsiElement? {
         return when {
-            ArtifactTypeService.isJava(element) -> element.findParentOfType<PsiIfStatement>()
             ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtIfExpression>()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.findParentOfType<PsiIfStatement>()
         }
     }
 
     override fun getParentFunction(element: PsiElement): PsiNamedElement? {
         return when {
-            ArtifactTypeService.isJava(element) -> element.findParentOfType<PsiMethod>()
             ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtNamedFunction>()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.findParentOfType<PsiMethod>()
+        }
+    }
+
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        return when {
+            ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtClass>()
+            else -> element.findParentOfType<PsiClass>()
         }
     }
 
     override fun getCalls(element: PsiElement): List<PsiElement> {
         return when {
-            ArtifactTypeService.isJava(element) -> element.descendantsOfType<PsiCallExpression>().toList()
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtCallExpression>().toList()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.descendantsOfType<PsiCallExpression>().toList()
         }
     }
 

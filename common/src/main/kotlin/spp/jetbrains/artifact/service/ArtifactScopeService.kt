@@ -51,6 +51,10 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
         return getService(element.language).getParentFunction(element)
     }
 
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        return getService(element.language).getParentClass(element)
+    }
+
     override fun getCalls(element: PsiElement): List<PsiElement> {
         return getService(element.language).getCalls(element)
     }

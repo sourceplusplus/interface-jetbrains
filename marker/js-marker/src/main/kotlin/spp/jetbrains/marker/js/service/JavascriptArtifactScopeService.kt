@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.js.service
 
 import com.intellij.lang.javascript.psi.*
+import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.lang.javascript.psi.util.JSTreeUtil
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
@@ -66,6 +67,11 @@ class JavascriptArtifactScopeService : IArtifactScopeService {
     override fun getParentFunction(element: PsiElement): PsiNamedElement? {
         require(ArtifactTypeService.isJavaScript(element))
         return element.findParentOfType<JSFunction>()
+    }
+
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.findParentOfType<JSClass>()
     }
 
     override fun getCalls(element: PsiElement): List<PsiElement> {
