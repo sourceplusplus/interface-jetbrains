@@ -35,6 +35,7 @@ interface IArtifactScopeService : ISourceMarkerService {
     fun getChildIfs(element: PsiElement): List<PsiElement>
     fun getParentIf(element: PsiElement): PsiElement?
     fun getParentFunction(element: PsiElement): PsiNamedElement?
+    fun getParentClass(element: PsiElement): PsiNamedElement?
     fun getCalls(element: PsiElement): List<PsiElement>
 
     fun getCalledFunctions(
