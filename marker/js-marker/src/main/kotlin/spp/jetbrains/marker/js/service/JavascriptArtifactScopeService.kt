@@ -49,9 +49,14 @@ import spp.jetbrains.marker.SourceMarkerUtils
 @Suppress("TooManyFunctions") // public API
 class JavascriptArtifactScopeService : IArtifactScopeService {
 
-    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
         require(ArtifactTypeService.isJavaScript(element))
         return element.descendantsOfType<JSFunction>().toList()
+    }
+
+    override fun getClasses(element: PsiElement): List<PsiNamedElement> {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.descendantsOfType<JSClass>().toList()
     }
 
     override fun getChildIfs(element: PsiElement): List<PsiElement> {

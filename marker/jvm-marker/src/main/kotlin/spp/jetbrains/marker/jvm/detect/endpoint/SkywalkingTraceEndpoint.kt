@@ -18,8 +18,16 @@ package spp.jetbrains.marker.jvm.detect.endpoint
 
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.Computable
+import com.intellij.psi.PsiLiteral
+import com.intellij.psi.PsiMethod
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import org.jetbrains.kotlin.idea.refactoring.memberInfo.qualifiedClassNameForRendering
+import org.jetbrains.kotlin.idea.util.findAnnotation
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import org.jetbrains.kotlin.psi.psiUtil.containingClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.expressions.UInjectionHost
 import org.jetbrains.uast.toUElementOfType
@@ -49,7 +57,7 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
         })
     }
 
-    override fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+    fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
         DumbService.getInstance(uMethod.project).runReadActionInSmartMode {
             val annotation = uMethod.findAnnotation(skywalkingTraceAnnotation)
@@ -62,6 +70,54 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
                 } as String?
                 if (value == null || value == "") {
                     val endpointName = "${uMethod.containingClass!!.qualifiedName}.${uMethod.name}"
+                    promise.complete(listOf(DetectedEndpoint(endpointName, true)))
+                } else {
+                    promise.complete(listOf(DetectedEndpoint(value, true)))
+                }
+            }
+
+            promise.tryComplete(emptyList())
+        }
+        return promise.future()
+    }
+
+    override fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
+        val promise = Promise.promise<List<DetectedEndpoint>>()
+        DumbService.getInstance(element.project).runReadActionInSmartMode {
+            val annotation = element.getAnnotation(skywalkingTraceAnnotation)
+            if (annotation != null) {
+                val operationNameExpr = annotation.findAttributeValue("operationName")
+                val value = if (operationNameExpr is PsiLiteral) {
+                    operationNameExpr.value?.toString()
+                } else {
+                    null
+                }
+                if (value == null || value == "") {
+                    val endpointName = "${element.containingClass!!.qualifiedName}.${element.name}"
+                    promise.complete(listOf(DetectedEndpoint(endpointName, true)))
+                } else {
+                    promise.complete(listOf(DetectedEndpoint(value, true)))
+                }
+            }
+
+            promise.tryComplete(emptyList())
+        }
+        return promise.future()
+    }
+
+    override fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>> {
+        val promise = Promise.promise<List<DetectedEndpoint>>()
+        DumbService.getInstance(element.project).runReadActionInSmartMode {
+            val annotation = element.findAnnotation(FqName(skywalkingTraceAnnotation))
+            if (annotation != null) {
+                val operationNameExpr = getAttributeValue(annotation, "operationName")
+                val value = if (operationNameExpr is KtStringTemplateExpression) {
+                    operationNameExpr.entries?.firstOrNull()?.text ?: operationNameExpr.text
+                } else {
+                    null
+                }
+                if (value == null || value == "") {
+                    val endpointName = "${element.containingClass()!!.qualifiedClassNameForRendering()}.${element.name}"
                     promise.complete(listOf(DetectedEndpoint(endpointName, true)))
                 } else {
                     promise.complete(listOf(DetectedEndpoint(value, true)))

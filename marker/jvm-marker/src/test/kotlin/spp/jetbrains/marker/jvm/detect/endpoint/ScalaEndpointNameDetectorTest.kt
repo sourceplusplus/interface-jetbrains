@@ -19,12 +19,24 @@ package spp.jetbrains.marker.jvm.detect.endpoint
 import com.intellij.openapi.application.ApplicationManager
 import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
-import org.jetbrains.uast.UFile
-import org.jetbrains.uast.toUElement
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.artifact.service.getClasses
+import spp.jetbrains.artifact.service.getFunctions
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector
+import spp.jetbrains.marker.jvm.service.JVMArtifactScopeService
 
 class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
+
+    override fun setUp() {
+        super.setUp()
+
+        SourceMarkerUtils.getJvmLanguages().let {
+            ArtifactScopeService.addService(JVMArtifactScopeService(), it)
+        }
+    }
 
     fun `test SpringMVCEndpoint RequestMapping method`() {
         @Language("Scala") val code = """
@@ -34,14 +46,16 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
                         def getStr() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.scala", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(2, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -56,14 +70,16 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
                         def doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.scala", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(2, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/", result.first().name)
             }
@@ -78,14 +94,16 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
                         def doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.scala", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(2, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -100,14 +118,16 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
                         def doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.scala", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(2, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -122,14 +142,16 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
                         def doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.scala", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(2, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("doGet", result.first().name)
             }
@@ -144,14 +166,16 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
                         def doGet() {}
                     }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.scala", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.scala", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(2, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[1]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("TestController.doGet", result.first().name)
             }

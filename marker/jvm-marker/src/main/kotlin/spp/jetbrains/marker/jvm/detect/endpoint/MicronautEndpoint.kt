@@ -19,8 +19,10 @@ package spp.jetbrains.marker.jvm.detect.endpoint
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.Computable
+import com.intellij.psi.PsiMethod
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.expressions.UInjectionHost
@@ -40,7 +42,7 @@ class MicronautEndpoint : JVMEndpointNameDetector {
     private val log = logger<MicronautEndpoint>()
     private val endpointAnnotationPrefix = "io.micronaut.http.annotation."
 
-    override fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+    fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             val annotation = uMethod.annotations.find {
@@ -81,6 +83,14 @@ class MicronautEndpoint : JVMEndpointNameDetector {
             promise.tryComplete(emptyList())
         }
         return promise.future()
+    }
+
+    override fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>> {
+        TODO("Not yet implemented")
     }
 
     override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
