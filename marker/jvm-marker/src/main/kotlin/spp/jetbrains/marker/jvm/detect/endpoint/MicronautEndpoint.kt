@@ -52,10 +52,7 @@ class MicronautEndpoint : JVMEndpointNameDetector {
             }
             if (annotation != null) {
                 val endpointType = annotation.qualifiedName!!.substringAfterLast(".").uppercase()
-                var endpointValue = getAttributeValue(annotation, "value")
-                if (endpointValue == null) {
-                    endpointValue = getAttributeValue(annotation, "null")
-                }
+                val endpointValue = getAttributeValue(annotation, "value")
                 val value = if (endpointValue is PsiLiteral) {
                     endpointValue.value?.toString()
                 } else {
@@ -66,10 +63,7 @@ class MicronautEndpoint : JVMEndpointNameDetector {
                 val controllerAnnotation = element.containingClass?.annotations?.find {
                     it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
                 }
-                var controllerValue = controllerAnnotation?.let { getAttributeValue(it, "value") }
-                if (controllerValue == null) {
-                    controllerValue = controllerAnnotation?.let { getAttributeValue(it, "null") }
-                }
+                val controllerValue = controllerAnnotation?.let { getAttributeValue(it, "value") }
                 val controller = if (controllerValue is PsiLiteral) {
                     controllerValue.value?.toString()
                 } else {
