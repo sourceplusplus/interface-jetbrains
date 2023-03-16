@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.joor.Reflect
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.artifact.service.define.IArtifactScopeService
@@ -51,10 +52,18 @@ import spp.jetbrains.marker.SourceMarkerUtils
 @Suppress("TooManyFunctions") // public API
 class JVMArtifactScopeService : IArtifactScopeService {
 
-    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
         return when {
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtNamedFunction>().toList()
+            ArtifactTypeService.isScala(element) -> element.descendantsOfType<ScFunctionDefinition>().toList()
             else -> element.descendantsOfType<PsiMethod>().toList()
+        }
+    }
+
+    override fun getClasses(element: PsiElement): List<PsiNamedElement> {
+        return when {
+            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtClass>().toList()
+            else -> element.descendantsOfType<PsiClass>().toList()
         }
     }
 
