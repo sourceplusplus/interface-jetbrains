@@ -84,6 +84,10 @@ class JavascriptArtifactScopeService : IArtifactScopeService {
         return element.descendantsOfType<JSCallExpression>().toList()
     }
 
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return ((element as? JSCallExpression)?.methodExpression as? JSReferenceExpression)?.resolve()
+    }
+
     override fun getCalledFunctions(
         element: PsiElement,
         includeExternal: Boolean,

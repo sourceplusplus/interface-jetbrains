@@ -63,6 +63,10 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
         return getService(element.language).getCalls(element)
     }
 
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return getService(element.language).tryResolveCall(element)
+    }
+
     override fun getCalledFunctions(
         element: PsiElement,
         includeExternal: Boolean,

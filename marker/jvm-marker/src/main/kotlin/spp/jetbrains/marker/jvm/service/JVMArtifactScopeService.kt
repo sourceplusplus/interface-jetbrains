@@ -41,6 +41,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.joor.Reflect
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.artifact.service.define.IArtifactScopeService
+import spp.jetbrains.artifact.service.isGroovy
+import spp.jetbrains.artifact.service.isKotlin
 import spp.jetbrains.marker.SourceMarkerUtils
 
 /**
@@ -99,6 +101,19 @@ class JVMArtifactScopeService : IArtifactScopeService {
         return when {
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtCallExpression>().toList()
             else -> element.descendantsOfType<PsiCallExpression>().toList()
+        }
+    }
+
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return when {
+            element.isKotlin() && element is KtCallExpression -> {
+                element.resolveToCall()?.resultingDescriptor?.psiElement
+            }
+
+            element.isGroovy() && element is GrCall -> element.resolveMethod()
+            element is PsiCallExpression -> element.resolveMethod()
+
+            else -> null
         }
     }
 

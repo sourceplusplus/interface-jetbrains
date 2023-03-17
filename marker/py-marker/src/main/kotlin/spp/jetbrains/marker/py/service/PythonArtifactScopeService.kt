@@ -84,6 +84,10 @@ class PythonArtifactScopeService : IArtifactScopeService {
         return element.descendantsOfType<PyCallExpression>().toList()
     }
 
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return ((element as? PyCallExpression)?.callee as? PyReferenceExpression)?.reference?.resolve()
+    }
+
     override fun getCalledFunctions(
         element: PsiElement,
         includeExternal: Boolean,
