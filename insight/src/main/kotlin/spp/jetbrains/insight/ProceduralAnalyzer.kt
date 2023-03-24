@@ -108,27 +108,27 @@ class ProceduralAnalyzer {
         processArtifacts: List<Any>,
         boolIterator: BooleanIterator
     ) {
-        processArtifacts.forEachIndexed { index, it ->
-            var artifactElement: ArtifactElement? = null
-            if (it is ArtifactElement) {
-                artifactElement = it.clone()
-                nextArtifacts.add(artifactElement)
+        processArtifacts.forEachIndexed { index, artifact ->
+            var clonedArtifact: ArtifactElement? = null
+            if (artifact is ArtifactElement) {
+                clonedArtifact = artifact.clone()
+                nextArtifacts.add(clonedArtifact)
             }
 
-            if (artifactElement is IfArtifact) {
+            if (clonedArtifact is IfArtifact) {
                 val bool = boolIterator.next()
-                artifactElement.setConditionEvaluation(bool)
+                clonedArtifact.setConditionEvaluation(bool)
 
                 if (bool) {
                     val childArtifacts = processArtifacts[index + 1] as List<Any>
-                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIterator)
+                    processPath(path, clonedArtifact.childArtifacts, childArtifacts, boolIterator)
                 } else {
                     val childArtifacts = processArtifacts[index + 2] as List<Any>
-                    processPath(path, artifactElement.childArtifacts, childArtifacts, boolIterator)
+                    processPath(path, clonedArtifact.childArtifacts, childArtifacts, boolIterator)
                 }
-            } else if (artifactElement is LoopArtifact) {
+            } else if (clonedArtifact is LoopArtifact) {
                 val childArtifacts = processArtifacts[index + 1] as List<Any>
-                processPath(path, artifactElement.childArtifacts, childArtifacts, boolIterator)
+                processPath(path, clonedArtifact.childArtifacts, childArtifacts, boolIterator)
             }
         }
     }
