@@ -404,7 +404,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         //live insight
         val insightServiceAvailable = availableRecords.any { it.name == SourceServices.LIVE_INSIGHT }
         if (insightServiceAvailable || availableRecords.any { it.name == SourceServices.LIVE_VIEW }) {
-            val insightManager = LiveInsightManager(project, insightServiceAvailable)
+            val insightManager = LiveInsightManager(insightServiceAvailable)
             vertx.deployVerticle(insightManager, DeploymentOptions().setWorker(true)).await()
             SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(insightManager)
         } else {
