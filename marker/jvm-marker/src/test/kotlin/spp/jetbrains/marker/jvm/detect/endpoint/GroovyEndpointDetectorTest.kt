@@ -17,31 +17,45 @@
 package spp.jetbrains.marker.jvm.detect.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.psi.PsiMethod
 import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
-import org.jetbrains.uast.UFile
-import org.jetbrains.uast.toUElement
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.artifact.service.getClasses
+import spp.jetbrains.artifact.service.getFunctions
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector
+import spp.jetbrains.marker.jvm.service.JVMArtifactScopeService
 
 class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
+    override fun setUp() {
+        super.setUp()
+
+        SourceMarkerUtils.getJvmLanguages().let {
+            ArtifactScopeService.addService(JVMArtifactScopeService(), it)
+        }
+    }
+
     fun `test SpringMVC RequestMapping method`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.*
-                    class TestController {
-                        @RequestMapping(value = "/doGet", method = RequestMethod.GET)
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.*
+                class TestController {
+                    @RequestMapping(value = "/doGet", method = RequestMethod.GET)
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -50,21 +64,23 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with static import`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping
-                    import static org.springframework.web.bind.annotation.RequestMethod.*
-                    class TestController {
-                        @RequestMapping(method = GET, value = "/doGet")
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping
+                import static org.springframework.web.bind.annotation.RequestMethod.*
+                class TestController {
+                    @RequestMapping(method = GET, value = "/doGet")
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -73,21 +89,23 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with no value`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping
-                    import static org.springframework.web.bind.annotation.RequestMethod.*
-                    class TestController {
-                        @RequestMapping(method = GET)
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping
+                import static org.springframework.web.bind.annotation.RequestMethod.*
+                class TestController {
+                    @RequestMapping(method = GET)
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.java", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/", result.first().name)
             }
@@ -96,22 +114,24 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with class request mapping`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping
-                    import static org.springframework.web.bind.annotation.RequestMethod.*
-                    @RequestMapping("/todos")
-                    class TestController {
-                        @RequestMapping(method = GET)
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping
+                import static org.springframework.web.bind.annotation.RequestMethod.*
+                @RequestMapping("/todos")
+                class TestController {
+                    @RequestMapping(method = GET)
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/todos", result.first().name)
             }
@@ -120,22 +140,24 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with class request mapping 2`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping
-                    import static org.springframework.web.bind.annotation.RequestMethod.*
-                    @RequestMapping("/todos/")
-                    class TestController {
-                        @RequestMapping(method = GET)
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping
+                import static org.springframework.web.bind.annotation.RequestMethod.*
+                @RequestMapping("/todos/")
+                class TestController {
+                    @RequestMapping(method = GET)
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/todos", result.first().name)
             }
@@ -144,22 +166,24 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC RequestMapping method with class request mapping 3`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.RequestMapping
-                    import static org.springframework.web.bind.annotation.RequestMethod.*
-                    @RequestMapping("/todos")
-                    class TestController {
-                        @RequestMapping(method = GET, value = "/doGet")
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.RequestMapping
+                import static org.springframework.web.bind.annotation.RequestMethod.*
+                @RequestMapping("/todos")
+                class TestController {
+                    @RequestMapping(method = GET, value = "/doGet")
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/todos/doGet", result.first().name)
             }
@@ -168,20 +192,22 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC GetMapping method`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping
-                    class TestController {
-                        @GetMapping(name = "/doGet")
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.GetMapping
+                class TestController {
+                    @GetMapping(name = "/doGet")
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/", result.first().name)
             }
@@ -190,20 +216,22 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC GetMapping method_path`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping
-                    class TestController {
-                        @GetMapping(path = "/doGet")
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.GetMapping
+                class TestController {
+                    @GetMapping(path = "/doGet")
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -212,20 +240,22 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SpringMVC GetMapping method_value`() {
         @Language("Groovy") val code = """
-                    import org.springframework.web.bind.annotation.GetMapping
-                    class TestController {
-                        @GetMapping(value = "/doGet")
-                        void doGet() {}
-                    }
+                import org.springframework.web.bind.annotation.GetMapping
+                class TestController {
+                    @GetMapping(value = "/doGet")
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -234,20 +264,22 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SkyWalking Trace with operation name`() {
         @Language("Groovy") val code = """
-                    import org.apache.skywalking.apm.toolkit.trace.Trace
-                    class TestController {
-                        @Trace(operationName = "doGet")
-                        void doGet() {}
-                    }
+                import org.apache.skywalking.apm.toolkit.trace.Trace
+                class TestController {
+                    @Trace(operationName = "doGet")
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("doGet", result.first().name)
             }
@@ -256,22 +288,50 @@ class GroovyEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
     fun `test SkyWalking Trace no operation name`() {
         @Language("Groovy") val code = """
-                    import org.apache.skywalking.apm.toolkit.trace.Trace
-                    class TestController {
-                        @Trace
-                        void doGet() {}
-                    }
+                import org.apache.skywalking.apm.toolkit.trace.Trace
+                class TestController {
+                    @Trace
+                    void doGet() {}
+                }
                 """.trimIndent()
-        val uFile = myFixture.configureByText("TestController.groovy", code).toUElement() as UFile
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
 
         ApplicationManager.getApplication().runReadAction {
-            assertEquals(1, uFile.classes.size)
-            assertEquals(1, uFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(uFile.classes[0].methods[0]).await()
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
                 assertEquals(1, result.size)
                 assertEquals("TestController.doGet", result.first().name)
+            }
+        }
+    }
+
+    fun `test Micronaut endpoint`() {
+        @Language("Groovy") val code = """
+                import io.micronaut.http.annotation.Controller
+                import io.micronaut.http.annotation.Get
+                @Controller("/todos")
+                class TestController {
+                    @Get("/doGet")
+                    void doGet() {}
+                }
+                """.trimIndent()
+        val psiFile = myFixture.configureByText("TestController.groovy", code)
+
+        ApplicationManager.getApplication().runReadAction {
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
+
+            safeRunBlocking {
+                val result = JVMEndpointDetector(project).determineEndpointName(
+                    psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
+                ).await()
+                assertEquals(1, result.size)
+                assertEquals("GET:/todos/doGet", result.first().name)
             }
         }
     }

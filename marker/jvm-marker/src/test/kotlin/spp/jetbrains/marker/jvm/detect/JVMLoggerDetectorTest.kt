@@ -35,10 +35,14 @@ import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.idea.core.util.toPsiFile
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
-import org.jetbrains.uast.toUElement
 import spp.jetbrains.UserData
+import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.artifact.service.getClasses
+import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
+import spp.jetbrains.marker.jvm.service.JVMArtifactScopeService
 import spp.jetbrains.marker.source.SourceFileMarker
 import java.io.File
 
@@ -82,6 +86,10 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
     public override fun setUp() {
         super.setUp()
 
+        SourceMarkerUtils.getJvmLanguages().let {
+            ArtifactScopeService.addService(JVMArtifactScopeService(), it)
+        }
+
         myFixture.addClass(
             "package ch.qos.logback.classic;\n" +
                     "\n" +
@@ -118,17 +126,17 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     fun testJavaLogbackLogger() {
         @Language("Java") val code = """
-                    import ch.qos.logback.classic.Logger;
-                    public class TestLogback {
-                        private static final Logger log = new Logger();
-                        public void loggers() {
-                            log.trace("trace {}", "trace");
-                            log.debug("debug {}", "debug");
-                            log.info("info {}", "info");
-                            log.warn("warn {}", "warn");
-                            log.error("error {}", "error");
-                        }
+                import ch.qos.logback.classic.Logger;
+                public class TestLogback {
+                    private static final Logger log = new Logger();
+                    public void loggers() {
+                        log.trace("trace {}", "trace");
+                        log.debug("debug {}", "debug");
+                        log.info("info {}", "info");
+                        log.warn("warn {}", "warn");
+                        log.error("error {}", "error");
                     }
+                }
                 """.trimIndent()
 
         ApplicationManager.getApplication().runReadAction {
@@ -154,39 +162,34 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     fun testKotlinLogbackLogger() {
         @Language("kotlin") val code = """
-                    import ch.qos.logback.classic.Logger
-                    class TestLogback {
-                        val log: Logger = Logger()
-                        fun loggers() {
-                            log.trace("trace {}", "trace")
-                            log.debug("debug {}", "debug")
-                            log.info("info {}", "info")
-                            log.warn("warn {}", "warn")
-                            log.error("error {}", "error")
-                        }
+                import ch.qos.logback.classic.Logger
+                class TestLogback {
+                    val log: Logger = Logger()
+                    fun loggers() {
+                        log.trace("trace {}", "trace")
+                        log.debug("debug {}", "debug")
+                        log.info("info {}", "info")
+                        log.warn("warn {}", "warn")
+                        log.error("error {}", "error")
                     }
+                }
                 """.trimIndent()
 
         ApplicationManager.getApplication().runReadAction {
-            val sourceFile = myFixture.createFile("TestLogback.kt", code).toPsiFile(project)
-            assertNotNull(sourceFile)
+            val psiFile = myFixture.createFile("TestLogback.kt", code).toPsiFile(project)!!
 
-            val ktFile = sourceFile as KtFile
-            assertEquals(1, ktFile.classes.size)
-            assertEquals(3, ktFile.classes[0].methods.size)
+            assertEquals(1, psiFile.getClasses().size)
+            assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             JVMLanguageProvider().setup(project.apply { UserData.vertx(this, Vertx.vertx()) })
             SourceFileMarker.SUPPORTED_FILE_TYPES.add(KtFile::class.java)
-            val fileMarker = SourceMarker.getSourceFileMarker(sourceFile)
+            val fileMarker = SourceMarker.getSourceFileMarker(psiFile)
             assertNotNull(fileMarker)
 
-            //todo: shouldn't need toUElement()
-            val result = JVMLoggerDetector(project)
-                .determineLoggerStatements(
-                    ktFile.classes[0].methods[1].toUElement()!!.sourcePsi as PsiNameIdentifierOwner,
-                    fileMarker!!
-                )
-                .map { it.logPattern }
+            val result = JVMLoggerDetector(project).determineLoggerStatements(
+                psiFile.getClasses()[0].getFunctions()[0] as PsiNameIdentifierOwner,
+                fileMarker!!
+            ).map { it.logPattern }
             assertEquals(5, result.size)
             assertContainsOrdered(result, "trace {}", "debug {}", "info {}", "warn {}", "error {}")
         }
@@ -194,17 +197,17 @@ class JVMLoggerDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     fun testGroovyLogbackLogger() {
         @Language("Groovy") val code = """
-                    import ch.qos.logback.classic.Logger
-                    class TestLogback {
-                        var log = new Logger()
-                        void loggers() {
-                            log.trace("trace {}", "trace")
-                            log.debug("debug {}", "debug")
-                            log.info("info {}", "info")
-                            log.warn("warn {}", "warn")
-                            log.error("error {}", "error")
-                        }
+                import ch.qos.logback.classic.Logger
+                class TestLogback {
+                    var log = new Logger()
+                    void loggers() {
+                        log.trace("trace {}", "trace")
+                        log.debug("debug {}", "debug")
+                        log.info("info {}", "info")
+                        log.warn("warn {}", "warn")
+                        log.error("error {}", "error")
                     }
+                }
                 """.trimIndent()
 
         ApplicationManager.getApplication().runReadAction {

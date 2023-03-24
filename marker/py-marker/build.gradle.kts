@@ -14,7 +14,7 @@ version = project.properties["projectVersion"] as String? ?: projectVersion
 
 intellij {
     type.set("IC")
-    plugins.set(listOf("PythonCore:231.6890.12"))
+    plugins.set(listOf("PythonCore:231.8109.2"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
@@ -62,7 +62,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:$guavaVersion")
-    compileOnly("org.jetbrains:annotations:24.0.0")
+    compileOnly("org.jetbrains:annotations:24.0.1")
 
     testRuntimeOnly(projectDependency(":marker:ult-marker"))
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")

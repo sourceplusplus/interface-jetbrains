@@ -16,23 +16,23 @@
  */
 package spp.jetbrains.marker.jvm.detect.endpoint
 
-import com.intellij.lang.Language
+import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
+import com.intellij.lang.jvm.annotation.JvmAnnotationEnumFieldValue
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.util.Computable
+import com.intellij.psi.*
 import io.vertx.core.Future
 import io.vertx.core.Promise
-import org.jetbrains.plugins.groovy.lang.psi.uast.GrUReferenceExpression
-import org.jetbrains.uast.*
-import org.jetbrains.uast.expressions.UInjectionHost
-import org.jetbrains.uast.java.JavaUSimpleNameReferenceExpression
-import org.jetbrains.uast.kotlin.KotlinStringULiteralExpression
-import org.jetbrains.uast.kotlin.KotlinUQualifiedReferenceExpression
-import org.jetbrains.uast.kotlin.KotlinUSimpleReferenceExpression
-import org.joor.Reflect
+import org.jetbrains.kotlin.idea.util.findAnnotation
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.containingClass
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrReferenceExpression
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScMethodCall
+import spp.jetbrains.artifact.service.isGroovy
+import spp.jetbrains.artifact.service.isScala
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
-import spp.jetbrains.marker.source.mark.guide.GuideMark
 
 /**
  * todo: description.
@@ -52,71 +52,46 @@ class SpringMVCEndpoint : JVMEndpointNameDetector {
         "org.springframework.web.bind.annotation.PatchMapping"
     )
 
-    override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
-        if (!guideMark.isMethodMark) {
-            return Future.succeededFuture(emptyList())
-        }
-
-        return ApplicationManager.getApplication().runReadAction(Computable {
-            val uMethod = guideMark.getPsiElement().toUElementOfType<UMethod>()
-                ?: return@Computable Future.succeededFuture(emptyList())
-            determineEndpointName(uMethod)
-        })
-    }
-
-    override fun determineEndpointName(uMethod: UMethod): Future<List<DetectedEndpoint>> {
+    override fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             for (annotationName in qualifiedNameSet) {
-                val annotation = uMethod.findAnnotation(annotationName)
+                val annotation = element.getAnnotation(annotationName)
                 if (annotation != null) {
-                    when {
-                        annotation.lang === Language.findLanguageByID("JAVA")
-                                || annotation.lang === Language.findLanguageByID("Groovy") -> {
-                            val detectedEndpoint = handleJavaOrGroovyAnnotation(false, annotation, annotationName)
-                            val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
-                                ?.findAnnotation(requestMappingAnnotation)
-                            if (classRequestMapping != null) {
-                                val classEndpoint = handleJavaOrGroovyAnnotation(
-                                    true, classRequestMapping, requestMappingAnnotation
-                                )
-                                handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
-                            } else {
-                                promise.complete(detectedEndpoint)
-                            }
-                        }
-
-                        annotation.lang === Language.findLanguageByID("kotlin") -> {
-                            val detectedEndpoint = handleKotlinAnnotation(false, annotation, annotationName)
-                            val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
-                                ?.findAnnotation(requestMappingAnnotation)
-                            if (classRequestMapping != null) {
-                                val classEndpoint = handleKotlinAnnotation(
-                                    true, classRequestMapping, requestMappingAnnotation
-                                )
-                                handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
-                            } else {
-                                promise.complete(detectedEndpoint)
-                            }
-                        }
-
-                        annotation.lang === Language.findLanguageByID("Scala") -> {
-                            val detectedEndpoint = handleScalaAnnotation(false, annotation, annotationName)
-                            val classRequestMapping = uMethod.containingClass?.toUElementOfType<UClass>()
-                                ?.findAnnotation(requestMappingAnnotation)
-                            if (classRequestMapping != null) {
-                                val classEndpoint = handleScalaAnnotation(
-                                    true, classRequestMapping, requestMappingAnnotation
-                                )
-                                handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
-                            } else {
-                                promise.complete(detectedEndpoint)
-                            }
-                        }
-
-                        else -> throw UnsupportedOperationException(
-                            "Language ${annotation.lang.displayName} is not currently supported"
+                    val detectedEndpoint = handleAnnotation(false, annotation, annotationName)
+                    val classRequestMapping = element.containingClass?.getAnnotation(requestMappingAnnotation)
+                    if (classRequestMapping != null) {
+                        val classEndpoint = handleAnnotation(
+                            true, classRequestMapping, requestMappingAnnotation
                         )
+                        handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
+                    } else {
+                        promise.complete(detectedEndpoint)
+                    }
+                }
+            }
+
+            promise.tryComplete(emptyList())
+        }
+        return promise.future()
+    }
+
+    override fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>> {
+        val promise = Promise.promise<List<DetectedEndpoint>>()
+        ApplicationManager.getApplication().runReadAction {
+            for (annotationName in qualifiedNameSet) {
+                val annotation = element.findAnnotation(FqName(annotationName))
+                if (annotation != null) {
+                    val detectedEndpoint = handleAnnotation(false, annotation, annotationName)
+                    val classRequestMapping = element.containingClass()
+                        ?.findAnnotation(FqName(requestMappingAnnotation))
+                    if (classRequestMapping != null) {
+                        val classEndpoint = handleAnnotation(
+                            true, classRequestMapping, requestMappingAnnotation
+                        )
+                        handleEndpointDetection(detectedEndpoint, classEndpoint, promise)
+                    } else {
+                        promise.complete(detectedEndpoint)
                     }
                 }
             }
@@ -157,172 +132,128 @@ class SpringMVCEndpoint : JVMEndpointNameDetector {
         }
     }
 
-    private fun handleJavaOrGroovyAnnotation(
+    private fun handleAnnotation(
         isClass: Boolean,
-        annotation: UAnnotation,
+        annotation: PsiAnnotation,
         annotationName: String
     ): List<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
-            var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
+            var endpointNameExpr = getAttributeValue(annotation, "value")
             if (endpointNameExpr == null) {
-                endpointNameExpr = annotation.attributeValues.find { it.name == "path" }?.expression
-            }
-            if (endpointNameExpr == null) {
-                endpointNameExpr = annotation.attributeValues.find { it.name == null }?.expression
+                endpointNameExpr = getAttributeValue(annotation, "path")
             }
             if (isClass) {
-                val value = if (endpointNameExpr == null) {
-                    "/"
-                } else (endpointNameExpr as UInjectionHost).evaluateToString()
+                val value = when (endpointNameExpr) {
+                    null -> "/"
+                    is JvmAnnotationConstantValue -> endpointNameExpr.constantValue?.toString()
+                    is PsiLiteral -> endpointNameExpr.value?.toString()
+                    else -> endpointNameExpr.toString()
+                }
                 return listOf(DetectedEndpoint(value.toString(), false, value.toString()))
             }
 
-            val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
-            var value = if (endpointNameExpr == null) "" else (endpointNameExpr as UInjectionHost).evaluateToString()
-            val methodTypes = if (methodExpr is UQualifiedReferenceExpression) {
-                listOf(methodExpr.selector.toString())
-            } else {
-                when (methodExpr) {
-                    is JavaUSimpleNameReferenceExpression -> listOf(methodExpr.resolvedName.toString())
-                    is GrUReferenceExpression -> listOf(methodExpr.resolvedName.toString())
-                    else -> EndpointDetector.httpMethods
+            val methodExpr = getAttributeValue(annotation, "method")
+            val methodTypes = when {
+                methodExpr is JvmAnnotationConstantValue -> listOf(methodExpr.constantValue?.toString())
+                methodExpr is PsiReferenceExpression -> listOf(methodExpr.referenceName)
+                methodExpr is JvmAnnotationEnumFieldValue -> listOf(methodExpr.fieldName)
+                methodExpr is PsiElement && methodExpr.isGroovy() && methodExpr is GrReferenceExpression -> {
+                    listOf(methodExpr.referenceName)
                 }
+
+                methodExpr is PsiElement && methodExpr.isScala() && methodExpr is ScMethodCall -> {
+                    listOf(methodExpr.args().exprs().head().text.substringAfter("RequestMethod."))
+                }
+
+                else -> EndpointDetector.httpMethods
+            }
+
+            var value = when {
+                endpointNameExpr == null -> ""
+                endpointNameExpr is JvmAnnotationConstantValue -> endpointNameExpr.constantValue?.toString()
+                endpointNameExpr is PsiElement && endpointNameExpr.isScala() && endpointNameExpr is ScMethodCall -> {
+                    endpointNameExpr.args().exprs().head().text.replace("\"", "")
+                }
+
+                else -> (endpointNameExpr as? PsiLiteral)?.value?.toString()
             }
             if (value.isNullOrEmpty()) value = "/"
             return methodTypes.map { DetectedEndpoint("$it:$value", false, value, it) }
         } else {
-            var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }
-            if (endpointNameExpr == null) endpointNameExpr = annotation.attributeValues.find { it.name == "path" }
-            var value = if (endpointNameExpr is UInjectionHost) {
-                endpointNameExpr.evaluateToString()
-            } else if (endpointNameExpr != null) {
-                endpointNameExpr.evaluate()
+            var endpointNameExpr = getAttributeValue(annotation, "value")
+            if (endpointNameExpr == null) endpointNameExpr = getAttributeValue(annotation, "path")
+            var value = if (endpointNameExpr is PsiLiteral) {
+                endpointNameExpr.value?.toString()
+            } else if (endpointNameExpr is JvmAnnotationConstantValue) {
+                endpointNameExpr.constantValue?.toString()
             } else {
                 "/"
             } as String
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
-                .replace("Mapping", "").toUpperCase()
+                .replace("Mapping", "").uppercase()
             if (value.isNullOrEmpty()) value = "/"
             return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
         }
     }
 
-    private fun handleKotlinAnnotation(
+    private fun handleAnnotation(
         isClass: Boolean,
-        annotation: UAnnotation,
+        annotation: KtAnnotationEntry,
         annotationName: String
     ): List<DetectedEndpoint> {
         if (annotationName == requestMappingAnnotation) {
-            var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
+            var endpointNameExpr = getAttributeValue(annotation, "value")
             if (endpointNameExpr == null) {
-                endpointNameExpr = annotation.attributeValues.find { it.name == "path" }?.expression
+                endpointNameExpr = getAttributeValue(annotation, "path")
             }
             if (endpointNameExpr == null) {
-                endpointNameExpr = annotation.attributeValues.find { it.name == null }?.expression
+                endpointNameExpr = getAttributeValue(annotation, null)
             }
             if (isClass) {
-                val value = if (endpointNameExpr == null) {
+                val value = if (endpointNameExpr is KtStringTemplateExpression) {
+                    endpointNameExpr.entries?.firstOrNull()?.text ?: endpointNameExpr.text
+                } else {
                     "/"
-                } else (endpointNameExpr as KotlinStringULiteralExpression).value
+                }
                 return listOf(DetectedEndpoint(value, false, value))
             }
 
-            val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
-            var value = if (endpointNameExpr?.javaClass?.simpleName?.equals("KotlinUCollectionLiteralExpression") == true) {
-                getField<List<UExpression>>(endpointNameExpr, "valueArguments")[0].evaluate()
-            } else {
-                endpointNameExpr?.evaluate() ?: ""
-            }
-            val valueArg = methodExpr?.let { getField<List<Any>>(it, "valueArguments")[0] }
-            val methodTypes = when (valueArg) {
-                is KotlinUSimpleReferenceExpression -> listOf(valueArg.resolvedName)
-                is KotlinUQualifiedReferenceExpression -> listOf(valueArg.selector.asSourceString())
+            val methodTypes = when (val methodExpr = getAttributeValue(annotation, "method")) {
+                is KtCollectionLiteralExpression -> methodExpr.getInnerExpressions().map {
+                    when (it) {
+                        is KtNameReferenceExpression -> it.getReferencedName()
+                        is KtDotQualifiedExpression -> it.selectorExpression?.text
+                        else -> null
+                    }
+                }
+
                 else -> EndpointDetector.httpMethods
             }
-            if (value?.toString().isNullOrEmpty()) value = "/"
+
+            var value = if (endpointNameExpr is KtCollectionLiteralExpression) {
+                endpointNameExpr.getInnerExpressions()[0].text.replace("\"", "")
+            } else {
+                null //endpointNameExpr?.evaluate() ?: ""
+            }
+            if (value.isNullOrEmpty()) value = "/"
             return methodTypes.map { DetectedEndpoint("$it:$value", false, value.toString(), it) }
         } else {
-            var valueExpr = annotation.findAttributeValue("value")
-            if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
-            var value = if (valueExpr?.javaClass?.simpleName?.equals("KotlinUCollectionLiteralExpression") == true) {
-                getField<List<UExpression>>(valueExpr, "valueArguments")[0].evaluate()
-            } else if (valueExpr != null) {
-                valueExpr.evaluate()
-            } else {
-                "/"
+            var valueExpr = getAttributeValue(annotation, "value")
+            if (valueExpr == null) {
+                valueExpr = getAttributeValue(annotation, "path")
+            }
+            if (valueExpr == null) {
+                valueExpr = getAttributeValue(annotation, null)
+            }
+            var value = when (valueExpr) {
+                is KtCollectionLiteralExpression -> valueExpr.getInnerExpressions()[0].text.replace("\"", "")
+                is KtStringTemplateExpression -> valueExpr.entries?.firstOrNull()?.text ?: valueExpr.text
+                else -> "/"
             }
             val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
                 .replace("Mapping", "").toUpperCase()
-            if (value?.toString().isNullOrEmpty()) value = "/"
-            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
-        }
-    }
-
-    private fun handleScalaAnnotation(
-        isClass: Boolean,
-        annotation: UAnnotation,
-        annotationName: String
-    ): List<DetectedEndpoint> {
-        if (annotationName == requestMappingAnnotation) {
-            var endpointNameExpr = annotation.attributeValues.find { it.name == "value" }?.expression
-            if (endpointNameExpr == null) {
-                endpointNameExpr = annotation.attributeValues.find { it.name == "path" }?.expression
-            }
-            if (endpointNameExpr == null) {
-                endpointNameExpr = annotation.attributeValues.find { it.name == null }?.expression
-            }
-            if (isClass) {
-                val value = if (endpointNameExpr == null) {
-                    "/"
-                } else (endpointNameExpr as KotlinStringULiteralExpression).value
-                return listOf(DetectedEndpoint(value, false, value))
-            }
-
-            val methodExpr = annotation.attributeValues.find { it.name == "method" }?.expression
-            var value = endpointNameExpr.getUCallExpression()!!.valueArguments[0].evaluate()
-            val valueArg = methodExpr?.let { (it as UCallExpressionAdapter).valueArguments[0] }
-            val methodTypes = if (valueArg is USimpleNameReferenceExpression) {
-                listOf(valueArg.resolvedName)
-            } else if (valueArg is UQualifiedReferenceExpressionAdapter) {
-                listOf(valueArg.selector.asSourceString().substringAfter("RequestMethod."))
-            } else {
-                EndpointDetector.httpMethods
-            }
-            if (value?.toString().isNullOrEmpty()) value = "/"
-            return methodTypes.map { DetectedEndpoint("$it:$value", false, value.toString(), it) }
-        } else {
-            var valueExpr = annotation.findAttributeValue("value")
-            if (valueExpr == null) valueExpr = annotation.findAttributeValue("path")
-            if (valueExpr is UastEmptyExpression) valueExpr =
-                annotation.findAttributeValue("path") //todo: have to call this twice???
-            if (valueExpr is UastEmptyExpression) valueExpr = null
-            var value = if (valueExpr?.javaClass?.simpleName?.equals("KotlinUCollectionLiteralExpression") == true) {
-                getField<List<UExpression>>(valueExpr, "valueArguments")[0].evaluate()
-            } else if (valueExpr != null) {
-                valueExpr.evaluate()
-            } else {
-                "/"
-            }
-            val method = annotationName.substring(annotationName.lastIndexOf(".") + 1)
-                .replace("Mapping", "").toUpperCase()
-            if (value?.toString().isNullOrEmpty()) value = "/"
-            return listOf(DetectedEndpoint("$method:$value", false, value.toString(), method))
-        }
-    }
-
-    private fun <T> getField(value: Any, name: String): T {
-        val fields = Reflect.on(value).fields()
-        return if (fields.containsKey(name)) {
-            fields[name]!!.get()
-        } else if (fields.containsKey("$name\$delegate")) {
-            val value = fields["$name\$delegate"]!!.get<Any>()
-            return if (value is Lazy<*>) {
-                value.value as T
-            } else {
-                value as T
-            }
-        } else {
-            throw IllegalArgumentException("Field $name not found")
+            if (value.isNullOrEmpty()) value = "/"
+            return listOf(DetectedEndpoint("$method:$value", false, value, method))
         }
     }
 }

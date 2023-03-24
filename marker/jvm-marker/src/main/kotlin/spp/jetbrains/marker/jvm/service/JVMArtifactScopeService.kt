@@ -37,9 +37,12 @@ import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.joor.Reflect
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.artifact.service.define.IArtifactScopeService
+import spp.jetbrains.artifact.service.isGroovy
+import spp.jetbrains.artifact.service.isKotlin
 import spp.jetbrains.marker.SourceMarkerUtils
 
 /**
@@ -51,43 +54,66 @@ import spp.jetbrains.marker.SourceMarkerUtils
 @Suppress("TooManyFunctions") // public API
 class JVMArtifactScopeService : IArtifactScopeService {
 
-    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
         return when {
-            ArtifactTypeService.isJava(element) -> element.descendantsOfType<PsiMethod>().toList()
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtNamedFunction>().toList()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            ArtifactTypeService.isScala(element) -> element.descendantsOfType<ScFunctionDefinition>().toList()
+            else -> element.descendantsOfType<PsiMethod>().toList()
+        }
+    }
+
+    override fun getClasses(element: PsiElement): List<PsiNamedElement> {
+        return when {
+            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtClass>().toList()
+            else -> element.descendantsOfType<PsiClass>().toList()
         }
     }
 
     override fun getChildIfs(element: PsiElement): List<PsiElement> {
         return when {
-            ArtifactTypeService.isJava(element) -> element.descendantsOfType<PsiIfStatement>().toList()
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtIfExpression>().toList()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.descendantsOfType<PsiIfStatement>().toList()
         }
     }
 
     override fun getParentIf(element: PsiElement): PsiElement? {
         return when {
-            ArtifactTypeService.isJava(element) -> element.findParentOfType<PsiIfStatement>()
             ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtIfExpression>()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.findParentOfType<PsiIfStatement>()
         }
     }
 
     override fun getParentFunction(element: PsiElement): PsiNamedElement? {
         return when {
-            ArtifactTypeService.isJava(element) -> element.findParentOfType<PsiMethod>()
             ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtNamedFunction>()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.findParentOfType<PsiMethod>()
+        }
+    }
+
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        return when {
+            ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtClass>()
+            else -> element.findParentOfType<PsiClass>()
         }
     }
 
     override fun getCalls(element: PsiElement): List<PsiElement> {
         return when {
-            ArtifactTypeService.isJava(element) -> element.descendantsOfType<PsiCallExpression>().toList()
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtCallExpression>().toList()
-            else -> throw IllegalArgumentException("Unsupported language: ${element.language}")
+            else -> element.descendantsOfType<PsiCallExpression>().toList()
+        }
+    }
+
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return when {
+            element.isKotlin() && element is KtCallExpression -> {
+                element.resolveToCall()?.resultingDescriptor?.psiElement
+            }
+
+            element.isGroovy() && element is GrCall -> element.resolveMethod()
+            element is PsiCallExpression -> element.resolveMethod()
+
+            else -> null
         }
     }
 

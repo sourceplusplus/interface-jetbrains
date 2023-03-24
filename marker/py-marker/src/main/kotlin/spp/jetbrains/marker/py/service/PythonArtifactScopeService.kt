@@ -35,10 +35,7 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.parentOfTypes
 import com.jetbrains.python.codeInsight.controlflow.ControlFlowCache
 import com.jetbrains.python.codeInsight.dataflow.scope.ScopeUtil
-import com.jetbrains.python.psi.PyCallExpression
-import com.jetbrains.python.psi.PyFunction
-import com.jetbrains.python.psi.PyIfStatement
-import com.jetbrains.python.psi.PyReferenceExpression
+import com.jetbrains.python.psi.*
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.jetbrains.marker.SourceMarkerUtils
@@ -52,9 +49,14 @@ import spp.jetbrains.marker.SourceMarkerUtils
 @Suppress("TooManyFunctions") // public API
 class PythonArtifactScopeService : IArtifactScopeService {
 
-    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
         require(ArtifactTypeService.isPython(element))
         return element.descendantsOfType<PyFunction>().toList()
+    }
+
+    override fun getClasses(element: PsiElement): List<PsiNamedElement> {
+        require(ArtifactTypeService.isPython(element))
+        return element.descendantsOfType<PyClass>().toList()
     }
 
     override fun getChildIfs(element: PsiElement): List<PsiElement> {
@@ -72,9 +74,18 @@ class PythonArtifactScopeService : IArtifactScopeService {
         return element.findParentOfType<PyFunction>()
     }
 
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        require(ArtifactTypeService.isPython(element))
+        return element.findParentOfType<PyClass>()
+    }
+
     override fun getCalls(element: PsiElement): List<PsiElement> {
         require(ArtifactTypeService.isPython(element))
         return element.descendantsOfType<PyCallExpression>().toList()
+    }
+
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return ((element as? PyCallExpression)?.callee as? PyReferenceExpression)?.reference?.resolve()
     }
 
     override fun getCalledFunctions(

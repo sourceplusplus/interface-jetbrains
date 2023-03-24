@@ -17,6 +17,7 @@
 package spp.jetbrains.marker.js.service
 
 import com.intellij.lang.javascript.psi.*
+import com.intellij.lang.javascript.psi.ecmal4.JSClass
 import com.intellij.lang.javascript.psi.util.JSTreeUtil
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
@@ -48,9 +49,14 @@ import spp.jetbrains.marker.SourceMarkerUtils
 @Suppress("TooManyFunctions") // public API
 class JavascriptArtifactScopeService : IArtifactScopeService {
 
-    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
         require(ArtifactTypeService.isJavaScript(element))
         return element.descendantsOfType<JSFunction>().toList()
+    }
+
+    override fun getClasses(element: PsiElement): List<PsiNamedElement> {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.descendantsOfType<JSClass>().toList()
     }
 
     override fun getChildIfs(element: PsiElement): List<PsiElement> {
@@ -68,9 +74,18 @@ class JavascriptArtifactScopeService : IArtifactScopeService {
         return element.findParentOfType<JSFunction>()
     }
 
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.findParentOfType<JSClass>()
+    }
+
     override fun getCalls(element: PsiElement): List<PsiElement> {
         require(ArtifactTypeService.isJavaScript(element))
         return element.descendantsOfType<JSCallExpression>().toList()
+    }
+
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return ((element as? JSCallExpression)?.methodExpression as? JSReferenceExpression)?.resolve()
     }
 
     override fun getCalledFunctions(

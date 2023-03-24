@@ -31,11 +31,14 @@ import com.intellij.psi.PsiNamedElement
 @Suppress("TooManyFunctions") // public API
 interface IArtifactScopeService : ISourceMarkerService {
 
-    fun getFunctions(element: PsiFile): List<PsiNamedElement>
+    fun getFunctions(element: PsiElement): List<PsiNamedElement>
+    fun getClasses(element: PsiElement): List<PsiNamedElement>
     fun getChildIfs(element: PsiElement): List<PsiElement>
     fun getParentIf(element: PsiElement): PsiElement?
     fun getParentFunction(element: PsiElement): PsiNamedElement?
+    fun getParentClass(element: PsiElement): PsiNamedElement?
     fun getCalls(element: PsiElement): List<PsiElement>
+    fun tryResolveCall(element: PsiElement): PsiElement?
 
     fun getCalledFunctions(
         element: PsiElement,

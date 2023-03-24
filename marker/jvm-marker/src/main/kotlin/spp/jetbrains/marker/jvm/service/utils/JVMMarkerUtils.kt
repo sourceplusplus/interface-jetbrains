@@ -29,7 +29,9 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.resolve.jvm.JvmPrimitiveType
+import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.artifact.service.isKotlin
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -47,22 +49,18 @@ object JVMMarkerUtils {
     private val log = logger<JVMMarkerUtils>()
 
     fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
-        when (element) {
-            is KtClass -> return getFullyQualifiedName(element)
-            is KtNamedFunction -> return getFullyQualifiedName(element)
-            is PsiClass -> return getFullyQualifiedName(element)
-            is PsiMethod -> return getFullyQualifiedName(element)
+        when {
+            element.isKotlin() && element is KtClass -> return getFullyQualifiedName(element)
+            element.isKotlin() && element is KtNamedFunction -> return getFullyQualifiedName(element)
+            element is PsiClass -> return getFullyQualifiedName(element)
+            element is PsiMethod -> return getFullyQualifiedName(element)
             else -> Unit
         }
 
         var expressionString = element.text
-        var parentIdentifier = element.findAnyContainingStrict(
-            PsiMethod::class.java, KtNamedFunction::class.java
-        )?.let { getFullyQualifiedName(it) }
+        var parentIdentifier = ArtifactScopeService.getParentFunction(element)?.let { getFullyQualifiedName(it) }
         if (parentIdentifier == null) {
-            parentIdentifier = element.findAnyContainingStrict(
-                PsiClass::class.java, KtClass::class.java
-            )?.let { getFullyQualifiedName(it) }
+            parentIdentifier = ArtifactScopeService.getParentClass(element)?.let { getFullyQualifiedName(it) }
         }
         if (parentIdentifier == null) {
             //todo: extension function, see SourceMarkerConfig, make test, groovy import statements

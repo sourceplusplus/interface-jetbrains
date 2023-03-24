@@ -56,7 +56,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3.5.0
         with:
           submodules: true
 
@@ -71,7 +71,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-          cache: gradle
+          #cache: gradle
 
       # Set environment variables
       - name: Export Properties
@@ -118,7 +118,7 @@ jobs:
 
       # Cache Plugin Verifier IDEs
       - name: Setup Plugin Verifier IDEs Cache
-        uses: actions/cache@v3.2.6
+        uses: actions/cache@v3.3.1
         with:
           path: ${{ steps.properties.outputs.pluginVerifierHomeDir }}/ides
           key: plugin-verifier-${{ hashFiles('plugin/build/listProductsReleases.txt') }}
@@ -193,7 +193,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3.5.0
 
       # Remove old release drafts by using the curl request for the available releases with a draft flag
       - name: Remove Old Release Drafts

@@ -22,6 +22,7 @@ import com.intellij.openapi.diagnostic.logger
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * todo: description.
@@ -32,15 +33,14 @@ import java.util.concurrent.ConcurrentHashMap
 object SourceGuideProvider : AbstractSourceGuideProvider {
 
     private val log = logger<SourceGuideProvider>()
-    private val providers = ConcurrentHashMap<String, MutableList<AbstractSourceGuideProvider>>()
+    private val providers = ConcurrentHashMap<String, CopyOnWriteArrayList<AbstractSourceGuideProvider>>()
 
     fun addProvider(guideProvider: AbstractSourceGuideProvider, language: String, vararg languages: String) {
-        providers.computeIfAbsent(language) { mutableListOf() }.add(guideProvider)
-        languages.forEach { providers.computeIfAbsent(it) { mutableListOf() }.add(guideProvider) }
+        addProvider(guideProvider, listOf(language, *languages))
     }
 
     fun addProvider(guideProvider: AbstractSourceGuideProvider, languages: List<String>) {
-        languages.forEach { providers.computeIfAbsent(it) { mutableListOf() }.add(guideProvider) }
+        languages.forEach { providers.computeIfAbsent(it) { CopyOnWriteArrayList() }.add(guideProvider) }
     }
 
     private fun getProvider(language: String): AbstractSourceGuideProvider? {

@@ -35,8 +35,12 @@ import spp.protocol.artifact.ArtifactType
 @Suppress("MemberVisibilityCanBePrivate", "TooManyFunctions") // public API
 object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>(), IArtifactScopeService {
 
-    override fun getFunctions(element: PsiFile): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
         return getService(element.language).getFunctions(element)
+    }
+
+    override fun getClasses(element: PsiElement): List<PsiNamedElement> {
+        return getService(element.language).getClasses(element)
     }
 
     override fun getChildIfs(element: PsiElement): List<PsiElement> {
@@ -51,8 +55,16 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
         return getService(element.language).getParentFunction(element)
     }
 
+    override fun getParentClass(element: PsiElement): PsiNamedElement? {
+        return getService(element.language).getParentClass(element)
+    }
+
     override fun getCalls(element: PsiElement): List<PsiElement> {
         return getService(element.language).getCalls(element)
+    }
+
+    override fun tryResolveCall(element: PsiElement): PsiElement? {
+        return getService(element.language).tryResolveCall(element)
     }
 
     override fun getCalledFunctions(
@@ -98,8 +110,12 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
 
 // Extensions
 
-fun PsiFile.getFunctions(): List<PsiNamedElement> {
+fun PsiElement.getFunctions(): List<PsiNamedElement> {
     return ArtifactScopeService.getService(language).getFunctions(this)
+}
+
+fun PsiElement.getClasses(): List<PsiNamedElement> {
+    return ArtifactScopeService.getService(language).getClasses(this)
 }
 
 fun PsiElement.getChildIfs(): List<PsiElement> {

@@ -71,3 +71,9 @@ object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingServic
         return getService(language).findPsiFile(language, project, frame)
     }
 }
+
+// Extensions
+
+fun PsiElement.getFullyQualifiedName(): ArtifactQualifiedName {
+    return ArtifactNamingService.getFullyQualifiedName(this)
+}
