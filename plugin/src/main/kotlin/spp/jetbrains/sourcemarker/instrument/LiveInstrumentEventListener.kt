@@ -66,8 +66,8 @@ class LiveInstrumentEventListener(
 
     override suspend fun start() {
         var developer = "system"
-        if (pluginConfig.serviceToken != null) {
-            val json = JWT.parse(pluginConfig.serviceToken)
+        if (pluginConfig.accessToken != null) {
+            val json = JWT.parse(pluginConfig.accessToken)
             developer = json.getJsonObject("payload").getString("developer_id")
         }
         vertx.addLiveInstrumentListener(developer, this).await()
@@ -76,7 +76,7 @@ class LiveInstrumentEventListener(
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.lowercase(),
             toLiveInstrumentSubscriberAddress(developer), null,
-            JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
+            JsonObject().apply { pluginConfig.accessToken?.let { put("access-token", it) } },
             null, null, TCPServiceDiscoveryBackend.getSocket(project)
         )
 

@@ -352,7 +352,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             log.info("Live management available")
 
             val liveManagementService = ServiceProxyBuilder(vertx)
-                .apply { config.serviceToken?.let { setToken(it) } }
+                .apply { config.accessToken?.let { setToken(it) } }
                 .setAddress(SourceServices.LIVE_MANAGEMENT)
                 .build(LiveManagementService::class.java)
             UserData.liveManagementService(project, liveManagementService)
@@ -371,7 +371,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             log.info("Live instruments available")
 
             val liveInstrument = ServiceProxyBuilder(vertx)
-                .apply { config.serviceToken?.let { setToken(it) } }
+                .apply { config.accessToken?.let { setToken(it) } }
                 .setAddress(SourceServices.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
             UserData.liveInstrumentService(project, liveInstrument)
@@ -390,7 +390,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         if (availableRecords.any { it.name == SourceServices.LIVE_VIEW }) {
             log.info("Live views available")
             val liveView = ServiceProxyBuilder(vertx)
-                .apply { config.serviceToken?.let { setToken(it) } }
+                .apply { config.accessToken?.let { setToken(it) } }
                 .setAddress(SourceServices.LIVE_VIEW)
                 .build(LiveViewService::class.java)
             UserData.liveViewService(project, liveView)
@@ -451,7 +451,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 }
             }
 
-            val tokenUri = "/api/new-token?access_token=" + config.accessToken
+            val tokenUri = "/api/new-token?authorization_code=" + config.authorizationCode
             val req = try {
                 vertx.createHttpClient(httpClientOptions).request(
                     RequestOptions()
@@ -481,7 +481,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             if (resp.statusCode() in 200..299) {
                 val body = resp.body().await().toString()
                 if (resp.statusCode() != 202) {
-                    config.serviceToken = body
+                    config.accessToken = body
                 }
 
                 discoverAvailableServices(vertx, config)
@@ -501,8 +501,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
     }
 
     private suspend fun tryDefaultAccess(vertx: Vertx, ssl: Boolean, config: SourceMarkerConfig) {
-        val defaultAccessToken = "change-me"
-        val tokenUri = "/api/new-token?access_token=$defaultAccessToken"
+        val defaultAuthorizationCode = "change-me"
+        val tokenUri = "/api/new-token?authorization_code=$defaultAuthorizationCode"
         val req = vertx.createHttpClient(HttpClientOptions().setSsl(ssl).setVerifyHost(false).setTrustAll(true))
             .request(
                 RequestOptions()
@@ -517,7 +517,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         if (resp.statusCode() in 200..299) {
             if (resp.statusCode() != 202) {
                 val body = resp.body().await().toString()
-                config.serviceToken = body
+                config.accessToken = body
             }
 
             if (ssl) {
@@ -525,7 +525,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             } else {
                 config.serviceHost = "http://localhost:" + SourceMarkerConfig.DEFAULT_SERVICE_PORT
             }
-            config.accessToken = defaultAccessToken
+            config.authorizationCode = defaultAuthorizationCode
             config.verifyHost = false
 
             val projectSettings = PropertiesComponent.getInstance(project)
@@ -559,7 +559,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         certificatePins.addAll(config.certificatePins)
         vertx.deployVerticle(
             SkywalkingMonitor(
-                skywalkingHost, config.serviceToken, certificatePins, config.verifyHost, config.serviceName, project
+                skywalkingHost, config.accessToken, certificatePins, config.verifyHost, config.serviceName, project
             )
         ).await()
     }

@@ -177,7 +177,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 setupPromise.complete()
             }
         }
-        val headers = JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } }
+        val headers = JsonObject().apply { pluginConfig.accessToken?.let { put("access-token", it) } }
         FrameHelper.sendFrame(
             BridgeEventType.SEND.name.lowercase(),
             PlatformAddress.MARKER_CONNECTED,
@@ -212,7 +212,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         if (setupFuture.isComplete) {
             if (setupFuture.succeeded()) {
                 val deliveryOptions = DeliveryOptions()
-                    .apply { pluginConfig.serviceToken?.let { addHeader("auth-token", it) } }
+                    .apply { pluginConfig.accessToken?.let { addHeader("access-token", it) } }
                 vertx.eventBus().request<JsonObject>("get-records", null, deliveryOptions) {
                     resultHandler.handle(Future.succeededFuture(mutableListOf(Record(it.result().body()))))
                 }
@@ -223,7 +223,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             setupFuture.onComplete {
                 if (it.succeeded()) {
                     val deliveryOptions = DeliveryOptions()
-                        .apply { pluginConfig.serviceToken?.let { addHeader("auth-token", it) } }
+                        .apply { pluginConfig.accessToken?.let { addHeader("access-token", it) } }
                     vertx.eventBus().request<JsonArray>("get-records", null, deliveryOptions) {
                         val records = mutableListOf<Record>()
                         it.result().body().forEach { record ->

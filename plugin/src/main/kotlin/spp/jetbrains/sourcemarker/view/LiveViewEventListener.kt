@@ -41,8 +41,8 @@ class LiveViewEventListener(
     override suspend fun start() {
         //register listener
         var developer = "system"
-        if (pluginConfig.serviceToken != null) {
-            val json = JWT.parse(pluginConfig.serviceToken)
+        if (pluginConfig.accessToken != null) {
+            val json = JWT.parse(pluginConfig.accessToken)
             developer = json.getJsonObject("payload").getString("developer_id")
         }
 
@@ -61,7 +61,7 @@ class LiveViewEventListener(
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.lowercase(),
             toLiveViewSubscriberAddress(developer), null,
-            JsonObject().apply { pluginConfig.serviceToken?.let { put("auth-token", it) } },
+            JsonObject().apply { pluginConfig.accessToken?.let { put("access-token", it) } },
             null, null, TCPServiceDiscoveryBackend.getSocket(project)
         )
     }

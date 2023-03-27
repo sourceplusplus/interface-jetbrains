@@ -45,13 +45,13 @@ public class PluginConfigurationPanel {
     private JCheckBox autoResolveEndpointNamesCheckBox;
     private JPanel myServiceSettingsPanel;
     private JTextField serviceHostTextField;
-    private JTextField accessTokenTextField;
+    private JTextField authorizationCodeTextField;
     private JPanel testPanel;
     private JComboBox serviceComboBox;
     private JCheckBox verifyHostCheckBox;
     private JLabel verifyHostLabel;
     private JLabel hostLabel;
-    private JLabel accessTokenLabel;
+    private JLabel authorizationCodeLabel;
     private JLabel certificatePinsLabel;
     private JLabel serviceLabel;
     private JPanel myPortalSettingsPanel;
@@ -76,7 +76,7 @@ public class PluginConfigurationPanel {
 
         //todo: shouldn't need to manually update locale text
         hostLabel.setText(message("service_host"));
-        accessTokenLabel.setText(message("access_token"));
+        authorizationCodeLabel.setText(message("authorization_code"));
         verifyHostLabel.setText(message("verify_host"));
         certificatePinsLabel.setText(message("certificate_pins"));
         serviceLabel.setText(message("service"));
@@ -86,7 +86,7 @@ public class PluginConfigurationPanel {
     private void setUIEnabled(boolean enabled) {
         autoResolveEndpointNamesCheckBox.setEnabled(enabled);
         serviceHostTextField.setEnabled(enabled);
-        accessTokenTextField.setEnabled(enabled);
+        authorizationCodeTextField.setEnabled(enabled);
         serviceComboBox.setEnabled(enabled);
         verifyHostCheckBox.setEnabled(enabled);
         portalZoomSpinner.setEnabled(enabled);
@@ -105,7 +105,7 @@ public class PluginConfigurationPanel {
         if (!Objects.equals(serviceHostTextField.getText(), config.getServiceHost() != null ? config.getServiceHost() : "")) {
             return true;
         }
-        if (!Objects.equals(accessTokenTextField.getText(), config.getAccessToken() != null ? config.getAccessToken() : "")) {
+        if (!Objects.equals(authorizationCodeTextField.getText(), config.getAuthorizationCode() != null ? config.getAuthorizationCode() : "")) {
             return true;
         }
         if (!Arrays.equals(myCertificatePins.listModel.toArray(), config.getCertificatePins().toArray())) {
@@ -134,7 +134,7 @@ public class PluginConfigurationPanel {
                 autoResolveEndpointNamesCheckBox.isSelected(),
                 true,
                 serviceHostTextField.getText(),
-                accessTokenTextField.getText(),
+                authorizationCodeTextField.getText(),
                 new ArrayList<>(Collections.list(myCertificatePins.listModel.elements())),
                 null,
                 verifyHostCheckBox.isSelected(),
@@ -150,7 +150,7 @@ public class PluginConfigurationPanel {
         this.config = config;
         autoResolveEndpointNamesCheckBox.setSelected(config.getAutoResolveEndpointNames());
         serviceHostTextField.setText(config.getServiceHost());
-        accessTokenTextField.setText(config.getAccessToken());
+        authorizationCodeTextField.setText(config.getAuthorizationCode());
         verifyHostCheckBox.setSelected(config.getVerifyHost());
 
         myCertificatePins = new CertificatePinPanel(!config.getOverride());
