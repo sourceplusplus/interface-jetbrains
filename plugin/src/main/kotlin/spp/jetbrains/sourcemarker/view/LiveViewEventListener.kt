@@ -61,7 +61,7 @@ class LiveViewEventListener(
         FrameHelper.sendFrame(
             BridgeEventType.REGISTER.name.lowercase(),
             toLiveViewSubscriberAddress(developer), null,
-            JsonObject().apply { pluginConfig.accessToken?.let { put("access-token", it) } },
+            JsonObject().apply { pluginConfig.accessToken?.let { put("auth-token", it) } },
             null, null, TCPServiceDiscoveryBackend.getSocket(project)
         )
     }
