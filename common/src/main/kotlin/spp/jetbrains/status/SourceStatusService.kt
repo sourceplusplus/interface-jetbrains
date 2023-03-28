@@ -37,6 +37,10 @@ interface SourceStatusService {
         fun getCurrentService(project: Project): Service? {
             return getInstance(project).getCurrentService()
         }
+
+        fun subscribe(project: Project, listener: SourceStatusListener) {
+            project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, listener)
+        }
     }
 
     fun isReady(): Boolean
@@ -49,4 +53,6 @@ interface SourceStatusService {
     fun getCurrentService(): Service?
     fun setCurrentService(service: Service)
     fun setActiveServices(services: List<Service>)
+    fun onServiceChange(triggerInitial: Boolean = true, listener: () -> Unit)
+    fun onReadyChange(triggerInitial: Boolean = true, listener: () -> Unit)
 }

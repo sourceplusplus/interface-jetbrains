@@ -36,8 +36,6 @@ import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
 import spp.jetbrains.sourcemarker.view.action.StopViewAction
 import spp.jetbrains.sourcemarker.view.trace.TraceSpanSplitterPanel
 import spp.jetbrains.sourcemarker.view.window.LiveViewTraceWindowImpl
-import spp.jetbrains.status.SourceStatus
-import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.status.SourceStatusService
 import spp.jetbrains.view.LiveViewTraceManager
 import spp.jetbrains.view.ResumableView
@@ -75,8 +73,8 @@ class LiveViewTraceManagerImpl(
 
     init {
         project.putUserData(LiveViewTraceManager.KEY, this)
-        project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
-            if (it == SourceStatus.Ready) {
+        SourceStatusService.getInstance(project).onReadyChange {
+            if (SourceStatusService.getInstance(project).isReady()) {
                 val vertx = UserData.vertx(project)
                 vertx.safeLaunch {
                     val service = SourceStatusService.getCurrentService(project)!!
@@ -87,7 +85,7 @@ class LiveViewTraceManagerImpl(
                     hideWindows()
                 }
             }
-        })
+        }
         contentManager.addContentManagerListener(this)
 
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {

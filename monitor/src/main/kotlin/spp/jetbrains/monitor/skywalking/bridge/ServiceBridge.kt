@@ -100,7 +100,6 @@ class ServiceBridge(
                         setActiveServices(activeServices)
                         setCurrentService(currentService!!)
                         update(ServiceChange)
-                        update(Ready)
                     }
                     true
                 }
@@ -113,7 +112,6 @@ class ServiceBridge(
                     setActiveServices(activeServices)
                     setCurrentService(currentService!!)
                     update(ServiceChange)
-                    update(Ready)
                 }
                 return true
             }
