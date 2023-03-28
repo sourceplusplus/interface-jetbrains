@@ -82,8 +82,9 @@ import spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewEventListener
 import spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl
-import spp.jetbrains.status.SourceStatus.ConnectionError
-import spp.jetbrains.status.SourceStatus.Pending
+import spp.jetbrains.status.SourceStatus.*
+import spp.jetbrains.status.SourceStatusListener
+import spp.jetbrains.status.SourceStatusListener.Companion.TOPIC
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveManagementService
@@ -224,6 +225,15 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                     .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
                         override fun run(indicator: ProgressIndicator) {
                             if (loadLivePluginsLock.tryLock()) {
+                                project.messageBus.connect().apply {
+                                    subscribe(TOPIC, SourceStatusListener {
+                                        if (it == PluginsLoaded) {
+                                            initMarker(vertx)
+                                            disconnect()
+                                        }
+                                    })
+                                }
+
                                 log.info("Loading live plugins for project: $project")
                                 project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
                                 log.info("Loaded live plugins for project: $project")
@@ -235,7 +245,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                         }
                     })
                 pluginsPromise.future().await()
-                initMarker(vertx)
             }
         }
     }
@@ -564,7 +573,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         ).await()
     }
 
-    private suspend fun initMarker(vertx: Vertx) {
+    private fun initMarker(vertx: Vertx) {
         log.info("Initializing marker")
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
@@ -576,7 +585,9 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
 
-        vertx.deployVerticle(CodeChangeListener(project)).await()
+        vertx.deployVerticle(CodeChangeListener(project)).onFailure {
+            log.error("Unable to deploy code change listener", it)
+        }
 
         SourceMarker.getInstance(project).apply {
             addGlobalSourceMarkEventListener(SourceInlayHintProvider.EVENT_LISTENER)
