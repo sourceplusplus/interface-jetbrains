@@ -33,6 +33,7 @@ import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.general.Service
+import java.util.concurrent.atomic.AtomicBoolean
 
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
@@ -49,7 +50,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     private var activeServices = mutableListOf<Service>()
 
     override fun isReady(): Boolean {
-        return getCurrentStatus().first == Ready
+        return getCurrentStatus().first.isReady
     }
 
     override fun isConnected(): Boolean {
@@ -95,13 +96,45 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
         return currentService
     }
 
+    @Synchronized
     override fun setCurrentService(service: Service) {
         currentService = service
         update(ServiceChange)
     }
 
+    @Synchronized
     override fun setActiveServices(services: List<Service>) {
         activeServices = services.toMutableList()
+    }
+
+    override fun onServiceChange(triggerInitial: Boolean, listener: () -> Unit) {
+        synchronized(statusLock) {
+            if (triggerInitial && currentService != null) {
+                listener()
+            }
+            project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+                if (it == ServiceChange) {
+                    listener()
+                }
+            })
+        }
+    }
+
+    override fun onReadyChange(triggerInitial: Boolean, listener: () -> Unit) {
+        synchronized(statusLock) {
+            if (triggerInitial) {
+                listener()
+            }
+
+            val statusTriggered = AtomicBoolean()
+            project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+                if (isReady() && statusTriggered.compareAndSet(false, true)) {
+                    listener()
+                } else if (!isReady() && statusTriggered.compareAndSet(true, false)) {
+                    listener()
+                }
+            })
+        }
     }
 
     private suspend fun onStatusChanged(status: SourceStatus) = when (status) {

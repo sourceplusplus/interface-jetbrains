@@ -39,8 +39,8 @@ import spp.jetbrains.marker.service.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.CODE_CHANGED
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge
 import spp.jetbrains.safeLaunch
+import spp.jetbrains.status.SourceStatusService
 
 /**
  * Manages the [VCS_MODIFIED] flag and emits corresponding [CODE_CHANGED] events.
@@ -59,7 +59,7 @@ class CodeChangeListener(val project: Project) : CoroutineVerticle(), Disposable
     override suspend fun start() {
         //todo: find a better place for this
         //refresh all source marks on service changes
-        ServiceBridge.currentServiceConsumer(vertx).handler {
+        SourceStatusService.getInstance(project).onServiceChange {
             vertx.safeLaunch {
                 SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
                 FileEditorManager.getInstance(project).allEditors.forEach {

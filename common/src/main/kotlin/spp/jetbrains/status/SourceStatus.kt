@@ -25,37 +25,47 @@ import javax.swing.Icon
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 enum class SourceStatus {
-    Ready,
     Enabled,
     Disabled,
     Pending,
     ConnectionError,
-    ServiceChange;
+    ServiceChange,
+    PluginsLoaded;
 
     val icon: Icon
         get() {
             return when (this) {
-                Ready, ServiceChange -> PluginIcons.statusEnabled
-                Enabled -> PluginIcons.statusPending
+                Enabled, Pending -> PluginIcons.statusPending
                 Disabled -> PluginIcons.statusDisabled
-                Pending -> PluginIcons.statusPending
                 ConnectionError -> PluginIcons.statusFailed
+                else -> PluginIcons.statusEnabled
             }
         }
     val presentableText: String
         get() {
             return when (this) {
-                Ready, ServiceChange -> "Click to disable Source++"
-                Enabled -> "Click to disable Source++"
                 Disabled -> "Click to enable Source++"
                 Pending -> "Booting Source++"
                 ConnectionError -> "Connection error"
+                else -> "Click to disable Source++"
             }
         }
 
     val disposedPlugin: Boolean
-        get() = this == Disabled || this == ConnectionError
+        get() = this in DISPOSED_STATUSES
 
     val isConnected: Boolean
-        get() = this == Ready || this == Pending
+        get() = this in CONNECTED_STATUSES
+
+    val isEnabled: Boolean
+        get() = this != Disabled
+
+    val isReady: Boolean
+        get() = this in READY_STATUSES
+
+    companion object {
+        val READY_STATUSES = setOf(PluginsLoaded, ServiceChange)
+        val CONNECTED_STATUSES = setOf(PluginsLoaded, ServiceChange, Pending)
+        val DISPOSED_STATUSES = setOf(Disabled, ConnectionError)
+    }
 }
