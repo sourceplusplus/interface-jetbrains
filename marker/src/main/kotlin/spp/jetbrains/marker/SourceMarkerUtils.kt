@@ -85,8 +85,19 @@ object SourceMarkerUtils {
      */
     @JvmStatic
     fun getLineNumber(element: PsiElement): Int {
+        return getStartLineNumber(element)
+    }
+
+    @JvmStatic
+    fun getStartLineNumber(element: PsiElement): Int {
         val document = element.containingFile.viewProvider.document
         return document!!.getLineNumber(element.textRange.startOffset) + 1
+    }
+
+    @JvmStatic
+    fun getEndLineNumber(element: PsiElement): Int {
+        val document = element.containingFile.viewProvider.document
+        return document!!.getLineNumber(element.textRange.endOffset) + 1
     }
 
     fun getPrefixSpacingCount(method: PsiElement): Int {
