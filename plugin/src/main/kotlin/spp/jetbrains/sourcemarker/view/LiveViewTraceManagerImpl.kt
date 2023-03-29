@@ -74,7 +74,7 @@ class LiveViewTraceManagerImpl(
     init {
         project.putUserData(LiveViewTraceManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
-            if (SourceStatusService.getInstance(project).isReady()) {
+            if (it.isReady) {
                 val vertx = UserData.vertx(project)
                 vertx.safeLaunch {
                     val service = SourceStatusService.getCurrentService(project)!!

@@ -120,18 +120,18 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
         }
     }
 
-    override fun onReadyChange(triggerInitial: Boolean, listener: () -> Unit) {
+    override fun onReadyChange(triggerInitial: Boolean, listener: (SourceStatus) -> Unit) {
         synchronized(statusLock) {
             if (triggerInitial) {
-                listener()
+                listener(status)
             }
 
             val statusTriggered = AtomicBoolean()
             project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
                 if (isReady() && statusTriggered.compareAndSet(false, true)) {
-                    listener()
+                    listener(status)
                 } else if (!isReady() && statusTriggered.compareAndSet(true, false)) {
-                    listener()
+                    listener(status)
                 }
             })
         }

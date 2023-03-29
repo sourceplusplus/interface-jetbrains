@@ -54,5 +54,5 @@ interface SourceStatusService {
     fun setCurrentService(service: Service)
     fun setActiveServices(services: List<Service>)
     fun onServiceChange(triggerInitial: Boolean = true, listener: () -> Unit)
-    fun onReadyChange(triggerInitial: Boolean = true, listener: () -> Unit)
+    fun onReadyChange(triggerInitial: Boolean = true, listener: (SourceStatus) -> Unit)
 }
