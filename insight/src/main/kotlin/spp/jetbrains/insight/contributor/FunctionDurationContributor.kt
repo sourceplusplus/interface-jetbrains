@@ -17,6 +17,7 @@
 package spp.jetbrains.insight.contributor
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.util.ui.update.MergingUpdateQueue
 import com.intellij.util.ui.update.Update
@@ -229,7 +230,11 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
 
     private fun queueForInsights(mark: MethodGuideMark) {
         updateInsightQueue.queue(Update.create(mark) {
-            updateInsights(mark as MethodSourceMark)
+            try {
+                updateInsights(mark as MethodSourceMark)
+            } catch (e: PsiInvalidElementAccessException) {
+                //ignore; attempted to get insights for code that's been invalidated
+            }
         })
     }
 }
