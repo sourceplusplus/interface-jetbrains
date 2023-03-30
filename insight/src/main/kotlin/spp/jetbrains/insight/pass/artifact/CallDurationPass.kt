@@ -18,13 +18,15 @@ package spp.jetbrains.insight.pass.artifact
 
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
+import spp.jetbrains.artifact.model.ReferenceArtifact
 import spp.jetbrains.insight.InsightKeys
+import spp.jetbrains.insight.InsightKeys.CALL_ARGS
 import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ArtifactPass
 import spp.jetbrains.insight.path.ProceduralMultiPath
 import spp.jetbrains.insight.path.ProceduralPath
-import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightType.FUNCTION_DURATION
+import spp.protocol.insight.InsightType.PATH_DURATION
 import spp.protocol.insight.InsightValue
 
 /**
@@ -37,16 +39,19 @@ class CallDurationPass : ArtifactPass() {
 
         val resolvedFunction = element.getResolvedFunction()
         if (resolvedFunction != null) {
+            resolvedFunction.data[CALL_ARGS] = resolveArguments(element) //todo: don't set if contains unresolved?
+
             var multiPath = element.getData(InsightKeys.PROCEDURAL_MULTI_PATH)
-            if (multiPath == null && !element.isRecursive() && analyzer.passConfig.analyzeResolvedFunctions) {
+            if (shouldAnalyzeResolvedFunction(multiPath, element)) {
                 multiPath = analyzer.analyze(resolvedFunction)
             }
 
-            if (multiPath != null) {
+            val callArgs = resolvedFunction.getData(CALL_ARGS) ?: resolvedFunction.parameters
+            if (multiPath != null && isFullyResolved(callArgs)) {
                 //use the average of pre-determined durations (if available)
-                val possiblePaths = determinePossiblePaths(resolvedFunction.parameters, multiPath)
+                val possiblePaths = determinePossiblePaths(callArgs, multiPath)
                 val duration = possiblePaths.mapNotNull {
-                    it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
+                    it.getInsights().find { it.type == PATH_DURATION }?.value as Long?
                 }.ifEmpty { null }?.average()?.toLong()
                 if (duration != null) {
                     element.data[InsightKeys.FUNCTION_DURATION] =
@@ -60,6 +65,30 @@ class CallDurationPass : ArtifactPass() {
                     InsightValue.of(FUNCTION_DURATION, duration).asDerived()
             }
         }
+    }
+
+    /**
+     * Replace [ReferenceArtifact] params with the actual values from the call.
+     */
+    private fun resolveArguments(element: CallArtifact): List<ArtifactElement> {
+        val callArgs = rootArtifact.getData(CALL_ARGS)
+        return element.getArguments().map {
+            if (it is ReferenceArtifact && it.isFunctionParameter()) {
+                callArgs?.getOrNull(it.getFunctionParameterIndex()) ?: it
+            } else {
+                it
+            }
+        }
+    }
+
+    private fun isFullyResolved(callArgs: List<ArtifactElement>): Boolean {
+        return callArgs.none { (it as? ReferenceArtifact)?.isFunctionParameter() == true }
+    }
+
+    private fun shouldAnalyzeResolvedFunction(multiPath: ProceduralMultiPath?, element: CallArtifact): Boolean {
+        if (!analyzer.passConfig.analyzeResolvedFunctions) return false
+        if (element.isRecursive()) return false
+        return multiPath == null || !multiPath.paths.all { it.getInsights().any { it.type == PATH_DURATION } }
     }
 
     private fun determinePossiblePaths(

@@ -17,6 +17,7 @@
 package spp.jetbrains.insight
 
 import spp.jetbrains.SourceKey
+import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.insight.path.ProceduralMultiPath
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
@@ -27,6 +28,7 @@ import spp.protocol.insight.InsightValue
 object InsightKeys {
 
     val PROCEDURAL_MULTI_PATH = SourceKey<ProceduralMultiPath>("PROCEDURAL_MULTI_PATH")
+    val CALL_ARGS = SourceKey<List<ArtifactElement>>("CALL_ARGS")
 
     val FUNCTION_DURATION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION.name)
     val FUNCTION_DURATION_PREDICTION = SourceKey<InsightValue<Long>>(InsightType.FUNCTION_DURATION_PREDICTION.name)

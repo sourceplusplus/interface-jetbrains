@@ -45,4 +45,20 @@ public class PassVariable {
     private void literalPass6() {
         doSleep(false);
     }
+
+    private void literalPass7() {
+        literalPass7_1(false);
+    }
+
+    private void literalPass7_1(boolean sleep) {
+        literalPass7_2(sleep);
+    }
+
+    private void literalPass7_2(boolean sleep) {
+        if (sleep) {
+            Thread.sleep(100);
+            Thread.sleep(100);
+        }
+        Thread.sleep(100);
+    }
 }

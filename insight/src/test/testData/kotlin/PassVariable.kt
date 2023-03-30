@@ -45,4 +45,20 @@ class PassVariable {
     fun literalPass6() {
         doSleep(false)
     }
+
+    fun literalPass7() {
+        literalPass7_1(false)
+    }
+
+    fun literalPass7_1(sleep: Boolean) {
+        literalPass7_2(sleep)
+    }
+
+    fun literalPass7_2(sleep: Boolean) {
+        if (sleep) {
+            Thread.sleep(100)
+            Thread.sleep(100)
+        }
+        Thread.sleep(100)
+    }
 }

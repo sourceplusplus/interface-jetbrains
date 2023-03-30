@@ -43,3 +43,19 @@ def doSleep5(sleep):
 
 def literalPass6():
     doSleep(False)
+
+
+def literalPass7():
+    literalPass7_1(False)
+
+
+def literalPass7_1(sleep):
+    literalPass7_2(sleep)
+
+
+def literalPass7_2(sleep):
+    if sleep:
+        Thread.sleep(100)
+        Thread.sleep(100)
+
+    Thread.sleep(100)

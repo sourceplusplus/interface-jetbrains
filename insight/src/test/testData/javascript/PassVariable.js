@@ -36,11 +36,27 @@ function literalPass5() {
 
 function doSleep5(sleep) {
     if (sleep) {
-        Thread.sleep(400)
+        Thread.sleep(400);
     }
-    Thread.sleep(200)
+    Thread.sleep(200);
 }
 
 function literalPass6() {
     doSleep(false);
+}
+
+function literalPass7() {
+    literalPass7_1(false);
+}
+
+function literalPass7_1(sleep) {
+    literalPass7_2(sleep);
+}
+
+function literalPass7_2(sleep) {
+    if (sleep) {
+        Thread.sleep(100);
+        Thread.sleep(100);
+    }
+    Thread.sleep(100);
 }
