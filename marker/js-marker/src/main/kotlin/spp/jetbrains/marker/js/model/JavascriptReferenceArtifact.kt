@@ -27,6 +27,10 @@ class JavascriptReferenceArtifact(override val psiElement: JSReferenceExpression
         return psiElement.resolve() is JSParameter
     }
 
+    override fun getFunctionParameterIndex(): Int {
+        return 0 //todo: this
+    }
+
     override fun clone(): ArtifactElement {
         return JavascriptReferenceArtifact(psiElement)
     }

@@ -46,6 +46,10 @@ class JVMReferenceArtifact(override val psiElement: PsiElement) : ReferenceArtif
         return false
     }
 
+    override fun getFunctionParameterIndex(): Int {
+        return 0 //todo: this
+    }
+
     override fun toString(): String {
         return "JVMReferenceArtifact(functionParameter=${isFunctionParameter()})"
     }

@@ -30,5 +30,16 @@ def doSleep4(sleep):
     Thread.sleep(200)
 
 
+def literalPass5():
+    doSleep5(False)
+
+
+def doSleep5(sleep):
+    if sleep:
+        Thread.sleep(400)
+
+    Thread.sleep(200)
+
+
 def literalPass6():
     doSleep(False)

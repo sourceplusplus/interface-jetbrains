@@ -21,6 +21,8 @@ import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.getDuration
 import spp.jetbrains.insight.pass.ArtifactPass
+import spp.jetbrains.insight.path.ProceduralMultiPath
+import spp.jetbrains.insight.path.ProceduralPath
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightType.FUNCTION_DURATION
 import spp.protocol.insight.InsightValue
@@ -42,8 +44,8 @@ class CallDurationPass : ArtifactPass() {
 
             if (multiPath != null) {
                 //use the average of pre-determined durations (if available)
-                val possiblePaths = multiPath
-                var duration = multiPath.mapNotNull {
+                val possiblePaths = determinePossiblePaths(resolvedFunction.parameters, multiPath)
+                val duration = possiblePaths.mapNotNull {
                     it.getInsights().find { it.type == InsightType.PATH_DURATION }?.value as Long?
                 }.ifEmpty { null }?.average()?.toLong()
                 if (duration != null) {
@@ -58,6 +60,19 @@ class CallDurationPass : ArtifactPass() {
                     InsightValue.of(FUNCTION_DURATION, duration).asDerived()
             }
         }
+    }
+
+    private fun determinePossiblePaths(
+        params: List<ArtifactElement>,
+        multiPath: ProceduralMultiPath,
+    ): ProceduralMultiPath {
+        val possiblePaths = mutableListOf<ProceduralPath>()
+        for (path in multiPath) {
+            if (path.evaluateParams(params)) {
+                possiblePaths.add(path)
+            }
+        }
+        return ProceduralMultiPath(possiblePaths)
     }
 
     private fun CallArtifact.isRecursive(): Boolean {

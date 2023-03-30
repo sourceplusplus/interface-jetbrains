@@ -30,6 +30,17 @@ function doSleep4(sleep) {
     Thread.sleep(200);
 }
 
+function literalPass5() {
+    doSleep5(false)
+}
+
+function doSleep5(sleep) {
+    if (sleep) {
+        Thread.sleep(400)
+    }
+    Thread.sleep(200)
+}
+
 function literalPass6() {
     doSleep(false);
 }

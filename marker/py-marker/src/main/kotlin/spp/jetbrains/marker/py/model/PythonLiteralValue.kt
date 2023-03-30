@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.py.model
 
+import com.jetbrains.python.psi.PyBoolLiteralExpression
 import com.jetbrains.python.psi.PyLiteralExpression
 import com.jetbrains.python.psi.PyNumericLiteralExpression
 import spp.jetbrains.artifact.model.ArtifactLiteralValue
@@ -33,6 +34,7 @@ class PythonLiteralValue(override val psiElement: PyLiteralExpression) : Artifac
                     }
                 }
 
+                is PyBoolLiteralExpression -> psiElement.value
                 else -> psiElement.text
             }
         }

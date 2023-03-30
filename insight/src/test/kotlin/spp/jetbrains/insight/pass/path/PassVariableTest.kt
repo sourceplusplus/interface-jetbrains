@@ -18,7 +18,6 @@ package spp.jetbrains.insight.pass.path
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.insight.ProceduralAnalyzer
@@ -43,7 +42,6 @@ class PassVariableTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testLiteralPass() {
         doLiteralPass("kotlin", "kt")
         doLiteralPass("java", "java")
@@ -66,7 +64,6 @@ class PassVariableTest : BasePlatformTestCase() {
         assertEquals(200L, pathInsights.first().value)
     }
 
-    @Test
     fun testLiteralPass2() {
         doLiteralPass2("kotlin", "kt")
         doLiteralPass2("java", "java")
@@ -89,7 +86,6 @@ class PassVariableTest : BasePlatformTestCase() {
         assertEquals(200L, pathInsights.first().value)
     }
 
-    @Test
     fun testLiteralPass3() {
         doLiteralPass3("kotlin", "kt")
         doLiteralPass3("java", "java")
@@ -112,7 +108,6 @@ class PassVariableTest : BasePlatformTestCase() {
         assertEquals(200L, pathInsights.first().value)
     }
 
-    @Test
     fun testLiteralPass4() {
         doLiteralPass4("kotlin", "kt")
         doLiteralPass4("java", "java")
@@ -148,46 +143,44 @@ class PassVariableTest : BasePlatformTestCase() {
         assertEquals(200L, pathInsights.first().value)
     }
 
-//    @Test
-//    fun testLiteralPass5() {
-//        doLiteralPass5("kotlin", "kt")
-//        doLiteralPass5("java", "java")
-//        doLiteralPass5("javascript", "js")
-//        doLiteralPass5("python", "py")
-//    }
-//
-//    private fun doLiteralPass5(language: String, extension: String) {
-//        val psi = myFixture.configureByFile("$language/PassVariable.$extension")
-//
-//        //pre-analyze
-//        val preAnalyzePaths = ProceduralAnalyzer().analyze(
-//            psi.getFunctions().find { it.name!!.contains("doSleep5") }.toArtifact()!!
-//        )
-//        assertEquals(2, preAnalyzePaths.size)
-//
-//        preAnalyzePaths.apply {
-//            val truePath = find { it.conditions.first().first }!!
-//            assertEquals(InsightType.PATH_DURATION, truePath.getInsights().first().type)
-//            assertEquals(600L, truePath.getInsights().first().value)
-//
-//            val falsePath = find { !it.conditions.first().first }!!
-//            assertEquals(InsightType.PATH_DURATION, falsePath.getInsights().first().type)
-//            assertEquals(200L, falsePath.getInsights().first().value)
-//        }
-//
-//        val paths = ProceduralAnalyzer().analyze(
-//            psi.getFunctions().find { it.name!!.contains("literalPass5") }.toArtifact()!!
-//        )
-//        assertEquals(1, paths.size)
-//
-//        val path = paths.first()
-//        val pathInsights = path.getInsights()
-//        assertEquals(1, pathInsights.size)
-//        assertEquals(InsightType.PATH_DURATION, pathInsights.first().type)
-//        assertEquals(200L, pathInsights.first().value)
-//    }
+    fun testLiteralPass5() {
+        doLiteralPass5("kotlin", "kt")
+        doLiteralPass5("java", "java")
+        doLiteralPass5("javascript", "js")
+        doLiteralPass5("python", "py")
+    }
 
-    @Test
+    private fun doLiteralPass5(language: String, extension: String) {
+        val psi = myFixture.configureByFile("$language/PassVariable.$extension")
+
+        //pre-analyze
+        val preAnalyzePaths = ProceduralAnalyzer().analyze(
+            psi.getFunctions().find { it.name!!.contains("doSleep5") }.toArtifact()!!
+        )
+        assertEquals(2, preAnalyzePaths.size)
+
+        preAnalyzePaths.apply {
+            val truePath = find { it.conditions.first().first }!!
+            assertEquals(InsightType.PATH_DURATION, truePath.getInsights().first().type)
+            assertEquals(600L, truePath.getInsights().first().value)
+
+            val falsePath = find { !it.conditions.first().first }!!
+            assertEquals(InsightType.PATH_DURATION, falsePath.getInsights().first().type)
+            assertEquals(200L, falsePath.getInsights().first().value)
+        }
+
+        val paths = ProceduralAnalyzer().analyze(
+            psi.getFunctions().find { it.name!!.contains("literalPass5") }.toArtifact()!!
+        )
+        assertEquals(1, paths.size)
+
+        val path = paths.first()
+        val pathInsights = path.getInsights()
+        assertEquals(1, pathInsights.size)
+        assertEquals(InsightType.PATH_DURATION, pathInsights.first().type)
+        assertEquals(200L, pathInsights.first().value)
+    }
+
     fun testLiteralPass6() {
         doLiteralPass6("kotlin", "kt")
         doLiteralPass6("java", "java")

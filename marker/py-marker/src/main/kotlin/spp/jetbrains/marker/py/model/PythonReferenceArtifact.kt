@@ -27,6 +27,10 @@ class PythonReferenceArtifact(override val psiElement: PyReferenceExpression) : 
         return psiElement.reference.resolve() is PyParameter
     }
 
+    override fun getFunctionParameterIndex(): Int {
+        return 0 //todo: this
+    }
+
     override fun clone(): ArtifactElement {
         return PythonReferenceArtifact(psiElement)
     }

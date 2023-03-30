@@ -26,4 +26,5 @@ import com.intellij.psi.PsiElement
 abstract class ReferenceArtifact(psiElement: PsiElement) : ArtifactElement(psiElement) {
 
     abstract fun isFunctionParameter(): Boolean
+    abstract fun getFunctionParameterIndex(): Int
 }
