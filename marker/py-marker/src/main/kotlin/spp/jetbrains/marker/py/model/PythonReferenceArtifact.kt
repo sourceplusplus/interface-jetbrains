@@ -16,19 +16,28 @@
  */
 package spp.jetbrains.marker.py.model
 
+import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyParameter
+import com.jetbrains.python.psi.PyParameterList
 import com.jetbrains.python.psi.PyReferenceExpression
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.ReferenceArtifact
 
 class PythonReferenceArtifact(override val psiElement: PyReferenceExpression) : ReferenceArtifact(psiElement) {
 
+    private val resolvedElement: PsiElement? by lazy {
+        psiElement.reference.resolve()
+    }
+
     override fun isFunctionParameter(): Boolean {
-        return psiElement.reference.resolve() is PyParameter
+        return resolvedElement is PyParameter
     }
 
     override fun getFunctionParameterIndex(): Int {
-        return 0 //todo: this
+        if (!isFunctionParameter()) return -1
+        val parameter = resolvedElement as PyParameter
+        val parameterList = parameter.parent as? PyParameterList
+        return parameterList?.parameters?.indexOf(parameter) ?: -1
     }
 
     override fun clone(): ArtifactElement {

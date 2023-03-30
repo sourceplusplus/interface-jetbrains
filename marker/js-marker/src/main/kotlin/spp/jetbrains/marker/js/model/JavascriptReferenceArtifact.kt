@@ -17,18 +17,27 @@
 package spp.jetbrains.marker.js.model
 
 import com.intellij.lang.javascript.psi.JSParameter
+import com.intellij.lang.javascript.psi.JSParameterList
 import com.intellij.lang.javascript.psi.JSReferenceExpression
+import com.intellij.psi.PsiElement
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.ReferenceArtifact
 
 class JavascriptReferenceArtifact(override val psiElement: JSReferenceExpression) : ReferenceArtifact(psiElement) {
 
+    private val resolvedElement: PsiElement? by lazy {
+        psiElement.resolve()
+    }
+
     override fun isFunctionParameter(): Boolean {
-        return psiElement.resolve() is JSParameter
+        return resolvedElement is JSParameter
     }
 
     override fun getFunctionParameterIndex(): Int {
-        return 0 //todo: this
+        if (!isFunctionParameter()) return -1
+        val parameter = resolvedElement as JSParameter
+        val parameterList = parameter.parent as? JSParameterList
+        return parameterList?.parameters?.indexOf(parameter) ?: -1
     }
 
     override fun clone(): ArtifactElement {
