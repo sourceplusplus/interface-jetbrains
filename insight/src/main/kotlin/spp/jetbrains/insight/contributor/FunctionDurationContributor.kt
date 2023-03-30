@@ -30,6 +30,7 @@ import spp.jetbrains.insight.InsightKeys.FUNCTION_DURATION_PREDICTION
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys.VCS_MODIFIED
+import spp.jetbrains.marker.SourceMarkerUtils.doOnReadThread
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
@@ -149,8 +150,10 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
      * that are directly called by the given method.
      */
     private fun searchForInsights(mark: MethodGuideMark) {
-        val directMethods = ArtifactScopeService.getCalledFunctions(mark.getPsiMethod())
-        val psiFiles = directMethods.mapNotNull { it.containingFile }.toSet()
+        val psiFiles = doOnReadThread {
+            val directMethods = ArtifactScopeService.getCalledFunctions(mark.getPsiMethod())
+            directMethods.mapNotNull { it.containingFile }.toSet()
+        }
         psiFiles.mapNotNull { SourceMarker.getSourceFileMarker(it) } //trigger automatic creation of guide marks
     }
 

@@ -140,12 +140,13 @@ class JVMArtifactScopeService : IArtifactScopeService {
     }
 
     override fun getCallerFunctions(element: PsiElement, includeIndirect: Boolean): List<PsiNameIdentifierOwner> {
+        val project = doOnReadThread { element.project }
         val references = ProgressManager.getInstance().runProcess(Computable {
             if (ApplicationManager.getApplication().isReadAccessAllowed) {
-                ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+                ReferencesSearch.search(element, GlobalSearchScope.projectScope(project)).toList()
             } else {
-                DumbService.getInstance(element.project).runReadActionInSmartMode(Computable {
-                    ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+                DumbService.getInstance(project).runReadActionInSmartMode(Computable {
+                    ReferencesSearch.search(element, GlobalSearchScope.projectScope(project)).toList()
                 })
             }
         }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
