@@ -31,6 +31,7 @@ import com.intellij.psi.PsiNamedElement
 @Suppress("TooManyFunctions") // public API
 interface IArtifactScopeService : ISourceMarkerService {
 
+    fun getLoops(element: PsiElement): List<PsiElement>
     fun getFunctions(element: PsiElement): List<PsiNamedElement>
     fun getClasses(element: PsiElement): List<PsiNamedElement>
     fun getChildIfs(element: PsiElement): List<PsiElement>
