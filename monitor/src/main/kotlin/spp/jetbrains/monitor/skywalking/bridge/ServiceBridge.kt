@@ -18,13 +18,9 @@ package spp.jetbrains.monitor.skywalking.bridge
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import io.vertx.core.Vertx
-import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
-import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.monitor.skywalking.SkywalkingClient
 import spp.jetbrains.monitor.skywalking.model.DurationStep
 import spp.jetbrains.status.SourceStatus.*
@@ -45,18 +41,11 @@ class ServiceBridge(
     private val initServiceName: String?
 ) : CoroutineVerticle() {
 
+    private val log = logger<ServiceBridge>()
     private var currentService: Service? = null
     private var activeServices: List<Service> = emptyList()
 
     override suspend fun start() {
-        //async accessors
-        vertx.eventBus().localConsumer<Boolean>(getCurrentServiceAddress) { msg ->
-            if (currentService == null) {
-                log.warn("No current service set")
-            }
-            msg.reply(currentService)
-        }
-
         //attempt to set current service
         SourceStatusService.getInstance(project).update(Pending, "Setting current service")
         setCurrentService(true)
@@ -78,6 +67,8 @@ class ServiceBridge(
     }
 
     private suspend fun setCurrentService(canStartChecker: Boolean): Boolean {
+        SourceStatusService.getInstance(project).update(WaitingForService)
+
         log.info("Attempting to set current service. Can start checker: $canStartChecker")
         activeServices = skywalkingClient.run {
             getServices(getDuration(ZonedDateTime.now().minusMinutes(15), DurationStep.MINUTE))
@@ -95,11 +86,10 @@ class ServiceBridge(
                     }
                     false
                 } else {
-                    vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
                     SourceStatusService.getInstance(project).apply {
                         setActiveServices(activeServices)
                         setCurrentService(currentService!!)
-                        update(ServiceChange)
+                        update(ServiceEstablished)
                     }
                     true
                 }
@@ -107,11 +97,10 @@ class ServiceBridge(
             if (currentService == null) {
                 currentService = activeServices[0]
                 log.info("Current service set to: ${currentService!!.name}")
-                vertx.eventBus().publish(currentServiceUpdatedAddress, currentService)
                 SourceStatusService.getInstance(project).apply {
                     setActiveServices(activeServices)
                     setCurrentService(currentService!!)
-                    update(ServiceChange)
+                    update(ServiceEstablished)
                 }
                 return true
             }
@@ -122,24 +111,5 @@ class ServiceBridge(
             }
         }
         return false
-    }
-
-    companion object {
-        private val log = logger<ServiceBridge>()
-
-        private const val rootAddress = "monitor.skywalking.service"
-        private const val getCurrentServiceAddress = "$rootAddress.currentService"
-        private const val currentServiceUpdatedAddress = "$rootAddress.currentService-Updated"
-
-        fun currentServiceConsumer(vertx: Vertx): MessageConsumer<Service> {
-            return vertx.eventBus().localConsumer(currentServiceUpdatedAddress)
-        }
-
-        fun getCurrentServiceAwait(vertx: Vertx): Service? {
-            return safeRunBlocking(vertx.dispatcher()) {
-                vertx.eventBus()
-                    .request<Service>(getCurrentServiceAddress, true).await().body()
-            }
-        }
     }
 }

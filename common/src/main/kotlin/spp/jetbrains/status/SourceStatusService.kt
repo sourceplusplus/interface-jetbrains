@@ -30,14 +30,17 @@ interface SourceStatusService {
     companion object {
         val KEY = Key.create<SourceStatusService>("SPP_SOURCE_STATUS_SERVICE")
 
+        @JvmStatic
         fun getInstance(project: Project): SourceStatusService {
             return project.getUserData(KEY)!!
         }
 
+        @JvmStatic
         fun getCurrentService(project: Project): Service? {
             return getInstance(project).getCurrentService()
         }
 
+        @JvmStatic
         fun subscribe(project: Project, listener: SourceStatusListener) {
             project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, listener)
         }

@@ -192,7 +192,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         connectionJob = vertx.safeLaunch {
             var connectedMonitor = false
             try {
-                SourceStatusService.getInstance(project).update(Pending, "Initializing services")
                 initServices(vertx, config)
                 SourceStatusService.getInstance(project).update(Pending, "Initializing monitor")
                 initMonitor(vertx, config)
@@ -333,6 +332,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
     }
 
     private suspend fun discoverAvailableServices(vertx: Vertx, config: SourceMarkerConfig) {
+        SourceStatusService.getInstance(project).update(Pending, "Discovering available services")
+
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
             Thread.currentThread().contextClassLoader = javaClass.classLoader
@@ -439,6 +440,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
     }
 
     private suspend fun initServices(vertx: Vertx, config: SourceMarkerConfig) {
+        SourceStatusService.getInstance(project).update(Pending, "Logging in")
+
         if (!config.serviceHost.isNullOrBlank()) {
             val certificatePins = mutableListOf<String>()
             certificatePins.addAll(config.certificatePins)

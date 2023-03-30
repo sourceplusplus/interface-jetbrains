@@ -138,6 +138,7 @@ object SourceMarkerUtils {
         }
     }
 
+    //todo: look into using ApplicationManager.getApplication().assertReadAccessAllowed()
     fun <T> doOnReadThread(action: () -> T): T {
         return if (ApplicationManager.getApplication().isReadAccessAllowed) {
             action.invoke()

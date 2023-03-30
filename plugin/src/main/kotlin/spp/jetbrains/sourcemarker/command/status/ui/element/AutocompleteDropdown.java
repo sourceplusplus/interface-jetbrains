@@ -17,11 +17,10 @@
 package spp.jetbrains.sourcemarker.command.status.ui.element;
 
 import com.intellij.openapi.project.Project;
-import io.vertx.core.Vertx;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
-import spp.jetbrains.monitor.skywalking.bridge.ServiceBridge;
+import spp.jetbrains.status.SourceStatusService;
 import spp.protocol.platform.developer.SelfInfo;
 import spp.protocol.platform.general.Service;
 
@@ -42,8 +41,7 @@ public class AutocompleteDropdown extends JPanel {
         userLabel.setText(selfInfo.getDeveloper().getId());
 
         serviceText.setForeground(PluginUI.getPlaceholderForeground());
-        Vertx vertx = UserData.INSTANCE.vertx(project);
-        Service service = ServiceBridge.Companion.getCurrentServiceAwait(vertx);
+        Service service = SourceStatusService.getCurrentService(project);
         if (service != null) {
             serviceLabel.setText(service.getName());
             serviceLabel.setForeground(PluginUI.getCommandHighlightForeground());

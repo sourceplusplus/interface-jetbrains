@@ -24,21 +24,23 @@ import javax.swing.Icon
  *
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-enum class SourceStatus {
+enum class SourceStatus(val ephemeral: Boolean = false) {
     Enabled,
     Disabled,
     Pending,
+    PluginsLoaded(true),
+    Connected,
     ConnectionError,
-    ServiceChange,
-    PluginsLoaded;
+    WaitingForService,
+    ServiceEstablished;
 
     val icon: Icon
         get() {
-            return when (this) {
-                Enabled, Pending -> PluginIcons.statusPending
-                Disabled -> PluginIcons.statusDisabled
-                ConnectionError -> PluginIcons.statusFailed
-                else -> PluginIcons.statusEnabled
+            return when {
+                isReady -> PluginIcons.statusEnabled
+                isDisabled -> PluginIcons.statusDisabled
+                isFailed -> PluginIcons.statusFailed
+                else -> PluginIcons.statusPending
             }
         }
     val presentableText: String
@@ -46,7 +48,10 @@ enum class SourceStatus {
             return when (this) {
                 Disabled -> "Click to enable Source++"
                 Pending -> "Booting Source++"
+                Connected -> "Connection established"
+                WaitingForService -> "Waiting for active service"
                 ConnectionError -> "Connection error"
+                PluginsLoaded -> "Plugins loaded"
                 else -> "Click to disable Source++"
             }
         }
@@ -54,18 +59,25 @@ enum class SourceStatus {
     val disposedPlugin: Boolean
         get() = this in DISPOSED_STATUSES
 
+    val isFailed: Boolean
+        get() = this in FAILED_STATUSES
+
     val isConnected: Boolean
         get() = this in CONNECTED_STATUSES
 
     val isEnabled: Boolean
-        get() = this != Disabled
+        get() = !isDisabled
+
+    val isDisabled: Boolean
+        get() = this == Disabled
 
     val isReady: Boolean
         get() = this in READY_STATUSES
 
     companion object {
-        val READY_STATUSES = setOf(PluginsLoaded, ServiceChange)
-        val CONNECTED_STATUSES = setOf(PluginsLoaded, ServiceChange, Pending)
+        val READY_STATUSES = setOf(ServiceEstablished)
+        val CONNECTED_STATUSES = READY_STATUSES + setOf(PluginsLoaded, Pending, Connected, WaitingForService)
         val DISPOSED_STATUSES = setOf(Disabled, ConnectionError)
+        val FAILED_STATUSES = setOf(ConnectionError)
     }
 }

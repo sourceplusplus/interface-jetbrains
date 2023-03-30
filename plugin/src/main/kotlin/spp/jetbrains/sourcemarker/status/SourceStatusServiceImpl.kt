@@ -75,10 +75,11 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                 return@synchronized
             }
 
+            message?.let { log.info(it) }
+            this.message = message
             if (oldStatus != status) {
-                if (status != ServiceChange) {
+                if (!status.ephemeral) {
                     this.status = status
-                    this.message = message
                     log.info("Status changed from $oldStatus to $status")
                 }
 
@@ -99,7 +100,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     @Synchronized
     override fun setCurrentService(service: Service) {
         currentService = service
-        update(ServiceChange)
+        update(ServiceEstablished)
     }
 
     @Synchronized
@@ -113,7 +114,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                 listener()
             }
             project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
-                if (it == ServiceChange) {
+                if (it == ServiceEstablished) {
                     listener()
                 }
             })
