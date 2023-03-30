@@ -45,6 +45,7 @@ complexity:
     threshold: 5
   TooManyFunctions:
     thresholdInClasses: 15
+    thresholdInObjects: 15
   LongParameterList:
     functionThreshold: 8
   LongMethod:
