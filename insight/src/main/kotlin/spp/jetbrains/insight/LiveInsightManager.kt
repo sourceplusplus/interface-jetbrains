@@ -17,7 +17,6 @@
 package spp.jetbrains.insight
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -39,9 +38,9 @@ class LiveInsightManager(
     private val remoteInsightsAvailable: Boolean
 ) : CoroutineVerticle(), SourceMarkEventListener, Disposable {
 
-    private val log = logger<LiveInsightManager>()
+//    private val log = logger<LiveInsightManager>()
 
-    //    private lateinit var insightService: LiveInsightService
+//    private lateinit var insightService: LiveInsightService
 //    private lateinit var workspace: InsightWorkspace
     private val contributors = listOf(
         FunctionDurationContributor(remoteInsightsAvailable)
