@@ -28,4 +28,6 @@ abstract class FunctionArtifact(
     override fun getName(): String? = psiElement.name
     override fun setName(name: String): PsiElement = psiElement.setName(name)
     override fun getNameIdentifier(): PsiElement? = psiElement.nameIdentifier
+
+    abstract fun getAnnotations(): List<PsiElement>
 }

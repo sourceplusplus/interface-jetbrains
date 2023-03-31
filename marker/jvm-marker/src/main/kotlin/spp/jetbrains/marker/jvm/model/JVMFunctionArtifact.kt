@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.jvm.model
 
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiNameIdentifierOwner
 import org.jetbrains.kotlin.psi.KtNamedFunction
@@ -33,6 +34,14 @@ class JVMFunctionArtifact(override val psiElement: PsiNameIdentifierOwner) : Fun
                 else -> TODO()
             }
         }
+
+    override fun getAnnotations(): List<PsiElement> {
+        return when (psiElement) {
+            is PsiMethod -> psiElement.annotations.toList()
+            is KtNamedFunction -> psiElement.annotationEntries
+            else -> TODO()
+        }
+    }
 
     override fun clone(): JVMFunctionArtifact {
         return JVMFunctionArtifact(psiElement)
