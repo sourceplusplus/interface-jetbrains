@@ -34,6 +34,10 @@ class LiveInsightManager(
     private val remoteInsightsAvailable: Boolean
 ) : CoroutineVerticle(), SourceMarkEventListener, Disposable {
 
+//    private val log = logger<LiveInsightManager>()
+
+//    private lateinit var insightService: LiveInsightService
+//    private lateinit var workspace: InsightWorkspace
     private val contributors = listOf(
         FunctionDurationContributor(remoteInsightsAvailable)
     )

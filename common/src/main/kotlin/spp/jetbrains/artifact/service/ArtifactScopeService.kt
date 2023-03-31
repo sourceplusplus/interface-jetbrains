@@ -35,6 +35,10 @@ import spp.protocol.artifact.ArtifactType
 @Suppress("MemberVisibilityCanBePrivate", "TooManyFunctions") // public API
 object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>(), IArtifactScopeService {
 
+    override fun getLoops(element: PsiElement): List<PsiElement> {
+        return getService(element.language).getLoops(element)
+    }
+
     override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
         return getService(element.language).getFunctions(element)
     }
