@@ -57,6 +57,7 @@ class LiveViewChartWindow(
     val project: Project,
     var liveView: LiveView,
     private val entityName: String,
+    private val labels: List<String>,
     private val consumerCreator: (LiveViewChartWindow) -> MessageConsumer<JsonObject>
 ) : ResumableView {
 
@@ -101,7 +102,7 @@ class LiveViewChartWindow(
         viewService.getHistoricalMetrics(
             liveView.entityIds.toList(),
             liveView.viewConfig.viewMetrics,
-            step, start, stop
+            step, start, stop, labels
         ).onSuccess {
             for (i in 0 until it.data.size()) {
                 val stepBucket = step.bucketFormatter.format(start.plusSeconds((step.seconds * i).toLong())).toLong()

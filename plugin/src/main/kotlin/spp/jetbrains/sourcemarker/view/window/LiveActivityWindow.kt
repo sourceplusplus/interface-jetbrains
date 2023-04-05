@@ -40,7 +40,8 @@ class LiveActivityWindow(
     entityName: String,
     private val scope: String,
     metrics: List<MetricType>,
-    private var refreshRate: Int
+    labels: List<String> = listOf(),
+    private var refreshRate: Int = -1
 ) : TabbedResumableView() {
 
     private var initialFocus = true
@@ -58,7 +59,7 @@ class LiveActivityWindow(
                         listOf(it.metricId),
                         refreshRate
                     )
-                ), entityName
+                ), entityName, labels
             ) { consumerCreator(it, vertx) }
             addTab("$scope ${it.simpleName}", respTimeChart, respTimeChart.component)
         }

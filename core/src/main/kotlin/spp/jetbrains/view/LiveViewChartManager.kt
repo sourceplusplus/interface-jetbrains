@@ -45,6 +45,7 @@ interface LiveViewChartManager : ResumableViewManager {
         entityId: String,
         name: String,
         scope: String,
-        metricTypes: List<MetricType>
+        metricTypes: List<MetricType>,
+        labels: List<String> = emptyList()
     )
 }

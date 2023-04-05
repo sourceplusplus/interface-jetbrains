@@ -137,7 +137,7 @@ class LiveViewChartManagerImpl(
                 MetricType.Service_RespTime_AVG,
                 MetricType.Service_SLA,
                 MetricType.Service_CPM
-            ), 1000
+            ), refreshRate = 1000
         )
         val overviewContent = contentFactory.createContent(
             overviewWindow.component,
@@ -193,7 +193,7 @@ class LiveViewChartManagerImpl(
                 MetricType.Endpoint_RespTime_AVG.asRealtime(),
                 MetricType.Endpoint_SLA.asRealtime(),
                 MetricType.Endpoint_CPM.asRealtime()
-            ), -1
+            )
         )
         activityWindow.resume()
 
@@ -213,7 +213,8 @@ class LiveViewChartManagerImpl(
         entityId: String,
         name: String,
         scope: String,
-        metricTypes: List<MetricType>
+        metricTypes: List<MetricType>,
+        labels: List<String>
     ) = ApplicationManager.getApplication().invokeLater {
         val existingContent = contentManager.findContent(name)
         if (existingContent != null) {
@@ -222,7 +223,7 @@ class LiveViewChartManagerImpl(
             return@invokeLater
         }
 
-        val activityWindow = LiveActivityWindow(project, entityId, name, scope, metricTypes, -1)
+        val activityWindow = LiveActivityWindow(project, entityId, name, scope, metricTypes, labels)
         activityWindow.resume()
 
         val content = contentFactory.createContent(
