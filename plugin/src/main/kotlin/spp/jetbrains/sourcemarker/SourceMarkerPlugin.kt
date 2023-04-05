@@ -165,26 +165,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig()
-        if (!addedConfigListener) {
-            addedConfigListener = true
-            val localConfigListener = object : BulkFileListener {
-                var lastUpdated = -1L
-                override fun after(events: MutableList<out VFileEvent>) {
-                    val event = events.firstOrNull() as? VFileContentChangeEvent ?: return
-                    if (event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
-                        if (event.oldTimestamp <= lastUpdated) return else lastUpdated = event.oldTimestamp
-                        DumbService.getInstance(project).smartInvokeLater {
-                            val localConfig = loadSppPluginFileConfiguration()
-                            if (localConfig != null && localConfig.override) {
-                                log.info("Local config updated. Reloading plugin.")
-                                safeRunBlocking { init(localConfig) }
-                            }
-                        }
-                    }
-                }
-            }
-            project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, localConfigListener)
-        }
+        addSppPluginConfigChangeListener()
 
         connectionJob?.cancel()
         connectionJob = null
@@ -246,6 +227,29 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 pluginsPromise.future().await()
             }
         }
+    }
+
+    private fun addSppPluginConfigChangeListener() {
+        if (addedConfigListener) return
+        addedConfigListener = true
+
+        val localConfigListener = object : BulkFileListener {
+            var lastUpdated = -1L
+            override fun after(events: MutableList<out VFileEvent>) {
+                val event = events.firstOrNull() as? VFileContentChangeEvent ?: return
+                if (event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
+                    if (event.oldTimestamp <= lastUpdated) return else lastUpdated = event.oldTimestamp
+                    DumbService.getInstance(project).smartInvokeLater {
+                        val localConfig = loadSppPluginFileConfiguration()
+                        if (localConfig != null && localConfig.override) {
+                            log.info("Local config updated. Reloading plugin.")
+                            safeRunBlocking { init(localConfig) }
+                        }
+                    }
+                }
+            }
+        }
+        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, localConfigListener)
     }
 
     fun loadSppPluginFileConfiguration(): SourceMarkerConfig? {
