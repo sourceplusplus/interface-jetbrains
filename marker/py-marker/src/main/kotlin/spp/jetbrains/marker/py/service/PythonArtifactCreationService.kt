@@ -156,6 +156,14 @@ class PythonArtifactCreationService : IArtifactCreationService {
         }
     }
 
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        TODO("Not yet implemented")
+    }
+
     override fun createExpressionGuideMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,

@@ -166,6 +166,14 @@ class JVMArtifactCreationService : IArtifactCreationService {
         return createExpressionSourceMark(fileMarker, element, SourceMark.Type.INLAY, autoApply) as ExpressionInlayMark
     }
 
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        return createExpressionSourceMark(fileMarker, element, SourceMark.Type.INLAY, autoApply) as ExpressionInlayMark
+    }
+
     override fun createExpressionGuideMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,

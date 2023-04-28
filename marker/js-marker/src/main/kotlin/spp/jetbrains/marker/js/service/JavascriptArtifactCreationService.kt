@@ -140,6 +140,14 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
 
     override fun createExpressionInlayMark(
         fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        TODO("Not yet implemented")
+    }
+
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
         lineNumber: Int,
         autoApply: Boolean
     ): ExpressionInlayMark {
