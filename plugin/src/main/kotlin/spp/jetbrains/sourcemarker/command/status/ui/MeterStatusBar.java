@@ -346,6 +346,7 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
                 metricValue,
 //                meterIdField.getText(),
                 new ArrayList<>(),
+                new ArrayList<>(),
                 sourceLocation,
                 condition,
                 expirationDate,
