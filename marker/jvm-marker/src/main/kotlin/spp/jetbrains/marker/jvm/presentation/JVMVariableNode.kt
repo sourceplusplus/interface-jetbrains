@@ -113,7 +113,11 @@ class JVMVariableNode(
             val varValue = variable.value
             if (varValue is JsonObject && varValue.getString("@skip") != null) {
                 val skipReason = varValue.getString("@skip")
-                presentation.addText(" $skipReason", ERROR_ATTRIBUTES)
+                if (skipReason == "EXCEPTION_OCCURRED" && varValue.getString("@toString") != null) {
+                    presentation.addText(" " + varValue.getString("@toString"), ERROR_ATTRIBUTES)
+                } else {
+                    presentation.addText(" $skipReason", ERROR_ATTRIBUTES)
+                }
             }
         } else {
             if (variable.value is LiveVariable) {
