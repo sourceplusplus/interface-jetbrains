@@ -26,8 +26,10 @@ object ScopeExtensions {
     private val log = logger<ScopeExtensions>()
 
     fun <T> safeRunBlocking(action: suspend () -> T): T {
+//        val source = Exception()
         return runBlocking {
             try {
+//                Thread.currentThread().name = ExceptionUtil.getThrowableText(source)
                 return@runBlocking action()
             } catch (throwable: Throwable) {
                 log.error(throwable)
@@ -88,7 +90,9 @@ fun Vertx.safeLaunch(action: suspend () -> Unit): Job {
 }
 
 fun Vertx.safeExecuteBlocking(action: suspend () -> Unit) {
+//    val source = Exception()
     executeBlocking<Nothing> {
+//        Thread.currentThread().name = ExceptionUtil.getThrowableText(source)
         ScopeExtensions.safeRunBlocking(dispatcher()) {
             action()
         }
