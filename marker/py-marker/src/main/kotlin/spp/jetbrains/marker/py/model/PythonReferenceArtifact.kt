@@ -22,6 +22,7 @@ import com.jetbrains.python.psi.PyParameterList
 import com.jetbrains.python.psi.PyReferenceExpression
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.ReferenceArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class PythonReferenceArtifact(override val psiElement: PyReferenceExpression) : ReferenceArtifact(psiElement) {
 
@@ -38,6 +39,10 @@ class PythonReferenceArtifact(override val psiElement: PyReferenceExpression) : 
         val parameter = resolvedElement as PyParameter
         val parameterList = parameter.parent as? PyParameterList
         return parameterList?.parameters?.indexOf(parameter) ?: -1
+    }
+
+    override fun resolve(): ArtifactElement? {
+        return resolvedElement?.toArtifact()
     }
 
     override fun clone(): ArtifactElement {

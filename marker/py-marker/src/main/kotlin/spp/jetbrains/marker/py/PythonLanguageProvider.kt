@@ -37,7 +37,7 @@ import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventList
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.safeExecuteBlocking
+import spp.jetbrains.safeLaunch
 
 /**
  * Provides Python support for the Marker API.
@@ -71,7 +71,7 @@ class PythonLanguageProvider : LanguageProvider {
                 //setup endpoint detector and attempt detection
                 if (mark is GuideMark) {
                     mark.putUserData(SourceMarkerKeys.ENDPOINT_DETECTOR, endpointDetector)
-                    UserData.vertx(project).safeExecuteBlocking { endpointDetector.getOrFindEndpointIds(mark) }
+                    UserData.vertx(project).safeLaunch { endpointDetector.getOrFindEndpointIds(mark) }
                 }
 
                 //setup logger detector
@@ -82,7 +82,7 @@ class PythonLanguageProvider : LanguageProvider {
 
                 //attempt to detect logger(s) on method guide marks
                 if (mark is MethodGuideMark) {
-                    UserData.vertx(project).safeExecuteBlocking { loggerDetector.determineLoggerStatements(mark) }
+                    UserData.vertx(project).safeLaunch { loggerDetector.determineLoggerStatements(mark) }
                 }
             }
         })

@@ -11,7 +11,6 @@ pluginManagement {
 
 include 'commander'
 include 'commander:kotlin-compiler-wrapper'
-include 'common'
 include 'core'
 include 'insight'
 include 'marker'
@@ -19,5 +18,4 @@ include 'marker:js-marker'
 include 'marker:jvm-marker'
 include 'marker:py-marker'
 include 'marker:ult-marker'
-include 'monitor'
 include 'plugin'

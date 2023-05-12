@@ -20,8 +20,13 @@ import com.intellij.psi.PsiCall
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.nj2k.postProcessing.resolve
 import org.jetbrains.kotlin.psi.KtCallExpression
+import org.jetbrains.kotlin.psi.KtCallableReferenceExpression
 import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.path.GrMethodCallExpression
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScMethodCall
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
+import scala.collection.JavaConverters
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
@@ -29,11 +34,63 @@ import spp.jetbrains.artifact.service.toArtifact
 
 class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiElement) {
 
+    override fun getName(): String? {
+        return when (psiElement) {
+            is PsiCall -> psiElement.firstChild.text
+            is KtCallExpression -> psiElement.calleeExpression?.text
+            is KtCallableReferenceExpression -> psiElement.name
+
+            is KtDotQualifiedExpression -> {
+                if (psiElement.selectorExpression is KtCallExpression) {
+                    (psiElement.selectorExpression as KtCallExpression).calleeExpression?.text
+                } else {
+                    null
+                }
+            }
+
+            is GrMethodCallExpression -> {
+                psiElement.callReference?.methodName
+            }
+
+            is ScMethodCall -> {
+                psiElement.deepestInvokedExpr().lastChild.text
+            }
+
+            else -> null
+        }
+    }
+
     override fun resolveFunction(): FunctionArtifact? {
         val function = when (psiElement) {
             is PsiCall -> psiElement.resolveMethod()?.toArtifact() as? FunctionArtifact
             is KtCallExpression -> {
                 (psiElement.calleeExpression as KtNameReferenceExpression).resolve()
+                    ?.toArtifact() as? FunctionArtifact
+            }
+
+            is KtCallableReferenceExpression -> {
+                (psiElement.callableReference.resolve() as? PsiElement)?.toArtifact() as? FunctionArtifact
+            }
+
+            is KtDotQualifiedExpression -> {
+                if (psiElement.selectorExpression is KtCallExpression) {
+                    val test = (psiElement.selectorExpression as KtCallExpression).calleeExpression
+                    if (test is KtNameReferenceExpression) {
+                        test.resolve()?.toArtifact() as? FunctionArtifact
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            }
+
+            is GrMethodCallExpression -> {
+                psiElement.resolveMethod()?.toArtifact() as? FunctionArtifact
+            }
+
+            is ScMethodCall -> {
+                (psiElement.deepestInvokedExpr() as? ScReferenceExpression)?.resolve()
                     ?.toArtifact() as? FunctionArtifact
             }
 
@@ -59,17 +116,25 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
+                psiElement.valueArguments.mapNotNull { it.getArgumentExpression()?.toArtifact() }
             }
 
             is KtDotQualifiedExpression -> {
                 if (psiElement.selectorExpression is KtCallExpression) {
-                    (psiElement.selectorExpression as KtCallExpression).valueArguments.map {
-                        it.getArgumentExpression()?.toArtifact()!!
+                    (psiElement.selectorExpression as KtCallExpression).valueArguments.mapNotNull {
+                        it.getArgumentExpression()?.toArtifact()
                     }
                 } else {
                     emptyList()
                 }
+            }
+
+            is GrMethodCallExpression -> {
+                psiElement.argumentList.expressionArguments.mapNotNull { it.toArtifact() }
+            }
+
+            is ScMethodCall -> {
+                JavaConverters.asJavaCollection(psiElement.argumentExpressions()).mapNotNull { it.toArtifact() }
             }
 
             else -> emptyList()

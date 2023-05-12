@@ -27,12 +27,12 @@ import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.sourcemarker.view.model.ServiceEndpointRow
-import spp.jetbrains.sourcemarker.view.model.column.ServiceEndpointColumnInfo
-import spp.jetbrains.sourcemarker.view.window.renderer.EndpointAvailabilityTableCellRenderer
-import spp.jetbrains.sourcemarker.view.window.util.EndpointRowView
-import spp.jetbrains.view.LiveViewChartManager
 import spp.jetbrains.view.ResumableViewCollection
+import spp.jetbrains.view.manager.LiveViewChartManager
+import spp.jetbrains.view.model.ServiceEndpointRow
+import spp.jetbrains.view.model.column.ServiceEndpointColumnInfo
+import spp.jetbrains.view.window.renderer.EndpointAvailabilityTableCellRenderer
+import spp.jetbrains.view.window.util.EndpointRowView
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_CPM
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_SLA
@@ -92,7 +92,7 @@ class LiveEndpointsWindow(val project: Project, service: Service) : ResumableVie
 //        ServiceBridge.currentServiceConsumer(vertx).handler {
 //            val service = it.body()
         vertx.safeLaunch {
-            UserData.liveManagementService(project)?.getEndpoints(service.id)?.await()?.forEach {
+            UserData.liveManagementService(project).getEndpoints(service.id, 1000).await().forEach {
                 val endpointRow = ServiceEndpointRow(it)
                 model.addRow(endpointRow)
                 addView(vertx, service, endpointRow)

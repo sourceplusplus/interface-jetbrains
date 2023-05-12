@@ -21,7 +21,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import org.joor.Reflect
-import spp.jetbrains.sourcemarker.view.trace.column.PairColumnInfo
+import spp.jetbrains.view.trace.column.PairColumnInfo
 import spp.protocol.artifact.trace.TraceSpan
 import java.awt.BorderLayout
 import javax.swing.JPanel

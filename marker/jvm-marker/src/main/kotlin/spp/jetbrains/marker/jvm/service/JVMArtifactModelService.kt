@@ -20,6 +20,10 @@ import com.intellij.psi.*
 import com.siyeh.ig.psiutils.CountingLoop
 import org.jetbrains.kotlin.idea.references.mainReference
 import org.jetbrains.kotlin.psi.*
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrMethodCall
+import org.jetbrains.plugins.groovy.lang.psi.impl.GrMethodReferenceExpressionImpl
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScMethodCall
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.service.define.IArtifactModelService
 import spp.jetbrains.artifact.service.isKotlin
@@ -44,6 +48,8 @@ class JVMArtifactModelService : IArtifactModelService {
             is PsiBinaryExpression -> JVMBinaryExpression(element)
             is PsiMethod -> JVMFunctionArtifact(element)
             is PsiCall -> JVMCallArtifact(element)
+            is GrMethodCall -> JVMCallArtifact(element)
+            is ScMethodCall -> JVMCallArtifact(element)
             is PsiCodeBlock -> JVMBlockArtifact(element)
             is PsiBlockStatement -> JVMBlockArtifact(element.codeBlock)
             is PsiForStatement -> {
@@ -63,6 +69,22 @@ class JVMArtifactModelService : IArtifactModelService {
                 }
             }
 
+            is GrMethodReferenceExpressionImpl -> {
+                if (element.resolve() != null) {
+                    JVMReferenceArtifact(element)
+                } else {
+                    null
+                }
+            }
+
+            is ScReferenceExpression -> {
+                if (element.resolve() != null) {
+                    JVMReferenceArtifact(element)
+                } else {
+                    null
+                }
+            }
+
             else -> null
         }
     }
@@ -70,11 +92,13 @@ class JVMArtifactModelService : IArtifactModelService {
     private fun fromKotlin(element: PsiElement): ArtifactElement? {
         return when (element) {
             is KtIfExpression -> JVMIfArtifact(element)
+            is KtStringTemplateExpression -> JVMLiteralValue(element)
             is KtConstantExpression -> JVMLiteralValue(element)
             is KtBinaryExpression -> JVMBinaryExpression(element)
             is KtNamedFunction -> JVMFunctionArtifact(element)
             is KtCallExpression -> JVMCallArtifact(element)
             is KtBlockExpression -> JVMBlockArtifact(element)
+            is KtCallableReferenceExpression -> JVMCallArtifact(element)
             is KtDotQualifiedExpression -> {
                 if (element.selectorExpression is KtCallExpression) {
                     JVMCallArtifact(element)

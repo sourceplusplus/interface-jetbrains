@@ -21,12 +21,12 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import io.vertx.core.Future
+import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.SourceKey
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.monitor.skywalking.SkywalkingMonitorService
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.status.SourceStatusListener
 
@@ -49,7 +49,6 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
     }
 
     abstract val detectorSet: Set<T>
-    private val skywalkingMonitor by lazy { project.getUserData(SkywalkingMonitorService.KEY)!! }
 
     init {
         if (!ApplicationManager.getApplication().isUnitTestMode) {
@@ -125,7 +124,8 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
         }
 
         log.trace("Determining endpoint id for endpoint name: ${endpoint.name}")
-        val foundEndpoint = skywalkingMonitor.searchExactEndpoint(endpoint.name)
+        val foundEndpoint: JsonObject? = null //UserData.liveManagementService(guideMark.project)
+//            .getEndpoints()//searchExactEndpoint(endpoint.name)
         if (foundEndpoint != null) {
             val endpointId = foundEndpoint.getString("id")
             log.trace("Found endpoint id: $endpointId")

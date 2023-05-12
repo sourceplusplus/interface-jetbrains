@@ -34,7 +34,7 @@ import spp.jetbrains.marker.SourceMarkerKeys;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.api.SourceMark;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
-import spp.jetbrains.plugin.LiveStatusBarManager;
+import spp.jetbrains.marker.plugin.LiveStatusBarManager;
 import spp.jetbrains.sourcemarker.command.status.ui.config.LiveMeterConfigurationPanel;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
 import spp.jetbrains.state.LiveStateBar;

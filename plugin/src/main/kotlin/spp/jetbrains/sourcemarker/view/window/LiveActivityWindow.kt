@@ -21,7 +21,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
-import spp.jetbrains.sourcemarker.view.window.util.TabbedResumableView
+import spp.jetbrains.view.window.util.TabbedResumableView
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView

@@ -69,7 +69,6 @@ dependencies {
     implementation(projectDependency(":commander:kotlin-compiler-wrapper")) {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation(projectDependency(":common"))
     implementation(projectDependency(":core"))
     implementation(projectDependency(":insight"))
     implementation(projectDependency(":marker"))
@@ -77,7 +76,6 @@ dependencies {
     runtimeOnly(projectDependency(":marker:jvm-marker"))
     runtimeOnly(projectDependency(":marker:py-marker"))
     runtimeOnly(projectDependency(":marker:ult-marker"))
-    implementation(projectDependency(":monitor"))
     implementation("plus.sourceplus:protocol:$protocolVersion")
 
     implementation("org.apache.commons:commons-text:1.10.0")

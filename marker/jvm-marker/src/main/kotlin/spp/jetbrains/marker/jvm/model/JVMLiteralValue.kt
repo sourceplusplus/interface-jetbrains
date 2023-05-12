@@ -20,6 +20,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
 import com.intellij.psi.util.elementType
 import org.jetbrains.kotlin.psi.KtConstantExpression
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.stubs.ConstantValueKind.*
 import org.jetbrains.kotlin.psi.stubs.elements.KtConstantExpressionElementType.Companion.kindToConstantElementType
 import spp.jetbrains.artifact.model.ArtifactLiteralValue
@@ -46,6 +47,8 @@ class JVMLiteralValue(override val psiElement: PsiElement) : ArtifactLiteralValu
                         else -> psiElement.text
                     }
                 }
+
+                psiElement is KtStringTemplateExpression -> psiElement.children[0].text
 
                 else -> TODO()
             }

@@ -26,8 +26,8 @@ import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.SortableColumnModel
 import com.intellij.util.ui.tree.AbstractTreeModel
 import org.jetbrains.concurrency.Promise
-import spp.jetbrains.sourcemarker.view.trace.column.TraceSpanTreeNodeColumnInfo
-import spp.jetbrains.sourcemarker.view.trace.node.TraceSpanTreeNode
+import spp.jetbrains.view.trace.column.TraceSpanTreeNodeColumnInfo
+import spp.jetbrains.view.trace.node.TraceSpanTreeNode
 import javax.swing.JTree
 import javax.swing.RowSorter
 import javax.swing.SortOrder

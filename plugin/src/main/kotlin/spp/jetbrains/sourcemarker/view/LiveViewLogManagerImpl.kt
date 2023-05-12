@@ -35,8 +35,8 @@ import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
 import spp.jetbrains.sourcemarker.view.action.StopViewAction
 import spp.jetbrains.sourcemarker.view.window.LiveLogWindowImpl
 import spp.jetbrains.status.SourceStatusService
-import spp.jetbrains.view.LiveViewLogManager
 import spp.jetbrains.view.ResumableView
+import spp.jetbrains.view.manager.LiveViewLogManager
 import spp.jetbrains.view.window.LiveLogWindow
 import spp.protocol.platform.general.Service
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress

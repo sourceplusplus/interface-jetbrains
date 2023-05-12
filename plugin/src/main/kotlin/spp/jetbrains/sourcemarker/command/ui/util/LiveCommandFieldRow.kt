@@ -16,8 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.command.ui.util
 
-import spp.jetbrains.command.LiveCommand
-import spp.jetbrains.command.LiveLocationContext
+import spp.jetbrains.marker.command.LiveCommand
+import spp.jetbrains.marker.command.LiveLocationContext
 import spp.jetbrains.sourcemarker.command.util.AutocompleteFieldRow
 import javax.swing.Icon
 

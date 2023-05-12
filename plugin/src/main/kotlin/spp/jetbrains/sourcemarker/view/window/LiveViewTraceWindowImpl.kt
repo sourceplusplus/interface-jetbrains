@@ -26,9 +26,9 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.sourcemarker.view.trace.column.TraceRowColumnInfo
-import spp.jetbrains.sourcemarker.view.trace.renderer.TraceDurationTableCellRenderer
-import spp.jetbrains.sourcemarker.view.trace.renderer.TraceErrorTableCellRenderer
-import spp.jetbrains.view.LiveViewTraceManager
+import spp.jetbrains.view.manager.LiveViewTraceManager
+import spp.jetbrains.view.trace.renderer.TraceDurationTableCellRenderer
+import spp.jetbrains.view.trace.renderer.TraceErrorTableCellRenderer
 import spp.jetbrains.view.window.LiveTraceWindow
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.view.LiveView

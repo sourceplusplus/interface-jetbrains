@@ -62,11 +62,10 @@ import spp.jetbrains.UserData
 import spp.jetbrains.insight.LiveInsightManager
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.plugin.LivePluginService
+import spp.jetbrains.marker.plugin.LiveStatusBarManager
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
-import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
-import spp.jetbrains.plugin.LivePluginService
-import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.command.status.LiveStatusBarManagerImpl
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
@@ -171,12 +170,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         connectionJob = null
 
         connectionJob = vertx.safeLaunch {
-            var connectedMonitor = false
             try {
                 initServices(vertx, config)
-                SourceStatusService.getInstance(project).update(Pending, "Initializing monitor")
-                initMonitor(vertx, config)
-                connectedMonitor = true
 
                 if (!config.notifiedConnection) {
                     val pluginName = message("plugin_name")
@@ -199,33 +194,31 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 log.warn("Connection failed", throwable)
             }
 
-            if (connectedMonitor) {
-                val pluginsPromise = Promise.promise<Nothing>()
-                ProgressManager.getInstance()
-                    .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
-                        override fun run(indicator: ProgressIndicator) {
-                            if (loadLivePluginsLock.tryLock()) {
-                                project.messageBus.connect().apply {
-                                    subscribe(TOPIC, SourceStatusListener {
-                                        if (it == PluginsLoaded) {
-                                            initMarker(vertx)
-                                            disconnect()
-                                        }
-                                    })
-                                }
-
-                                log.info("Loading live plugins for project: $project")
-                                project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
-                                log.info("Loaded live plugins for project: $project")
-                                pluginsPromise.complete()
-                                loadLivePluginsLock.unlock()
-                            } else {
-                                log.warn("Ignoring extraneous live plugins load request for project: $project")
+            val pluginsPromise = Promise.promise<Nothing>()
+            ProgressManager.getInstance()
+                .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
+                    override fun run(indicator: ProgressIndicator) {
+                        if (loadLivePluginsLock.tryLock()) {
+                            project.messageBus.connect().apply {
+                                subscribe(TOPIC, SourceStatusListener {
+                                    if (it == PluginsLoaded) {
+                                        initMarker(vertx)
+                                        disconnect()
+                                    }
+                                })
                             }
+
+                            log.info("Loading live plugins for project: $project")
+                            project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
+                            log.info("Loaded live plugins for project: $project")
+                            pluginsPromise.complete()
+                            loadLivePluginsLock.unlock()
+                        } else {
+                            log.warn("Ignoring extraneous live plugins load request for project: $project")
                         }
-                    })
-                pluginsPromise.future().await()
-            }
+                    }
+                })
+            pluginsPromise.future().await()
         }
     }
 
@@ -566,18 +559,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             config.notifiedConnection = true
             projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
         }
-    }
-
-    private suspend fun initMonitor(vertx: Vertx, config: SourceMarkerConfig) {
-        val scheme = if (config.isSsl()) "https" else "http"
-        val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
-        val certificatePins = mutableListOf<String>()
-        certificatePins.addAll(config.certificatePins)
-        vertx.deployVerticle(
-            SkywalkingMonitor(
-                skywalkingHost, config.accessToken, certificatePins, config.verifyHost, config.serviceName, project
-            )
-        ).await()
     }
 
     private fun initMarker(vertx: Vertx) {

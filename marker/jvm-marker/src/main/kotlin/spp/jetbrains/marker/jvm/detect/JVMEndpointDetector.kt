@@ -50,22 +50,9 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
         MicronautEndpoint()
     )
 
-    fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> {
+    fun determineEndpointName(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
-        CompositeFuture.all(detectorSet.map { it.determineEndpointName(element) }).onComplete {
-            if (it.succeeded()) {
-                val detectedEndpoints = it.result().list<List<DetectedEndpoint>>()
-                promise.complete(detectedEndpoints.firstOrNull { it.isNotEmpty() } ?: emptyList())
-            } else {
-                promise.fail(it.cause())
-            }
-        }
-        return promise.future()
-    }
-
-    fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>> {
-        val promise = Promise.promise<List<DetectedEndpoint>>()
-        CompositeFuture.all(detectorSet.map { it.determineEndpointName(element) }).onComplete {
+        CompositeFuture.all(detectorSet.map { it.detectEndpointNames(guideMark) }).onComplete {
             if (it.succeeded()) {
                 val detectedEndpoints = it.result().list<List<DetectedEndpoint>>()
                 promise.complete(detectedEndpoints.firstOrNull { it.isNotEmpty() } ?: emptyList())
@@ -93,8 +80,11 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
             })
         }
 
-        fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>>
-        fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>>
+        fun determineEndpointName(element: PsiMethod): Future<List<DetectedEndpoint>> =
+            Future.succeededFuture(emptyList())
+
+        fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>> =
+            Future.succeededFuture(emptyList())
 
         fun getAttributeValue(annotation: PsiAnnotation, name: String): Any? {
             return if (annotation.isGroovy()) {

@@ -28,8 +28,8 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginUI
 import spp.jetbrains.UserData
-import spp.jetbrains.sourcemarker.view.overlay.ValueDotPainter
 import spp.jetbrains.view.ResumableView
+import spp.jetbrains.view.overlay.ValueDotPainter
 import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.view.LiveView

@@ -22,6 +22,7 @@ import com.intellij.lang.javascript.psi.JSReferenceExpression
 import com.intellij.psi.PsiElement
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.ReferenceArtifact
+import spp.jetbrains.artifact.service.toArtifact
 
 class JavascriptReferenceArtifact(override val psiElement: JSReferenceExpression) : ReferenceArtifact(psiElement) {
 
@@ -38,6 +39,10 @@ class JavascriptReferenceArtifact(override val psiElement: JSReferenceExpression
         val parameter = resolvedElement as JSParameter
         val parameterList = parameter.parent as? JSParameterList
         return parameterList?.parameters?.indexOf(parameter) ?: -1
+    }
+
+    override fun resolve(): ArtifactElement? {
+        return resolvedElement?.toArtifact()
     }
 
     override fun clone(): ArtifactElement {

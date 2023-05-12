@@ -127,6 +127,17 @@ class PythonArtifactScopeService : IArtifactScopeService {
         })
     }
 
+    override fun getCallerExpressions(element: PsiElement, includeIndirect: Boolean): List<PsiElement> {
+        val references = ProgressManager.getInstance().runProcess(Computable {
+            ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+        }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
+        return ReadAction.compute(ThrowableComputable {
+            references.mapNotNull {
+                it.element.parentOfType<PyExpression>()
+            }.filter { it.isWritable }
+        })
+    }
+
     override fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String> {
         val position = SourceMarkerUtils.getElementAtLine(file, lineNumber) ?: return emptyList()
         val scope = ScopeUtil.getScopeOwner(position) ?: return emptyList()

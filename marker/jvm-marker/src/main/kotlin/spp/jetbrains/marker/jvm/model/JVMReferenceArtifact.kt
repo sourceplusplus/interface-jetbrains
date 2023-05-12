@@ -67,6 +67,10 @@ class JVMReferenceArtifact(override val psiElement: PsiElement) : ReferenceArtif
         return -1
     }
 
+    override fun resolve(): ArtifactElement? {
+        return resolvedElement?.toArtifact()
+    }
+
     override fun toString(): String {
         return "JVMReferenceArtifact(functionParameter=${isFunctionParameter()})"
     }

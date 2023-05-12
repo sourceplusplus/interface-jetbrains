@@ -37,8 +37,8 @@ import spp.jetbrains.sourcemarker.view.action.StopViewAction
 import spp.jetbrains.sourcemarker.view.trace.TraceSpanSplitterPanel
 import spp.jetbrains.sourcemarker.view.window.LiveViewTraceWindowImpl
 import spp.jetbrains.status.SourceStatusService
-import spp.jetbrains.view.LiveViewTraceManager
 import spp.jetbrains.view.ResumableView
+import spp.jetbrains.view.manager.LiveViewTraceManager
 import spp.jetbrains.view.window.LiveTraceWindow
 import spp.protocol.artifact.trace.Trace
 import spp.protocol.platform.general.Service

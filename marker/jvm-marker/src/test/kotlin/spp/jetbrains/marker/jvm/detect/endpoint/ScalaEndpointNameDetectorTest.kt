@@ -21,12 +21,18 @@ import io.vertx.kotlin.coroutines.await
 import org.intellij.lang.annotations.Language
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.artifact.service.ArtifactModelService
 import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.artifact.service.getClasses
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector
+import spp.jetbrains.marker.jvm.service.JVMArtifactModelService
+import spp.jetbrains.marker.jvm.service.JVMArtifactNamingService
 import spp.jetbrains.marker.jvm.service.JVMArtifactScopeService
+import spp.jetbrains.marker.service.ArtifactNamingService
+import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
 class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
 
@@ -34,7 +40,9 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
         super.setUp()
 
         SourceMarkerUtils.getJvmLanguages().let {
+            ArtifactNamingService.addService(JVMArtifactNamingService(), it)
             ArtifactScopeService.addService(JVMArtifactScopeService(), it)
+            ArtifactModelService.addService(JVMArtifactModelService(), it)
         }
     }
 
@@ -53,9 +61,11 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -77,9 +87,11 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/", result.first().name)
             }
@@ -101,9 +113,11 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -125,9 +139,11 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -149,9 +165,11 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("doGet", result.first().name)
             }
@@ -173,9 +191,11 @@ class ScalaEndpointNameDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as ScFunctionDefinition
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("TestController.doGet", result.first().name)
             }

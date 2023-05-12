@@ -22,7 +22,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.render.RenderingUtil
 import com.intellij.util.ui.JBUI
 import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceModel
-import spp.jetbrains.sourcemarker.view.trace.node.TraceSpanTreeNode
+import spp.jetbrains.view.trace.node.TraceSpanTreeNode
 import java.awt.Component
 import java.awt.Graphics
 import javax.swing.JTable
