@@ -50,8 +50,11 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     private var reconnectionJob: Job? = null
     private var currentService: Service? = null
     private var activeServices = listOf<Service>()
+    private var initialService: String? = null
 
-    override suspend fun start() {
+    override suspend fun start(initialService: String?) {
+        this.initialService = initialService
+
         //attempt to set current service
         SourceStatusService.getInstance(project).update(Pending, "Setting current service")
         setCurrentService(true)
@@ -75,19 +78,18 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
     private suspend fun setCurrentService(canStartChecker: Boolean): Boolean {
         SourceStatusService.getInstance(project).update(WaitingForService)
-        val initServiceName = null //todo:
 
         log.info("Attempting to set current service. Can start checker: $canStartChecker")
         val managementService = UserData.liveManagementService(project)
         activeServices = managementService.getServices(null).await()
 
         if (activeServices.isNotEmpty()) {
-            if (initServiceName != null) {
-                currentService = activeServices.find { it.name == initServiceName }
+            if (initialService != null) {
+                currentService = activeServices.find { it.name == initialService }
                 currentService?.let { log.info("Current service set to: ${it.name}") }
 
                 return if (currentService == null) {
-                    log.warn("No service found with name: $initServiceName")
+                    log.warn("No service found with name: $initialService")
                     if (canStartChecker) {
                         periodicallyCheckForCurrentService()
                     }

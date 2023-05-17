@@ -172,7 +172,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         connectionJob = vertx.safeLaunch {
             try {
                 initServices(vertx, config)
-                SourceStatusService.getInstance(project).start()
+                SourceStatusService.getInstance(project).start(config.serviceName)
 
                 if (!config.notifiedConnection) {
                     val pluginName = message("plugin_name")
