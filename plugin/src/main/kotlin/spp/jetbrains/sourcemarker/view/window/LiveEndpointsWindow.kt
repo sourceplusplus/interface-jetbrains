@@ -89,15 +89,12 @@ class LiveEndpointsWindow(val project: Project, service: Service) : ResumableVie
         component.add(JBScrollPane(table), "Center")
 
         val vertx = UserData.vertx(project)
-//        ServiceBridge.currentServiceConsumer(vertx).handler {
-//            val service = it.body()
         vertx.safeLaunch {
             UserData.liveManagementService(project).getEndpoints(service.id, 1000).await().forEach {
                 val endpointRow = ServiceEndpointRow(it)
                 model.addRow(endpointRow)
                 addView(vertx, service, endpointRow)
             }
-//            }
         }
     }
 
