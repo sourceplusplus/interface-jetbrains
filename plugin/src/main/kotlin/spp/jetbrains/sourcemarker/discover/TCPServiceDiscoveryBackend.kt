@@ -148,7 +148,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
             SourceStatusService.getInstance(project).update(ConnectionError, "Service discovery socket closed")
         }
 
-        vertx.executeBlocking<Unit> {
+        vertx.executeBlocking {
             it.complete(connectServices(project))
         }
     }
