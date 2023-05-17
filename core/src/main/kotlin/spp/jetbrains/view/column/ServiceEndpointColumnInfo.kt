@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.view.model.column
+package spp.jetbrains.view.column
 
 import com.intellij.util.ui.ColumnInfo
 import spp.jetbrains.view.model.ServiceEndpointRow
