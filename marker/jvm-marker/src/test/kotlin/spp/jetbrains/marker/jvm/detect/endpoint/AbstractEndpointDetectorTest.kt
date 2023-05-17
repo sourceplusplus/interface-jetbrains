@@ -83,6 +83,35 @@ abstract class AbstractEndpointDetectorTest : LightJavaCodeInsightFixtureTestCas
                     "    boolean headRoute() default true;\n" +
                     "}\n"
         )
+
+        myFixture.addClass(
+            "package io.vertx.core;\n" +
+                    "public interface Vertx {\n" +
+                    "   static Vertx vertx() {\n" +
+                    "    return null;\n" +
+                    "  }\n" +
+                    "}\n"
+        )
+        myFixture.addClass(
+            "package io.vertx.ext.web;\n" +
+                    "public interface Router {\n" +
+                    "   static Router router(Vertx vertx) {\n" +
+                    "    return null;\n" +
+                    "   }\n" +
+                    "   Route get(String path);\n" +
+                    "}\n"
+        )
+        myFixture.addClass(
+            "package io.vertx.ext.web;\n" +
+                    "public interface Route {\n" +
+                    "   Route handler(Handler<RoutingContext> requestHandler);\n" +
+                    "}\n"
+        )
+        myFixture.addClass(
+            "package io.vertx.ext.web;\n" +
+                    "public interface RoutingContext {\n" +
+                    "}\n"
+        )
     }
 
     override fun tearDown() {

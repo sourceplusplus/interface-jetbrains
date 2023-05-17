@@ -33,6 +33,7 @@ import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetect
 import spp.jetbrains.marker.jvm.detect.endpoint.MicronautEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SkywalkingTraceEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
+import spp.jetbrains.marker.jvm.detect.endpoint.VertxEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 
@@ -47,7 +48,8 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
     override val detectorSet: Set<JVMEndpointNameDetector> = setOf(
         SkywalkingTraceEndpoint(),
         SpringMVCEndpoint(),
-        MicronautEndpoint()
+        MicronautEndpoint(),
+        VertxEndpoint()
     )
 
     fun determineEndpointName(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
