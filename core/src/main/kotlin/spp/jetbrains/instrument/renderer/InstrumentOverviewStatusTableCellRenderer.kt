@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.ui.renderer
+package spp.jetbrains.instrument.renderer
 
 import com.intellij.util.ui.ListTableModel
 import com.intellij.util.ui.table.IconTableCellRenderer
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.sourcemarker.instrument.ui.model.InstrumentOverview
+import spp.jetbrains.instrument.model.InstrumentOverview
 import javax.swing.Icon
 import javax.swing.JTable
 

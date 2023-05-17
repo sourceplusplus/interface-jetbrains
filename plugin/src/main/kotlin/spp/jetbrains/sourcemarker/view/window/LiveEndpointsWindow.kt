@@ -30,7 +30,7 @@ import spp.jetbrains.safeLaunch
 import spp.jetbrains.view.ResumableViewCollection
 import spp.jetbrains.view.manager.LiveViewChartManager
 import spp.jetbrains.view.model.ServiceEndpointRow
-import spp.jetbrains.view.model.column.ServiceEndpointColumnInfo
+import spp.jetbrains.view.column.ServiceEndpointColumnInfo
 import spp.jetbrains.view.window.renderer.EndpointAvailabilityTableCellRenderer
 import spp.jetbrains.view.window.util.EndpointRowView
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_CPM

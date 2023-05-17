@@ -23,11 +23,11 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
-import spp.jetbrains.sourcemarker.instrument.ui.column.InstrumentOverviewColumnInfo
-import spp.jetbrains.sourcemarker.instrument.ui.model.InstrumentOverview
-import spp.jetbrains.sourcemarker.instrument.ui.renderer.CreatedByTableCellRenderer
-import spp.jetbrains.sourcemarker.instrument.ui.renderer.InstrumentOverviewStatusTableCellRenderer
-import spp.jetbrains.sourcemarker.instrument.ui.renderer.InstrumentTypeTableCellRenderer
+import spp.jetbrains.instrument.column.InstrumentOverviewColumnInfo
+import spp.jetbrains.instrument.model.InstrumentOverview
+import spp.jetbrains.instrument.renderer.CreatedByTableCellRenderer
+import spp.jetbrains.instrument.renderer.InstrumentOverviewStatusTableCellRenderer
+import spp.jetbrains.instrument.renderer.InstrumentTypeTableCellRenderer
 import java.awt.BorderLayout
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent

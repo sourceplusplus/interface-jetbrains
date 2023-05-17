@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.marker.presentation
+package spp.jetbrains.instrument.presentation
 
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.ui.SimpleTextAttributes

@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.ui.column
+package spp.jetbrains.instrument.column
 
 import com.intellij.util.ui.ColumnInfo
-import spp.jetbrains.sourcemarker.instrument.ui.renderer.InstrumentTypeTableCellRenderer
+import spp.jetbrains.instrument.renderer.InstrumentTypeTableCellRenderer
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentRemoved

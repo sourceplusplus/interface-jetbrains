@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.ui.column
+package spp.jetbrains.instrument.column
 
 import com.intellij.util.ui.ColumnInfo
-import spp.jetbrains.sourcemarker.instrument.ui.model.InstrumentOverview
-import spp.jetbrains.sourcemarker.instrument.ui.renderer.CreatedByTableCellRenderer
-import spp.jetbrains.sourcemarker.instrument.ui.renderer.InstrumentOverviewStatusTableCellRenderer
-import spp.jetbrains.sourcemarker.instrument.ui.renderer.InstrumentTypeTableCellRenderer
+import spp.jetbrains.instrument.model.InstrumentOverview
+import spp.jetbrains.instrument.renderer.CreatedByTableCellRenderer
+import spp.jetbrains.instrument.renderer.InstrumentOverviewStatusTableCellRenderer
+import spp.jetbrains.instrument.renderer.InstrumentTypeTableCellRenderer
 import spp.protocol.utils.toPrettyDuration
 import java.time.Instant
 

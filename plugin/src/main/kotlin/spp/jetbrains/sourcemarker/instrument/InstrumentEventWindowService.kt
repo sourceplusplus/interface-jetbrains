@@ -36,7 +36,7 @@ import spp.jetbrains.sourcemarker.instrument.ui.InstrumentEventTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentOverviewTab
 import spp.jetbrains.sourcemarker.instrument.ui.action.ClearInstrumentsAction
 import spp.jetbrains.sourcemarker.instrument.ui.action.RemoveInstrumentAction
-import spp.jetbrains.sourcemarker.instrument.ui.model.InstrumentOverview
+import spp.jetbrains.instrument.model.InstrumentOverview
 import spp.jetbrains.status.SourceStatusListener
 import spp.protocol.artifact.exception.sourceAsLineNumber
 import spp.protocol.instrument.event.LiveBreakpointHit

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spp.jetbrains.sourcemarker.instrument.ui.model
+package spp.jetbrains.instrument.model
 
 import spp.protocol.instrument.LiveInstrumentType
 import spp.protocol.instrument.event.LiveInstrumentApplied
