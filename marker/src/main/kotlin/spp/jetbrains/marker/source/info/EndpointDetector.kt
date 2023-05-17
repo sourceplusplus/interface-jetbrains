@@ -21,7 +21,6 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import io.vertx.core.Future
-import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.SourceKey
 import spp.jetbrains.UserData
@@ -29,6 +28,7 @@ import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.status.SourceStatusListener
+import spp.jetbrains.status.SourceStatusService
 
 /**
  * Base class for endpoint detectors. Concrete endpoint detectors are responsible for determining the endpoint name(s)
@@ -66,9 +66,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
 
             val vertx = UserData.vertx(project)
             vertx.setPeriodic(5000) {
-                vertx.safeLaunch {
-                    redetectEndpoints()
-                }
+                vertx.safeLaunch { redetectEndpoints() }
             }
         }
     }
@@ -122,14 +120,19 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
             log.trace("Internal endpoint, skipping endpoint id lookup")
             return
         }
+        val service = SourceStatusService.getCurrentService(project)
+        if (service == null) {
+            log.warn("Could not determine endpoint id for endpoint name: ${endpoint.name}")
+            return
+        }
 
         log.trace("Determining endpoint id for endpoint name: ${endpoint.name}")
-        val foundEndpoint: JsonObject? = null //UserData.liveManagementService(guideMark.project)
-//            .getEndpoints()//searchExactEndpoint(endpoint.name)
+        val endpoints = UserData.liveManagementService(guideMark.project)
+            .searchEndpoints(service.id, endpoint.name, 1000)
+        val foundEndpoint = endpoints.await().find { it.name == endpoint.name }
         if (foundEndpoint != null) {
-            val endpointId = foundEndpoint.getString("id")
-            log.trace("Found endpoint id: $endpointId")
-            endpoint.id = endpointId
+            log.trace("Found endpoint id: ${foundEndpoint.id}")
+            endpoint.id = foundEndpoint.id
             guideMark.putUserData(ENDPOINT_FOUND, true)
         } else {
             if (guideMark.getUserData(ENDPOINT_FOUND) == null) {

@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.marker.plugin.impl
 
-import com.apollographql.apollo3.exception.ApolloNetworkException
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
@@ -27,8 +26,6 @@ import spp.jetbrains.marker.indicator.LiveIndicator
 import spp.jetbrains.marker.plugin.LivePluginService
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.status.SourceStatus.ConnectionError
-import spp.jetbrains.status.SourceStatusService
 
 class LivePluginServiceImpl(val project: Project) : LivePluginService {
 
@@ -59,12 +56,7 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
             val trigger = indicator.listenForAllEvents || indicator.listenForEvents.contains(it.eventCode)
             if (trigger && it.sourceMark is GuideMark) {
                 safeRunBlocking {
-                    try {
-                        indicator.trigger(it.sourceMark, it)
-                    } catch (e: ApolloNetworkException) {
-                        log.warn("Network error while triggering indicator $indicator", e)
-                        SourceStatusService.getInstance(project).update(ConnectionError, e.message)
-                    }
+                    indicator.trigger(it.sourceMark, it)
                 }
             }
         }

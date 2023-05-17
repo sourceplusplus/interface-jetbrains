@@ -16,29 +16,20 @@
  */
 package spp.jetbrains.marker.indicator
 
-import com.apollographql.apollo3.exception.ApolloException
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent
-import com.intellij.openapi.fileEditor.FileEditorManagerListener
-import com.intellij.openapi.observable.util.whenDisposed
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.removeUserData
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
-import spp.jetbrains.marker.indicator.ui.StickyNotificationPanel
 import spp.jetbrains.marker.plugin.LiveStatusBarManager
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.api.event.IEventCode
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.status.SourceStatus.ConnectionError
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
@@ -54,10 +45,9 @@ abstract class LiveIndicator(val project: Project) : Disposable {
     open val listenForEvents: List<IEventCode> = emptyList()
 
     private var periodicTimerId = -1L
-    val dumbService = DumbService.getInstance(project)
+    val dumbService: DumbService = DumbService.getInstance(project)
     val vertx = UserData.vertx(project)
 
-    @Deprecated("Use LiveViewService instead")
     val managementService = UserData.liveManagementService(project)
     val viewService = UserData.liveViewService(project)!!
     val statusManager = LiveStatusBarManager.getInstance(project)
@@ -75,13 +65,7 @@ abstract class LiveIndicator(val project: Project) : Disposable {
                     return@safeLaunch
                 }
 
-                try {
-                    refreshIndicator()
-                } catch (ex: ApolloException) {
-                    log.warn("Error refreshing indicator", ex)
-                    SourceStatusService.getInstance(project)
-                        .update(ConnectionError, "Unable to connect to platform")
-                }
+                refreshIndicator()
             }
         }
     }
@@ -113,56 +97,6 @@ abstract class LiveIndicator(val project: Project) : Disposable {
             }
         }
         return consumer
-    }
-
-    fun showInEditor(
-        notification: StickyNotificationPanel
-    ) = ApplicationManager.getApplication().invokeLater {
-        val fileEditorManager = FileEditorManager.getInstance(project)
-        val editor = fileEditorManager.selectedEditor ?: return@invokeLater
-        if (editor.getUserData(StickyNotificationPanel.PSI_KEY) != null) return@invokeLater
-        editor.putUserData(StickyNotificationPanel.PSI_KEY, notification)
-        whenDisposed { editor.removeUserData(StickyNotificationPanel.PSI_KEY) }
-
-        notification.setCloseAction {
-            fileEditorManager.removeTopComponent(editor, notification)
-            editor.removeUserData(StickyNotificationPanel.PSI_KEY)
-        }
-        fileEditorManager.addTopComponent(editor, notification)
-    }
-
-    fun showStickyInEditor(
-        notification: StickyNotificationPanel
-    ) = ApplicationManager.getApplication().invokeLater {
-        val fileEditorManager = FileEditorManager.getInstance(project)
-        val editor = fileEditorManager.selectedEditor ?: return@invokeLater
-        if (editor.getUserData(StickyNotificationPanel.PSI_KEY) != null) return@invokeLater
-        editor.putUserData(StickyNotificationPanel.PSI_KEY, notification)
-        whenDisposed { editor.removeUserData(StickyNotificationPanel.PSI_KEY) }
-
-        notification.setCloseAction {
-            fileEditorManager.removeTopComponent(editor, notification)
-            editor.removeUserData(StickyNotificationPanel.PSI_KEY)
-        }
-        fileEditorManager.addTopComponent(editor, notification)
-
-        project.messageBus.connect(this)
-            .subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, object : FileEditorManagerListener {
-                override fun selectionChanged(event: FileEditorManagerEvent) {
-                    fileEditorManager.removeTopComponent(editor, notification)
-                    editor.removeUserData(StickyNotificationPanel.PSI_KEY)
-                    fileEditorManager.selectedEditor?.removeUserData(StickyNotificationPanel.PSI_KEY)
-                    showInEditor(notification)
-                }
-            })
-    }
-
-    fun clearStickyInEditor() = ApplicationManager.getApplication().invokeLater {
-        val fileEditorManager = FileEditorManager.getInstance(project)
-        val editor = fileEditorManager.selectedEditor ?: return@invokeLater
-        val stickyNotification = editor.getUserData(StickyNotificationPanel.PSI_KEY) ?: return@invokeLater
-        fileEditorManager.removeTopComponent(editor, stickyNotification)
-        editor.removeUserData(StickyNotificationPanel.PSI_KEY)
     }
 
 //    fun findIcon(path: String): Icon {
