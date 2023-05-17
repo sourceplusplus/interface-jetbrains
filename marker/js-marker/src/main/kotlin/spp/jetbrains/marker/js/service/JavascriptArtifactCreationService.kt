@@ -143,7 +143,16 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
         element: PsiElement,
         autoApply: Boolean
     ): ExpressionInlayMark {
-        TODO("Not yet implemented")
+        val inlayMark = fileMarker.createExpressionSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            inlayMark.apply(true)
+            inlayMark
+        } else {
+            inlayMark
+        }
     }
 
     override fun createExpressionInlayMark(
