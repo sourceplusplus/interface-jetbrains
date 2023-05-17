@@ -28,6 +28,7 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.instrument.model.InstrumentOverview
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactNamingService
@@ -36,7 +37,6 @@ import spp.jetbrains.sourcemarker.instrument.ui.InstrumentEventTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentOverviewTab
 import spp.jetbrains.sourcemarker.instrument.ui.action.ClearInstrumentsAction
 import spp.jetbrains.sourcemarker.instrument.ui.action.RemoveInstrumentAction
-import spp.jetbrains.instrument.model.InstrumentOverview
 import spp.jetbrains.status.SourceStatusListener
 import spp.protocol.artifact.exception.sourceAsLineNumber
 import spp.protocol.instrument.event.LiveBreakpointHit

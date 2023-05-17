@@ -22,10 +22,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
-import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.jetbrains.instrument.column.LiveInstrumentEventColumnInfo
 import spp.jetbrains.instrument.model.InstrumentOverview
 import spp.jetbrains.instrument.renderer.InstrumentTypeTableCellRenderer
+import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import java.awt.BorderLayout
