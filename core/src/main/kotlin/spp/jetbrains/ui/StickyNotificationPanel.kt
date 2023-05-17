@@ -22,6 +22,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.observable.util.whenDisposed
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.removeUserData
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.util.messages.SimpleMessageBusConnection
@@ -31,6 +32,7 @@ import java.awt.Color
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class StickyNotificationPanel(
+    parentDisposable: Disposable,
     val project: Project,
     background: Color? = null
 ) : EditorNotificationPanel(background), Disposable {
@@ -42,6 +44,7 @@ class StickyNotificationPanel(
     private val busConnection: SimpleMessageBusConnection
 
     init {
+        Disposer.register(parentDisposable, this)
         whenDisposed { hideSticky() }
         setCloseAction { hideSticky() }
 
