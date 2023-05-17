@@ -21,12 +21,14 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import spp.jetbrains.ScopeExtensions.safeGlobalAsync
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.UserData
+import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
@@ -47,7 +49,76 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     private val reconnectionLock = Any()
     private var reconnectionJob: Job? = null
     private var currentService: Service? = null
-    private var activeServices = mutableListOf<Service>()
+    private var activeServices = listOf<Service>()
+
+    override suspend fun start() {
+        //attempt to set current service
+        SourceStatusService.getInstance(project).update(Pending, "Setting current service")
+        setCurrentService(true)
+    }
+
+    private fun periodicallyCheckForCurrentService() {
+        log.info("No current service set, starting periodic check for current service")
+        val vertx = UserData.vertx(project)
+        vertx.setPeriodic(5000) { timerId ->
+            vertx.safeLaunch {
+                try {
+                    if (setCurrentService(false)) {
+                        vertx.cancelTimer(timerId)
+                    }
+                } catch (e: Exception) {
+                    log.warn("Error setting current service", e)
+                }
+            }
+        }
+    }
+
+    private suspend fun setCurrentService(canStartChecker: Boolean): Boolean {
+        SourceStatusService.getInstance(project).update(WaitingForService)
+        val initServiceName = null //todo:
+
+        log.info("Attempting to set current service. Can start checker: $canStartChecker")
+        val managementService = UserData.liveManagementService(project)
+        activeServices = managementService.getServices(null).await()
+
+        if (activeServices.isNotEmpty()) {
+            if (initServiceName != null) {
+                currentService = activeServices.find { it.name == initServiceName }
+                currentService?.let { log.info("Current service set to: ${it.name}") }
+
+                return if (currentService == null) {
+                    log.warn("No service found with name: $initServiceName")
+                    if (canStartChecker) {
+                        periodicallyCheckForCurrentService()
+                    }
+                    false
+                } else {
+                    SourceStatusService.getInstance(project).apply {
+                        setActiveServices(activeServices)
+                        setCurrentService(currentService!!)
+                        update(ServiceEstablished)
+                    }
+                    true
+                }
+            }
+            if (currentService == null) {
+                currentService = activeServices[0]
+                log.info("Current service set to: ${currentService!!.name}")
+                SourceStatusService.getInstance(project).apply {
+                    setActiveServices(activeServices)
+                    setCurrentService(currentService!!)
+                    update(ServiceEstablished)
+                }
+                return true
+            }
+        } else {
+            log.warn("No active services found")
+            if (canStartChecker) {
+                periodicallyCheckForCurrentService()
+            }
+        }
+        return false
+    }
 
     override fun isReady(): Boolean {
         return getCurrentStatus().first.isReady
