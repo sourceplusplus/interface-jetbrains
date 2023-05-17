@@ -3,6 +3,7 @@ plugins {
     id("maven-publish")
 }
 
+val joorVersion: String by project
 val vertxVersion: String by project
 val projectVersion: String by project
 val protocolVersion = project.properties["protocolVersion"] as String? ?: projectVersion
@@ -48,4 +49,5 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("io.dropwizard.metrics:metrics-core:4.2.18")
+    compileOnly("org.jooq:joor:$joorVersion")
 }
