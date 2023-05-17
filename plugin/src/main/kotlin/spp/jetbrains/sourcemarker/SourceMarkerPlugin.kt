@@ -172,6 +172,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         connectionJob = vertx.safeLaunch {
             try {
                 initServices(vertx, config)
+                SourceStatusService.getInstance(project).start()
 
                 if (!config.notifiedConnection) {
                     val pluginName = message("plugin_name")
@@ -192,6 +193,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             } catch (throwable: Throwable) {
                 SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
                 log.warn("Connection failed", throwable)
+                return@safeLaunch
             }
 
             val pluginsPromise = Promise.promise<Nothing>()
