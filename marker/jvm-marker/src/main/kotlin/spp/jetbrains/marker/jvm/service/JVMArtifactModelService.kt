@@ -26,7 +26,9 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScMethodCall
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.service.define.IArtifactModelService
+import spp.jetbrains.artifact.service.isGroovy
 import spp.jetbrains.artifact.service.isKotlin
+import spp.jetbrains.artifact.service.isScala
 import spp.jetbrains.marker.jvm.model.*
 
 /**
@@ -39,7 +41,16 @@ class JVMArtifactModelService : IArtifactModelService {
 
     override fun toArtifact(element: PsiElement): ArtifactElement? {
         if (element.isKotlin()) {
-            return fromKotlin(element)
+            val fromKotlin = fromKotlin(element)
+            if (fromKotlin != null) return fromKotlin
+        }
+        if (element.isScala()) {
+            val fromScala = fromScala(element)
+            if (fromScala != null) return fromScala
+        }
+        if (element.isGroovy()) {
+            val fromGroovy = fromGroovy(element)
+            if (fromGroovy != null) return fromGroovy
         }
 
         return when (element) {
@@ -48,8 +59,6 @@ class JVMArtifactModelService : IArtifactModelService {
             is PsiBinaryExpression -> JVMBinaryExpression(element)
             is PsiMethod -> JVMFunctionArtifact(element)
             is PsiCall -> JVMCallArtifact(element)
-            is GrMethodCall -> JVMCallArtifact(element)
-            is ScMethodCall -> JVMCallArtifact(element)
             is PsiCodeBlock -> JVMBlockArtifact(element)
             is PsiBlockStatement -> JVMBlockArtifact(element.codeBlock)
             is PsiForStatement -> {
@@ -62,22 +71,6 @@ class JVMArtifactModelService : IArtifactModelService {
             }
 
             is PsiReferenceExpression -> {
-                if (element.resolve() != null) {
-                    JVMReferenceArtifact(element)
-                } else {
-                    null
-                }
-            }
-
-            is GrMethodReferenceExpressionImpl -> {
-                if (element.resolve() != null) {
-                    JVMReferenceArtifact(element)
-                } else {
-                    null
-                }
-            }
-
-            is ScReferenceExpression -> {
                 if (element.resolve() != null) {
                     JVMReferenceArtifact(element)
                 } else {
@@ -110,6 +103,36 @@ class JVMArtifactModelService : IArtifactModelService {
             is KtNameReferenceExpression -> {
                 //todo: easier way to determine if this is a variable or literal reference (Boolean, String, etc)
                 if (element.mainReference.resolve() != null) {
+                    JVMReferenceArtifact(element)
+                } else {
+                    null
+                }
+            }
+
+            else -> null
+        }
+    }
+
+    private fun fromScala(element: PsiElement): ArtifactElement? {
+        return when (element) {
+            is ScMethodCall -> JVMCallArtifact(element)
+            is ScReferenceExpression -> {
+                if (element.resolve() != null) {
+                    JVMReferenceArtifact(element)
+                } else {
+                    null
+                }
+            }
+
+            else -> null
+        }
+    }
+
+    private fun fromGroovy(element: PsiElement): ArtifactElement? {
+        return when (element) {
+            is GrMethodCall -> JVMCallArtifact(element)
+            is GrMethodReferenceExpressionImpl -> {
+                if (element.resolve() != null) {
                     JVMReferenceArtifact(element)
                 } else {
                     null
