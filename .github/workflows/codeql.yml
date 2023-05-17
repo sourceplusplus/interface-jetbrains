@@ -21,7 +21,7 @@ on:
     - cron: '43 23 * * 2'
 
 env:
-  GRADLE_OPTS: -Xmx5g -Xms5g
+  GRADLE_OPTS: -Xmx5g -Xms5g -Dkotlin.daemon.jvm.options=-Xmx5g
 
 jobs:
   analyze:
@@ -74,7 +74,7 @@ jobs:
     - name: Autobuild
       uses: github/codeql-action/autobuild@v2
       env:
-        SEMMLE_JAVA_EXTRACTOR_JVM_ARGS: -Xmx4g -Xms512m
+        SEMMLE_JAVA_EXTRACTOR_JVM_ARGS: -Xmx5g
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
