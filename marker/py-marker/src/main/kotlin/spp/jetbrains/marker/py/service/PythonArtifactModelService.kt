@@ -38,6 +38,13 @@ class PythonArtifactModelService : IArtifactModelService {
             is PyFunction -> PythonFunctionArtifact(element)
             is PyCallExpression -> PythonCallArtifact(element)
             is PyStatementList -> PythonBlockArtifact(element)
+            is PyReferenceExpression -> {
+                if (element.reference.resolve() != null) {
+                    PythonReferenceArtifact(element)
+                } else {
+                    null
+                }
+            }
             else -> null
         }
     }

@@ -3,4 +3,4 @@ def code1():
 
 
 def code2():
-    print(True)  # sleep 200ms
+    Thread.sleep(200)

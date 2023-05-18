@@ -27,21 +27,29 @@ import spp.protocol.insight.InsightValue
 /**
  * Calculates [FUNCTION_DURATION] for Thread.sleep() [CallArtifact]s that can be statically determined.
  */
-class ThreadSleepPass : ArtifactPass {
+class ThreadSleepPass : ArtifactPass() {
 
     override fun analyze(element: ArtifactElement) {
         if (element !is CallArtifact) return //only interested in calls
 
-        //todo: verify better
-        if (element.text.contains("sleep(")) {
+        if (isSleepCall(element)) {
             val args = element.getArguments()
             if (args.size == 1 && args.first() is ArtifactLiteralValue) {
                 val duration = ((args.first() as ArtifactLiteralValue).value as? Number)?.toLong() ?: return
+                element.data[InsightKeys.FUNCTION_DURATION] =
+                    InsightValue.of(FUNCTION_DURATION, duration).asDerived()
+
+                //also store in the psi since it's consistent across procedures
                 element.putUserData(
                     InsightKeys.FUNCTION_DURATION.asPsiKey(),
                     InsightValue.of(FUNCTION_DURATION, duration).asDerived()
                 )
             }
         }
+    }
+
+    //todo: verify better
+    private fun isSleepCall(element: CallArtifact): Boolean {
+        return element.text.contains("sleep(")
     }
 }

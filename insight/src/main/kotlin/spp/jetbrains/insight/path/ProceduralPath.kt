@@ -16,10 +16,7 @@
  */
 package spp.jetbrains.insight.path
 
-import spp.jetbrains.artifact.model.ArtifactElement
-import spp.jetbrains.artifact.model.CallArtifact
-import spp.jetbrains.artifact.model.FunctionArtifact
-import spp.jetbrains.artifact.model.IfArtifact
+import spp.jetbrains.artifact.model.*
 import spp.protocol.insight.InsightValue
 
 /**
@@ -33,6 +30,29 @@ data class ProceduralPath(
 
     override fun iterator(): Iterator<ArtifactElement> = descendants.iterator()
     fun getInsights(): List<InsightValue<*>> = insights
+
+    fun evaluateParams(params: List<ArtifactElement>): Boolean {
+        val ifsDeterminedByParams = artifacts.filterIsInstance<IfArtifact>().filter {
+            (it.condition as? ReferenceArtifact)?.isFunctionParameter() == true
+        }
+        ifsDeterminedByParams.forEach {
+            val paramIndex = (it.condition as ReferenceArtifact).getFunctionParameterIndex()
+            if (params.size <= paramIndex) {
+                return false
+            }
+            val param = params[paramIndex]
+            if (param is ArtifactLiteralValue) {
+                val paramValue = param.value
+                if (paramValue !is Boolean) {
+                    return false
+                }
+                if (paramValue != it.getConditionEvaluation()) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
 
     fun getResolvedCallFunctions(): List<FunctionArtifact> {
         return artifacts
@@ -59,6 +79,10 @@ data class ProceduralPath(
             }
             return descendants
         }
+
+    fun containsDescendant(artifact: ArtifactElement): Boolean {
+        return descendants.any { it.isSameArtifact(artifact) }
+    }
 
     private fun getDescendants(element: ArtifactElement): List<ArtifactElement> {
         val descendants = mutableListOf<ArtifactElement>()

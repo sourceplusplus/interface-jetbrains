@@ -18,7 +18,6 @@ package spp.jetbrains.insight.pass.artifact
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getCalls
 import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.insight.ProceduralAnalyzer
@@ -43,7 +42,6 @@ class ThreadSleepPassTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testThreadSleep() {
         doTestThreadSleep("kotlin", "kt")
         doTestThreadSleep("java", "java")

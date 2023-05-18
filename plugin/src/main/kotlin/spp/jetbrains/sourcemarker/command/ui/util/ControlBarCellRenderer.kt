@@ -18,7 +18,7 @@ package spp.jetbrains.sourcemarker.command.ui.util
 
 import spp.jetbrains.PluginUI.getBackgroundFocusColor
 import spp.jetbrains.PluginUI.getBackgroundUnfocusedColor
-import spp.jetbrains.command.LiveLocationContext
+import spp.jetbrains.marker.command.LiveLocationContext
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.command.status.ui.element.LiveControlBarRow
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField

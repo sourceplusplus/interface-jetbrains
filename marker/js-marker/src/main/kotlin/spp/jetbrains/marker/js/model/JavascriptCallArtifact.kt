@@ -26,7 +26,16 @@ import spp.jetbrains.artifact.service.toArtifact
 class JavascriptCallArtifact(override val psiElement: JSCallExpression) : CallArtifact(psiElement) {
 
     override fun resolveFunction(): FunctionArtifact? {
-        return (psiElement.methodExpression as? PsiReference)?.resolve()?.toArtifact() as? FunctionArtifact
+        val function = (psiElement.methodExpression as? PsiReference)?.resolve()?.toArtifact() as? FunctionArtifact
+
+        //propagate call arguments to function parameters
+        if (function != null) {
+            getArguments().forEach {
+                function.parameters.add(it)
+            }
+        }
+
+        return function
     }
 
     override fun getArguments(): List<ArtifactElement> {

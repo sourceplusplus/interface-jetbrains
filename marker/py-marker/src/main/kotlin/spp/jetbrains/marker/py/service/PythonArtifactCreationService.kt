@@ -156,6 +156,23 @@ class PythonArtifactCreationService : IArtifactCreationService {
         }
     }
 
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        val inlayMark = fileMarker.createExpressionSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            inlayMark.apply(true)
+            inlayMark
+        } else {
+            inlayMark
+        }
+    }
+
     override fun createExpressionGuideMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,

@@ -20,9 +20,9 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.OnePixelSplitter
-import spp.jetbrains.sourcemarker.view.trace.node.TraceSpanTreeNode
 import spp.jetbrains.sourcemarker.view.trace.table.TraceSpanTable
 import spp.jetbrains.sourcemarker.view.trace.table.TraceSpanTreeTable
+import spp.jetbrains.view.trace.node.TraceSpanTreeNode
 import spp.protocol.artifact.trace.TraceSpan
 import javax.swing.tree.DefaultMutableTreeNode
 

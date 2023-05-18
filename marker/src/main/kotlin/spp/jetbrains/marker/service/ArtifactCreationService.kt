@@ -114,6 +114,15 @@ object ArtifactCreationService : AbstractSourceMarkerService<IArtifactCreationSe
             .createExpressionInlayMark(fileMarker, lineNumber, autoApply)
     }
 
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        return getService(fileMarker.psiFile.language)
+            .createExpressionInlayMark(fileMarker, element, autoApply)
+    }
+
     override fun createExpressionGuideMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,

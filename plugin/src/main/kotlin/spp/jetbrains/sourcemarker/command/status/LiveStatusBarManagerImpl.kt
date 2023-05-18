@@ -24,6 +24,7 @@ import com.intellij.openapi.project.Project
 import io.vertx.core.Vertx
 import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.command.util.CircularList
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS
@@ -31,6 +32,7 @@ import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_ID
 import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_TYPE
 import spp.jetbrains.marker.SourceMarkerKeys.VIEW_EVENT_LISTENERS
 import spp.jetbrains.marker.SourceMarkerKeys.VIEW_SUBSCRIPTION_ID
+import spp.jetbrains.marker.plugin.LiveStatusBarManager
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -38,10 +40,8 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.api.component.api.config.SourceMarkComponentConfiguration
 import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkComponentProvider
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.command.status.ui.*
-import spp.jetbrains.sourcemarker.command.util.CircularList
 import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*

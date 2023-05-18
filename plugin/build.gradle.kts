@@ -48,7 +48,7 @@ tasks {
 }
 
 tasks.getByName<JavaExec>("runIde") {
-    //systemProperty("sourcemarker.debug.unblocked_threads", true)
+    //systemProperty("spp.debug.unblocked_threads", true)
     systemProperty("ide.enable.slow.operations.in.edt", false)
     systemProperty("ide.browser.jcef.contextMenu.devTools.enabled", true)
     systemProperty("idea.log.debug.categories", "#spp.jetbrains")
@@ -69,7 +69,6 @@ dependencies {
     implementation(projectDependency(":commander:kotlin-compiler-wrapper")) {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation(projectDependency(":common"))
     implementation(projectDependency(":core"))
     implementation(projectDependency(":insight"))
     implementation(projectDependency(":marker"))
@@ -77,7 +76,6 @@ dependencies {
     runtimeOnly(projectDependency(":marker:jvm-marker"))
     runtimeOnly(projectDependency(":marker:py-marker"))
     runtimeOnly(projectDependency(":marker:ult-marker"))
-    implementation(projectDependency(":monitor"))
     implementation("plus.sourceplus:protocol:$protocolVersion")
 
     implementation("org.apache.commons:commons-text:1.10.0")

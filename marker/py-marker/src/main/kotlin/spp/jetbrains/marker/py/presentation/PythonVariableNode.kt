@@ -22,7 +22,7 @@ import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
 import io.vertx.core.json.JsonObject
-import spp.jetbrains.marker.presentation.LiveVariableNode
+import spp.jetbrains.instrument.presentation.LiveVariableNode
 import spp.protocol.instrument.variable.LiveVariable
 
 /**

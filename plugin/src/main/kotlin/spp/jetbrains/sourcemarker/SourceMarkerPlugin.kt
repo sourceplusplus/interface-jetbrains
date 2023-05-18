@@ -62,11 +62,10 @@ import spp.jetbrains.UserData
 import spp.jetbrains.insight.LiveInsightManager
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.plugin.LivePluginService
+import spp.jetbrains.marker.plugin.LiveStatusBarManager
 import spp.jetbrains.marker.plugin.SourceInlayHintProvider
 import spp.jetbrains.marker.plugin.SourceMarkerStartupActivity
-import spp.jetbrains.monitor.skywalking.SkywalkingMonitor
-import spp.jetbrains.plugin.LivePluginService
-import spp.jetbrains.plugin.LiveStatusBarManager
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.command.status.LiveStatusBarManagerImpl
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
@@ -155,7 +154,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             }
         }
 
-        val options = if (System.getProperty("sourcemarker.debug.unblocked_threads", "false")!!.toBoolean()) {
+        val options = if (System.getProperty("spp.debug.unblocked_threads", "false")!!.toBoolean()) {
             log.info("Removed blocked thread checker")
             VertxOptions().setBlockedThreadCheckInterval(Int.MAX_VALUE.toLong())
         } else {
@@ -165,38 +164,15 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig()
-        if (!addedConfigListener) {
-            addedConfigListener = true
-            val localConfigListener = object : BulkFileListener {
-                var lastUpdated = -1L
-                override fun after(events: MutableList<out VFileEvent>) {
-                    val event = events.firstOrNull() as? VFileContentChangeEvent ?: return
-                    if (event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
-                        if (event.oldTimestamp <= lastUpdated) return else lastUpdated = event.oldTimestamp
-                        DumbService.getInstance(project).smartInvokeLater {
-                            val localConfig = loadSppPluginFileConfiguration()
-                            if (localConfig != null && localConfig.override) {
-                                log.info("Local config updated. Reloading plugin.")
-                                safeRunBlocking { init(localConfig) }
-                            }
-                        }
-                    }
-                }
-            }
-            project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, localConfigListener)
-        }
+        addSppPluginConfigChangeListener()
 
         connectionJob?.cancel()
         connectionJob = null
 
         connectionJob = vertx.safeLaunch {
-            var connectedMonitor = false
             try {
-                SourceStatusService.getInstance(project).update(Pending, "Initializing services")
                 initServices(vertx, config)
-                SourceStatusService.getInstance(project).update(Pending, "Initializing monitor")
-                initMonitor(vertx, config)
-                connectedMonitor = true
+                SourceStatusService.getInstance(project).start(config.serviceName)
 
                 if (!config.notifiedConnection) {
                     val pluginName = message("plugin_name")
@@ -217,36 +193,58 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             } catch (throwable: Throwable) {
                 SourceStatusService.getInstance(project).update(ConnectionError, throwable.message)
                 log.warn("Connection failed", throwable)
+                return@safeLaunch
             }
 
-            if (connectedMonitor) {
-                val pluginsPromise = Promise.promise<Nothing>()
-                ProgressManager.getInstance()
-                    .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
-                        override fun run(indicator: ProgressIndicator) {
-                            if (loadLivePluginsLock.tryLock()) {
-                                project.messageBus.connect().apply {
-                                    subscribe(TOPIC, SourceStatusListener {
-                                        if (it == PluginsLoaded) {
-                                            initMarker(vertx)
-                                            disconnect()
-                                        }
-                                    })
-                                }
-
-                                log.info("Loading live plugins for project: $project")
-                                project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
-                                log.info("Loaded live plugins for project: $project")
-                                pluginsPromise.complete()
-                                loadLivePluginsLock.unlock()
-                            } else {
-                                log.warn("Ignoring extraneous live plugins load request for project: $project")
+            val pluginsPromise = Promise.promise<Nothing>()
+            ProgressManager.getInstance()
+                .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
+                    override fun run(indicator: ProgressIndicator) {
+                        if (loadLivePluginsLock.tryLock()) {
+                            project.messageBus.connect().apply {
+                                subscribe(TOPIC, SourceStatusListener {
+                                    if (it == PluginsLoaded) {
+                                        initMarker(vertx)
+                                        disconnect()
+                                    }
+                                })
                             }
+
+                            log.info("Loading live plugins for project: $project")
+                            project.getUserData(LivePluginService.LIVE_PLUGIN_LOADER)!!.invoke()
+                            log.info("Loaded live plugins for project: $project")
+                            pluginsPromise.complete()
+                            loadLivePluginsLock.unlock()
+                        } else {
+                            log.warn("Ignoring extraneous live plugins load request for project: $project")
                         }
-                    })
-                pluginsPromise.future().await()
+                    }
+                })
+            pluginsPromise.future().await()
+        }
+    }
+
+    private fun addSppPluginConfigChangeListener() {
+        if (addedConfigListener) return
+        addedConfigListener = true
+
+        val localConfigListener = object : BulkFileListener {
+            var lastUpdated = -1L
+            override fun after(events: MutableList<out VFileEvent>) {
+                val event = events.firstOrNull() as? VFileContentChangeEvent ?: return
+                if (event.isFromSave && event.path.endsWith(SPP_PLUGIN_YML_PATH)) {
+                    if (event.oldTimestamp <= lastUpdated) return else lastUpdated = event.oldTimestamp
+                    DumbService.getInstance(project).smartInvokeLater {
+                        val localConfig = loadSppPluginFileConfiguration()
+                        if (localConfig != null && localConfig.override) {
+                            log.info("Local config updated. Reloading plugin.")
+                            safeRunBlocking { init(localConfig) }
+                        }
+                    }
+                }
             }
         }
+        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, localConfigListener)
     }
 
     fun loadSppPluginFileConfiguration(): SourceMarkerConfig? {
@@ -333,6 +331,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
     }
 
     private suspend fun discoverAvailableServices(vertx: Vertx, config: SourceMarkerConfig) {
+        SourceStatusService.getInstance(project).update(Pending, "Discovering available services")
+
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
             Thread.currentThread().contextClassLoader = javaClass.classLoader
@@ -413,7 +413,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         //live insight
         val insightServiceAvailable = availableRecords.any { it.name == SourceServices.LIVE_INSIGHT }
         if (insightServiceAvailable || availableRecords.any { it.name == SourceServices.LIVE_VIEW }) {
-            val insightManager = LiveInsightManager(project, insightServiceAvailable)
+            val insightManager = LiveInsightManager(insightServiceAvailable)
             vertx.deployVerticle(insightManager, DeploymentOptions().setWorker(true)).await()
             SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(insightManager)
         } else {
@@ -439,6 +439,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
     }
 
     private suspend fun initServices(vertx: Vertx, config: SourceMarkerConfig) {
+        SourceStatusService.getInstance(project).update(Pending, "Logging in")
+
         if (!config.serviceHost.isNullOrBlank()) {
             val certificatePins = mutableListOf<String>()
             certificatePins.addAll(config.certificatePins)
@@ -559,18 +561,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             config.notifiedConnection = true
             projectSettings.setValue("sourcemarker_plugin_config", Json.encode(config))
         }
-    }
-
-    private suspend fun initMonitor(vertx: Vertx, config: SourceMarkerConfig) {
-        val scheme = if (config.isSsl()) "https" else "http"
-        val skywalkingHost = "$scheme://${config.serviceHostNormalized}:${config.getServicePortNormalized()}/graphql"
-        val certificatePins = mutableListOf<String>()
-        certificatePins.addAll(config.certificatePins)
-        vertx.deployVerticle(
-            SkywalkingMonitor(
-                skywalkingHost, config.accessToken, certificatePins, config.verifyHost, config.serviceName, project
-            )
-        ).await()
     }
 
     private fun initMarker(vertx: Vertx) {

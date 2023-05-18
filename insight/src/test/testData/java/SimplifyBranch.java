@@ -1,16 +1,16 @@
 public class SimplifyBranch {
     public void simplifyBranch() {
         if (true) {
-            System.out.println(true); //sleep 100ms
+            Thread.sleep(100);
         }
-        System.out.println(false); //sleep 100ms
+        Thread.sleep(100);
     }
 
     public void simplifyBranch2() {
-        System.out.println(false); //sleep 100ms
+        Thread.sleep(100);
         if (true) {
-            System.out.println(true); //sleep 100ms
+            Thread.sleep(100);
         }
-        System.out.println(false); //sleep 100ms
+        Thread.sleep(100);
     }
 }

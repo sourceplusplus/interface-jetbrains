@@ -1,13 +1,13 @@
 def simplifyBranch():
     if True:
-        print(True)  # sleep 100ms
+        Thread.sleep(100)
 
-    print(False)  # sleep 100ms
+    Thread.sleep(100)
 
 
 def simplifyBranch2():
-    print(True)  # sleep 100ms
+    Thread.sleep(100)
     if True:
-        print(False)  # sleep 100ms
+        Thread.sleep(100)
 
-    print(True)  # sleep 100ms
+    Thread.sleep(100)

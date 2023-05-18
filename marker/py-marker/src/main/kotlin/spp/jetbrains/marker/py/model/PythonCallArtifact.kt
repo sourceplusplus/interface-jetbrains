@@ -26,7 +26,17 @@ import spp.jetbrains.artifact.service.toArtifact
 class PythonCallArtifact(override val psiElement: PyCallExpression) : CallArtifact(psiElement) {
 
     override fun resolveFunction(): FunctionArtifact? {
-        return (psiElement.callee as? PyReferenceExpression)?.reference?.resolve().toArtifact() as? FunctionArtifact
+        val function = (psiElement.callee as? PyReferenceExpression)
+            ?.reference?.resolve().toArtifact() as? FunctionArtifact
+
+        //propagate call arguments to function parameters
+        if (function != null) {
+            getArguments().forEach {
+                function.parameters.add(it)
+            }
+        }
+
+        return function
     }
 
     override fun getArguments(): List<ArtifactElement> {

@@ -18,7 +18,6 @@ package spp.jetbrains.insight.pass.multipath
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
@@ -42,7 +41,6 @@ class StaticDfaTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testStaticDfa() {
         doTest("kotlin", "kt")
         doTest("java", "java")

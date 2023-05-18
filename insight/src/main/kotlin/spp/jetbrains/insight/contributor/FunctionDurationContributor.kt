@@ -17,6 +17,7 @@
 package spp.jetbrains.insight.contributor
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.psi.PsiInvalidElementAccessException
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.util.ui.update.MergingUpdateQueue
 import com.intellij.util.ui.update.Update
@@ -29,6 +30,7 @@ import spp.jetbrains.insight.InsightKeys.FUNCTION_DURATION_PREDICTION
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys.VCS_MODIFIED
+import spp.jetbrains.marker.SourceMarkerUtils.doOnReadThread
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.api.MethodSourceMark
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEvent
@@ -115,7 +117,10 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
                         FUNCTION_DURATION,
                         InsightValue.of(InsightType.FUNCTION_DURATION, responseTime)
                     )
-                    log.info("Set method duration from $currentDuration to $responseTime. Artifact: ${guideMark.artifactQualifiedName}")
+                    log.info(
+                        "Set method duration from $currentDuration to $responseTime. "
+                                + "Artifact: ${guideMark.artifactQualifiedName}"
+                    )
 
                     //propagate to callers
                     vertx.safeExecuteBlocking {
@@ -145,8 +150,10 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
      * that are directly called by the given method.
      */
     private fun searchForInsights(mark: MethodGuideMark) {
-        val directMethods = ArtifactScopeService.getCalledFunctions(mark.getPsiMethod())
-        val psiFiles = directMethods.mapNotNull { it.containingFile }.toSet()
+        val psiFiles = doOnReadThread {
+            val directMethods = ArtifactScopeService.getCalledFunctions(mark.getPsiMethod())
+            directMethods.mapNotNull { it.containingFile }.toSet()
+        }
         psiFiles.mapNotNull { SourceMarker.getSourceFileMarker(it) } //trigger automatic creation of guide marks
     }
 
@@ -191,7 +198,10 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
 
             //set function duration prediction insight
             if (methodDurationPrediction != null) {
-                log.info("Set method duration prediction to $methodDurationPrediction. Artifact: ${mark.artifactQualifiedName}")
+                log.info(
+                    "Set method duration prediction to $methodDurationPrediction. " +
+                            "Artifact: ${mark.artifactQualifiedName}"
+                )
                 mark.putUserData(
                     FUNCTION_DURATION_PREDICTION,
                     InsightValue(InsightType.FUNCTION_DURATION_PREDICTION, methodDurationPrediction).asDerived()
@@ -223,7 +233,11 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
 
     private fun queueForInsights(mark: MethodGuideMark) {
         updateInsightQueue.queue(Update.create(mark) {
-            updateInsights(mark as MethodSourceMark)
+            try {
+                updateInsights(mark as MethodSourceMark)
+            } catch (e: PsiInvalidElementAccessException) {
+                //ignore; attempted to get insights for code that's been invalidated
+            }
         })
     }
 }

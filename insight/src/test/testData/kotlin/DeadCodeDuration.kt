@@ -1,18 +1,18 @@
 public class DeadCodeDuration {
     fun code1() {
         if (false) {
-            println(true) //sleep 200ms
+            Thread.sleep(200)
         }
-        println(false) //sleep 200ms
+        Thread.sleep(200)
     }
 
     fun code2() {
         if (false) {
-            println(true) //sleep 200ms
+            Thread.sleep(200)
         } else {
-            println(false) //sleep 200ms
-            println(false) //sleep 200ms
+            Thread.sleep(200)
+            Thread.sleep(200)
         }
-        println(false) //sleep 200ms
+        Thread.sleep(200)
     }
 }

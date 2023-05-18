@@ -18,7 +18,6 @@ package spp.jetbrains.insight.pass.path
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
@@ -45,7 +44,6 @@ class UnbalancedBranchProbabilityTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testUnbalancedBranchProbability() {
         doTest("kotlin", "kt")
         doTest("java", "java")

@@ -21,7 +21,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
-import spp.jetbrains.sourcemarker.view.window.util.TabbedResumableView
+import spp.jetbrains.view.window.util.TabbedResumableView
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
@@ -40,7 +40,8 @@ class LiveActivityWindow(
     entityName: String,
     private val scope: String,
     metrics: List<MetricType>,
-    private var refreshRate: Int
+    labels: List<String> = listOf(),
+    private var refreshRate: Int = -1
 ) : TabbedResumableView() {
 
     private var initialFocus = true
@@ -58,7 +59,7 @@ class LiveActivityWindow(
                         listOf(it.metricId),
                         refreshRate
                     )
-                ), entityName
+                ), entityName, labels
             ) { consumerCreator(it, vertx) }
             addTab("$scope ${it.simpleName}", respTimeChart, respTimeChart.component)
         }

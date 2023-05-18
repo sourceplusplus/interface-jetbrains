@@ -17,6 +17,8 @@
 package spp.jetbrains.marker.js.service
 
 import com.intellij.lang.javascript.psi.*
+import com.intellij.lang.javascript.psi.ecma6.TypeScriptVariable
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue
 import spp.jetbrains.artifact.model.ArtifactElement
@@ -39,6 +41,19 @@ class JavascriptArtifactModelService : IArtifactModelService {
             is JSFunction -> JavascriptFunctionArtifact(element)
             is JSCallExpression -> JavascriptCallArtifact(element)
             is JSBlockStatement -> JavascriptBlockArtifact(element)
+            is JSReferenceExpression -> {
+                val resolve = element.resolve()
+                if (resolve != null) {
+                    val projectFileIndex = ProjectFileIndex.getInstance(element.project)
+                    if (projectFileIndex.isInSource(resolve.containingFile.virtualFile)) {
+                        JavascriptReferenceArtifact(element)
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            }
             else -> null
         }
     }

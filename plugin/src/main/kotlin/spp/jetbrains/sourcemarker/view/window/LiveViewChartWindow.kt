@@ -28,8 +28,8 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginUI
 import spp.jetbrains.UserData
-import spp.jetbrains.sourcemarker.view.overlay.ValueDotPainter
 import spp.jetbrains.view.ResumableView
+import spp.jetbrains.view.overlay.ValueDotPainter
 import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.view.LiveView
@@ -57,6 +57,7 @@ class LiveViewChartWindow(
     val project: Project,
     var liveView: LiveView,
     private val entityName: String,
+    private val labels: List<String>,
     private val consumerCreator: (LiveViewChartWindow) -> MessageConsumer<JsonObject>
 ) : ResumableView {
 
@@ -101,7 +102,7 @@ class LiveViewChartWindow(
         viewService.getHistoricalMetrics(
             liveView.entityIds.toList(),
             liveView.viewConfig.viewMetrics,
-            step, start, stop
+            step, start, stop, labels
         ).onSuccess {
             for (i in 0 until it.data.size()) {
                 val stepBucket = step.bucketFormatter.format(start.plusSeconds((step.seconds * i).toLong())).toLong()

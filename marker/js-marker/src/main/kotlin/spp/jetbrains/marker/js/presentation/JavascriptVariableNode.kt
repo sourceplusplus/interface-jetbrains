@@ -21,7 +21,7 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.xdebugger.impl.ui.XDebuggerUIConstants
-import spp.jetbrains.marker.presentation.LiveVariableNode
+import spp.jetbrains.instrument.presentation.LiveVariableNode
 import spp.protocol.instrument.variable.LiveVariable
 import spp.protocol.instrument.variable.LiveVariableScope
 

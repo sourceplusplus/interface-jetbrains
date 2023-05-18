@@ -18,8 +18,6 @@ package spp.jetbrains.insight
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
-import spp.jetbrains.artifact.service.getCalls
 import spp.jetbrains.artifact.service.getChildIfs
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
@@ -45,7 +43,6 @@ class MultiInsightTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testSequentialMethodCalls() {
         doTest("kotlin", "kt")
         doTest("java", "java")
@@ -65,12 +62,6 @@ class MultiInsightTest : BasePlatformTestCase() {
             it.putUserData(
                 InsightKeys.FUNCTION_DURATION.asPsiKey(),
                 InsightValue.of(InsightType.FUNCTION_DURATION, 100L)
-            )
-        }
-        psi.getCalls().filter { it.text.contains("true", true) || it.text.contains("false", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 200L)
             )
         }
 

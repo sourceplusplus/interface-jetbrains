@@ -31,6 +31,7 @@ import java.util.stream.IntStream
 class ProceduralAnalyzer {
 
     var passProvider: InsightPassProvider = InsightPassProvider.FULL
+    val passConfig: InsightPassConfig = InsightPassConfig()
 
     /**
      * Performs an intraprocedural analysis of the given [ArtifactElement].
@@ -50,7 +51,7 @@ class ProceduralAnalyzer {
             paths.add(path)
         }
 
-        return passProvider.analyze(ProceduralMultiPath(paths))
+        return passProvider.analyze(this, ProceduralMultiPath(paths))
     }
 
     /**
@@ -62,9 +63,7 @@ class ProceduralAnalyzer {
     fun analyzeUp(element: ArtifactElement): List<ProceduralPath> {
         //todo: do this more efficiently
         val paths = analyze(element.getParentFunction().toArtifact()!!)
-        return paths.filter {
-            it.descendants.contains(element)
-        }
+        return paths.filter { it.containsDescendant(element) }
     }
 
     private fun walkDown(element: ArtifactElement, parent: MutableList<Any>) {

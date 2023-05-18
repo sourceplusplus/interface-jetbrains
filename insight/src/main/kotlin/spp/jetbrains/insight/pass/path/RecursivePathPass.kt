@@ -27,17 +27,19 @@ import spp.protocol.insight.InsightValue
 /**
  * Adds the [PATH_IS_RECURSIVE] insight to the [ProceduralPath] if it is recursive.
  */
-class RecursivePathPass : ProceduralPathPass {
+class RecursivePathPass : ProceduralPathPass() {
 
     override fun analyze(path: ProceduralPath) {
         if (path.rootArtifact is FunctionArtifact) {
-            //search for calls to the root function
             val calls = path.filterIsInstance<CallArtifact>()
-            val recursiveCalls = calls.filter { it.getResolvedFunction() == path.rootArtifact }
+            val recursiveCalls = calls.filter { it.isRecursive() }
             if (recursiveCalls.isNotEmpty()) {
                 path.insights.add(InsightValue.of(PATH_IS_RECURSIVE, true))
-                recursiveCalls.forEach { it.data[InsightKeys.RECURSIVE_CALL] = true }
             }
         }
+    }
+
+    private fun CallArtifact.isRecursive(): Boolean {
+        return getData(InsightKeys.RECURSIVE_CALL)?.value == true
     }
 }

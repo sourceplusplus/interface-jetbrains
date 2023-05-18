@@ -49,7 +49,7 @@ configure<PublishingExtension> {
 }
 
 dependencies {
-    implementation(projectDependency(":common"))
+    implementation(projectDependency(":core"))
     implementation(projectDependency(":marker"))
     implementation("plus.sourceplus:protocol:$protocolVersion")
 

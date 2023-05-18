@@ -1,18 +1,18 @@
 public class DeadCodeDuration {
     public void code1() {
         if (false) {
-            System.out.println(true); //sleep 200ms
+            Thread.sleep(200);
         }
-        System.out.println(false); //sleep 200ms
+        Thread.sleep(200);
     }
 
     public void code2() {
         if (false) {
-            System.out.println(true); //sleep 200ms
+            Thread.sleep(200);
         } else {
-            System.out.println(false); //sleep 200ms
-            System.out.println(false); //sleep 200ms
+            Thread.sleep(200);
+            Thread.sleep(200);
         }
-        System.out.println(false); //sleep 200ms
+        Thread.sleep(200);
     }
 }

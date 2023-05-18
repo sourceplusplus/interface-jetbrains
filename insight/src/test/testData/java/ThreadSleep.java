@@ -1,5 +1,5 @@
 public class ThreadSleep {
-    public void sleep() throws InterruptedException {
+    public void sleep() {
         Thread.sleep(1000);
     }
 }

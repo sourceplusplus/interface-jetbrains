@@ -18,7 +18,6 @@ package spp.jetbrains.insight
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getCalls
 import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
@@ -41,7 +40,6 @@ class BranchProbabilityTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testOneFourthProbability() {
         doOneFourthProbability("kotlin", "kt")
         doOneFourthProbability("java", "java")

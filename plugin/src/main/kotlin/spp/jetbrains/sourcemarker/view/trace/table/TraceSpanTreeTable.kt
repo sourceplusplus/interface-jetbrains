@@ -23,8 +23,8 @@ import com.intellij.ui.components.JBTreeTable
 import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceModel
 import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceRowSorter
 import spp.jetbrains.sourcemarker.view.trace.LiveViewTraceTreeStructure
-import spp.jetbrains.sourcemarker.view.trace.node.TraceRootTreeNode
 import spp.jetbrains.sourcemarker.view.trace.renderer.SpanEventTableCellRenderer
+import spp.jetbrains.view.trace.node.TraceRootTreeNode
 import spp.protocol.artifact.trace.TraceSpan
 import java.time.Duration
 import javax.swing.RowSorter

@@ -21,8 +21,8 @@ import spp.jetbrains.insight.path.ProceduralMultiPath
 /**
  * A pass that analyzes a [ProceduralMultiPath].
  */
-interface ProceduralMultiPathPass : IPass {
-    fun preProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
-    fun analyze(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
-    fun postProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
+abstract class ProceduralMultiPathPass : InsightPass() {
+    open fun preProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
+    open fun analyze(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
+    open fun postProcess(multiPath: ProceduralMultiPath): ProceduralMultiPath = multiPath
 }

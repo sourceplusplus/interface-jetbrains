@@ -26,7 +26,7 @@ import spp.jetbrains.insight.path.ProceduralPath
  * Loads the [ProceduralPath] set from [CallArtifact]s that have already been processed. Allows for basic
  * interprocedural analyses for artifacts with known [ProceduralPath]s.
  */
-class LoadPsiPass : ArtifactPass {
+class LoadPsiPass : ArtifactPass() {
 
     override fun analyze(element: ArtifactElement) {
         if (element !is CallArtifact) return //only interested in calls

@@ -140,6 +140,23 @@ class JavascriptArtifactCreationService : IArtifactCreationService {
 
     override fun createExpressionInlayMark(
         fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean
+    ): ExpressionInlayMark {
+        val inlayMark = fileMarker.createExpressionSourceMark(
+            element,
+            SourceMark.Type.INLAY
+        ) as ExpressionInlayMark
+        return if (autoApply) {
+            inlayMark.apply(true)
+            inlayMark
+        } else {
+            inlayMark
+        }
+    }
+
+    override fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
         lineNumber: Int,
         autoApply: Boolean
     ): ExpressionInlayMark {

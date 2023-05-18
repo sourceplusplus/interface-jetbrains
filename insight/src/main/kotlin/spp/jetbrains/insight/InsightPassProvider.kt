@@ -18,13 +18,10 @@ package spp.jetbrains.insight
 
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.insight.pass.ArtifactPass
-import spp.jetbrains.insight.pass.IPass
+import spp.jetbrains.insight.pass.InsightPass
 import spp.jetbrains.insight.pass.ProceduralMultiPathPass
 import spp.jetbrains.insight.pass.ProceduralPathPass
-import spp.jetbrains.insight.pass.artifact.CallDurationPass
-import spp.jetbrains.insight.pass.artifact.LoadPsiPass
-import spp.jetbrains.insight.pass.artifact.RandomConditionalPass
-import spp.jetbrains.insight.pass.artifact.ThreadSleepPass
+import spp.jetbrains.insight.pass.artifact.*
 import spp.jetbrains.insight.pass.multipath.SavePsiMultiPathPass
 import spp.jetbrains.insight.pass.multipath.SimplifyMultiPathPass
 import spp.jetbrains.insight.pass.multipath.StaticDfaMultiPathPass
@@ -44,6 +41,7 @@ class InsightPassProvider {
         val ALL_PASSES = listOf(
             //artifact passes
             LoadPsiPass(),
+            RecursiveCallPass(),
             RandomConditionalPass(),
             CallDurationPass(),
             ThreadSleepPass(),
@@ -68,11 +66,12 @@ class InsightPassProvider {
         }
     }
 
+    private lateinit var analyzer: ProceduralAnalyzer
     private val artifactPasses = mutableListOf<ArtifactPass>()
     private val pathPasses = mutableListOf<ProceduralPathPass>()
     private val multiPathPasses = mutableListOf<ProceduralMultiPathPass>()
 
-    fun registerPass(pass: IPass) {
+    fun registerPass(pass: InsightPass) {
         when (pass) {
             is ArtifactPass -> artifactPasses.add(pass)
             is ProceduralPathPass -> pathPasses.add(pass)
@@ -81,16 +80,22 @@ class InsightPassProvider {
         }
     }
 
-    private fun analyze(element: ArtifactElement) {
-        artifactPasses.forEach { it.analyze(element) }
+    private fun analyze(element: ArtifactElement, path: ProceduralPath) {
+        artifactPasses.forEach {
+            it.analyzer = analyzer
+            it.rootArtifact = path.rootArtifact
+            it.analyze(element)
+        }
     }
 
     private fun analyze(path: ProceduralPath) {
-        path.forEach { analyze(it) }
+        path.forEach { analyze(it, path) }
         pathPasses.forEach { it.analyze(path) }
     }
 
-    fun analyze(multiPath: ProceduralMultiPath): ProceduralMultiPath {
+    fun analyze(analyzer: ProceduralAnalyzer, multiPath: ProceduralMultiPath): ProceduralMultiPath {
+        this.analyzer = analyzer
+
         val preProcessedMultiPath = multiPathPasses.fold(multiPath) { acc, pass ->
             pass.preProcess(acc)
         }

@@ -21,6 +21,6 @@ import spp.jetbrains.insight.path.ProceduralPath
 /**
  * A pass that analyzes an [ProceduralPath] and adds data to it.
  */
-interface ProceduralPathPass : IPass {
-    fun analyze(path: ProceduralPath)
+abstract class ProceduralPathPass : InsightPass() {
+    abstract fun analyze(path: ProceduralPath)
 }

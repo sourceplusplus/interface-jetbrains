@@ -16,6 +16,7 @@
  */
 package spp.jetbrains.marker.py.model
 
+import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyFunction
 import spp.jetbrains.artifact.model.BlockArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
@@ -25,6 +26,10 @@ class PythonFunctionArtifact(override val psiElement: PyFunction) : FunctionArti
 
     override val bodyBlock: BlockArtifact?
         get() = psiElement.statementList.toArtifact() as? BlockArtifact
+
+    override fun getAnnotations(): List<PsiElement> {
+        return emptyList()
+    }
 
     override fun clone(): PythonFunctionArtifact {
         return PythonFunctionArtifact(psiElement)

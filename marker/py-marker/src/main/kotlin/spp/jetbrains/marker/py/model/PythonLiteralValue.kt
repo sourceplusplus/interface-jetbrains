@@ -16,12 +16,28 @@
  */
 package spp.jetbrains.marker.py.model
 
+import com.jetbrains.python.psi.PyBoolLiteralExpression
 import com.jetbrains.python.psi.PyLiteralExpression
+import com.jetbrains.python.psi.PyNumericLiteralExpression
 import spp.jetbrains.artifact.model.ArtifactLiteralValue
 
 class PythonLiteralValue(override val psiElement: PyLiteralExpression) : ArtifactLiteralValue(psiElement) {
     override val value: Any?
-        get() = psiElement.text //todo: value
+        get() {
+            return when (psiElement) {
+                is PyNumericLiteralExpression -> {
+                    val numericValue = psiElement.bigDecimalValue
+                    if (numericValue?.scale() == 0) {
+                        numericValue.toLong()
+                    } else {
+                        numericValue?.toDouble()
+                    }
+                }
+
+                is PyBoolLiteralExpression -> psiElement.value
+                else -> psiElement.text
+            }
+        }
 
     override fun clone(): PythonLiteralValue {
         return PythonLiteralValue(psiElement)

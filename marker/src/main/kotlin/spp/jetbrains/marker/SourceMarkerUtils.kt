@@ -19,6 +19,7 @@ package spp.jetbrains.marker
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -134,6 +135,15 @@ object SourceMarkerUtils {
             action.invoke()
         } else {
             SwingUtilities.invokeLater { action.invoke() }
+        }
+    }
+
+    //todo: look into using ApplicationManager.getApplication().assertReadAccessAllowed()
+    fun <T> doOnReadThread(action: () -> T): T {
+        return if (ApplicationManager.getApplication().isReadAccessAllowed) {
+            action.invoke()
+        } else {
+            ApplicationManager.getApplication().runReadAction(ThrowableComputable { action.invoke() })
         }
     }
 

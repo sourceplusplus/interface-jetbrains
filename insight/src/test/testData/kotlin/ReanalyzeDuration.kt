@@ -4,6 +4,6 @@ public class ReanalyzeDuration {
     }
 
     fun code2() {
-        println(true) //sleep 200ms
+        Thread.sleep(200)
     }
 }

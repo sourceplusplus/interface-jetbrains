@@ -1,3 +1,0 @@
-query getVersion {
-    result: version
-}

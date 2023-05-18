@@ -76,6 +76,12 @@ interface IArtifactCreationService : ISourceMarkerService {
         autoApply: Boolean = false
     ): ExpressionInlayMark
 
+    fun createExpressionInlayMark(
+        fileMarker: SourceFileMarker,
+        element: PsiElement,
+        autoApply: Boolean = false
+    ): ExpressionInlayMark
+
     fun createExpressionGuideMark(
         fileMarker: SourceFileMarker,
         lineNumber: Int,

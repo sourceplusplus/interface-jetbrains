@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.source.mark.gutter.GutterMark;
-import spp.jetbrains.plugin.LiveStatusBarManager;
+import spp.jetbrains.marker.plugin.LiveStatusBarManager;
 import spp.protocol.instrument.LiveMeter;
 import spp.protocol.service.listen.LiveInstrumentListener;
 import spp.protocol.service.listen.LiveViewEventListener;

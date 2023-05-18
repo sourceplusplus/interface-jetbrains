@@ -46,6 +46,7 @@ import spp.protocol.instrument.LiveInstrument
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.*
 import spp.protocol.service.SourceServices.Subscribe.toLiveInstrumentSubscriberAddress
+import spp.protocol.service.SourceServices.Subscribe.toLiveInstrumentSubscription
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.addLiveInstrumentListener
 import java.util.concurrent.CopyOnWriteArrayList
@@ -129,6 +130,17 @@ class LiveInstrumentEventListener(
                 }
             }
         }
+    }
+
+    /**
+     * The plugin only listens for instrument events sent to the developer by their id.
+     * This re-emits instruments by their instrument ids to allow for individual processing.
+     */
+    override fun onInstrumentEvent(event: LiveInstrumentEvent) {
+        vertx.eventBus().publish(
+            toLiveInstrumentSubscription(event.instrument.id!!),
+            event.toJson()
+        )
     }
 
     override fun onInstrumentAddedEvent(event: LiveInstrumentAdded) {

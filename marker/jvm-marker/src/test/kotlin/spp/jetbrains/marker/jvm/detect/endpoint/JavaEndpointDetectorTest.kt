@@ -26,6 +26,8 @@ import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector
 import spp.jetbrains.marker.jvm.service.*
 import spp.jetbrains.marker.service.*
+import spp.jetbrains.marker.source.SourceFileMarker
+import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
 class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
 
@@ -33,7 +35,9 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
         super.setUp()
 
         SourceMarkerUtils.getJvmLanguages().let {
+            ArtifactNamingService.addService(JVMArtifactNamingService(), it)
             ArtifactScopeService.addService(JVMArtifactScopeService(), it)
+            ArtifactModelService.addService(JVMArtifactModelService(), it)
         }
     }
 
@@ -52,9 +56,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -77,9 +83,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -102,9 +110,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/", result.first().name)
             }
@@ -128,9 +138,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/todos", result.first().name)
             }
@@ -154,9 +166,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/todos", result.first().name)
             }
@@ -180,9 +194,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/todos/doGet", result.first().name)
             }
@@ -204,9 +220,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/", result.first().name)
             }
@@ -228,9 +246,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -252,9 +272,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/doGet", result.first().name)
             }
@@ -276,9 +298,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("doGet", result.first().name)
             }
@@ -300,9 +324,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("TestController.doGet", result.first().name)
             }
@@ -326,9 +352,11 @@ class JavaEndpointDetectorTest : AbstractEndpointDetectorTest() {
             assertEquals(1, psiFile.getClasses()[0].getFunctions().size)
 
             safeRunBlocking {
-                val result = JVMEndpointDetector(project).determineEndpointName(
+                val guideMark = MethodGuideMark(
+                    SourceFileMarker(psiFile),
                     psiFile.getClasses()[0].getFunctions()[0] as PsiMethod
-                ).await()
+                )
+                val result = JVMEndpointDetector(project).determineEndpointName(guideMark).await()
                 assertEquals(1, result.size)
                 assertEquals("GET:/todos/doGet", result.first().name)
             }

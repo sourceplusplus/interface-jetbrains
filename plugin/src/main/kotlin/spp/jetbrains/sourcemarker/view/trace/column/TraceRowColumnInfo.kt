@@ -17,8 +17,8 @@
 package spp.jetbrains.sourcemarker.view.trace.column
 
 import com.intellij.util.ui.ColumnInfo
-import spp.jetbrains.sourcemarker.view.trace.renderer.TraceDurationTableCellRenderer
-import spp.jetbrains.sourcemarker.view.trace.renderer.TraceErrorTableCellRenderer
+import spp.jetbrains.view.trace.renderer.TraceDurationTableCellRenderer
+import spp.jetbrains.view.trace.renderer.TraceErrorTableCellRenderer
 import spp.protocol.artifact.trace.Trace
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

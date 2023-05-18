@@ -20,7 +20,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.popup.*
 import spp.jetbrains.icons.PluginIcons
-import spp.jetbrains.view.LiveViewChartManager
+import spp.jetbrains.view.manager.LiveViewChartManager
 import javax.swing.Icon
 
 /**

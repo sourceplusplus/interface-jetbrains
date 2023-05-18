@@ -44,6 +44,7 @@ import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.jetbrains.artifact.service.isGroovy
 import spp.jetbrains.artifact.service.isKotlin
 import spp.jetbrains.marker.SourceMarkerUtils
+import spp.jetbrains.marker.SourceMarkerUtils.doOnReadThread
 
 /**
  * Used to determine the scope of JVM artifacts.
@@ -130,8 +131,9 @@ class JVMArtifactScopeService : IArtifactScopeService {
         includeExternal: Boolean,
         includeIndirect: Boolean
     ): List<PsiNameIdentifierOwner> {
+        val project = doOnReadThread { element.project }
         if (includeIndirect) {
-            return DumbService.getInstance(element.project).runReadActionInSmartMode(Computable {
+            return DumbService.getInstance(project).runReadActionInSmartMode(Computable {
                 val calledFunctions = getResolvedCalls(element)
                 val filteredFunctions = calledFunctions.filter { includeExternal || it.isWritable }
                 return@Computable (filteredFunctions + filteredFunctions.flatMap {
@@ -140,18 +142,19 @@ class JVMArtifactScopeService : IArtifactScopeService {
             })
         }
 
-        return DumbService.getInstance(element.project).runReadActionInSmartMode(Computable {
+        return DumbService.getInstance(project).runReadActionInSmartMode(Computable {
             return@Computable getResolvedCalls(element).filter { includeExternal || it.isWritable }.toList()
         })
     }
 
     override fun getCallerFunctions(element: PsiElement, includeIndirect: Boolean): List<PsiNameIdentifierOwner> {
+        val project = doOnReadThread { element.project }
         val references = ProgressManager.getInstance().runProcess(Computable {
             if (ApplicationManager.getApplication().isReadAccessAllowed) {
-                ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+                ReferencesSearch.search(element, GlobalSearchScope.projectScope(project)).toList()
             } else {
-                DumbService.getInstance(element.project).runReadActionInSmartMode(Computable {
-                    ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+                DumbService.getInstance(project).runReadActionInSmartMode(Computable {
+                    ReferencesSearch.search(element, GlobalSearchScope.projectScope(project)).toList()
                 })
             }
         }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
@@ -163,6 +166,22 @@ class JVMArtifactScopeService : IArtifactScopeService {
                     it.element.parentOfType<PsiMethod>()
                 }
             }.filter { it.isWritable() }
+        })
+    }
+
+    override fun getCallerExpressions(element: PsiElement, includeIndirect: Boolean): List<PsiElement> {
+        val project = doOnReadThread { element.project }
+        val references = ProgressManager.getInstance().runProcess(Computable {
+            if (ApplicationManager.getApplication().isReadAccessAllowed) {
+                ReferencesSearch.search(element, GlobalSearchScope.projectScope(project)).toList()
+            } else {
+                DumbService.getInstance(project).runReadActionInSmartMode(Computable {
+                    ReferencesSearch.search(element, GlobalSearchScope.projectScope(project)).toList()
+                })
+            }
+        }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
+        return ReadAction.compute(ThrowableComputable {
+            references.mapNotNull { it.element }.filter { it.isWritable() }
         })
     }
 

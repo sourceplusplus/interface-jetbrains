@@ -20,7 +20,7 @@ import com.intellij.ide.util.treeView.AbstractTreeNode
 import com.intellij.ide.util.treeView.AbstractTreeStructure
 import com.intellij.ide.util.treeView.NodeDescriptor
 import com.intellij.util.ArrayUtil
-import spp.jetbrains.sourcemarker.view.trace.node.TraceRootTreeNode
+import spp.jetbrains.view.trace.node.TraceRootTreeNode
 
 /**
  * todo: description.

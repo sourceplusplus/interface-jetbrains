@@ -18,7 +18,6 @@ package spp.jetbrains.insight.pass.multipath
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.IfArtifact
 import spp.jetbrains.artifact.service.getFunctions
@@ -45,7 +44,6 @@ class SimplifyBranchTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testSimplifyBranch() {
         doSimplifyBranch("kotlin", "kt")
         doSimplifyBranch("java", "java")
@@ -88,7 +86,6 @@ class SimplifyBranchTest : BasePlatformTestCase() {
         assertTrue(ifChildren[0] is CallArtifact)
     }
 
-    @Test
     fun testSimplifyBranch2() {
         doSimplifyBranch2("kotlin", "kt")
         doSimplifyBranch2("java", "java")

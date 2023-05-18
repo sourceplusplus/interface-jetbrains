@@ -21,10 +21,11 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.artifact.service.ArtifactScopeService
-import spp.jetbrains.command.LiveCommand
-import spp.jetbrains.command.LiveCommandContext
-import spp.jetbrains.command.LiveLocationContext
 import spp.jetbrains.marker.SourceMarkerUtils.substringAfterIgnoreCase
+import spp.jetbrains.marker.command.LiveCommand
+import spp.jetbrains.marker.command.LiveCommandContext
+import spp.jetbrains.marker.command.LiveLocationContext
+import spp.jetbrains.marker.plugin.LivePluginService
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -35,7 +36,6 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.ExpressionInlayMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.plugin.LivePluginService
 import spp.jetbrains.sourcemarker.command.ui.ControlBar
 import spp.jetbrains.status.SourceStatusService
 import java.awt.BorderLayout

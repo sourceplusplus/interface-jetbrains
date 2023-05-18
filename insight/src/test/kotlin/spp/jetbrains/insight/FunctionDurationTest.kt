@@ -18,7 +18,6 @@ package spp.jetbrains.insight
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.marker.js.JavascriptLanguageProvider
@@ -43,7 +42,6 @@ class FunctionDurationTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testSequentialMethodCalls() {
         doTest("kotlin", "kt")
         doTest("java", "java")

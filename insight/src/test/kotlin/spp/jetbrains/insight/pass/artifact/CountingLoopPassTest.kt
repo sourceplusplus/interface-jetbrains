@@ -18,16 +18,12 @@ package spp.jetbrains.insight.pass.artifact
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
-import spp.jetbrains.artifact.service.getCalls
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
-import spp.jetbrains.insight.InsightKeys
 import spp.jetbrains.insight.ProceduralAnalyzer
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 import spp.jetbrains.marker.service.*
 import spp.protocol.insight.InsightType
-import spp.protocol.insight.InsightValue
 
 @TestDataPath("\$CONTENT_ROOT/testData/")
 class CountingLoopPassTest : BasePlatformTestCase() {
@@ -42,7 +38,6 @@ class CountingLoopPassTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testCountingLoop() {
 //        doTest("kotlin", "kt")
         doTest("java", "java")
@@ -50,14 +45,6 @@ class CountingLoopPassTest : BasePlatformTestCase() {
 
     private fun doTest(language: String, extension: String) {
         val psi = myFixture.configureByFile("$language/CountingLoop.$extension")
-
-        //setup
-        psi.getCalls().filter { it.text.contains("true", true) }.forEach {
-            it.putUserData(
-                InsightKeys.FUNCTION_DURATION.asPsiKey(),
-                InsightValue.of(InsightType.FUNCTION_DURATION, 100L)
-            )
-        }
 
         val countingLoop1 = psi.getFunctions().first { it.name == "countingLoop" }
         val loop1Paths = ProceduralAnalyzer().analyze(countingLoop1.toArtifact()!!)

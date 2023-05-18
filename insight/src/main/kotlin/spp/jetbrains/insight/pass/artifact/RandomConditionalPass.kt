@@ -25,7 +25,7 @@ import spp.jetbrains.insight.pass.ArtifactPass
 import spp.protocol.insight.InsightType
 import spp.protocol.insight.InsightValue
 
-class RandomConditionalPass : ArtifactPass {
+class RandomConditionalPass : ArtifactPass() {
 
     override fun analyze(element: ArtifactElement) {
         if (element !is IfArtifact) return //only interested in ifs

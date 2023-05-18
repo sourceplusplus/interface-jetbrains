@@ -127,6 +127,17 @@ class JavascriptArtifactScopeService : IArtifactScopeService {
         })
     }
 
+    override fun getCallerExpressions(element: PsiElement, includeIndirect: Boolean): List<PsiElement> {
+        val references = ProgressManager.getInstance().runProcess(Computable {
+            ReferencesSearch.search(element, GlobalSearchScope.projectScope(element.project)).toList()
+        }, EmptyProgressIndicator(ModalityState.defaultModalityState()))
+        return ReadAction.compute(ThrowableComputable {
+            references.mapNotNull {
+                it.element.parentOfType<JSCallExpression>()
+            }.filter { it.isWritable }
+        })
+    }
+
     override fun getScopeVariables(file: PsiFile, lineNumber: Int): List<String> {
         val vars = mutableListOf<JSVariable>()
         val position = SourceMarkerUtils.getElementAtLine(file, lineNumber)!!

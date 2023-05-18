@@ -1,7 +1,7 @@
 public class CountingLoop {
     public void countingLoop() {
         for (int i = 0; i < 10; i++) {
-            System.out.println(true); //sleep 100ms
+            Thread.sleep(100);
         }
         for (int i = 0; i < 10; i++) ;
     }

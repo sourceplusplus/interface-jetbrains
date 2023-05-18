@@ -1,16 +1,16 @@
 public class SimplifyBranch {
     fun simplifyBranch() {
         if (true) {
-            println(true) //sleep 100ms
+            Thread.sleep(100)
         }
-        println(false) //sleep 100ms
+        Thread.sleep(100)
     }
 
     fun simplifyBranch2() {
-        println(true) //sleep 100ms
+        Thread.sleep(100)
         if (true) {
-            println(false) //sleep 100ms
+            Thread.sleep(100)
         }
-        println(true) //sleep 100ms
+        Thread.sleep(100)
     }
 }

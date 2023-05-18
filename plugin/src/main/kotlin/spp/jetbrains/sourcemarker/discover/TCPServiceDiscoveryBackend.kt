@@ -41,7 +41,7 @@ import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.config.getServicePortNormalized
 import spp.jetbrains.sourcemarker.config.isSsl
 import spp.jetbrains.sourcemarker.config.serviceHostNormalized
-import spp.jetbrains.status.SourceStatus.ConnectionError
+import spp.jetbrains.status.SourceStatus.*
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.PlatformAddress
 import spp.protocol.platform.status.InstanceConnection
@@ -75,7 +75,7 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         }
     }
 
-    var socket: NetSocket? = null
+    private var socket: NetSocket? = null
     private lateinit var vertx: Vertx
     private lateinit var client: NetClient
     private lateinit var pluginConfig: SourceMarkerConfig
@@ -99,6 +99,16 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
     }
 
     private suspend fun setupServiceClient(certificatePins: List<String>, serviceHost: String, config: JsonObject) {
+        val project = ProjectManager.getInstance().openProjects.find {
+            it.locationHash == config.getString("project_location_hash")
+        }
+        if (project != null) {
+            SourceStatusService.getInstance(project).update(Pending, "Connecting to server")
+        } else {
+            log.error("Failed to find project. Cannot setup service discovery client")
+            return
+        }
+
         try {
             client = if (certificatePins.isNotEmpty()) {
                 val options = NetClientOptions()
@@ -132,32 +142,18 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
 
         TCPServiceSocket(vertx, socket!!).exceptionHandler {
             log.warn("Service discovery socket exception", it)
-            val project = ProjectManager.getInstance().openProjects.find {
-                it.locationHash == config.getString("project_location_hash")
-            }
-            if (project != null) {
-                SourceStatusService.getInstance(project).update(ConnectionError, it.message)
-            } else {
-                log.warn("Unable to find project. Failed to report status update")
-            }
+            SourceStatusService.getInstance(project).update(ConnectionError, it.message)
         }.closeHandler {
             log.warn("Service discovery socket closed")
-            val project = ProjectManager.getInstance().openProjects.find {
-                it.locationHash == config.getString("project_location_hash")
-            }
-            if (project != null) {
-                SourceStatusService.getInstance(project).update(ConnectionError, "Service discovery socket closed")
-            } else {
-                log.warn("Unable to find project. Failed to report status update")
-            }
+            SourceStatusService.getInstance(project).update(ConnectionError, "Service discovery socket closed")
         }
 
-        vertx.executeBlocking<Unit> {
-            it.complete(connectServices())
+        vertx.executeBlocking {
+            it.complete(connectServices(project))
         }
     }
 
-    private fun connectServices() {
+    private fun connectServices(project: Project) {
         setupHandler(vertx, "get-records")
         setupHandler(vertx, LIVE_MANAGEMENT)
         setupHandler(vertx, LIVE_INSTRUMENT)
@@ -172,6 +168,8 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
         consumer.handler {
             //todo: handle false
             if (it.body() == true) {
+                SourceStatusService.getInstance(project).update(Connected)
+
                 promise.complete()
                 consumer.unregister()
                 setupPromise.complete()
