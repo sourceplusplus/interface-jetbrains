@@ -18,6 +18,7 @@ package spp.jetbrains.marker.plugin.impl
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.command.LiveCommand
@@ -77,10 +78,7 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         indicators.entries.find { it.key == indicator }?.let {
             SourceMarker.getInstance(project).removeGlobalSourceMarkEventListener(it.value)
             indicators.remove(it.key)
-
-            safeRunBlocking {
-                indicator.onUnregister()
-            }
+            Disposer.dispose(indicator)
             log.debug("Unregistered indicator: $indicator - Current indicators: ${indicators.size}")
         }
     }

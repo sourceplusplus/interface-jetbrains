@@ -35,7 +35,7 @@ import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
 import spp.protocol.instrument.event.LiveInstrumentEventType
 import spp.protocol.platform.developer.SelfInfo
-import spp.protocol.service.SourceServices
+import spp.protocol.service.SourceServices.Subscribe.toLiveInstrumentSubscriberAddress
 
 @Suppress("unused")
 abstract class LiveIndicator(val project: Project) : Disposable {
@@ -70,26 +70,15 @@ abstract class LiveIndicator(val project: Project) : Disposable {
         }
     }
 
-    open suspend fun onUnregister() {
-        vertx.cancelTimer(periodicTimerId)
-    }
-
     open suspend fun refreshIndicator() = Unit
     open suspend fun trigger(guideMark: GuideMark, event: SourceMarkEvent) = Unit
 
     override fun dispose() {
-        TODO("Not yet implemented")
+        vertx.cancelTimer(periodicTimerId)
     }
 
-    fun addBreakpointHitListener(
-        id: String,
-        listener: (LiveBreakpointHit) -> Unit
-    ): MessageConsumer<JsonObject> {
-        val consumer = vertx.eventBus().consumer<JsonObject>(
-            SourceServices.Subscribe.toLiveInstrumentSubscriberAddress(
-                selfInfo.developer.id
-            )
-        )
+    fun addBreakpointHitListener(id: String, listener: (LiveBreakpointHit) -> Unit): MessageConsumer<JsonObject> {
+        val consumer = vertx.eventBus().consumer<JsonObject>(toLiveInstrumentSubscriberAddress(selfInfo.developer.id))
         consumer.handler {
             val event = LiveInstrumentEvent.fromJson(it.body())
             if (event.instrument.id == id && event.eventType == LiveInstrumentEventType.BREAKPOINT_HIT) {
@@ -98,15 +87,6 @@ abstract class LiveIndicator(val project: Project) : Disposable {
         }
         return consumer
     }
-
-//    fun findIcon(path: String): Icon {
-//        val iconPath = if (File(pluginPath, path).exists()) {
-//            pluginPath + File.separator + path
-//        } else {
-//            path
-//        }
-//        return IconLoader.findIcon(File(iconPath).toURL())
-//    }
 
     fun findByEndpointName(endpointName: String): GuideMark? {
         return SourceMarker.getInstance(project).getSourceMarks().filterIsInstance<GuideMark>().firstOrNull {
