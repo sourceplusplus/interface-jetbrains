@@ -36,12 +36,14 @@ class ThreadSleepPass : ArtifactPass() {
             val args = element.getArguments()
             if (args.size == 1 && args.first() is ArtifactLiteralValue) {
                 val duration = ((args.first() as ArtifactLiteralValue).value as? Number)?.toLong() ?: return
+                element.data[InsightKeys.FUNCTION_DURATION] =
+                    InsightValue.of(FUNCTION_DURATION, duration).asDerived()
+
+                //also store in the psi since it's consistent across procedures
                 element.putUserData(
                     InsightKeys.FUNCTION_DURATION.asPsiKey(),
                     InsightValue.of(FUNCTION_DURATION, duration).asDerived()
                 )
-                element.data[InsightKeys.FUNCTION_DURATION] =
-                    InsightValue.of(FUNCTION_DURATION, duration).asDerived()
             }
         }
     }
