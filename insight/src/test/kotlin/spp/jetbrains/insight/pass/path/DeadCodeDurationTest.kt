@@ -18,7 +18,6 @@ package spp.jetbrains.insight.pass.path
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.insight.ProceduralAnalyzer
@@ -43,7 +42,6 @@ class DeadCodeDurationTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testCode1() {
         doCode1Test("kotlin", "kt")
         doCode1Test("java", "java")
@@ -66,7 +64,6 @@ class DeadCodeDurationTest : BasePlatformTestCase() {
         assertEquals(200L, pathInsights.first().value)
     }
 
-    @Test
     fun testCode2() {
         doCode2Test("kotlin", "kt")
         doCode2Test("java", "java")

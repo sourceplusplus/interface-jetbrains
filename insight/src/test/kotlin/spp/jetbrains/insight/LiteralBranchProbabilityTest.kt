@@ -18,7 +18,6 @@ package spp.jetbrains.insight
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getChildIfs
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
@@ -42,7 +41,6 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testBooleanConstant() {
         doTestBooleanConstant("kotlin", "kt")
         doTestBooleanConstant("java", "java")
@@ -70,7 +68,6 @@ class LiteralBranchProbabilityTest : BasePlatformTestCase() {
         assertEquals(1.0, truePath.descendants[0].getData(InsightKeys.PATH_EXECUTION_PROBABILITY)?.value)
     }
 
-    @Test
     fun testNumberCompare() {
         doTestNumberCompare("kotlin", "kt")
         doTestNumberCompare("java", "java")

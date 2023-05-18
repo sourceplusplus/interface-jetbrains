@@ -18,7 +18,6 @@ package spp.jetbrains.insight
 
 import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.jupiter.api.Test
 import spp.jetbrains.artifact.service.getChildIfs
 import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.artifact.service.toArtifact
@@ -44,7 +43,6 @@ class MultiInsightTest : BasePlatformTestCase() {
         return "src/test/testData/"
     }
 
-    @Test
     fun testSequentialMethodCalls() {
         doTest("kotlin", "kt")
         doTest("java", "java")
@@ -74,7 +72,7 @@ class MultiInsightTest : BasePlatformTestCase() {
         val falseFalsePath = paths.toList()[0]
         assertEquals(1, falseFalsePath.getInsights().size)
         assertEquals(300L, falseFalsePath.getInsights()[0].value) //InsightKeys.PATH_DURATION
-        assertEquals(3, falseFalsePath.descendants.size) //todo: consolidate CallArtifact(Thread.sleep(200)), CallArtifact(sleep(200))
+        assertEquals(3, falseFalsePath.descendants.size)
         assertEquals(1, falseFalsePath.conditions.size)
         assertTrue(falseFalsePath.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
         assertFalse(falseFalsePath.conditions[0].first)
@@ -92,7 +90,7 @@ class MultiInsightTest : BasePlatformTestCase() {
         val falseTruePath = paths.toList()[1]
         assertEquals(1, falseTruePath.getInsights().size)
         assertEquals(300L, falseTruePath.getInsights()[0].value) //InsightKeys.PATH_DURATION
-        assertEquals(3, falseTruePath.descendants.size) //todo: consolidate CallArtifact(Thread.sleep(200)), CallArtifact(sleep(200))
+        assertEquals(3, falseTruePath.descendants.size)
         assertEquals(1, falseTruePath.conditions.size)
         assertTrue(falseTruePath.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
         assertFalse(falseTruePath.conditions[0].first)
@@ -123,7 +121,7 @@ class MultiInsightTest : BasePlatformTestCase() {
         val trueTruePath = paths.toList()[3]
         assertEquals(1, trueTruePath.getInsights().size)
         assertEquals(400L, trueTruePath.getInsights()[0].value) //InsightKeys.PATH_DURATION
-        assertEquals(4, trueTruePath.descendants.size) //todo: consolidate CallArtifact(Thread.sleep(200)), CallArtifact(sleep(200))
+        assertEquals(4, trueTruePath.descendants.size)
         assertEquals(2, trueTruePath.conditions.size)
         assertTrue(trueTruePath.conditions[0].second.condition?.text?.contains("random() > 0.5") == true)
         assertTrue(trueTruePath.conditions[0].first)
