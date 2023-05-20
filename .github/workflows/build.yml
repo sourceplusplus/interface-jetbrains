@@ -159,7 +159,7 @@ jobs:
 
       - name: Remove Old Snapshot Packages
         if: github.ref == 'refs/heads/master'
-        uses: smartsquaregmbh/delete-old-packages@v0.7.0
+        uses: smartsquaregmbh/delete-old-packages@v0.6.0
         with:
           keep: 0
           version-pattern: "^\\d+\\.\\d+\\.\\d+-SNAPSHOT$"
