@@ -164,7 +164,6 @@ jobs:
           keep: 0
           version-pattern: "^\\d+\\.\\d+\\.\\d+-SNAPSHOT$"
           names: |
-            plus.sourceplus.interface.jetbrains-common
             plus.sourceplus.interface.jetbrains-core
             plus.sourceplus.interface.jetbrains-insight
             plus.sourceplus.interface.jetbrains-marker
