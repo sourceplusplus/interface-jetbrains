@@ -89,11 +89,6 @@ class LiveViewChartManagerImpl(
             override fun stateChanged(toolWindowManager: ToolWindowManager) {
                 if (toolWindow.isVisible) {
                     (contentManager.contents.firstOrNull()?.disposer as? ResumableView)?.onFocused()
-                } else {
-                    //pause views when tool window is hidden
-                    contentManager.contents
-                        .mapNotNull { it.disposer as? ResumableView }
-                        .forEach { it.pause() }
                 }
             }
         })
