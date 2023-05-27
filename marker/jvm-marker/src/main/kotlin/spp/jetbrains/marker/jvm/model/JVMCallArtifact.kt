@@ -30,17 +30,19 @@ import scala.collection.JavaConverters
 import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.model.CallArtifact
 import spp.jetbrains.artifact.model.FunctionArtifact
+import spp.jetbrains.artifact.service.isGroovy
+import spp.jetbrains.artifact.service.isKotlin
+import spp.jetbrains.artifact.service.isScala
 import spp.jetbrains.artifact.service.toArtifact
 
 class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiElement) {
 
     override fun getName(): String? {
-        return when (psiElement) {
-            is PsiCall -> psiElement.firstChild.text
-            is KtCallExpression -> psiElement.calleeExpression?.text
-            is KtCallableReferenceExpression -> psiElement.name
-
-            is KtDotQualifiedExpression -> {
+        return when {
+            psiElement is PsiCall -> psiElement.firstChild.text
+            psiElement.isKotlin() && psiElement is KtCallExpression -> psiElement.calleeExpression?.text
+            psiElement.isKotlin() && psiElement is KtCallableReferenceExpression -> psiElement.name
+            psiElement.isKotlin() && psiElement is KtDotQualifiedExpression -> {
                 if (psiElement.selectorExpression is KtCallExpression) {
                     (psiElement.selectorExpression as KtCallExpression).calleeExpression?.text
                 } else {
@@ -48,11 +50,11 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
                 }
             }
 
-            is GrMethodCallExpression -> {
+            psiElement.isGroovy() && psiElement is GrMethodCallExpression -> {
                 psiElement.callReference?.methodName
             }
 
-            is ScMethodCall -> {
+            psiElement.isScala() && psiElement is ScMethodCall -> {
                 psiElement.deepestInvokedExpr().lastChild.text
             }
 
@@ -61,18 +63,18 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
     }
 
     override fun resolveFunction(): FunctionArtifact? {
-        val function = when (psiElement) {
-            is PsiCall -> psiElement.resolveMethod()?.toArtifact() as? FunctionArtifact
-            is KtCallExpression -> {
+        val function = when {
+            psiElement is PsiCall -> psiElement.resolveMethod()?.toArtifact() as? FunctionArtifact
+            psiElement.isKotlin() && psiElement is KtCallExpression -> {
                 (psiElement.calleeExpression as KtNameReferenceExpression).resolve()
                     ?.toArtifact() as? FunctionArtifact
             }
 
-            is KtCallableReferenceExpression -> {
-                (psiElement.callableReference.resolve() as? PsiElement)?.toArtifact() as? FunctionArtifact
+            psiElement.isKotlin() && psiElement is KtCallableReferenceExpression -> {
+                psiElement.callableReference.resolve()?.toArtifact() as? FunctionArtifact
             }
 
-            is KtDotQualifiedExpression -> {
+            psiElement.isKotlin() && psiElement is KtDotQualifiedExpression -> {
                 if (psiElement.selectorExpression is KtCallExpression) {
                     val test = (psiElement.selectorExpression as KtCallExpression).calleeExpression
                     if (test is KtNameReferenceExpression) {
@@ -85,11 +87,11 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
                 }
             }
 
-            is GrMethodCallExpression -> {
+            psiElement.isGroovy() && psiElement is GrMethodCallExpression -> {
                 psiElement.resolveMethod()?.toArtifact() as? FunctionArtifact
             }
 
-            is ScMethodCall -> {
+            psiElement.isScala() && psiElement is ScMethodCall -> {
                 (psiElement.deepestInvokedExpr() as? ScReferenceExpression)?.resolve()
                     ?.toArtifact() as? FunctionArtifact
             }
@@ -108,9 +110,9 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
     }
 
     override fun getArguments(): List<ArtifactElement> {
-        return when (psiElement) {
-            is PsiCall -> psiElement.argumentList?.expressions?.mapNotNull { it.toArtifact() } ?: emptyList()
-            is KtCallExpression -> {
+        return when {
+            psiElement is PsiCall -> psiElement.argumentList?.expressions?.mapNotNull { it.toArtifact() } ?: emptyList()
+            psiElement.isKotlin() && psiElement is KtCallExpression -> {
                 try {
                     psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
                 } catch (e: Exception) {
@@ -119,7 +121,7 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
                 psiElement.valueArguments.mapNotNull { it.getArgumentExpression()?.toArtifact() }
             }
 
-            is KtDotQualifiedExpression -> {
+            psiElement.isKotlin() && psiElement is KtDotQualifiedExpression -> {
                 if (psiElement.selectorExpression is KtCallExpression) {
                     (psiElement.selectorExpression as KtCallExpression).valueArguments.mapNotNull {
                         it.getArgumentExpression()?.toArtifact()
@@ -129,11 +131,11 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
                 }
             }
 
-            is GrMethodCallExpression -> {
+            psiElement.isGroovy() && psiElement is GrMethodCallExpression -> {
                 psiElement.argumentList.expressionArguments.mapNotNull { it.toArtifact() }
             }
 
-            is ScMethodCall -> {
+            psiElement.isScala() && psiElement is ScMethodCall -> {
                 JavaConverters.asJavaCollection(psiElement.argumentExpressions()).mapNotNull { it.toArtifact() }
             }
 
@@ -143,10 +145,14 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
 
     override fun isSameArtifact(element: ArtifactElement): Boolean {
         if (element is JVMCallArtifact) {
-            if (psiElement is KtCallExpression && element.psiElement is KtDotQualifiedExpression) {
-                return psiElement == (element.psiElement as KtDotQualifiedExpression).selectorExpression
-            } else if (psiElement is KtDotQualifiedExpression && element.psiElement is KtCallExpression) {
-                return psiElement.selectorExpression == element.psiElement
+            when {
+                psiElement.isKotlin() && psiElement is KtCallExpression && element.psiElement is KtDotQualifiedExpression -> {
+                    return psiElement == (element.psiElement as KtDotQualifiedExpression).selectorExpression
+                }
+
+                psiElement.isKotlin() && psiElement is KtDotQualifiedExpression && element.psiElement is KtCallExpression -> {
+                    return psiElement.selectorExpression == element.psiElement
+                }
             }
         }
         return super.isSameArtifact(element)
