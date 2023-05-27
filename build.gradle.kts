@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("app.cash.licensee:licensee-gradle-plugin:1.6.0")
+        classpath("app.cash.licensee:licensee-gradle-plugin:1.7.0")
     }
 }
 
