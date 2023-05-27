@@ -26,7 +26,6 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.removeUserData
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.util.messages.SimpleMessageBusConnection
-import org.joor.Reflect
 import spp.jetbrains.SourceKey
 import java.awt.Color
 
@@ -34,8 +33,9 @@ import java.awt.Color
 class StickyNotificationPanel(
     parentDisposable: Disposable,
     val project: Project,
-    background: Color? = null
-) : EditorNotificationPanel(background), Disposable {
+    background: Color? = null,
+    status: Status = Status.Info
+) : EditorNotificationPanel(background, status), Disposable {
 
     private val selfKey = SourceKey<StickyNotificationPanel>(
         this::class.simpleName.toString() + "@" + System.identityHashCode(this)
@@ -59,7 +59,6 @@ class StickyNotificationPanel(
     }
 
     fun addCloseAction() {
-        Reflect.on(this).set("myCloseButton", null)
         setCloseAction { hideSticky() }
     }
 
