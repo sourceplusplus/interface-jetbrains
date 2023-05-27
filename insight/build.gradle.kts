@@ -56,7 +56,7 @@ dependencies {
     implementation("plus.sourceplus:protocol:$protocolVersion")
 
     compileOnly("org.jooq:joor:$joorVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.google.guava:guava:$guavaVersion")
     compileOnly("org.jetbrains:annotations:24.0.1")

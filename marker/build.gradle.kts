@@ -48,13 +48,13 @@ configure<PublishingExtension> {
 dependencies {
     compileOnly(projectDependency(":core"))
     compileOnly("plus.sourceplus:protocol:$protocolVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     compileOnly("com.google.guava:guava:$guavaVersion")
     testImplementation("junit:junit:4.13.2")
 }
