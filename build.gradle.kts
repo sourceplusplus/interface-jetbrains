@@ -128,7 +128,7 @@ subprojects {
     apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
     val detektPlugins by configurations
     dependencies {
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.22.0")
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
     }
 
     tasks {
