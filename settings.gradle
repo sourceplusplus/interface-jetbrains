@@ -4,7 +4,7 @@ pluginManagement {
         id 'org.jetbrains.kotlin.jvm' version kotlinVersion apply false
         id 'com.avast.gradle.docker-compose' version "0.16.12" apply false
         id 'io.gitlab.arturbosch.detekt' version "1.22.0" apply false
-        id 'com.apollographql.apollo3' version "3.8.1" apply false
+        id 'com.apollographql.apollo3' version "3.8.2" apply false
         id 'com.diffplug.spotless' version '6.18.0' apply false
     }
 }
