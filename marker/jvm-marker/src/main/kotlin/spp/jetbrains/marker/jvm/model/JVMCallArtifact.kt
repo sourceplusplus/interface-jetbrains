@@ -113,11 +113,6 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
         return when {
             psiElement is PsiCall -> psiElement.argumentList?.expressions?.mapNotNull { it.toArtifact() } ?: emptyList()
             psiElement.isKotlin() && psiElement is KtCallExpression -> {
-                try {
-                    psiElement.valueArguments.map { it.getArgumentExpression()?.toArtifact()!! }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
                 psiElement.valueArguments.mapNotNull { it.getArgumentExpression()?.toArtifact() }
             }
 
