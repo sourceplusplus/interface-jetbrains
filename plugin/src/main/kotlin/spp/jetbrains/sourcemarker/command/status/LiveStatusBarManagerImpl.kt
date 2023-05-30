@@ -326,12 +326,12 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                 UserData.liveViewService(project)!!.addLiveView(
                     LiveView(
                         null,
-                        mutableSetOf(liveMeter.toMetricId()),
+                        mutableSetOf(liveMeter.id!!),
                         ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
                         liveMeter.location,
                         LiveViewConfig(
                             "LIVE_METER",
-                            listOf(liveMeter.toMetricId())
+                            listOf(liveMeter.id!!)
                         )
                     )
                 ).onComplete {
