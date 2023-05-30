@@ -141,11 +141,13 @@ class JVMCallArtifact(override val psiElement: PsiElement) : CallArtifact(psiEle
     override fun isSameArtifact(element: ArtifactElement): Boolean {
         if (element is JVMCallArtifact) {
             when {
-                psiElement.isKotlin() && psiElement is KtCallExpression && element.psiElement is KtDotQualifiedExpression -> {
+                psiElement.isKotlin() && psiElement is KtCallExpression
+                        && element.psiElement is KtDotQualifiedExpression -> {
                     return psiElement == (element.psiElement as KtDotQualifiedExpression).selectorExpression
                 }
 
-                psiElement.isKotlin() && psiElement is KtDotQualifiedExpression && element.psiElement is KtCallExpression -> {
+                psiElement.isKotlin() && psiElement is KtDotQualifiedExpression
+                        && element.psiElement is KtCallExpression -> {
                     return psiElement.selectorExpression == element.psiElement
                 }
             }
