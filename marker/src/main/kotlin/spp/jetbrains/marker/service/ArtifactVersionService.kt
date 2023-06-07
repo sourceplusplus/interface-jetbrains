@@ -105,7 +105,7 @@ object ArtifactVersionService {
     /**
      * Taken from [VcsFacadeImpl.getChangedElements]
      */
-    @Suppress("LoopWithTooManyJumpStatements") // copied code
+    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod") // copied code
     private fun <T : PsiElement> getChangedElements(
         project: Project,
         changes: Array<Change>,

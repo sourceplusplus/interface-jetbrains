@@ -127,9 +127,8 @@ class JVMVariableNode(
                 presentation.addText(variable.value.toString(), fromTextAttributes(scheme.getAttributes(NUMBER)))
             } else {
                 val varValue = variable.value
-                if (
-                    varValue is JsonArray && varValue.size() == 1 &&
-                    varValue.first() is JsonObject && (varValue.first() as JsonObject).getString("@skip") != null
+                if ((varValue as? JsonArray)?.size() == 1
+                    && (varValue.first() as? JsonObject)?.getString("@skip") != null
                 ) {
                     val clazz = (varValue.first() as JsonObject).getString("@class").substringAfterLast(".")
                     val id = (varValue.first() as JsonObject).getString("@id")

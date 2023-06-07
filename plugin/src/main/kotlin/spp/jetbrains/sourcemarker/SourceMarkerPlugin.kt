@@ -445,63 +445,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         SourceStatusService.getInstance(project).update(Pending, "Logging in")
 
         if (!config.serviceHost.isNullOrBlank()) {
-            val certificatePins = mutableListOf<String>()
-            certificatePins.addAll(config.certificatePins)
-            val httpClientOptions = if (certificatePins.isNotEmpty()) {
-                HttpClientOptions()
-                    .setTrustOptions(
-                        TrustOptions.wrap(
-                            JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
-                        )
-                    )
-                    .setVerifyHost(false)
-            } else {
-                HttpClientOptions().apply {
-                    if (config.isSsl()) {
-                        isSsl = config.isSsl()
-                        isVerifyHost = false
-                        isTrustAll = true
-                    }
-                }
-            }
-
-            val tokenUri = "/api/new-token?authorization_code=" + config.authorizationCode
-            val req = try {
-                vertx.createHttpClient(httpClientOptions).request(
-                    RequestOptions()
-                        .setSsl(config.isSsl())
-                        .setHost(config.serviceHostNormalized)
-                        .setPort(config.getServicePortNormalized())
-                        .setURI(tokenUri)
-                ).await()
-            } catch (ignore: ConnectException) {
-                vertx.createHttpClient(httpClientOptions).request(
-                    RequestOptions()
-                        .setSsl(config.isSsl())
-                        .setHost(config.serviceHostNormalized)
-                        .setPort(config.isSsl().let { if (it) 443 else 80 }) //try default HTTP ports
-                        .setURI(tokenUri)
-                ).await().apply {
-                    //update config with successful port
-                    config.serviceHost = if (config.isSsl()) {
-                        "https://${config.serviceHostNormalized}:443"
-                    } else {
-                        "http://${config.serviceHostNormalized}:80"
-                    }
-                }
-            }
-            req.end().await()
-            val resp = req.response().await()
-            if (resp.statusCode() in 200..299) {
-                val body = resp.body().await().toString()
-                if (resp.statusCode() != 202) {
-                    config.accessToken = body
-                }
-
-                discoverAvailableServices(vertx, config)
-            } else {
-                error("Error getting service token: ${resp.statusCode()} ${resp.statusMessage()}")
-            }
+            connectToConfiguredService(vertx, config)
         } else {
             //try default local access
             try {
@@ -511,6 +455,66 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             } catch (e: Exception) {
                 log.warn("Unable to find local live platform", e)
             }
+        }
+    }
+
+    private suspend fun connectToConfiguredService(vertx: Vertx, config: SourceMarkerConfig) {
+        val certificatePins = mutableListOf<String>()
+        certificatePins.addAll(config.certificatePins)
+        val httpClientOptions = if (certificatePins.isNotEmpty()) {
+            HttpClientOptions()
+                .setTrustOptions(
+                    TrustOptions.wrap(
+                        JavaPinning.trustManagerForPins(certificatePins.map { Pin.fromString("CERTSHA256:$it") })
+                    )
+                )
+                .setVerifyHost(false)
+        } else {
+            HttpClientOptions().apply {
+                if (config.isSsl()) {
+                    isSsl = config.isSsl()
+                    isVerifyHost = false
+                    isTrustAll = true
+                }
+            }
+        }
+
+        val tokenUri = "/api/new-token?authorization_code=" + config.authorizationCode
+        val req = try {
+            vertx.createHttpClient(httpClientOptions).request(
+                RequestOptions()
+                    .setSsl(config.isSsl())
+                    .setHost(config.serviceHostNormalized)
+                    .setPort(config.getServicePortNormalized())
+                    .setURI(tokenUri)
+            ).await()
+        } catch (ignore: ConnectException) {
+            vertx.createHttpClient(httpClientOptions).request(
+                RequestOptions()
+                    .setSsl(config.isSsl())
+                    .setHost(config.serviceHostNormalized)
+                    .setPort(config.isSsl().let { if (it) 443 else 80 }) //try default HTTP ports
+                    .setURI(tokenUri)
+            ).await().apply {
+                //update config with successful port
+                config.serviceHost = if (config.isSsl()) {
+                    "https://${config.serviceHostNormalized}:443"
+                } else {
+                    "http://${config.serviceHostNormalized}:80"
+                }
+            }
+        }
+        req.end().await()
+        val resp = req.response().await()
+        if (resp.statusCode() in 200..299) {
+            val body = resp.body().await().toString()
+            if (resp.statusCode() != 202) {
+                config.accessToken = body
+            }
+
+            discoverAvailableServices(vertx, config)
+        } else {
+            error("Error getting service token: ${resp.statusCode()} ${resp.statusMessage()}")
         }
     }
 
