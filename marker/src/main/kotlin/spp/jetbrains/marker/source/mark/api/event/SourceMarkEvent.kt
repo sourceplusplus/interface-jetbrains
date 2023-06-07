@@ -24,11 +24,20 @@ import spp.jetbrains.marker.source.mark.api.SourceMark
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-open class SourceMarkEvent(
-    val sourceMark: SourceMark,
-    val eventCode: IEventCode,
-    vararg val params: Any?
-) {
+open class SourceMarkEvent {
+
+    val sourceMark: SourceMark
+    val eventCode: IEventCode
+    val params: Array<out Any?>
+
+    constructor(sourceMark: SourceMark, eventCode: IEventCode, params: List<Any?>) {
+        this.sourceMark = sourceMark
+        this.eventCode = eventCode
+        this.params = params.toTypedArray()
+    }
+
+    constructor(sourceMark: SourceMark, eventCode: IEventCode, vararg params: Any?) :
+            this(sourceMark, eventCode, params.toList())
 
     override fun toString(): String {
         return if (params.isEmpty()) {

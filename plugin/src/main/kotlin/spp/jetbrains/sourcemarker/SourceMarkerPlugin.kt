@@ -332,22 +332,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
 
     private suspend fun discoverAvailableServices(vertx: Vertx, config: SourceMarkerConfig) {
         SourceStatusService.getInstance(project).update(Pending, "Discovering available services")
-
-        val originalClassLoader = Thread.currentThread().contextClassLoader
-        try {
-            Thread.currentThread().contextClassLoader = javaClass.classLoader
-            discovery = DiscoveryImpl(
-                vertx,
-                ServiceDiscoveryOptions().setBackendConfiguration(
-                    JsonObject()
-                        .put("backend-name", "tcp-service-discovery")
-                        .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
-                        .put("project_location_hash", project.locationHash)
-                )
-            )
-        } finally {
-            Thread.currentThread().contextClassLoader = originalClassLoader
-        }
+        setupServiceDiscoveryBackend(vertx, config)
 
         val liveStatusManager = LiveStatusBarManagerImpl(project, vertx)
         project.putUserData(LiveStatusBarManager.KEY, liveStatusManager)
@@ -418,6 +403,24 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(insightManager)
         } else {
             log.warn("Live insights unavailable")
+        }
+    }
+
+    private fun setupServiceDiscoveryBackend(vertx: Vertx, config: SourceMarkerConfig) {
+        val originalClassLoader = Thread.currentThread().contextClassLoader
+        try {
+            Thread.currentThread().contextClassLoader = javaClass.classLoader
+            discovery = DiscoveryImpl(
+                vertx,
+                ServiceDiscoveryOptions().setBackendConfiguration(
+                    JsonObject()
+                        .put("backend-name", "tcp-service-discovery")
+                        .put("sourcemarker_plugin_config", JsonObject.mapFrom(config))
+                        .put("project_location_hash", project.locationHash)
+                )
+            )
+        } finally {
+            Thread.currentThread().contextClassLoader = originalClassLoader
         }
     }
 

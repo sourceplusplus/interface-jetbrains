@@ -17,7 +17,6 @@
 package spp.jetbrains.marker.js.service
 
 import com.intellij.lang.javascript.psi.*
-import com.intellij.lang.javascript.psi.ecma6.TypeScriptVariable
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralValue

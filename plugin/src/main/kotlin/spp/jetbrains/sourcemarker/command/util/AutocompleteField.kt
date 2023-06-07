@@ -45,7 +45,7 @@ import javax.swing.text.*
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "TooManyFunctions")
 class AutocompleteField<T : AutocompleteFieldRow>(
     val project: Project,
     var placeHolderText: String?,

@@ -47,6 +47,7 @@ complexity:
     thresholdInClasses: 15
     thresholdInObjects: 15
   LongParameterList:
-    functionThreshold: 8
+    functionThreshold: 10
+    constructorThreshold: 10
   LongMethod:
     excludes: [ '**/test/**' ]

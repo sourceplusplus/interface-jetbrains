@@ -77,7 +77,7 @@ import kotlin.concurrent.schedule
  * @since 0.1.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "TooManyFunctions")
 interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener {
 
     /**
@@ -361,7 +361,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
     }
 
     fun triggerEvent(eventCode: IEventCode, params: List<Any?>, listen: (() -> Unit)? = null) {
-        triggerEvent(SourceMarkEvent(this, eventCode, *params.toTypedArray()), listen)
+        triggerEvent(SourceMarkEvent(this, eventCode, params), listen)
     }
 
     fun triggerEvent(event: SourceMarkEvent, listen: (() -> Unit)? = null) {
@@ -456,10 +456,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
             }
             val popupComponentSize = popupComponent.preferredSize
 
-            val displayPoint = if ((this is ClassSourceMark && sourceMarkComponent.configuration.showAboveClass)
-                || (this is MethodSourceMark && sourceMarkComponent.configuration.showAboveMethod)
-                || (this is ExpressionSourceMark && sourceMarkComponent.configuration.showAboveExpression)
-            ) {
+            val displayPoint = if (isDisplayPointAbove()) {
                 editor.visualPositionToXY(
                     editor.offsetToVisualPosition(editor.document.getLineStartOffset(lineNumber))
                 )
@@ -499,6 +496,15 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                 editor.scrollingModel.addVisibleAreaListener(this)
                 sourceMarkComponent.configuration.addedScrollListener = true
             }
+        }
+    }
+
+    private fun isDisplayPointAbove(): Boolean {
+        return when (this) {
+            is ClassSourceMark -> sourceMarkComponent.configuration.showAboveClass
+            is MethodSourceMark -> sourceMarkComponent.configuration.showAboveMethod
+            is ExpressionSourceMark -> sourceMarkComponent.configuration.showAboveExpression
+            else -> false
         }
     }
 
