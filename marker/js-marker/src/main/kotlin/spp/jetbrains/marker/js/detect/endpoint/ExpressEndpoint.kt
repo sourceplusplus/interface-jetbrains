@@ -136,7 +136,8 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
         val initializer = routerVariable.initializer as JSCallExpression
 
         val initializerMethod = initializer.firstChild
-        if (initializerMethod.children.getOrNull(2)?.text != "Router") { // TODO: Is this the only thing we want out of express?
+        // TODO: Is this the only thing we want out of express?
+        if (initializerMethod.children.getOrNull(2)?.text != "Router") {
             return emptyList()
         }
 
@@ -181,7 +182,8 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
         if (!expressInitializer.isRequireCall) {
             return false
         }
-        if (expressInitializer.arguments[0] !is JSLiteralExpression) { // TODO: How would we support require with a variable?
+        // TODO: How would we support require with a variable?
+        if (expressInitializer.arguments[0] !is JSLiteralExpression) {
             return false
         }
 

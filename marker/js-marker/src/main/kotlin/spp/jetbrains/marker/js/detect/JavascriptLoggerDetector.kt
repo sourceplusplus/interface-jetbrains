@@ -20,7 +20,7 @@ import com.intellij.openapi.project.Project
 import spp.jetbrains.marker.source.info.LoggerDetector
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
-class JavascriptLoggerDetector(project: Project) : LoggerDetector {
+class JavascriptLoggerDetector(val project: Project) : LoggerDetector {
 
     override fun determineLoggerStatements(guideMark: MethodGuideMark): List<LoggerDetector.DetectedLogger> {
         return emptyList()

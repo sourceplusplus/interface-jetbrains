@@ -37,6 +37,7 @@ import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.general.Service
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("TooManyFunctions")
 class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
 
     companion object {
@@ -122,17 +123,9 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
         return false
     }
 
-    override fun isReady(): Boolean {
-        return getCurrentStatus().first.isReady
-    }
-
-    override fun isConnected(): Boolean {
-        return getCurrentStatus().first.isConnected
-    }
-
-    override fun isLoggedIn(): Boolean {
-        return UserData.hasSelfInfo(project)
-    }
+    override fun isReady(): Boolean = getCurrentStatus().first.isReady
+    override fun isConnected(): Boolean = getCurrentStatus().first.isConnected
+    override fun isLoggedIn(): Boolean = UserData.hasSelfInfo(project)
 
     override fun getCurrentStatus(): Pair<SourceStatus, String?> {
         synchronized(statusLock) {

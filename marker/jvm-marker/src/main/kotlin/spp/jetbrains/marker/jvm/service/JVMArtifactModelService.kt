@@ -39,6 +39,7 @@ import spp.jetbrains.marker.jvm.model.*
  */
 class JVMArtifactModelService : IArtifactModelService {
 
+    @Suppress("CyclomaticComplexMethod")
     override fun toArtifact(element: PsiElement): ArtifactElement? {
         if (element.isKotlin()) {
             val fromKotlin = fromKotlin(element)

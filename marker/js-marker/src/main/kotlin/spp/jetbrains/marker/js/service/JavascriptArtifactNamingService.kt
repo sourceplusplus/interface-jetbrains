@@ -120,8 +120,8 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
     }
 
     private fun getStatementOrExpressionQualifiedName(element: PsiElement, type: ArtifactType): ArtifactQualifiedName {
-        //todo: each element needs a unique name but encoding the literal text and appending the offset is not unique enough
-        // - will need to get a unique hash from PSI or generate a unique name and store it in the PSI
+        //todo: each element needs a unique name but encoding the literal text and appending the offset is not unique
+        // - enough will need to get a unique hash from PSI or generate a unique name and store it in the PSI
         var expressionString = if (element is PsiNamedElement) {
             element.name ?: ""
         } else {

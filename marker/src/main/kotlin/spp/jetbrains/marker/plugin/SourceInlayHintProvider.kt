@@ -114,14 +114,9 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
             if (it.renderer is BlockInlayRenderer) {
                 val cachedPresentation = Reflect.on(it.renderer).field("cachedPresentation").get<Any>()
                 if (cachedPresentation is RecursivelyUpdatingRootPresentation) {
-                    if (cachedPresentation.content is StaticDelegatePresentation) {
-                        val delegatePresentation = cachedPresentation.content as StaticDelegatePresentation
-                        if (delegatePresentation.presentation is DynamicTextInlayPresentation) {
-                            val dynamicPresentation = delegatePresentation.presentation as DynamicTextInlayPresentation
-                            if (dynamicPresentation.inlayMark == sourceMark) {
-                                Disposer.dispose(it)
-                            }
-                        }
+                    val presentation = (cachedPresentation.content as? StaticDelegatePresentation)?.presentation
+                    if (presentation is DynamicTextInlayPresentation && presentation.inlayMark == sourceMark) {
+                        Disposer.dispose(it)
                     }
                 }
             }

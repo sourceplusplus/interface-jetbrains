@@ -203,10 +203,8 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val foo5 = methods[4]
         val name5 = JVMArtifactNamingService().getFullyQualifiedName(foo5)
-        assertEquals(
-            "$className.foo5(java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[])",
-            name5.identifier
-        )
+        val paramsStr = "java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[]"
+        assertEquals("$className.foo5($paramsStr)", name5.identifier)
         assertEquals(ArtifactType.FUNCTION, name5.type)
         assertNotNull(name5.lineNumber)
     }
@@ -238,10 +236,8 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val foo3 = methods[2]
         val name3 = JVMArtifactNamingService().getFullyQualifiedName(foo3)
-        assertEquals(
-            "com.example.$className.foo3(java.lang.String,int,long,double,float,boolean,char,byte,short)",
-            name3.identifier
-        )
+        val paramsStr3 = "java.lang.String,int,long,double,float,boolean,char,byte,short"
+        assertEquals("com.example.$className.foo3($paramsStr3)", name3.identifier)
         assertEquals(ArtifactType.FUNCTION, name3.type)
         assertNotNull(name3.lineNumber)
 
@@ -253,10 +249,8 @@ class JVMArtifactNamingServiceTest : BasePlatformTestCase() {
 
         val foo5 = methods[4]
         val name5 = JVMArtifactNamingService().getFullyQualifiedName(foo5)
-        assertEquals(
-            "com.example.$className.foo5(java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[])",
-            name5.identifier
-        )
+        val paramsStr5 = "java.lang.String[],int[],long[],double[],float[],boolean[],char[],byte[],short[]"
+        assertEquals("com.example.$className.foo5($paramsStr5)", name5.identifier)
         assertEquals(ArtifactType.FUNCTION, name5.type)
         assertNotNull(name5.lineNumber)
     }
