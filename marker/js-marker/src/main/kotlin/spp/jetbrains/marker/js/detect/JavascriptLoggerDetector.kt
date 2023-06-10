@@ -22,7 +22,7 @@ import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
 class JavascriptLoggerDetector(val project: Project) : LoggerDetector {
 
-    override fun determineLoggerStatements(guideMark: MethodGuideMark): List<LoggerDetector.DetectedLogger> {
+    override suspend fun determineLoggerStatements(guideMark: MethodGuideMark): List<LoggerDetector.DetectedLogger> {
         return emptyList()
     }
 }

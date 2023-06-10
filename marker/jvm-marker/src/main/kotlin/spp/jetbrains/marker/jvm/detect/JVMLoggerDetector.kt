@@ -18,12 +18,12 @@ package spp.jetbrains.marker.jvm.detect
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.psi.*
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import io.vertx.kotlin.coroutines.await
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
@@ -32,6 +32,7 @@ import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.path.GrMethodCallExpression
+import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
@@ -40,6 +41,7 @@ import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
 import spp.jetbrains.marker.source.info.LoggerDetector.DetectedLogger
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
+import spp.jetbrains.safeExecuteBlockingRunReadActionInSmartMode
 
 /**
  * Detects the presence of log statements within methods and saves log patterns.
@@ -62,7 +64,7 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         )
     }
 
-    override fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger> {
+    override suspend fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger> {
         val psiMethod = ApplicationManager.getApplication().runReadAction(Computable {
             guideMark.getPsiMethod()
         })
@@ -70,12 +72,12 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         return guideMark.getChildren().mapNotNull { it.getUserData(DETECTED_LOGGER) }
     }
 
-    fun determineLoggerStatements(
+    suspend fun determineLoggerStatements(
         function: PsiNameIdentifierOwner,
         fileMarker: SourceFileMarker
     ): List<DetectedLogger> {
-        val loggerStatements = mutableListOf<DetectedLogger>()
-        DumbService.getInstance(project).runReadActionInSmartMode {
+        return UserData.vertx(fileMarker.project).safeExecuteBlockingRunReadActionInSmartMode(fileMarker.project) {
+            val loggerStatements = mutableListOf<DetectedLogger>()
             function.acceptChildren(object : PsiRecursiveElementVisitor() {
                 override fun visitElement(element: PsiElement) {
                     if (element is PsiMethodCallExpression) {
@@ -88,8 +90,8 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
                     super.visitElement(element)
                 }
             })
-        }
-        return loggerStatements
+            loggerStatements
+        }.await()
     }
 
     private fun handleJavaCall(

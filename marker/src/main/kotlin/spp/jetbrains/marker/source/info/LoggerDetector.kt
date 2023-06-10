@@ -38,7 +38,7 @@ interface LoggerDetector {
         inlayMark.putUserData(DETECTED_LOGGER, detectedLogger)
     }
 
-    fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger>
+    suspend fun determineLoggerStatements(guideMark: MethodGuideMark): List<DetectedLogger>
 
     /**
      * Represents a detected log statement.

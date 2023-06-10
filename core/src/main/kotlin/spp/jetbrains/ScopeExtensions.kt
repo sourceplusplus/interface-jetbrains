@@ -17,6 +17,11 @@
 package spp.jetbrains
 
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
+import io.vertx.core.Future
+import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.*
@@ -98,4 +103,16 @@ fun Vertx.safeExecuteBlocking(action: suspend () -> Unit) {
         }
         it.complete()
     }
+}
+
+fun <T> Vertx.safeExecuteBlockingRunReadActionInSmartMode(project: Project, computable: suspend () -> T): Future<T> {
+    val promise = Promise.promise<T>()
+    safeExecuteBlocking {
+        DumbService.getInstance(project).runReadActionInSmartMode(Computable {
+            ScopeExtensions.safeRunBlocking(dispatcher()) {
+                computable()
+            }
+        })
+    }
+    return promise.future()
 }
