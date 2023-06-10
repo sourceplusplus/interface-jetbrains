@@ -61,6 +61,7 @@ class CodeChangeListener(val project: Project) : CoroutineVerticle(), Disposable
         //refresh all source marks on service changes
         SourceStatusService.getInstance(project).onServiceChange {
             vertx.safeLaunch {
+                log.info("Refreshing all source marks on service change")
                 SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
                 FileEditorManager.getInstance(project).allEditors.forEach {
                     ApplicationManager.getApplication().runReadAction {
