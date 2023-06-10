@@ -41,7 +41,7 @@ import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
 import spp.jetbrains.marker.source.info.LoggerDetector.DetectedLogger
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
-import spp.jetbrains.safeExecuteBlockingRunReadActionInSmartMode
+import spp.jetbrains.executeBlockingReadActionWhenSmart
 
 /**
  * Detects the presence of log statements within methods and saves log patterns.
@@ -76,7 +76,7 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         function: PsiNameIdentifierOwner,
         fileMarker: SourceFileMarker
     ): List<DetectedLogger> {
-        return UserData.vertx(fileMarker.project).safeExecuteBlockingRunReadActionInSmartMode(fileMarker.project) {
+        return UserData.vertx(fileMarker.project).executeBlockingReadActionWhenSmart(fileMarker.project) {
             val loggerStatements = mutableListOf<DetectedLogger>()
             function.acceptChildren(object : PsiRecursiveElementVisitor() {
                 override fun visitElement(element: PsiElement) {

@@ -16,10 +16,10 @@
  */
 package spp.jetbrains
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Computable
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -105,14 +105,21 @@ fun Vertx.safeExecuteBlocking(action: suspend () -> Unit) {
     }
 }
 
-fun <T> Vertx.safeExecuteBlockingRunReadActionInSmartMode(project: Project, computable: suspend () -> T): Future<T> {
+fun <T> Vertx.executeBlockingReadActionWhenSmart(project: Project, computable: suspend () -> T): Future<T> {
     val promise = Promise.promise<T>()
-    safeExecuteBlocking {
-        DumbService.getInstance(project).runReadActionInSmartMode(Computable {
-            ScopeExtensions.safeRunBlocking(dispatcher()) {
-                computable()
+    DumbService.getInstance(project).runWhenSmart {
+        executeBlocking<Nothing> {
+            ApplicationManager.getApplication().runReadAction {
+                ScopeExtensions.safeRunBlocking(dispatcher()) {
+                    try {
+                        promise.complete(computable.invoke())
+                    } catch (throwable: Throwable) {
+                        promise.fail(throwable)
+                    }
+                    it.complete()
+                }
             }
-        })
+        }
     }
     return promise.future()
 }

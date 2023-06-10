@@ -58,7 +58,7 @@ object SourceGuideProvider : AbstractSourceGuideProvider {
     }
 
     override fun determineGuideMarks(fileMarker: SourceFileMarker) {
-        ReadAction.run<Nothing> {
+        ReadAction.nonBlocking<Unit> {
             val guideProvider = getProvider(fileMarker.psiFile.language)
             if (guideProvider != null) {
                 guideProvider.determineGuideMarks(fileMarker)

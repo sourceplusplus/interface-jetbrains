@@ -19,17 +19,17 @@ package spp.jetbrains.marker.ult.endpoint
 import com.intellij.microservices.url.UrlPath
 import com.intellij.microservices.url.UrlResolveRequest
 import com.intellij.microservices.url.UrlResolverManager
-import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.ThrowableComputable
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import spp.jetbrains.UserData
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.info.EndpointDetector.EndpointNameDetector
 import spp.jetbrains.marker.source.mark.guide.GuideMark
+import spp.jetbrains.executeBlockingReadActionWhenSmart
 
 /**
  * Detects endpoints using IntelliJ's [UrlResolverManager] experimental functionality.
@@ -58,37 +58,40 @@ class UrlResolverEndpointDetector(
 
     override fun detectEndpointNames(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         val detectedEndpointPromise = Promise.promise<List<DetectedEndpoint>>()
-        val targetPaths = ReadAction.compute(ThrowableComputable {
+        UserData.vertx(guideMark.project).executeBlockingReadActionWhenSmart(guideMark.project) {
             UrlResolverManager.getInstance(guideMark.project).getVariants(
                 UrlResolveRequest(null, null, UrlPath.fromExactString(""), null)
             )
-        })
-        DumbService.getInstance(guideMark.project).smartInvokeLater {
-            ProgressManager.getInstance().runProcess({
-                for (targetPath in targetPaths) {
-                    if (targetPath.resolveToPsiElement() == guideMark.getPsiElement()) {
-                        val endpointName = getEndpointName(targetPath.path)
-                        val methodType = targetPath.methods.firstOrNull()
+        }.onSuccess { targetPaths ->
+            DumbService.getInstance(guideMark.project).smartInvokeLater {
+                ProgressManager.getInstance().runProcess({
+                    for (targetPath in targetPaths) {
+                        if (targetPath.resolveToPsiElement() == guideMark.getPsiElement()) {
+                            val endpointName = getEndpointName(targetPath.path)
+                            val methodType = targetPath.methods.firstOrNull()
 
-                        if (methodType == null) {
-                            //no method type means all HTTP methods are supported
-                            val detectedEndpoints = mutableListOf<DetectedEndpoint>()
-                            for (methodType in httpMethods) {
+                            if (methodType == null) {
+                                //no method type means all HTTP methods are supported
+                                val detectedEndpoints = mutableListOf<DetectedEndpoint>()
+                                for (methodType in httpMethods) {
+                                    val fullEndpointName = "$methodType:$endpointName"
+                                    log.info("Detected endpoint: $fullEndpointName")
+                                    detectedEndpoints.add(DetectedEndpoint(fullEndpointName, false))
+                                }
+                                detectedEndpointPromise.complete(detectedEndpoints)
+                            } else {
                                 val fullEndpointName = "$methodType:$endpointName"
                                 log.info("Detected endpoint: $fullEndpointName")
-                                detectedEndpoints.add(DetectedEndpoint(fullEndpointName, false))
+                                detectedEndpointPromise.complete(listOf(DetectedEndpoint(fullEndpointName, false)))
                             }
-                            detectedEndpointPromise.complete(detectedEndpoints)
-                        } else {
-                            val fullEndpointName = "$methodType:$endpointName"
-                            log.info("Detected endpoint: $fullEndpointName")
-                            detectedEndpointPromise.complete(listOf(DetectedEndpoint(fullEndpointName, false)))
+                            break
                         }
-                        break
                     }
-                }
-                detectedEndpointPromise.tryComplete(emptyList())
-            }, null)
+                    detectedEndpointPromise.tryComplete(emptyList())
+                }, null)
+            }
+        }.onFailure {
+            detectedEndpointPromise.fail(it)
         }
         return detectedEndpointPromise.future()
     }

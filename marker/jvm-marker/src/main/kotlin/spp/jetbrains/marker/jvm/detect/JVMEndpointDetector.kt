@@ -36,7 +36,7 @@ import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.VertxEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.safeExecuteBlockingRunReadActionInSmartMode
+import spp.jetbrains.executeBlockingReadActionWhenSmart
 
 /**
  * todo: description.
@@ -72,7 +72,7 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
                 return Future.succeededFuture(emptyList())
             }
 
-            return UserData.vertx(guideMark.project).safeExecuteBlockingRunReadActionInSmartMode(guideMark.project) {
+            return UserData.vertx(guideMark.project).executeBlockingReadActionWhenSmart(guideMark.project) {
                 if (guideMark.getPsiElement() is PsiMethod) {
                     determineEndpointName(guideMark.getPsiElement() as PsiMethod).await()
                 } else if (guideMark.getPsiElement() is KtNamedFunction) {
