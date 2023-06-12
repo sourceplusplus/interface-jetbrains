@@ -66,8 +66,8 @@ class LiveViewChartWindow(
     private var consumer: MessageConsumer<JsonObject>? = null
     private var step = MetricStep.MINUTE
     private var reservoirSize = 5
-    private val keepTimeSize: Int
-        get() = step.milliseconds * reservoirSize
+    private val keepTimeSize: Long
+        get() = step.milliseconds.toLong() * reservoirSize
     private var xStepSize: Long = (step.milliseconds).toLong()
     private val metricType = MetricType(liveView.viewConfig.viewMetrics.first())
     private var chartColor = defaultChartColor(metricType)
@@ -99,12 +99,6 @@ class LiveViewChartWindow(
         val stop = Instant.now()
         val start = stop.truncatedTo(ChronoUnit.SECONDS)
             .minusSeconds(60 + (getHistoricalMinutes() * 60).toLong())
-        log.info(">>>>>>>>>>>>>>>>>>>>")
-        log.info(">>>>>>>>>>>>>>>>>>>> step (getHistoricalData) = $step")
-        log.info(">>>>>>>>>>>>>>>>>>>> start (getHistoricalData) = $start")
-        log.info(">>>>>>>>>>>>>>>>>>>> stop (getHistoricalData) = $stop")
-        log.info(">>>>>>>>>>>>>>>>>>>> labels (getHistoricalData) = $labels")
-        log.info(">>>>>>>>>>>>>>>>>>>>")
         viewService.getHistoricalMetrics(
             liveView.entityIds.toList(),
             liveView.viewConfig.viewMetrics,
@@ -150,18 +144,7 @@ class LiveViewChartWindow(
         reservoirSize = historicalMinutes
         histogram = Histogram(SlidingWindowReservoir(histogramSize))
         //chart.clear() //todo: possible memory leak
-        log.info(">>>>>>>>>>>>>>>>>>>>")
-        log.info(">>>>>>>>>> before step.seconds = ${step.seconds}")
-        log.info(">>>>>>>>>> before step.milliseconds = ${step.milliseconds}")
-        log.info(">>>>>>>>>> before reservoirSize = $reservoirSize")
-        log.info(">>>>>>>>>> before xStepSize = $xStepSize")
         xStepSize = (step.milliseconds).toLong() * reservoirSize
-        log.info(">>>>>>>>>>>>>>>>>>>>")
-        log.info(">>>>>>>>>> after step.seconds = ${step.seconds}")
-        log.info(">>>>>>>>>> after step.milliseconds = ${step.milliseconds}")
-        log.info(">>>>>>>>>> after reservoirSize = $reservoirSize")
-        log.info(">>>>>>>>>> after xStepSize = $xStepSize")
-        log.info(">>>>>>>>>>>>>>>>>>>>")
 
         getHistoricalData()
     }
