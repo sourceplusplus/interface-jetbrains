@@ -19,7 +19,6 @@ package spp.jetbrains.marker.jvm.detect
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiMethod
-import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
@@ -55,7 +54,7 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
 
     fun determineEndpointName(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
-        CompositeFuture.all(detectorSet.map { it.detectEndpointNames(guideMark) }).onComplete {
+        Future.all(detectorSet.map { it.detectEndpointNames(guideMark) }).onComplete {
             if (it.succeeded()) {
                 val detectedEndpoints = it.result().list<List<DetectedEndpoint>>()
                 promise.complete(detectedEndpoints.firstOrNull { it.isNotEmpty() } ?: emptyList())
