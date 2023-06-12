@@ -71,15 +71,18 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
         }
     }
 
+    /**
+     * Rechecks for endpoint ids for endpoints that have not yet been detected.
+     */
     private suspend fun redetectEndpoints() {
         val redetectIds = SourceMarker.getInstance(project).getGuideMarks().filter {
             it.getUserData(DETECTED_ENDPOINTS)?.any { it.id == null } == true
         }.ifEmpty { return }
 
-        log.trace("Redetecting endpoints ids for project ${project.name}")
-        redetectIds.forEach {
-            getOrFindEndpoints(it)
-        }
+        val startTime = System.currentTimeMillis()
+        log.trace("Re-detecting endpoints ids for project ${project.name}")
+        redetectIds.forEach { getOrFindEndpoints(it) }
+        log.debug("Re-detected ${redetectIds.size} endpoints in ${System.currentTimeMillis() - startTime}ms")
     }
 
     suspend fun getOrFindEndpointIds(sourceMark: GuideMark): List<String> {
@@ -126,12 +129,12 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
             return
         }
 
-        log.trace("Determining endpoint id for endpoint name: ${endpoint.name}")
+        log.debug("Determining endpoint id for endpoint name: ${endpoint.name}")
         val endpoints = UserData.liveManagementService(guideMark.project)
             .searchEndpoints(service.id, endpoint.name, 1000)
         val foundEndpoint = endpoints.await().find { it.name == endpoint.name }
         if (foundEndpoint != null) {
-            log.trace("Found endpoint id: ${foundEndpoint.id}")
+            log.debug("Found endpoint id: ${foundEndpoint.id}")
             endpoint.id = foundEndpoint.id
             guideMark.putUserData(ENDPOINT_FOUND, true)
         } else {

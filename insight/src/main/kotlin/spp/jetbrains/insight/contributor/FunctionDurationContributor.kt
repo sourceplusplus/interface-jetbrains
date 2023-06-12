@@ -117,7 +117,7 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
                         FUNCTION_DURATION,
                         InsightValue.of(InsightType.FUNCTION_DURATION, responseTime)
                     )
-                    log.info(
+                    log.trace(
                         "Set method duration from $currentDuration to $responseTime. "
                                 + "Artifact: ${guideMark.artifactQualifiedName}"
                     )

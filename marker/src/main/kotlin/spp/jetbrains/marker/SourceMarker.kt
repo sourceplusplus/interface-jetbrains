@@ -116,9 +116,7 @@ class SourceMarker(private val project: Project) {
         fileMarker = availableSourceFileMarkers[psiFile.hashCode()]!!
         psiFile.putUserData(SourceFileMarker.KEY, fileMarker)
 
-        safeGlobalLaunch {
-            SourceGuideProvider.determineGuideMarks(fileMarker)
-        }
+        SourceGuideProvider.determineGuideMarks(fileMarker)
         return fileMarker
     }
 
