@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.auxiliary.modifiers.annotation.GrAnnotationNameValuePair
 import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.isGroovy
+import spp.jetbrains.executeBlockingReadActionWhenSmart
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.jvm.detect.endpoint.MicronautEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SkywalkingTraceEndpoint
@@ -36,7 +37,6 @@ import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.VertxEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.executeBlockingReadActionWhenSmart
 
 /**
  * todo: description.

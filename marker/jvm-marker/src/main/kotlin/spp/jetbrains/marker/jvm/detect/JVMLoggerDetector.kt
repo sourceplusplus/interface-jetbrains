@@ -34,6 +34,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.path.GrMethodCallExpression
 import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.executeBlockingReadActionWhenSmart
 import spp.jetbrains.marker.service.ArtifactCreationService
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.info.LoggerDetector
@@ -41,7 +42,6 @@ import spp.jetbrains.marker.source.info.LoggerDetector.Companion.DETECTED_LOGGER
 import spp.jetbrains.marker.source.info.LoggerDetector.DetectedLogger
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
-import spp.jetbrains.executeBlockingReadActionWhenSmart
 
 /**
  * Detects the presence of log statements within methods and saves log patterns.
