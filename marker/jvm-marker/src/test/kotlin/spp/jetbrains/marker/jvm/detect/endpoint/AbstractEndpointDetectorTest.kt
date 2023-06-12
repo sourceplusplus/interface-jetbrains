@@ -18,11 +18,14 @@ package spp.jetbrains.marker.jvm.detect.endpoint
 
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
+import io.vertx.core.Vertx
+import spp.jetbrains.UserData
 
 abstract class AbstractEndpointDetectorTest : LightJavaCodeInsightFixtureTestCase() {
 
     public override fun setUp() {
         super.setUp()
+        UserData.vertx(project, Vertx.vertx())
 
         myFixture.addClass(
             "package org.springframework.web.bind.annotation;\n" +

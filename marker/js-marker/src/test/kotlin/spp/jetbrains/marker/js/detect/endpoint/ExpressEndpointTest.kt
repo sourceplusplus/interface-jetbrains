@@ -66,7 +66,7 @@ class ExpressEndpointTest : BasePlatformTestCase() {
         val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(testEndpointFile)
         assertNotNull(fileMarker)
 
-        SourceGuideProvider.determineGuideMarks(fileMarker!!)
+        SourceGuideProvider.getProvider(fileMarker!!.psiFile.language)?.determineGuideMarks(fileMarker)
 
         val endpointGuideMark = fileMarker.getGuideMarks().find { it.lineNumber == 4 }
         assertNotNull(endpointGuideMark)
@@ -83,7 +83,7 @@ class ExpressEndpointTest : BasePlatformTestCase() {
         val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(testEndpointFile)
         assertNotNull(fileMarker)
 
-        SourceGuideProvider.determineGuideMarks(fileMarker!!)
+        SourceGuideProvider.getProvider(fileMarker!!.psiFile.language)?.determineGuideMarks(fileMarker)
 
         val endpointGuideMark = fileMarker.getGuideMarks().find { it.lineNumber == 4 }
         assertNotNull(endpointGuideMark)
@@ -102,7 +102,7 @@ class ExpressEndpointTest : BasePlatformTestCase() {
         val fileMarker = SourceMarker.getInstance(project).getSourceFileMarker(testEndpointFile)
         assertNotNull(fileMarker)
 
-        SourceGuideProvider.determineGuideMarks(fileMarker!!)
+        SourceGuideProvider.getProvider(fileMarker!!.psiFile.language)?.determineGuideMarks(fileMarker)
 
         val endpointGuideMark = fileMarker.getGuideMarks().find { it.lineNumber == 4 }
         assertNotNull(endpointGuideMark)
