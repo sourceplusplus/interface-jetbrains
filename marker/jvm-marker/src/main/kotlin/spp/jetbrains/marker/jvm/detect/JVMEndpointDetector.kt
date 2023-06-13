@@ -19,7 +19,6 @@ package spp.jetbrains.marker.jvm.detect
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiMethod
-import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.kotlin.coroutines.await
@@ -29,6 +28,7 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.plugins.groovy.lang.psi.api.auxiliary.modifiers.annotation.GrAnnotationNameValuePair
 import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.isGroovy
+import spp.jetbrains.executeBlockingReadActionWhenSmart
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
 import spp.jetbrains.marker.jvm.detect.endpoint.MicronautEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.SkywalkingTraceEndpoint
@@ -36,7 +36,6 @@ import spp.jetbrains.marker.jvm.detect.endpoint.SpringMVCEndpoint
 import spp.jetbrains.marker.jvm.detect.endpoint.VertxEndpoint
 import spp.jetbrains.marker.source.info.EndpointDetector
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.executeBlockingReadActionWhenSmart
 
 /**
  * todo: description.
@@ -55,7 +54,7 @@ class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDe
 
     fun determineEndpointName(guideMark: GuideMark): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
-        CompositeFuture.all(detectorSet.map { it.detectEndpointNames(guideMark) }).onComplete {
+        Future.all(detectorSet.map { it.detectEndpointNames(guideMark) }).onComplete {
             if (it.succeeded()) {
                 val detectedEndpoints = it.result().list<List<DetectedEndpoint>>()
                 promise.complete(detectedEndpoints.firstOrNull { it.isNotEmpty() } ?: emptyList())

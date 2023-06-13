@@ -22,10 +22,10 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyFile
 import io.vertx.core.Vertx
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
+import spp.jetbrains.marker.service.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
@@ -54,11 +54,9 @@ class PythonGuideProviderTest : BasePlatformTestCase() {
         val fileMarker = SourceMarker.getSourceFileMarker(psiFile)
         assertNotNull(fileMarker)
 
-        runBlocking {
-            delay(1_500)
-        }
+        SourceGuideProvider.getProvider(fileMarker!!.psiFile.language)?.determineGuideMarks(fileMarker)
 
-        val sourceMarks = fileMarker!!.getSourceMarks()
+        val sourceMarks = fileMarker.getSourceMarks()
         assertNotNull(sourceMarks)
         assertEquals(1, sourceMarks.size)
 

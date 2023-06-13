@@ -78,7 +78,7 @@ private object AnonymousFeedback {
             val duplicate = findFirstDuplicate(newGitHubIssue.title, issueService, repoID)
             var isNewIssue = true
             if (duplicate != null) {
-                issueService.createComment(repoID, duplicate.number, generateGitHubIssueBody(environmentDetails, false))
+                issueService.createComment(repoID, duplicate.number, generateGitHubIssueBody(environmentDetails))
                 newGitHubIssue = duplicate
                 isNewIssue = false
             } else {
@@ -112,20 +112,19 @@ private object AnonymousFeedback {
         val errorMessage = details.remove("error.message")?.takeIf(String::isNotBlank) ?: "Unspecified error"
         title = PluginBundle.message("git.issue.title", details.remove("error.hash").orEmpty(), errorMessage)
         details["title"] = title
-        body = generateGitHubIssueBody(details, true)
+        body = generateGitHubIssueBody(details)
     }
 
-    private fun generateGitHubIssueBody(details: MutableMap<String, String>, includeStacktrace: Boolean) =
+    private fun generateGitHubIssueBody(details: MutableMap<String, String>) =
         buildString {
             val errorDescription = details.remove("error.description").orEmpty()
             val stackTrace = details.remove("error.stacktrace")?.takeIf(String::isNotBlank) ?: "invalid stacktrace"
             if (errorDescription.isNotEmpty()) append(errorDescription).appendLine("\n\n----------------------\n")
             for ((key, value) in details) append("- ").append(key).append(": ").appendLine(value)
-            if (includeStacktrace)
-                appendLine("<details><summary>Full StackTrace</summary>")
-                    .appendLine("<pre><code>")
-                    .appendLine(stackTrace)
-                    .appendLine("</code></pre>\n</details>")
+            appendLine("<details><summary>Full StackTrace</summary>")
+                .appendLine("<pre><code>")
+                .appendLine(stackTrace)
+                .appendLine("</code></pre>\n</details>")
         }
 }
 

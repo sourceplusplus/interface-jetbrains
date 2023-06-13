@@ -53,7 +53,7 @@ object SourceGuideProvider : AbstractSourceGuideProvider {
         }
     }
 
-    private fun getProvider(language: Language): AbstractSourceGuideProvider? {
+    fun getProvider(language: Language): AbstractSourceGuideProvider? {
         return getProvider(language.baseLanguage?.id ?: language.id)
     }
 
