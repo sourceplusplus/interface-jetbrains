@@ -58,6 +58,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
         return getService(element.language).isLiteral(element)
     }
 
+    fun isSupported(element: PsiElement): Boolean {
+        return getServiceIfPresent(element.language.baseLanguage?.id ?: element.language.id) != null
+    }
+
     fun isFunction(element: PsiElement): Boolean {
         return element is FunctionArtifact || getType(element) == ArtifactType.FUNCTION
     }
