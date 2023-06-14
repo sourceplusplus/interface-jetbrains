@@ -198,11 +198,15 @@ subprojects {
         }
     }
 
-    fun projectDependency(name: String): ProjectDependency {
-        return if (rootProject.name.contains("jetbrains")) {
-            DependencyHandlerScope.of(rootProject.dependencies).project(name)
-        } else {
-            DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
-        }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.freeCompilerArgs = listOf("-Xdebug")
+    }
+}
+
+fun projectDependency(name: String): ProjectDependency {
+    return if (rootProject.name.contains("jetbrains")) {
+        DependencyHandlerScope.of(rootProject.dependencies).project(name)
+    } else {
+        DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
     }
 }
