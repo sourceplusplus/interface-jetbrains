@@ -20,9 +20,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
+import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import io.vertx.core.eventbus.MessageConsumer
@@ -63,15 +65,25 @@ class LiveViewTraceManagerImpl(
         }
     }
 
+    private val toolWindowId = "Live Traces"
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
-    private var toolWindow = ToolWindowManager.getInstance(project)
-        .registerToolWindow(RegisterToolWindowTask.closable("Live Traces", PluginIcons.ToolWindow.listTree))
-    private var contentManager = toolWindow.contentManager
+    private var toolWindow: ToolWindow
+    private var contentManager: ContentManager
     override var currentView: ResumableView? = null
     override val refreshInterval: Int?
         get() = currentView?.refreshInterval
 
     init {
+        val existingToolWindow = ToolWindowManager.getInstance(project).getToolWindow(toolWindowId)
+        if (existingToolWindow == null) {
+            toolWindow = ToolWindowManager.getInstance(project)
+                .registerToolWindow(RegisterToolWindowTask.closable(toolWindowId, PluginIcons.ToolWindow.listTree))
+        } else {
+            toolWindow = existingToolWindow
+            toolWindow.isAvailable = true
+        }
+        contentManager = toolWindow.contentManager
+
         project.putUserData(LiveViewTraceManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
             if (it.isReady) {
