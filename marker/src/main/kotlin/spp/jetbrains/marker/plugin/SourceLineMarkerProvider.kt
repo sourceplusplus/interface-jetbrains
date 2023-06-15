@@ -25,7 +25,6 @@ import com.intellij.util.Function
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.service.ArtifactMarkService
-import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 
 /**

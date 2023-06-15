@@ -54,8 +54,8 @@ class ExpressEndpoint : EndpointDetector.EndpointNameDetector {
             }
 
             val expression = guideMark.getPsiElement() as JSCallExpression
-            val method = expression.firstChild as JSReferenceExpression
-            if (method.firstChild !is JSReferenceExpression) {
+            val method = expression.firstChild as? JSReferenceExpression
+            if (method?.firstChild !is JSReferenceExpression) {
                 promise.complete(emptyList())
                 return@runReadAction
             }
