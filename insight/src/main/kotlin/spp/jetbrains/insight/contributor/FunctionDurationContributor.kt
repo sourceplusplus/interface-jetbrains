@@ -237,7 +237,9 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
                 updateInsights(mark as MethodSourceMark)
             } catch (e: PsiInvalidElementAccessException) {
                 //ignore; attempted to get insights for code that's been invalidated
-            }
+            } catch (e: AssertionError) {
+                //ignore; attempted to get insights for code that's been invalidated
+            } //todo: should likely be handled by properly using read actions
         })
     }
 }
