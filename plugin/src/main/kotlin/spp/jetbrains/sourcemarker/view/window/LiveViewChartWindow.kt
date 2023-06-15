@@ -67,7 +67,7 @@ class LiveViewChartWindow(
     private var step = MetricStep.MINUTE
     private var reservoirSize = 5
     private val keepTimeSize: Long
-        get() = step.milliseconds.toLong() * reservoirSize
+        get() = step.milliseconds.toLong() * timeSizeMultiplier()
     private var xStepSize: Long = (step.milliseconds).toLong()
     private val metricType = MetricType(liveView.viewConfig.viewMetrics.first())
     private var chartColor = defaultChartColor(metricType)
@@ -264,6 +264,15 @@ class LiveViewChartWindow(
             left = 40
             bottom = 25
             right = 40
+        }
+    }
+
+    private fun timeSizeMultiplier(): Int {
+        return when (step) {
+            MetricStep.SECOND -> reservoirSize*60
+            MetricStep.MINUTE -> reservoirSize
+            MetricStep.HOUR -> reservoirSize/60
+            MetricStep.DAY -> reservoirSize/(60*24)
         }
     }
 
