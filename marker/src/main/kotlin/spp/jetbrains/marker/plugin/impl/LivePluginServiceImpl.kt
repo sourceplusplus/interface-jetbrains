@@ -16,9 +16,13 @@
  */
 package spp.jetbrains.marker.plugin.impl
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import spp.jetbrains.PluginBundle
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.command.LiveCommand
 import spp.jetbrains.marker.command.LiveLocationContext
@@ -65,7 +69,20 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         indicators[indicator] = eventListener
 
         indicator.vertx.safeLaunch {
-            indicator.onRegister()
+            try {
+                indicator.onRegister()
+            } catch (e: Throwable) {
+                log.warn("Failed to register indicator: $indicator", e)
+
+                Notifications.Bus.notify(
+                    Notification(
+                        PluginBundle.message("plugin_name"), "Failed to register indicator: $indicator",
+                        e.message ?: "Unknown error",
+                        NotificationType.ERROR
+                    ),
+                    project
+                )
+            }
         }
         log.debug("Registered indicator: $indicator - Current indicators: ${indicators.size}")
     }
