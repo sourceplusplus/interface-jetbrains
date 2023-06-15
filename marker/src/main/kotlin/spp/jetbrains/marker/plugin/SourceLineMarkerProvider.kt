@@ -37,7 +37,7 @@ import spp.jetbrains.marker.source.mark.gutter.GutterMark
 class SourceLineMarkerProvider : LineMarkerProviderDescriptor() {
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<PsiElement>? {
-        if (!SourceFileMarker.isFileSupported(element.containingFile)) {
+        if (!ArtifactTypeService.isSupported(element)) {
             return null //not a supported file type
         }
 

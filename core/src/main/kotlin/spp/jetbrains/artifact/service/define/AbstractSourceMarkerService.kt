@@ -17,6 +17,7 @@
 package spp.jetbrains.artifact.service.define
 
 import com.intellij.lang.Language
+import com.intellij.psi.PsiElement
 import spp.protocol.artifact.ArtifactLanguage
 
 abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
@@ -33,7 +34,11 @@ abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
     }
 
     private fun getService(language: String): T {
-        return services[language] ?: throw IllegalArgumentException("No service for language $language")
+        return getServiceIfPresent(language) ?: throw IllegalArgumentException("No service for language $language")
+    }
+
+    fun getServiceIfPresent(language: String): T? {
+        return services[language]
     }
 
     fun getService(language: Language): T {
