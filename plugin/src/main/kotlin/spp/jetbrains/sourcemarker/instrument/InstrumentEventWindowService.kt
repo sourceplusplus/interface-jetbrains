@@ -21,9 +21,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
+import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
@@ -59,10 +61,10 @@ class InstrumentEventWindowService(
         }
     }
 
+    private val toolWindowId = "Live Instruments"
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
-    private var toolWindow = ToolWindowManager.getInstance(project)
-        .registerToolWindow(RegisterToolWindowTask.closable("Live Instruments", PluginIcons.ToolWindow.satelliteDish))
-    private var contentManager = toolWindow.contentManager
+    private var toolWindow: ToolWindow
+    private var contentManager: ContentManager
     private val executionPointHighlighter = ExecutionPointHighlighter(project)
     private lateinit var breakpointHitTab: BreakpointHitTab
     private lateinit var overviewTab: InstrumentOverviewTab
@@ -85,6 +87,16 @@ class InstrumentEventWindowService(
         }
 
     init {
+        val existingToolWindow = ToolWindowManager.getInstance(project).getToolWindow(toolWindowId)
+        if (existingToolWindow == null) {
+            toolWindow = ToolWindowManager.getInstance(project)
+                .registerToolWindow(RegisterToolWindowTask.closable(toolWindowId, PluginIcons.ToolWindow.satelliteDish))
+        } else {
+            toolWindow = existingToolWindow
+            toolWindow.isAvailable = true
+        }
+        contentManager = toolWindow.contentManager
+
         project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
             if (it.disposedPlugin) {
                 ApplicationManager.getApplication().invokeLater {

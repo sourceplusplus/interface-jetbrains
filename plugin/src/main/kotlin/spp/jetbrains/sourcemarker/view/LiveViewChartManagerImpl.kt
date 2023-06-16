@@ -21,9 +21,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
+import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.UserData
@@ -58,15 +60,25 @@ class LiveViewChartManagerImpl(
         }
     }
 
+    private val toolWindowId = "Live Activity"
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
-    private var toolWindow = ToolWindowManager.getInstance(project)
-        .registerToolWindow(RegisterToolWindowTask.closable("Live Activity", PluginIcons.ToolWindow.chartArea))
-    private var contentManager = toolWindow.contentManager
+    private var toolWindow: ToolWindow
+    private var contentManager: ContentManager
     override var currentView: ResumableView? = null
     override val refreshInterval: Int?
         get() = currentView?.refreshInterval
 
     init {
+        val existingToolWindow = ToolWindowManager.getInstance(project).getToolWindow(toolWindowId)
+        if (existingToolWindow == null) {
+            toolWindow = ToolWindowManager.getInstance(project)
+                .registerToolWindow(RegisterToolWindowTask.closable(toolWindowId, PluginIcons.ToolWindow.chartArea))
+        } else {
+            toolWindow = existingToolWindow
+            toolWindow.isAvailable = true
+        }
+        contentManager = toolWindow.contentManager
+
         project.putUserData(LiveViewChartManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
             if (it.isReady) {

@@ -51,6 +51,7 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     }
 
     override fun getType(element: PsiElement): ArtifactType? {
+        if (!isSupported(element)) return null
         return getService(element.language).getType(element)
     }
 
