@@ -235,9 +235,9 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
         updateInsightQueue.queue(Update.create(mark) {
             try {
                 updateInsights(mark as MethodSourceMark)
-            } catch (e: PsiInvalidElementAccessException) {
+            } catch (ignore: PsiInvalidElementAccessException) {
                 //ignore; attempted to get insights for code that's been invalidated
-            } catch (e: AssertionError) {
+            } catch (ignore: AssertionError) {
                 //ignore; attempted to get insights for code that's been invalidated
             } //todo: should likely be handled by properly using read actions
         })

@@ -192,11 +192,16 @@ class TCPServiceDiscoveryBackend : ServiceDiscoveryBackend {
                 tempConsumer.unregister()
             }
 
+            val socket = this.socket
+            if (socket == null) {
+                log.warn("Socket is closed. Cannot send response: ${resp.body()}")
+                return@localConsumer
+            }
             val headers = JsonObject()
             resp.headers().entries().forEach { headers.put(it.key, it.value) }
             FrameHelper.sendFrame(
                 BridgeEventType.SEND.name.lowercase(),
-                address, replyAddress, headers, true, resp.body(), socket!!
+                address, replyAddress, headers, true, resp.body(), socket
             )
         }
     }
