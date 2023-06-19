@@ -99,19 +99,25 @@ class LiveViewChartWindow(
         val stop = Instant.now()
         val start = stop.truncatedTo(ChronoUnit.SECONDS)
             .minusSeconds(60 + (getHistoricalMinutes() * 60).toLong())
-        viewService.getHistoricalMetrics(
-            liveView.entityIds.toList(),
-            liveView.viewConfig.viewMetrics,
-            step, start, stop, labels
-        ).onSuccess {
-            for (i in 0 until it.data.size()) {
-                val stepBucket = step.bucketFormatter.format(start.plusSeconds((step.seconds * i).toLong())).toLong()
-                val metricData = it.data.getJsonObject(i)
-                addMetric(metricData.put("timeBucket", stepBucket))
+        viewService.clearLiveViews()
+            .onSuccess {
+                viewService.getHistoricalMetrics(
+                    liveView.entityIds.toList(),
+                    liveView.viewConfig.viewMetrics,
+                    step, start, stop, labels
+                ).onSuccess {
+                    for (i in 0 until it.data.size()) {
+                        val stepBucket =
+                            step.bucketFormatter.format(start.plusSeconds((step.seconds * i).toLong())).toLong()
+                        val metricData = it.data.getJsonObject(i)
+                        addMetric(metricData.put("timeBucket", stepBucket))
+                    }
+                }.onFailure {
+                    log.error("Failed to get historical metrics", it)
+                }
+            }.onFailure {
+                log.error("Failed to clear live views", it)
             }
-        }.onFailure {
-            log.error("Failed to get historical metrics", it)
-        }
     }
 
     override fun pause() {
