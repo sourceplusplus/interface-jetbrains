@@ -20,7 +20,6 @@ import com.intellij.codeInsight.hints.*
 import com.intellij.codeInsight.hints.presentation.*
 import com.intellij.ide.ui.AntialiasingType
 import com.intellij.lang.Language
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.INLINE_PARAMETER_HINT
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.Inlay
@@ -60,8 +59,6 @@ import javax.swing.JPanel
 class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
-        private val log = logger<SourceInlayHintProvider>()
-
         val EVENT_LISTENER = SourceMarkEventListener { event ->
             when (event.eventCode) {
                 VIRTUAL_TEXT_UPDATED, INLAY_MARK_VISIBLE, INLAY_MARK_HIDDEN -> {
