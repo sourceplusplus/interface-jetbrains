@@ -17,7 +17,6 @@
 package spp.jetbrains.sourcemarker.instrument.ui
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
@@ -25,6 +24,7 @@ import com.intellij.util.ui.ListTableModel
 import spp.jetbrains.instrument.column.LiveInstrumentEventColumnInfo
 import spp.jetbrains.instrument.model.InstrumentOverview
 import spp.jetbrains.instrument.renderer.InstrumentTypeTableCellRenderer
+import spp.jetbrains.invokeLater
 import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
@@ -71,7 +71,7 @@ class InstrumentEventTab(val project: Project, val overview: InstrumentOverview)
                 if (mouseEvent.clickCount == 2 && row >= 0) {
                     val event = model.getItem(table.convertRowIndexToModel(row))
                     if (event is LiveBreakpointHit) {
-                        ApplicationManager.getApplication().invokeLater {
+                        project.invokeLater {
                             InstrumentEventWindowService.getInstance(project).showBreakpointHit(event)
                         }
                     }
@@ -83,7 +83,7 @@ class InstrumentEventTab(val project: Project, val overview: InstrumentOverview)
             override fun actionPerformed(e: ActionEvent) {
                 val event = model.getItem(table.convertRowIndexToModel(table.selectedRow))
                 if (event is LiveBreakpointHit) {
-                    ApplicationManager.getApplication().invokeLater {
+                    project.invokeLater {
                         InstrumentEventWindowService.getInstance(project).showBreakpointHit(event)
                     }
                 }

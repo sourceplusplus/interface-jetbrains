@@ -31,6 +31,7 @@ import com.intellij.ui.content.ContentManagerListener
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.instrument.model.InstrumentOverview
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.service.ArtifactNamingService
@@ -99,7 +100,7 @@ class InstrumentEventWindowService(
 
         project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
             if (it.disposedPlugin) {
-                ApplicationManager.getApplication().invokeLater {
+                project.invokeLater {
                     hideWindows()
                 }
             }

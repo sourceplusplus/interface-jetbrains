@@ -40,7 +40,7 @@ class TraceSpanTreeTable(
     project: Project,
     spans: List<TraceSpan>,
     private val rootNode: TraceRootTreeNode = TraceRootTreeNode(project, spans),
-    model: LiveViewTraceModel = LiveViewTraceModel(LiveViewTraceTreeStructure(rootNode))
+    model: LiveViewTraceModel = LiveViewTraceModel(project, LiveViewTraceTreeStructure(rootNode))
 ) : JBTreeTable(model), Disposable {
 
     init {

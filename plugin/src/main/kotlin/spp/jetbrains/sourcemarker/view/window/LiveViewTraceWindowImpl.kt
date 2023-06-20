@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.view.window
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
@@ -25,6 +24,7 @@ import com.intellij.util.ui.ListTableModel
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
+import spp.jetbrains.invokeLater
 import spp.jetbrains.sourcemarker.view.trace.column.TraceRowColumnInfo
 import spp.jetbrains.view.manager.LiveViewTraceManager
 import spp.jetbrains.view.trace.renderer.TraceDurationTableCellRenderer
@@ -46,7 +46,7 @@ import javax.swing.SortOrder
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LiveViewTraceWindowImpl(
-    project: Project,
+    private val project: Project,
     override var liveView: LiveView,
     private val consumerCreator: (LiveTraceWindow) -> MessageConsumer<JsonObject>
 ) : LiveTraceWindow {
@@ -95,7 +95,7 @@ class LiveViewTraceWindowImpl(
         table.columnModel.getColumn(3).minWidth = 100
     }
 
-    override fun addTrace(trace: Trace) = ApplicationManager.getApplication().invokeLater {
+    override fun addTrace(trace: Trace) = project.invokeLater {
         model.addRow(trace)
     }
 

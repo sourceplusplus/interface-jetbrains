@@ -16,12 +16,12 @@
  */
 package spp.jetbrains.view.window.util
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.util.ui.ListTableModel
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
+import spp.jetbrains.invokeLater
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.model.ServiceEndpointRow
 import spp.protocol.artifact.metrics.MetricStep
@@ -93,7 +93,7 @@ class EndpointRowView(
                 }
             }
 
-            ApplicationManager.getApplication().invokeLater {
+            project.invokeLater {
                 model.fireTableDataChanged()
             }
         }.onFailure {

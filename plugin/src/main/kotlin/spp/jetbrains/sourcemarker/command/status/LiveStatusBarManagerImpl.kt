@@ -26,6 +26,7 @@ import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.command.util.CircularList
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS
 import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_ID
@@ -219,7 +220,7 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
     }
 
     override fun showBreakpointStatusBar(liveBreakpoint: LiveBreakpoint, fileMarker: SourceFileMarker) {
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
             val findInlayMark =
                 ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveBreakpoint.location.line)
@@ -252,7 +253,7 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
     }
 
     override fun showLogStatusBar(liveLog: LiveLog, fileMarker: SourceFileMarker) {
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             val editor = FileEditorManager.getInstance(fileMarker.project).selectedTextEditor!!
             val findInlayMark =
                 ArtifactCreationService.getOrCreateExpressionInlayMark(fileMarker, liveLog.location.line)
