@@ -20,6 +20,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.util.ExceptionUtil
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.Vertx
@@ -31,40 +32,56 @@ object ScopeExtensions {
     private val log = logger<ScopeExtensions>()
 
     fun <T> safeRunBlocking(action: suspend () -> T): T {
-//        val source = Exception()
+        val source = Exception()
         return runBlocking {
             try {
-//                Thread.currentThread().name = ExceptionUtil.getThrowableText(source)
                 return@runBlocking action()
             } catch (throwable: Throwable) {
-                log.error(throwable)
+                log.error(buildString {
+                    append("Error in safeRunBlocking")
+                    append("\n")
+                    append("Source: ")
+                    append(ExceptionUtil.getThrowableText(source))
+                }, throwable)
                 throw throwable
             }
         }
     }
 
     fun <T> safeRunBlocking(dispatcher: CoroutineDispatcher, action: suspend () -> T): T {
+        val source = Exception()
         return runBlocking(dispatcher) {
             try {
                 return@runBlocking action()
             } catch (throwable: Throwable) {
-                log.error(throwable)
+                log.error(buildString {
+                    append("Error in safeRunBlocking")
+                    append("\n")
+                    append("Source: ")
+                    append(ExceptionUtil.getThrowableText(source))
+                }, throwable)
                 throw throwable
             }
         }
     }
 
-    suspend fun safeExecute(action: suspend () -> Unit) {
+    suspend fun safeExecute(source: Exception, action: suspend () -> Unit) {
         try {
             action()
         } catch (throwable: Throwable) {
-            log.error(throwable)
+            log.error(buildString {
+                append("Error in safeExecute")
+                append("\n")
+                append("Source: ")
+                append(ExceptionUtil.getThrowableText(source))
+            }, throwable)
         }
     }
 
     fun safeGlobalLaunch(action: suspend () -> Unit) {
+        val source = Exception()
         GlobalScope.launch {
-            safeExecute {
+            safeExecute(source) {
                 action()
             }
         }
@@ -73,13 +90,19 @@ object ScopeExtensions {
     fun safeGlobalAsync(
         action: suspend CoroutineScope.() -> Unit
     ): Deferred<*> {
+        val source = Exception()
         return GlobalScope.async {
-            safeExecute {
+            safeExecute(source) {
                 try {
                     action()
                 } catch (ignored: CancellationException) {
                 } catch (throwable: Throwable) {
-                    log.error(throwable)
+                    log.error(buildString {
+                        append("Error in safeGlobalAsync")
+                        append("\n")
+                        append("Source: ")
+                        append(ExceptionUtil.getThrowableText(source))
+                    }, throwable)
                 }
             }
         }
@@ -87,8 +110,9 @@ object ScopeExtensions {
 }
 
 fun Vertx.safeLaunch(action: suspend () -> Unit): Job {
+    val source = Exception()
     return GlobalScope.launch(dispatcher()) {
-        ScopeExtensions.safeExecute {
+        ScopeExtensions.safeExecute(source) {
             action()
         }
     }
