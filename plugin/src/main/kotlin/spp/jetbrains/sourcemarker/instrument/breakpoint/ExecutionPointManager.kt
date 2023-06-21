@@ -17,7 +17,6 @@
 package spp.jetbrains.sourcemarker.instrument.breakpoint
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -26,6 +25,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.impl.ui.ExecutionPointHighlighter
 import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTrace
 import spp.jetbrains.sourcemarker.instrument.breakpoint.model.ActiveStackTraceListener
@@ -56,7 +56,7 @@ class ExecutionPointManager(
         val lineStartOffset = currentFrame.sourceAsLineNumber()?.let {
             document.getLineStartOffset(it) - 1
         } ?: return
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             try {
                 FileEditorManager.getInstance(project).openTextEditor(
                     OpenFileDescriptor(project, virtualFile, lineStartOffset), false

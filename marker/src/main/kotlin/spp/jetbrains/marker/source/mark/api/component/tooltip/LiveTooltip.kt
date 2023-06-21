@@ -18,7 +18,6 @@ package spp.jetbrains.marker.source.mark.api.component.tooltip
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.codeInsight.hint.HintManager
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
@@ -30,6 +29,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.awt.RelativePoint
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import java.awt.event.KeyAdapter
@@ -42,8 +42,7 @@ import javax.swing.JPanel
 open class LiveTooltip(val guideMark: GuideMark, var panel: JPanel? = null) {
 
     init {
-        ApplicationManager.getApplication().invokeLater {
-            if (guideMark.project.isDisposed) return@invokeLater
+        guideMark.project.invokeLater {
             install(guideMark.project)
         }
     }

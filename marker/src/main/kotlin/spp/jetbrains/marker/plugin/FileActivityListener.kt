@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.marker.plugin
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
@@ -31,6 +30,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
@@ -121,7 +121,7 @@ class FileActivityListener : FileEditorManagerListener {
 
                         if (syncViewProvider) {
                             //todo: better fix (prevents #8)
-                            ApplicationManager.getApplication().invokeLater {
+                            psiFile.project.invokeLater {
                                 val fileEditorManager = FileEditorManager.getInstance(fileMarker.project)
                                 fileEditorManager.closeFile(fileMarker.psiFile.virtualFile)
                                 fileEditorManager.openFile(fileMarker.psiFile.virtualFile, true)

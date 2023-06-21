@@ -27,6 +27,7 @@ import spp.jetbrains.instrument.model.InstrumentOverview
 import spp.jetbrains.instrument.renderer.CreatedByTableCellRenderer
 import spp.jetbrains.instrument.renderer.InstrumentOverviewStatusTableCellRenderer
 import spp.jetbrains.instrument.renderer.InstrumentTypeTableCellRenderer
+import spp.jetbrains.invokeLater
 import spp.jetbrains.sourcemarker.instrument.InstrumentEventWindowService
 import java.awt.BorderLayout
 import java.awt.event.ActionEvent
@@ -86,7 +87,7 @@ class InstrumentOverviewTab(val project: Project) : Disposable {
                 val point = mouseEvent.point
                 val row = table.rowAtPoint(point)
                 if (mouseEvent.clickCount == 2 && row >= 0) {
-                    ApplicationManager.getApplication().invokeLater {
+                    project.invokeLater {
                         InstrumentEventWindowService.getInstance(project)
                             .showInstrumentEvents(model.getItem(table.convertRowIndexToModel(row)))
                     }
@@ -96,7 +97,7 @@ class InstrumentOverviewTab(val project: Project) : Disposable {
         table.inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter")
         table.actionMap.put("enter", object : AbstractAction() {
             override fun actionPerformed(actionEvent: ActionEvent) {
-                ApplicationManager.getApplication().invokeLater {
+                project.invokeLater {
                     InstrumentEventWindowService.getInstance(project)
                         .showInstrumentEvents(model.getItem(table.convertRowIndexToModel(table.selectedRow)))
                 }
@@ -108,7 +109,7 @@ class InstrumentOverviewTab(val project: Project) : Disposable {
         ApplicationManager.getApplication().executeOnPooledThread {
             while (true) {
                 Thread.sleep(1000)
-                ApplicationManager.getApplication().invokeLater {
+                project.invokeLater {
                     table.repaint()
                 }
             }

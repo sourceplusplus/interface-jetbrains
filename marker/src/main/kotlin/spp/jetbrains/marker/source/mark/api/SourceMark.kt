@@ -19,7 +19,6 @@ package spp.jetbrains.marker.source.mark.api
 import com.intellij.codeInsight.hints.InlayHintsPassFactory
 import com.intellij.lang.Language
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
@@ -44,6 +43,7 @@ import com.intellij.util.ui.JBUI
 import spp.jetbrains.ScopeExtensions.safeGlobalLaunch
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.SourceKey
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerUtils.doOnDispatchThread
 import spp.jetbrains.marker.plugin.SourceInlayComponentProvider
@@ -199,7 +199,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                     addEventListener(SynchronousSourceMarkEventListener {
                         when (it.eventCode) {
                             INLAY_MARK_VISIBLE -> {
-                                ApplicationManager.getApplication().invokeLater {
+                                project.invokeLater {
                                     configuration.inlayRef = Ref.create()
                                     configuration.inlayRef!!.set(
                                         provider.insertAfter(
@@ -214,7 +214,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                             }
 
                             INLAY_MARK_HIDDEN -> {
-                                ApplicationManager.getApplication().invokeLater {
+                                project.invokeLater {
                                     configuration.inlayRef?.get()?.dispose()
                                     configuration.inlayRef = null
                                 }
@@ -222,7 +222,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                         }
                     })
                 } else {
-                    ApplicationManager.getApplication().invokeLater {
+                    project.invokeLater {
                         InlayHintsPassFactory.forceHintsUpdateOnNextPass()
                     }
                 }

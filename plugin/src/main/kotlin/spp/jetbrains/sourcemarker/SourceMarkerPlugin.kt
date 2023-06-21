@@ -60,6 +60,7 @@ import spp.jetbrains.PluginBundle.message
 import spp.jetbrains.ScopeExtensions.safeRunBlocking
 import spp.jetbrains.UserData
 import spp.jetbrains.insight.LiveInsightManager
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.plugin.LivePluginService
@@ -370,7 +371,7 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 .build(LiveInstrumentService::class.java)
             UserData.liveInstrumentService(project, liveInstrument)
 
-            ApplicationManager.getApplication().invokeLater {
+            project.invokeLater {
                 InstrumentEventWindowService.getInstance(project).makeOverviewTab()
             }
             val eventListener = LiveInstrumentEventListener(project, config)

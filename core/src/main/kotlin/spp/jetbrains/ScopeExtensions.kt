@@ -123,3 +123,9 @@ fun <T> Vertx.executeBlockingReadActionWhenSmart(project: Project, computable: s
     }
     return promise.future()
 }
+
+fun Project.invokeLater(action: () -> Unit) {
+    ApplicationManager.getApplication().invokeLater({
+        action()
+    }, disposed)
+}

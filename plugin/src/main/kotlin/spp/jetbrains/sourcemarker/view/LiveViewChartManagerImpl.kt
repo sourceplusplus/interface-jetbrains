@@ -18,6 +18,7 @@ package spp.jetbrains.sourcemarker.view
 
 import com.intellij.openapi.actionSystem.Separator
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
@@ -30,6 +31,7 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.invokeLater
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ChangeTimeAction
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
@@ -60,6 +62,7 @@ class LiveViewChartManagerImpl(
         }
     }
 
+    private val log = logger<LiveViewChartManagerImpl>()
     private val toolWindowId = "Live Activity"
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow: ToolWindow
@@ -82,15 +85,19 @@ class LiveViewChartManagerImpl(
         project.putUserData(LiveViewChartManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
             if (it.isReady) {
-                val vertx = UserData.vertx(project)
-                vertx.safeLaunch {
-                    val service = SourceStatusService.getCurrentService(project)!!
-                    ApplicationManager.getApplication().invokeLater {
+                UserData.vertx(project).safeLaunch {
+                    val service = SourceStatusService.getCurrentService(project)
+                    if (service == null) {
+                        log.warn("No service found for project: ${project.name}")
+                        return@safeLaunch
+                    }
+
+                    project.invokeLater {
                         showServiceWindow(service)
                     }
                 }
             } else {
-                ApplicationManager.getApplication().invokeLater {
+                project.invokeLater {
                     hideWindows()
                 }
             }
@@ -182,12 +189,12 @@ class LiveViewChartManagerImpl(
         }
     }
 
-    override fun showOverviewActivity() = ApplicationManager.getApplication().invokeLater {
+    override fun showOverviewActivity() = project.invokeLater {
         contentManager.setSelectedContent(contentManager.findContent("Overview"))
         toolWindow.show()
     }
 
-    override fun showEndpointActivity(endpoint: ServiceEndpoint) = ApplicationManager.getApplication().invokeLater {
+    override fun showEndpointActivity(endpoint: ServiceEndpoint) = project.invokeLater {
         val existingContent = contentManager.findContent(endpoint.name)
         if (existingContent != null) {
             contentManager.setSelectedContent(existingContent)
@@ -222,7 +229,7 @@ class LiveViewChartManagerImpl(
         scope: String,
         metricTypes: List<MetricType>,
         labels: List<String>
-    ) = ApplicationManager.getApplication().invokeLater {
+    ) = project.invokeLater {
         val existingContent = contentManager.findContent(name)
         if (existingContent != null) {
             contentManager.setSelectedContent(existingContent)

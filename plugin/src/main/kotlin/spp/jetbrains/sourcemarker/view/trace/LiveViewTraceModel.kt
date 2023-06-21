@@ -17,7 +17,7 @@
 package spp.jetbrains.sourcemarker.view.trace
 
 import com.intellij.ide.util.treeView.NodeDescriptor
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
 import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.tree.StructureTreeModel
 import com.intellij.ui.tree.TreeVisitor
@@ -26,6 +26,7 @@ import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.SortableColumnModel
 import com.intellij.util.ui.tree.AbstractTreeModel
 import org.jetbrains.concurrency.Promise
+import spp.jetbrains.invokeLater
 import spp.jetbrains.view.trace.column.TraceSpanTreeNodeColumnInfo
 import spp.jetbrains.view.trace.node.TraceSpanTreeNode
 import javax.swing.JTree
@@ -44,6 +45,7 @@ import javax.swing.tree.TreePath
  */
 @Suppress("TooManyFunctions")
 class LiveViewTraceModel(
+    private val project: Project,
     structure: LiveViewTraceTreeStructure
 ) : AbstractTreeModel(), TreeTableModel, SortableColumnModel, TreeModelListener, TreeVisitor.Acceptor {
 
@@ -128,7 +130,7 @@ class LiveViewTraceModel(
 
         //todo: pretty sure this is wrong
         //auto-select first row
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             val node = (e.treePath.path[0] as DefaultMutableTreeNode)
             if (node.childCount == 0) return@invokeLater
             myTree?.selectionPath = e.treePath.pathByAddingChild(node.firstChild)

@@ -29,6 +29,7 @@ import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys
 import spp.jetbrains.marker.SourceMarkerKeys.INSTRUMENT_ID
@@ -116,7 +117,7 @@ class LiveInstrumentEventListener(
                         return@runReadAction
                     }
 
-                    ApplicationManager.getApplication().invokeLater {
+                    project.invokeLater {
                         activeInstruments.forEach {
                             if (locationSource == it.location.source && it.location.line in startLine..endLine) {
                                 when (it) {
@@ -144,7 +145,7 @@ class LiveInstrumentEventListener(
     }
 
     override fun onInstrumentAddedEvent(event: LiveInstrumentAdded) {
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             log.debug("Instrument added: $event")
             activeInstruments.add(event.instrument)
             InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
@@ -195,7 +196,7 @@ class LiveInstrumentEventListener(
     }
 
     override fun onInstrumentRemovedEvent(event: LiveInstrumentRemoved) {
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             log.debug("Instrument removed: $event")
             activeInstruments.remove(event.instrument)
             InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
@@ -224,7 +225,7 @@ class LiveInstrumentEventListener(
         }
     }
 
-    override fun onInstrumentHitEvent(event: LiveInstrumentHit) = ApplicationManager.getApplication().invokeLater {
+    override fun onInstrumentHitEvent(event: LiveInstrumentHit) = project.invokeLater {
         InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
 
         if (event is LiveBreakpointHit) {
@@ -239,7 +240,7 @@ class LiveInstrumentEventListener(
     }
 
     override fun onInstrumentAppliedEvent(event: LiveInstrumentApplied) {
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
         }
     }

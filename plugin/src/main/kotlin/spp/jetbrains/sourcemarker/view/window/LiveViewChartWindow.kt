@@ -18,7 +18,6 @@ package spp.jetbrains.sourcemarker.view.window
 
 import com.codahale.metrics.Histogram
 import com.codahale.metrics.SlidingWindowReservoir
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.DarculaColors
@@ -28,6 +27,7 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginUI
 import spp.jetbrains.UserData
+import spp.jetbrains.invokeLater
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.overlay.ValueDotPainter
 import spp.protocol.artifact.metrics.MetricStep
@@ -287,7 +287,7 @@ class LiveViewChartWindow(
         addMetric(rawMetrics)
     }
 
-    private fun addMetric(rawMetrics: JsonObject) = ApplicationManager.getApplication().invokeLater {
+    private fun addMetric(rawMetrics: JsonObject) = project.invokeLater {
         val metricValue = rawMetrics.getLong("value")
         histogram.update(metricValue)
 

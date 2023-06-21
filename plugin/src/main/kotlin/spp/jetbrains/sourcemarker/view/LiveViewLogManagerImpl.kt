@@ -31,6 +31,7 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.invokeLater
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
@@ -90,7 +91,7 @@ class LiveViewLogManagerImpl(
                     showServicesWindow(service)
                 }
             } else {
-                ApplicationManager.getApplication().invokeLater {
+                project.invokeLater {
                     hideWindows()
                 }
             }
@@ -135,7 +136,7 @@ class LiveViewLogManagerImpl(
         }
     }
 
-    private fun showServicesWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
+    private fun showServicesWindow(service: Service) = project.invokeLater {
         val liveView = LiveView(
             entityIds = mutableSetOf(service.name),
             viewConfig = LiveViewConfig("SERVICE_LOGS_WINDOW", listOf("service_logs"), 1000)
@@ -177,7 +178,7 @@ class LiveViewLogManagerImpl(
     ): LiveLogWindow {
         val existingContent = contentManager.findContent(title)
         if (existingContent != null) {
-            ApplicationManager.getApplication().invokeLater {
+            project.invokeLater {
                 contentManager.setSelectedContent(existingContent)
                 toolWindow.show()
             }
@@ -190,7 +191,7 @@ class LiveViewLogManagerImpl(
         val logWindow = LiveLogWindowImpl(project, liveView, consumer)
         logWindow.resume()
 
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             val content = contentFactory
                 .createContent(logWindow.component, title, false)
             content.setDisposer(logWindow)

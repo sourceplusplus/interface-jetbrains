@@ -20,8 +20,6 @@ import com.intellij.codeInsight.hints.*
 import com.intellij.codeInsight.hints.presentation.*
 import com.intellij.ide.ui.AntialiasingType
 import com.intellij.lang.Language
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors.INLINE_PARAMETER_HINT
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.Inlay
@@ -35,6 +33,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.ui.paint.EffectPainter
 import org.joor.Reflect
+import spp.jetbrains.invokeLater
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.service.ArtifactMarkService
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -60,17 +59,10 @@ import javax.swing.JPanel
 class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
 
     companion object {
-        private val log = logger<SourceInlayHintProvider>()
-
         val EVENT_LISTENER = SourceMarkEventListener { event ->
             when (event.eventCode) {
                 VIRTUAL_TEXT_UPDATED, INLAY_MARK_VISIBLE, INLAY_MARK_HIDDEN -> {
-                    ApplicationManager.getApplication().invokeLater {
-                        if (event.sourceMark.project.isDisposed) {
-                            log.warn("Project is disposed, ignoring event: ${event.eventCode}")
-                            return@invokeLater
-                        }
-
+                    event.sourceMark.project.invokeLater {
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getInlineElementsInRange(0, Integer.MAX_VALUE)?.forEach {
@@ -92,12 +84,7 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                 }
 
                 MARK_REMOVED -> {
-                    ApplicationManager.getApplication().invokeLater {
-                        if (event.sourceMark.project.isDisposed) {
-                            log.warn("Project is disposed, ignoring event: ${event.eventCode}")
-                            return@invokeLater
-                        }
-
+                    event.sourceMark.project.invokeLater {
                         FileEditorManager.getInstance(event.sourceMark.project).selectedTextEditor?.inlayModel
                             //todo: smaller range
                             ?.getBlockElementsInRange(0, Integer.MAX_VALUE)?.forEach {

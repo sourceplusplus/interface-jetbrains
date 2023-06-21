@@ -32,6 +32,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.coroutines.await
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
+import spp.jetbrains.invokeLater
 import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
@@ -93,7 +94,7 @@ class LiveViewTraceManagerImpl(
                     showServiceWindow(service)
                 }
             } else {
-                ApplicationManager.getApplication().invokeLater {
+                project.invokeLater {
                     hideWindows()
                 }
             }
@@ -138,7 +139,7 @@ class LiveViewTraceManagerImpl(
         }
     }
 
-    private fun showServiceWindow(service: Service) = ApplicationManager.getApplication().invokeLater {
+    private fun showServiceWindow(service: Service) = project.invokeLater {
         val liveView = LiveView(
             entityIds = mutableSetOf(service.name),
             viewConfig = LiveViewConfig("SERVICE_TRACES_WINDOW", listOf("service_traces"), 1000)
@@ -179,7 +180,7 @@ class LiveViewTraceManagerImpl(
         liveView: LiveView,
         endpointName: String,
         consumer: (LiveTraceWindow) -> MessageConsumer<JsonObject>
-    ) = ApplicationManager.getApplication().invokeLater {
+    ) = project.invokeLater {
         val existingContent = contentManager.findContent(endpointName)
         if (existingContent != null) {
             contentManager.setSelectedContent(existingContent)
@@ -205,7 +206,7 @@ class LiveViewTraceManagerImpl(
     override fun showTraceSpans(trace: Trace) {
         val existingContent = contentManager.findContent(trace.traceIds.first())
         if (existingContent != null) {
-            ApplicationManager.getApplication().invokeLater {
+            project.invokeLater {
                 contentManager.setSelectedContent(existingContent)
                 toolWindow.show()
             }
@@ -217,7 +218,7 @@ class LiveViewTraceManagerImpl(
             val traceSpans = traceStack?.traceSpans ?: return@safeLaunch
             val traceWindow = TraceSpanSplitterPanel(project, traceSpans)
 
-            ApplicationManager.getApplication().invokeLater {
+            project.invokeLater {
                 val content = contentFactory.createContent(
                     traceWindow,
                     trace.traceIds.first(),
