@@ -26,12 +26,12 @@ import com.intellij.ui.charts.*
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginUI
-import spp.jetbrains.UserData
 import spp.jetbrains.invokeLater
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.overlay.ValueDotPainter
 import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
 import java.awt.Color
@@ -55,6 +55,7 @@ import kotlin.math.ceil
  */
 class LiveViewChartWindowImpl(
     val project: Project,
+    private val viewService: LiveViewService,
     var liveView: LiveView,
     private val entityName: String,
     private val labels: List<String>,
@@ -62,7 +63,6 @@ class LiveViewChartWindowImpl(
 ) : ResumableView {
 
     private val log = logger<LiveViewChartWindowImpl>()
-    private val viewService = UserData.liveViewService(project)!!
     private var consumer: MessageConsumer<JsonObject>? = null
     private var step = MetricStep.MINUTE
     private var reservoirSize = 5

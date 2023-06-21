@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.view.window.util.TabbedResumableView
 import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewConfig
@@ -36,6 +37,7 @@ import spp.protocol.view.LiveViewEvent
  */
 class LiveActivityWindow(
     project: Project,
+    private val viewService: LiveViewService,
     entityId: String,
     entityName: String,
     private val scope: String,
@@ -52,7 +54,7 @@ class LiveActivityWindow(
         val vertx = UserData.vertx(project)
         metrics.forEach {
             val respTimeChart = LiveViewChartWindowImpl(
-                project, LiveView(
+                project, viewService, LiveView(
                     entityIds = mutableSetOf(entityId),
                     viewConfig = LiveViewConfig(
                         "${scope.uppercase()}_ACTIVITY_CHART",

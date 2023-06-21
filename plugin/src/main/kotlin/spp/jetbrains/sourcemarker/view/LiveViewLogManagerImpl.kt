@@ -17,6 +17,7 @@
 package spp.jetbrains.sourcemarker.view
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
@@ -63,6 +64,7 @@ class LiveViewLogManagerImpl(
         }
     }
 
+    private val log = logger<LiveViewLogManagerImpl>()
     private val toolWindowId = "Live Logs"
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow: ToolWindow
@@ -137,11 +139,17 @@ class LiveViewLogManagerImpl(
     }
 
     private fun showServicesWindow(service: Service) = project.invokeLater {
+        val viewService = UserData.liveViewService(project)
+        if (viewService == null) {
+            log.warn("LiveViewService not available for project: ${project.name}")
+            return@invokeLater
+        }
+
         val liveView = LiveView(
             entityIds = mutableSetOf(service.name),
             viewConfig = LiveViewConfig("SERVICE_LOGS_WINDOW", listOf("service_logs"), 1000)
         )
-        val logWindow = LiveLogWindowImpl(project, liveView, { serviceLogsConsumerCreator(it) })
+        val logWindow = LiveLogWindowImpl(project, viewService, liveView, { serviceLogsConsumerCreator(it) })
         val overviewContent = contentFactory.createContent(
             logWindow.component,
             "Service: ${service.name}",
@@ -188,7 +196,10 @@ class LiveViewLogManagerImpl(
             return logWindow
         }
 
-        val logWindow = LiveLogWindowImpl(project, liveView, consumer)
+        val viewService = UserData.liveViewService(project)
+        require(viewService != null) { "LiveViewService not available" }
+
+        val logWindow = LiveLogWindowImpl(project, viewService, liveView, consumer)
         logWindow.resume()
 
         project.invokeLater {
