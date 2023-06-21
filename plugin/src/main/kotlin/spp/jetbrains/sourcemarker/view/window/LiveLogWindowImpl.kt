@@ -108,5 +108,11 @@ class LiveLogWindowImpl(
         return result.get()
     }
 
-    override fun dispose() = pause()
+    override fun dispose() {
+        try {
+            pause()
+        } catch (e: Exception) {
+            log.warn("Failed to dispose live view", e)
+        }
+    }
 }

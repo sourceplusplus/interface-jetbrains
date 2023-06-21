@@ -137,5 +137,11 @@ class LiveViewTraceWindowImpl(
 
     override fun supportsRealtime(): Boolean = true
 
-    override fun dispose() = Unit
+    override fun dispose() {
+        try {
+            pause()
+        } catch (e: Exception) {
+            log.warn("Failed to dispose live view", e)
+        }
+    }
 }
