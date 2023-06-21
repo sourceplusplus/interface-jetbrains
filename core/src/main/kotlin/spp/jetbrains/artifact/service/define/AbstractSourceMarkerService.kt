@@ -17,7 +17,6 @@
 package spp.jetbrains.artifact.service.define
 
 import com.intellij.lang.Language
-import com.intellij.psi.PsiElement
 import spp.protocol.artifact.ArtifactLanguage
 
 abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {

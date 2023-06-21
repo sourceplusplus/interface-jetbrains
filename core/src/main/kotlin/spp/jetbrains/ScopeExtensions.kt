@@ -27,6 +27,7 @@ import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.*
 
+@Suppress("ThrowingExceptionsWithoutMessageOrCause")
 object ScopeExtensions {
 
     private val log = logger<ScopeExtensions>()
