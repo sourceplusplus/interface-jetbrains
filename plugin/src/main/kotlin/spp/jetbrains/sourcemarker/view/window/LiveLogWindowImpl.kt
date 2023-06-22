@@ -39,7 +39,7 @@ import javax.swing.JPanel
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LiveLogWindowImpl(
-    project: Project,
+    private val project: Project,
     private val viewService: LiveViewService,
     override var liveView: LiveView,
     private val consumerCreator: (LiveLogWindow) -> MessageConsumer<JsonObject>
@@ -84,6 +84,9 @@ class LiveLogWindowImpl(
         consumer?.unregister()
         consumer = null
         liveView.subscriptionId?.let {
+            if (project.isDisposed) {
+                return //no need to remove view
+            }
             viewService.removeLiveView(it).onFailure {
                 log.error("Failed to pause live view", it)
             }
