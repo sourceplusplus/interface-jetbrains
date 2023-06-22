@@ -38,7 +38,7 @@ object ScopeExtensions {
             try {
                 return@runBlocking action()
             } catch (throwable: Throwable) {
-                log.error(buildString {
+                log.warn(buildString {
                     append(ExceptionUtil.getThrowableText(throwable))
                     append("\n")
                     append("Source: ")
@@ -55,7 +55,7 @@ object ScopeExtensions {
             try {
                 return@runBlocking action()
             } catch (throwable: Throwable) {
-                log.error(buildString {
+                log.warn(buildString {
                     append(ExceptionUtil.getThrowableText(throwable))
                     append("\n")
                     append("Source: ")
@@ -70,7 +70,7 @@ object ScopeExtensions {
         try {
             action()
         } catch (throwable: Throwable) {
-            log.error(buildString {
+            log.warn(buildString {
                 append(ExceptionUtil.getThrowableText(throwable))
                 append("\n")
                 append("Source: ")
@@ -98,7 +98,7 @@ object ScopeExtensions {
                     action()
                 } catch (ignored: CancellationException) {
                 } catch (throwable: Throwable) {
-                    log.error(buildString {
+                    log.warn(buildString {
                         append(ExceptionUtil.getThrowableText(throwable))
                         append("\n")
                         append("Source: ")
