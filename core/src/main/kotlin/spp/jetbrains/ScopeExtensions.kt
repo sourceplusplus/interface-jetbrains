@@ -38,12 +38,12 @@ object ScopeExtensions {
             try {
                 return@runBlocking action()
             } catch (throwable: Throwable) {
-                log.error(buildString {
-                    append("Error in safeRunBlocking")
+                log.warn(buildString {
+                    append(ExceptionUtil.getThrowableText(throwable))
                     append("\n")
                     append("Source: ")
                     append(ExceptionUtil.getThrowableText(source))
-                }, throwable)
+                })
                 throw throwable
             }
         }
@@ -55,12 +55,12 @@ object ScopeExtensions {
             try {
                 return@runBlocking action()
             } catch (throwable: Throwable) {
-                log.error(buildString {
-                    append("Error in safeRunBlocking")
+                log.warn(buildString {
+                    append(ExceptionUtil.getThrowableText(throwable))
                     append("\n")
                     append("Source: ")
                     append(ExceptionUtil.getThrowableText(source))
-                }, throwable)
+                })
                 throw throwable
             }
         }
@@ -70,12 +70,12 @@ object ScopeExtensions {
         try {
             action()
         } catch (throwable: Throwable) {
-            log.error(buildString {
-                append("Error in safeExecute")
+            log.warn(buildString {
+                append(ExceptionUtil.getThrowableText(throwable))
                 append("\n")
                 append("Source: ")
                 append(ExceptionUtil.getThrowableText(source))
-            }, throwable)
+            })
         }
     }
 
@@ -98,12 +98,12 @@ object ScopeExtensions {
                     action()
                 } catch (ignored: CancellationException) {
                 } catch (throwable: Throwable) {
-                    log.error(buildString {
-                        append("Error in safeGlobalAsync")
+                    log.warn(buildString {
+                        append(ExceptionUtil.getThrowableText(throwable))
                         append("\n")
                         append("Source: ")
                         append(ExceptionUtil.getThrowableText(source))
-                    }, throwable)
+                    })
                 }
             }
         }

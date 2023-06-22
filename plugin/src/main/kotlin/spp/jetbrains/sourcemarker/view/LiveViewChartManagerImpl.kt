@@ -168,7 +168,7 @@ class LiveViewChartManagerImpl(
         overviewContent.isCloseable = false
         contentManager.addContent(overviewContent)
 
-        val endpointsWindow = LiveEndpointsWindow(project, service)
+        val endpointsWindow = LiveEndpointsWindow(project, viewService, service)
         val endpointsContent = contentFactory.createContent(
             endpointsWindow.component,
             "Endpoints",

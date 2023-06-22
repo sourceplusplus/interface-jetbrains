@@ -32,13 +32,12 @@ import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
-import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.status.SourceStatusService
 import spp.protocol.platform.general.Service
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("TooManyFunctions")
-class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
+class SourceStatusServiceImpl(override val project: Project) : SourceStatusService {
 
     companion object {
         private val log = logger<SourceStatusServiceImpl>()
@@ -149,7 +148,7 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
                     log.info("Status changed from $oldStatus to $status")
                 }
 
-                project.messageBus.syncPublisher(SourceStatusListener.TOPIC).onStatusChanged(status)
+                SourceStatusService.getInstance(project).publishStatus(status)
                 safeGlobalLaunch {
                     onStatusChanged(status)
                 }
@@ -175,32 +174,51 @@ class SourceStatusServiceImpl(val project: Project) : SourceStatusService {
     }
 
     override fun onServiceChange(triggerInitial: Boolean, listener: () -> Unit) {
-        synchronized(statusLock) {
-            if (triggerInitial && currentService != null) {
+        if (triggerInitial && currentService != null) {
+            synchronized(statusLock) {
                 listener()
             }
-            project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
-                if (it == ServiceEstablished) {
+        }
+        UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
+            if (it.body() == ServiceEstablished) {
+                synchronized(statusLock) {
                     listener()
                 }
-            })
+            }
+        }
+    }
+
+    override fun onStatusChange(triggerInitial: Boolean, listener: (SourceStatus) -> Unit) {
+        synchronized(statusLock) {
+            if (triggerInitial) {
+                synchronized(statusLock) {
+                    listener(status)
+                }
+            }
+            UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
+                synchronized(statusLock) {
+                    listener(it.body())
+                }
+            }
         }
     }
 
     override fun onReadyChange(triggerInitial: Boolean, listener: (SourceStatus) -> Unit) {
-        synchronized(statusLock) {
-            if (triggerInitial) {
+        if (triggerInitial) {
+            synchronized(statusLock) {
                 listener(status)
             }
+        }
 
-            val statusTriggered = AtomicBoolean()
-            project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+        val statusTriggered = AtomicBoolean()
+        UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
+            synchronized(statusLock) {
                 if (isReady() && statusTriggered.compareAndSet(false, true)) {
                     listener(status)
                 } else if (!isReady() && statusTriggered.compareAndSet(true, false)) {
                     listener(status)
                 }
-            })
+            }
         }
     }
 

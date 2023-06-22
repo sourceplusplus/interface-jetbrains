@@ -40,7 +40,7 @@ import spp.jetbrains.sourcemarker.instrument.ui.InstrumentEventTab
 import spp.jetbrains.sourcemarker.instrument.ui.InstrumentOverviewTab
 import spp.jetbrains.sourcemarker.instrument.ui.action.ClearInstrumentsAction
 import spp.jetbrains.sourcemarker.instrument.ui.action.RemoveInstrumentAction
-import spp.jetbrains.status.SourceStatusListener
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.artifact.exception.sourceAsLineNumber
 import spp.protocol.instrument.event.LiveBreakpointHit
 import spp.protocol.instrument.event.LiveInstrumentEvent
@@ -98,13 +98,13 @@ class InstrumentEventWindowService(
         }
         contentManager = toolWindow.contentManager
 
-        project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+        SourceStatusService.getInstance(project).onStatusChange {
             if (it.disposedPlugin) {
                 project.invokeLater {
                     hideWindows()
                 }
             }
-        })
+        }
         contentManager.addContentManagerListener(this)
 
         project.messageBus.connect().subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {

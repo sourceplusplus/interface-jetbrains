@@ -72,14 +72,14 @@ class SourceMarker(private val project: Project) {
         return availableSourceFileMarkers.values.toList()
     }
 
-    suspend fun clearAvailableSourceFileMarkers() {
+    fun clearAvailableSourceFileMarkers() {
         availableSourceFileMarkers.forEach {
             deactivateSourceFileMarker(it.value)
         }
         availableSourceFileMarkers.clear()
     }
 
-    suspend fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
+    fun deactivateSourceFileMarker(sourceFileMarker: SourceFileMarker): Boolean {
         if (availableSourceFileMarkers.remove(sourceFileMarker.hashCode()) != null) {
             sourceFileMarker.clearSourceMarks()
             sourceFileMarker.psiFile.putUserData(SourceFileMarker.KEY, null)

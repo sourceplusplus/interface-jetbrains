@@ -39,7 +39,6 @@ import spp.jetbrains.marker.service.SourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventCode.CODE_CHANGED
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.safeExecuteBlocking
 import spp.jetbrains.status.SourceStatusService
 
 /**
@@ -60,15 +59,13 @@ class CodeChangeListener(val project: Project) : CoroutineVerticle(), Disposable
         //todo: find a better place for this
         //refresh all source marks on service changes
         SourceStatusService.getInstance(project).onServiceChange {
-            vertx.safeExecuteBlocking {
-                log.info("Refreshing all source marks on service change")
-                SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
-                FileEditorManager.getInstance(project).allEditors.forEach {
-                    ApplicationManager.getApplication().runReadAction {
-                        PsiManager.getInstance(project).findFile(it.file)?.let {
-                            SourceMarker.getSourceFileMarker(it)
-                            DaemonCodeAnalyzer.getInstance(project).restart(it)
-                        }
+            log.info("Refreshing all source marks on service change")
+            SourceMarker.getInstance(project).clearAvailableSourceFileMarkers()
+            FileEditorManager.getInstance(project).allEditors.forEach {
+                ApplicationManager.getApplication().runReadAction {
+                    PsiManager.getInstance(project).findFile(it.file)?.let {
+                        SourceMarker.getSourceFileMarker(it)
+                        DaemonCodeAnalyzer.getInstance(project).restart(it)
                     }
                 }
             }
