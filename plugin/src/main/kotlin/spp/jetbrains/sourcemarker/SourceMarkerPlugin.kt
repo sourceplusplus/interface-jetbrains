@@ -82,10 +82,10 @@ import spp.jetbrains.sourcemarker.view.LiveViewChartManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewEventListener
 import spp.jetbrains.sourcemarker.view.LiveViewLogManagerImpl
 import spp.jetbrains.sourcemarker.view.LiveViewTraceManagerImpl
+import spp.jetbrains.status.SourceStatus
 import spp.jetbrains.status.SourceStatus.*
-import spp.jetbrains.status.SourceStatusListener
-import spp.jetbrains.status.SourceStatusListener.Companion.TOPIC
 import spp.jetbrains.status.SourceStatusService
+import spp.protocol.marshall.LocalMessageCodec
 import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.LiveManagementService
 import spp.protocol.service.LiveViewService
@@ -132,13 +132,14 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             return //tests manually set up necessary components
         }
 
+        //setup plugin
+        safeRunBlocking { getInstance(project).init() }
+
         //make sure live view managers are initialized
         LiveViewChartManagerImpl.init(project)
         LiveViewTraceManagerImpl.init(project)
         LiveViewLogManagerImpl.init(project)
 
-        //setup plugin
-        safeRunBlocking { getInstance(project).init() }
         super.runActivity(project)
     }
 
@@ -162,6 +163,8 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
             VertxOptions()
         }
         val vertx = UserData.vertx(project, Vertx.vertx(options))
+        vertx.eventBus().registerDefaultCodec(SourceStatus::class.java, LocalMessageCodec())
+
         LivePluginProjectLoader.projectOpened(project)
 
         val config = configInput ?: getConfig()
@@ -202,13 +205,10 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 .run(object : Task.Backgroundable(project, "Loading Source++ plugins", false, ALWAYS_BACKGROUND) {
                     override fun run(indicator: ProgressIndicator) {
                         if (loadLivePluginsLock.tryLock()) {
-                            project.messageBus.connect().apply {
-                                subscribe(TOPIC, SourceStatusListener {
-                                    if (it == PluginsLoaded) {
-                                        initMarker(vertx)
-                                        disconnect()
-                                    }
-                                })
+                            SourceStatusService.getInstance(project).onStatusChange {
+                                if (it == PluginsLoaded) {
+                                    initMarker(vertx)
+                                }
                             }
 
                             log.info("Loading live plugins for project: $project")

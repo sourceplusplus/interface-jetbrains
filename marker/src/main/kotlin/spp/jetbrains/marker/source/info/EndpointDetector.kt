@@ -27,7 +27,6 @@ import spp.jetbrains.UserData
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.safeLaunch
-import spp.jetbrains.status.SourceStatusListener
 import spp.jetbrains.status.SourceStatusService
 
 /**
@@ -58,9 +57,9 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
 
     private fun setupRedetector() {
         if (project.getUserData(REDETECTOR_SETUP) != true) {
-            project.messageBus.connect().subscribe(SourceStatusListener.TOPIC, SourceStatusListener {
+            SourceStatusService.getInstance(project).onStatusChange {
                 if (it.disposedPlugin) project.putUserData(REDETECTOR_SETUP, false)
-            })
+            }
             project.putUserData(REDETECTOR_SETUP, true)
             log.info("Setting up endpoint re-detector for project ${project.name}")
 

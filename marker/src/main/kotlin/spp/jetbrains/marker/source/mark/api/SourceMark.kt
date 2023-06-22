@@ -246,7 +246,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         }
     }
 
-    suspend fun disposeSuspend(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
+    fun disposeSuspend(removeFromMarker: Boolean = true, assertRemoval: Boolean = true) {
         doDispose(removeFromMarker, assertRemoval)
 
         triggerEventSuspend(SourceMarkEvent(this, SourceMarkEventCode.MARK_REMOVED))
@@ -383,7 +383,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
         }
     }
 
-    suspend fun triggerEventSuspend(event: SourceMarkEvent) {
+    fun triggerEventSuspend(event: SourceMarkEvent) {
         //sync listeners
         getEventListeners()
             .filterIsInstance<SynchronousSourceMarkEventListener>()
