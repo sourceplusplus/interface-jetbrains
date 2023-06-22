@@ -275,10 +275,10 @@ class LiveViewChartWindowImpl(
 
     private fun timeSizeMultiplier(): Int {
         return when (step) {
-            MetricStep.SECOND -> reservoirSize*60
+            MetricStep.SECOND -> reservoirSize * 60
             MetricStep.MINUTE -> reservoirSize
-            MetricStep.HOUR -> reservoirSize/60
-            MetricStep.DAY -> reservoirSize/(60*24)
+            MetricStep.HOUR -> reservoirSize / 60
+            MetricStep.DAY -> reservoirSize / (60 * 24)
         }
     }
 
