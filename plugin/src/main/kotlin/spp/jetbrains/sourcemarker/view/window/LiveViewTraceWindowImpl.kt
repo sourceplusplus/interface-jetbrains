@@ -123,6 +123,9 @@ class LiveViewTraceWindowImpl(
         consumer?.unregister()
         consumer = null
         liveView.subscriptionId?.let {
+            if (project.isDisposed) {
+                return //no need to remove view
+            }
             viewService.removeLiveView(it).onFailure {
                 log.error("Failed to pause live view", it)
             }
