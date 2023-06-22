@@ -38,6 +38,7 @@ import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_SLA
 import spp.protocol.instrument.location.LiveSourceLocation
 import spp.protocol.platform.general.Service
+import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewConfig
@@ -55,7 +56,11 @@ import javax.swing.SortOrder
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveEndpointsWindow(val project: Project, service: Service) : ResumableViewCollection() {
+class LiveEndpointsWindow(
+    val project: Project,
+    private val viewService: LiveViewService,
+    service: Service
+) : ResumableViewCollection() {
 
     private val model = ListTableModel<ServiceEndpointRow>(
         arrayOf(
@@ -67,7 +72,6 @@ class LiveEndpointsWindow(val project: Project, service: Service) : ResumableVie
         ArrayList(), 0, SortOrder.DESCENDING
     )
     val component: JPanel = JPanel(BorderLayout())
-    private val viewService = UserData.liveViewService(project)!!
     private var initialFocus = true
     private var refreshRate: Int = 1000
     override val refreshInterval: Int
