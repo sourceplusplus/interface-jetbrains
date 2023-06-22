@@ -39,11 +39,11 @@ object ScopeExtensions {
                 return@runBlocking action()
             } catch (throwable: Throwable) {
                 log.error(buildString {
-                    append("Error in safeRunBlocking")
+                    append(ExceptionUtil.getThrowableText(throwable))
                     append("\n")
                     append("Source: ")
                     append(ExceptionUtil.getThrowableText(source))
-                }, throwable)
+                })
                 throw throwable
             }
         }
@@ -56,11 +56,11 @@ object ScopeExtensions {
                 return@runBlocking action()
             } catch (throwable: Throwable) {
                 log.error(buildString {
-                    append("Error in safeRunBlocking")
+                    append(ExceptionUtil.getThrowableText(throwable))
                     append("\n")
                     append("Source: ")
                     append(ExceptionUtil.getThrowableText(source))
-                }, throwable)
+                })
                 throw throwable
             }
         }
@@ -71,11 +71,11 @@ object ScopeExtensions {
             action()
         } catch (throwable: Throwable) {
             log.error(buildString {
-                append("Error in safeExecute")
+                append(ExceptionUtil.getThrowableText(throwable))
                 append("\n")
                 append("Source: ")
                 append(ExceptionUtil.getThrowableText(source))
-            }, throwable)
+            })
         }
     }
 
@@ -99,11 +99,11 @@ object ScopeExtensions {
                 } catch (ignored: CancellationException) {
                 } catch (throwable: Throwable) {
                     log.error(buildString {
-                        append("Error in safeGlobalAsync")
+                        append(ExceptionUtil.getThrowableText(throwable))
                         append("\n")
                         append("Source: ")
                         append(ExceptionUtil.getThrowableText(source))
-                    }, throwable)
+                    })
                 }
             }
         }
