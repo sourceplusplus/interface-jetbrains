@@ -25,8 +25,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
-import spp.jetbrains.UserData
 import spp.jetbrains.view.window.LiveLogWindow
+import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import java.awt.BorderLayout
 import java.util.concurrent.atomic.AtomicReference
@@ -40,12 +40,12 @@ import javax.swing.JPanel
  */
 class LiveLogWindowImpl(
     project: Project,
+    private val viewService: LiveViewService,
     override var liveView: LiveView,
     private val consumerCreator: (LiveLogWindow) -> MessageConsumer<JsonObject>
 ) : LiveLogWindow {
 
     private val log = logger<LiveLogWindowImpl>()
-    private val viewService = UserData.liveViewService(project)!!
     private var consumer: MessageConsumer<JsonObject>? = null
     override val console: ConsoleView
     val component = JPanel(BorderLayout()).apply { isFocusable = true }
@@ -108,5 +108,11 @@ class LiveLogWindowImpl(
         return result.get()
     }
 
-    override fun dispose() = pause()
+    override fun dispose() {
+        try {
+            pause()
+        } catch (e: Exception) {
+            log.warn("Failed to dispose live view", e)
+        }
+    }
 }

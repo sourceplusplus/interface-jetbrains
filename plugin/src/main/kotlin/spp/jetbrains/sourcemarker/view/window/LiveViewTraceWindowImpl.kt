@@ -23,7 +23,6 @@ import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.ListTableModel
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
-import spp.jetbrains.UserData
 import spp.jetbrains.invokeLater
 import spp.jetbrains.sourcemarker.view.trace.column.TraceRowColumnInfo
 import spp.jetbrains.view.manager.LiveViewTraceManager
@@ -31,6 +30,7 @@ import spp.jetbrains.view.trace.renderer.TraceDurationTableCellRenderer
 import spp.jetbrains.view.trace.renderer.TraceErrorTableCellRenderer
 import spp.jetbrains.view.window.LiveTraceWindow
 import spp.protocol.artifact.trace.Trace
+import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import java.awt.BorderLayout
 import java.awt.Point
@@ -47,12 +47,12 @@ import javax.swing.SortOrder
  */
 class LiveViewTraceWindowImpl(
     private val project: Project,
+    private val viewService: LiveViewService,
     override var liveView: LiveView,
     private val consumerCreator: (LiveTraceWindow) -> MessageConsumer<JsonObject>
 ) : LiveTraceWindow {
 
     private val log = logger<LiveViewTraceWindowImpl>()
-    private val viewService = UserData.liveViewService(project)!!
     private var consumer: MessageConsumer<JsonObject>? = null
     override var isRunning = false
         private set
@@ -137,5 +137,11 @@ class LiveViewTraceWindowImpl(
 
     override fun supportsRealtime(): Boolean = true
 
-    override fun dispose() = Unit
+    override fun dispose() {
+        try {
+            pause()
+        } catch (e: Exception) {
+            log.warn("Failed to dispose live view", e)
+        }
+    }
 }

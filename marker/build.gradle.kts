@@ -54,7 +54,6 @@ dependencies {
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
     compileOnly("org.jooq:joor:$joorVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     compileOnly("com.google.guava:guava:$guavaVersion")
     testImplementation("junit:junit:4.13.2")
 }

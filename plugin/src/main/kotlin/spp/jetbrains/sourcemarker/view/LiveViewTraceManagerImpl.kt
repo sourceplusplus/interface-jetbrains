@@ -17,6 +17,7 @@
 package spp.jetbrains.sourcemarker.view
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
@@ -66,6 +67,7 @@ class LiveViewTraceManagerImpl(
         }
     }
 
+    private val log = logger<LiveViewTraceManagerImpl>()
     private val toolWindowId = "Live Traces"
     private val contentFactory = ApplicationManager.getApplication().getService(ContentFactory::class.java)
     private var toolWindow: ToolWindow
@@ -140,11 +142,17 @@ class LiveViewTraceManagerImpl(
     }
 
     private fun showServiceWindow(service: Service) = project.invokeLater {
+        val viewService = UserData.liveViewService(project)
+        if (viewService == null) {
+            log.warn("LiveViewService not available for project: ${project.name}")
+            return@invokeLater
+        }
+
         val liveView = LiveView(
             entityIds = mutableSetOf(service.name),
             viewConfig = LiveViewConfig("SERVICE_TRACES_WINDOW", listOf("service_traces"), 1000)
         )
-        val traceWindow = LiveViewTraceWindowImpl(project, liveView, { serviceTracesConsumerCreator(it) })
+        val traceWindow = LiveViewTraceWindowImpl(project, viewService, liveView, { serviceTracesConsumerCreator(it) })
         val overviewContent = contentFactory.createContent(
             traceWindow.component,
             "Service: ${service.name}",
@@ -188,7 +196,13 @@ class LiveViewTraceManagerImpl(
             return@invokeLater
         }
 
-        val traceWindow = LiveViewTraceWindowImpl(project, liveView, consumer)
+        val viewService = UserData.liveViewService(project)
+        if (viewService == null) {
+            log.warn("LiveViewService not available for project: ${project.name}")
+            return@invokeLater
+        }
+
+        val traceWindow = LiveViewTraceWindowImpl(project, viewService, liveView, consumer)
         traceWindow.resume()
 
         val content = contentFactory.createContent(
@@ -213,8 +227,14 @@ class LiveViewTraceManagerImpl(
             return
         }
 
+        val viewService = UserData.liveViewService(project)
+        if (viewService == null) {
+            log.warn("LiveViewService not available for project: ${project.name}")
+            return
+        }
+
         UserData.vertx(project).safeLaunch {
-            val traceStack = UserData.liveViewService(project)!!.getTraceStack(trace.traceIds.first()).await()
+            val traceStack = viewService.getTraceStack(trace.traceIds.first()).await()
             val traceSpans = traceStack?.traceSpans ?: return@safeLaunch
             val traceWindow = TraceSpanSplitterPanel(project, traceSpans)
 

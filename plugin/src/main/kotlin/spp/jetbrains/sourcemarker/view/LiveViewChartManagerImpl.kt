@@ -146,8 +146,14 @@ class LiveViewChartManagerImpl(
     }
 
     private fun showServiceWindow(service: Service) {
+        val viewService = UserData.liveViewService(project)
+        if (viewService == null) {
+            log.warn("LiveViewService not available for project: ${project.name}")
+            return
+        }
+
         val overviewWindow = LiveActivityWindow(
-            project, service.id, service.name, "Service", listOf(
+            project, viewService, service.id, service.name, "Service", listOf(
                 MetricType.Service_RespTime_AVG,
                 MetricType.Service_SLA,
                 MetricType.Service_CPM
@@ -202,8 +208,14 @@ class LiveViewChartManagerImpl(
             return@invokeLater
         }
 
+        val viewService = UserData.liveViewService(project)
+        if (viewService == null) {
+            log.warn("LiveViewService not available for project: ${project.name}")
+            return@invokeLater
+        }
+
         val activityWindow = LiveActivityWindow(
-            project, endpoint.id, endpoint.name, "Endpoint", listOf(
+            project, viewService, endpoint.id, endpoint.name, "Endpoint", listOf(
                 MetricType.Endpoint_RespTime_AVG.asRealtime(),
                 MetricType.Endpoint_SLA.asRealtime(),
                 MetricType.Endpoint_CPM.asRealtime()
@@ -237,7 +249,13 @@ class LiveViewChartManagerImpl(
             return@invokeLater
         }
 
-        val activityWindow = LiveActivityWindow(project, entityId, name, scope, metricTypes, labels)
+        val viewService = UserData.liveViewService(project)
+        if (viewService == null) {
+            log.warn("LiveViewService not available for project: ${project.name}")
+            return@invokeLater
+        }
+
+        val activityWindow = LiveActivityWindow(project, viewService, entityId, name, scope, metricTypes, labels)
         activityWindow.resume()
 
         val content = contentFactory.createContent(

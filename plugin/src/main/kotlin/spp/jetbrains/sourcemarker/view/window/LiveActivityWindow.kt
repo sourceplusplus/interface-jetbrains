@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.view.window.util.TabbedResumableView
 import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewConfig
@@ -36,6 +37,7 @@ import spp.protocol.view.LiveViewEvent
  */
 class LiveActivityWindow(
     project: Project,
+    private val viewService: LiveViewService,
     entityId: String,
     entityName: String,
     private val scope: String,
@@ -51,8 +53,8 @@ class LiveActivityWindow(
     init {
         val vertx = UserData.vertx(project)
         metrics.forEach {
-            val respTimeChart = LiveViewChartWindow(
-                project, LiveView(
+            val respTimeChart = LiveViewChartWindowImpl(
+                project, viewService, LiveView(
                     entityIds = mutableSetOf(entityId),
                     viewConfig = LiveViewConfig(
                         "${scope.uppercase()}_ACTIVITY_CHART",
@@ -73,12 +75,12 @@ class LiveActivityWindow(
     }
 
     fun getHistoricalMinutes(): Int? {
-        return (getViews().firstOrNull() as? LiveViewChartWindow)?.getHistoricalMinutes()
+        return (getViews().firstOrNull() as? LiveViewChartWindowImpl)?.getHistoricalMinutes()
     }
 
     fun setHistoricalMinutes(historicalMinutes: Int) {
         getViews().forEach {
-            it as LiveViewChartWindow
+            it as LiveViewChartWindowImpl
             it.setHistoricalMinutes(historicalMinutes)
         }
     }
@@ -90,7 +92,7 @@ class LiveActivityWindow(
 
     override fun supportsRealtime(): Boolean = scope != "Service"
 
-    private fun consumerCreator(window: LiveViewChartWindow, vertx: Vertx): MessageConsumer<JsonObject> {
+    private fun consumerCreator(window: LiveViewChartWindowImpl, vertx: Vertx): MessageConsumer<JsonObject> {
         val developerId = UserData.developerId(window.project)
         val consumer = vertx.eventBus().consumer<JsonObject>(toLiveViewSubscriberAddress(developerId))
         return consumer.handler {

@@ -26,12 +26,12 @@ import com.intellij.ui.charts.*
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginUI
-import spp.jetbrains.UserData
 import spp.jetbrains.invokeLater
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.overlay.ValueDotPainter
 import spp.protocol.artifact.metrics.MetricStep
 import spp.protocol.artifact.metrics.MetricType
+import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
 import java.awt.Color
@@ -53,16 +53,16 @@ import kotlin.math.ceil
  * @since 0.7.6
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
-class LiveViewChartWindow(
+class LiveViewChartWindowImpl(
     val project: Project,
+    private val viewService: LiveViewService,
     var liveView: LiveView,
     private val entityName: String,
     private val labels: List<String>,
-    private val consumerCreator: (LiveViewChartWindow) -> MessageConsumer<JsonObject>
+    private val consumerCreator: (LiveViewChartWindowImpl) -> MessageConsumer<JsonObject>
 ) : ResumableView {
 
-    private val log = logger<LiveViewChartWindow>()
-    private val viewService = UserData.liveViewService(project)!!
+    private val log = logger<LiveViewChartWindowImpl>()
     private var consumer: MessageConsumer<JsonObject>? = null
     private var step = MetricStep.MINUTE
     private var reservoirSize = 5
@@ -350,5 +350,11 @@ class LiveViewChartWindow(
         }
     }
 
-    override fun dispose() = Unit
+    override fun dispose() {
+        try {
+            pause()
+        } catch (e: Exception) {
+            log.warn("Failed to dispose live view", e)
+        }
+    }
 }

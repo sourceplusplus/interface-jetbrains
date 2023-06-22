@@ -39,6 +39,11 @@ class RemoveInstrumentAction(val service: InstrumentEventWindowService) : AnActi
     }
 
     override fun update(e: AnActionEvent) {
+        if (!UserData.hasVertx(service.project)) {
+            e.presentation.isEnabled = false
+            return
+        }
+
         UserData.vertx(service.project).safeLaunch {
             val selfInfo = UserData.selfInfo(service.project)
             if (selfInfo == null) {
