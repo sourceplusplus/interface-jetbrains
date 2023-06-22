@@ -195,10 +195,14 @@ class SourceStatusServiceImpl(override val project: Project) : SourceStatusServi
                     listener(status)
                 }
             }
-            UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
-                synchronized(statusLock) {
-                    listener(it.body())
+            if (UserData.hasVertx(project)) {
+                UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
+                    synchronized(statusLock) {
+                        listener(it.body())
+                    }
                 }
+            } else {
+                log.warn("No vertx instance found for project: $project")
             }
         }
     }
