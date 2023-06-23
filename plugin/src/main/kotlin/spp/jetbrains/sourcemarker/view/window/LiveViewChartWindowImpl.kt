@@ -99,14 +99,15 @@ class LiveViewChartWindowImpl(
         val stop = Instant.now()
         val start = stop.truncatedTo(ChronoUnit.SECONDS)
             .minusSeconds(60 + (getHistoricalMinutes() * 60).toLong())
+        val step = step
+
         viewService.getHistoricalMetrics(
             liveView.entityIds.toList(),
             liveView.viewConfig.viewMetrics,
             step, start, stop, labels
         ).onSuccess {
             for (i in 0 until it.data.size()) {
-                val stepBucket =
-                    step.bucketFormatter.format(start.plusSeconds((step.seconds * i).toLong())).toLong()
+                val stepBucket = step.bucketFormatter.format(start.plusSeconds((step.seconds * i).toLong())).toLong()
                 val metricData = it.data.getJsonObject(i)
                 addMetric(metricData.put("timeBucket", stepBucket))
             }
@@ -278,7 +279,7 @@ class LiveViewChartWindowImpl(
     }
 
     fun addMetric(viewEvent: LiveViewEvent) {
-        val rawMetrics = JsonObject(viewEvent.metricsData)
+        val rawMetrics = JsonObject(viewEvent.metricsData).put("timeBucket", viewEvent.timeBucket)
         addMetric(rawMetrics)
     }
 
@@ -300,8 +301,12 @@ class LiveViewChartWindowImpl(
             }
         }
 
-        val timeBucket = rawMetrics.getLong("currentTime")
-            ?: Instant.from(step.bucketFormatter.parse(rawMetrics.getLong("timeBucket").toString())).toEpochMilli()
+        var timeBucket = rawMetrics.getLong("currentTime")
+        if (timeBucket == null) {
+            val bucket = rawMetrics.getValue("timeBucket").toString()
+            val step = MetricStep.fromBucketFormat(bucket)
+            timeBucket = Instant.from(step.bucketFormatter.parse(bucket)).toEpochMilli()
+        }
         val newCoordinates = Coordinates.of(timeBucket, metricValue / metricType.unitConversion)
         val chartData = chart.datasets[0].data as MutableList<Coordinates<Long, Double>>
         val existingCoordinatesIndex = chartData.indexOfFirst { it.x >= timeBucket }
