@@ -66,9 +66,9 @@ class LiveViewChartWindowImpl(
     private var consumer: MessageConsumer<JsonObject>? = null
     private var step = MetricStep.MINUTE
     private var reservoirSize = 5
-    private val keepTimeSize: Int
-        get() = step.milliseconds * reservoirSize
-    private var xStepSize = step.milliseconds
+    private val keepTimeSize: Long
+        get() = step.milliseconds.toLong() * timeSizeMultiplier()
+    private var xStepSize: Long = (step.milliseconds).toLong()
     private val metricType = MetricType(liveView.viewConfig.viewMetrics.first())
     private var chartColor = defaultChartColor(metricType)
     private val timeFormat = SimpleDateFormat("h:mm a")
@@ -99,6 +99,8 @@ class LiveViewChartWindowImpl(
         val stop = Instant.now()
         val start = stop.truncatedTo(ChronoUnit.SECONDS)
             .minusSeconds(60 + (getHistoricalMinutes() * 60).toLong())
+        val step = step
+
         viewService.getHistoricalMetrics(
             liveView.entityIds.toList(),
             liveView.viewConfig.viewMetrics,
@@ -144,7 +146,7 @@ class LiveViewChartWindowImpl(
         reservoirSize = historicalMinutes
         histogram = Histogram(SlidingWindowReservoir(histogramSize))
         //chart.clear() //todo: possible memory leak
-        xStepSize = step.milliseconds * reservoirSize
+        xStepSize = (step.milliseconds).toLong() * reservoirSize
 
         getHistoricalData()
     }
@@ -267,8 +269,17 @@ class LiveViewChartWindowImpl(
         }
     }
 
+    private fun timeSizeMultiplier(): Int {
+        return when (step) {
+            MetricStep.SECOND -> reservoirSize * 60
+            MetricStep.MINUTE -> reservoirSize
+            MetricStep.HOUR -> reservoirSize / 60
+            MetricStep.DAY -> reservoirSize / (60 * 24)
+        }
+    }
+
     fun addMetric(viewEvent: LiveViewEvent) {
-        val rawMetrics = JsonObject(viewEvent.metricsData)
+        val rawMetrics = JsonObject(viewEvent.metricsData).put("timeBucket", viewEvent.timeBucket)
         addMetric(rawMetrics)
     }
 
@@ -290,8 +301,12 @@ class LiveViewChartWindowImpl(
             }
         }
 
-        val timeBucket = rawMetrics.getLong("currentTime")
-            ?: Instant.from(step.bucketFormatter.parse(rawMetrics.getLong("timeBucket").toString())).toEpochMilli()
+        var timeBucket = rawMetrics.getLong("currentTime")
+        if (timeBucket == null) {
+            val bucket = rawMetrics.getValue("timeBucket").toString()
+            val step = MetricStep.fromBucketFormat(bucket)
+            timeBucket = Instant.from(step.bucketFormatter.parse(bucket)).toEpochMilli()
+        }
         val newCoordinates = Coordinates.of(timeBucket, metricValue / metricType.unitConversion)
         val chartData = chart.datasets[0].data as MutableList<Coordinates<Long, Double>>
         val existingCoordinatesIndex = chartData.indexOfFirst { it.x >= timeBucket }
