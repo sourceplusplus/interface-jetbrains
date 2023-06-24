@@ -21,6 +21,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Pair
+import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,10 +40,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Suppress("TooManyFunctions")
 class SourceStatusServiceImpl(override val project: Project) : SourceStatusService {
 
-    companion object {
-        private val log = logger<SourceStatusServiceImpl>()
-    }
-
+    private val log = logger<SourceStatusServiceImpl>()
+    override val vertx: Vertx = UserData.vertx(project)
     private val statusLock = Any()
     private var status: SourceStatus = Pending
     private var message: String? = null
@@ -52,7 +51,7 @@ class SourceStatusServiceImpl(override val project: Project) : SourceStatusServi
     private var activeServices = listOf<Service>()
     private var initialService: String? = null
 
-    override suspend fun start(initialService: String?) {
+    override suspend fun start(vertx: Vertx, initialService: String?) {
         this.initialService = initialService
 
         //attempt to set current service
@@ -62,7 +61,6 @@ class SourceStatusServiceImpl(override val project: Project) : SourceStatusServi
 
     private fun periodicallyCheckForCurrentService() {
         log.info("No current service set, starting periodic check for current service")
-        val vertx = UserData.vertx(project)
         vertx.setPeriodic(5000) { timerId ->
             vertx.safeLaunch {
                 try {
@@ -173,54 +171,64 @@ class SourceStatusServiceImpl(override val project: Project) : SourceStatusServi
         activeServices = services.toMutableList()
     }
 
-    override fun onServiceChange(triggerInitial: Boolean, listener: () -> Unit) {
+    override fun onServiceChange(triggerInitial: Boolean, listener: suspend () -> Unit) {
         if (triggerInitial && currentService != null) {
             synchronized(statusLock) {
-                listener()
-            }
-        }
-        UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
-            if (it.body() == ServiceEstablished) {
-                synchronized(statusLock) {
+                vertx.safeLaunch {
                     listener()
                 }
             }
         }
-    }
-
-    override fun onStatusChange(triggerInitial: Boolean, listener: (SourceStatus) -> Unit) {
-        synchronized(statusLock) {
-            if (triggerInitial) {
+        vertx.eventBus().consumer<SourceStatus>("spp.status") {
+            if (it.body() == ServiceEstablished) {
                 synchronized(statusLock) {
-                    listener(status)
-                }
-            }
-            if (UserData.hasVertx(project)) {
-                UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
-                    synchronized(statusLock) {
-                        listener(it.body())
+                    vertx.safeLaunch {
+                        listener()
                     }
                 }
-            } else {
-                log.warn("No vertx instance found for project: $project")
             }
         }
     }
 
-    override fun onReadyChange(triggerInitial: Boolean, listener: (SourceStatus) -> Unit) {
+    override fun onStatusChange(triggerInitial: Boolean, listener: suspend (SourceStatus) -> Unit) {
+        synchronized(statusLock) {
+            if (triggerInitial) {
+                synchronized(statusLock) {
+                    vertx.safeLaunch {
+                        listener(status)
+                    }
+                }
+            }
+            vertx.eventBus().consumer("spp.status") {
+                synchronized(statusLock) {
+                    vertx.safeLaunch {
+                        listener(it.body())
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onReadyChange(triggerInitial: Boolean, listener: suspend (SourceStatus) -> Unit) {
         if (triggerInitial) {
             synchronized(statusLock) {
-                listener(status)
+                vertx.safeLaunch {
+                    listener(status)
+                }
             }
         }
 
         val statusTriggered = AtomicBoolean()
-        UserData.vertx(project).eventBus().consumer<SourceStatus>("spp.status") {
+        vertx.eventBus().consumer<SourceStatus>("spp.status") {
             synchronized(statusLock) {
                 if (isReady() && statusTriggered.compareAndSet(false, true)) {
-                    listener(status)
+                    vertx.safeLaunch {
+                        listener(status)
+                    }
                 } else if (!isReady() && statusTriggered.compareAndSet(true, false)) {
-                    listener(status)
+                    vertx.safeLaunch {
+                        listener(status)
+                    }
                 }
             }
         }

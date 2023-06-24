@@ -85,16 +85,14 @@ class LiveViewChartManagerImpl(
         project.putUserData(LiveViewChartManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
             if (it.isReady) {
-                UserData.vertx(project).safeLaunch {
-                    val service = SourceStatusService.getCurrentService(project)
-                    if (service == null) {
-                        log.warn("No service found for project: ${project.name}")
-                        return@safeLaunch
-                    }
+                val service = SourceStatusService.getCurrentService(project)
+                if (service == null) {
+                    log.warn("No service found for project: ${project.name}")
+                    return@onReadyChange
+                }
 
-                    project.invokeLater {
-                        showServiceWindow(service)
-                    }
+                project.invokeLater {
+                    showServiceWindow(service)
                 }
             } else {
                 project.invokeLater {
