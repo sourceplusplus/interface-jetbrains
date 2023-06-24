@@ -290,10 +290,12 @@ class LiveViewChartWindowImpl(
         if (metricType.requiresConversion) {
             //only for SLA
             chart.ranges.yMax = (histogram.snapshot.max / metricType.unitConversion) * 1.01
+            if (chart.ranges.yMax == 0.0) chart.ranges.yMax = 100.0
         } else {
             val step = ceil((histogram.snapshot.max / 10.0) / 5.0) * 5
             if (step >= 1) {
                 chart.ranges.yMax = histogram.snapshot.max.toDouble() * 1.01
+                if (chart.ranges.yMax == 0.0) chart.ranges.yMax = 1.01
                 chart.grid.yLines = generator(step)
             } else {
                 chart.ranges.yMax = 10.01
