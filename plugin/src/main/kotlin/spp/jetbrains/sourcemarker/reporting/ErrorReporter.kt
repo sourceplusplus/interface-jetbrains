@@ -43,6 +43,7 @@ import org.eclipse.egit.github.core.RepositoryId
 import org.eclipse.egit.github.core.client.GitHubClient
 import org.eclipse.egit.github.core.service.IssueService
 import spp.jetbrains.PluginBundle
+import spp.jetbrains.status.SourceStatusService
 import java.awt.Component
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -178,7 +179,8 @@ class GitHubErrorReporter : ErrorReportSubmitter() {
         val reportValues = getKeyValuePairs(
             bean,
             ApplicationInfoEx.getInstanceEx(),
-            ApplicationNamesInfo.getInstance()
+            ApplicationNamesInfo.getInstance(),
+            project
         )
         val notifyingCallback = CallbackWithNotification(callback, project)
         val task = AnonymousFeedbackTask(
@@ -258,7 +260,8 @@ private class AnonymousFeedbackTask(
 private fun getKeyValuePairs(
     error: GitHubErrorBean,
     appInfo: ApplicationInfoEx,
-    namesInfo: ApplicationNamesInfo
+    namesInfo: ApplicationNamesInfo,
+    project: Project?
 ): MutableMap<String, String> {
     PluginManagerCore.getPlugin(
         PluginId.findId("com.sourceplusplus.plugin.intellij", "com.sourceplusplus.plugin.intellij")
@@ -279,6 +282,7 @@ private fun getKeyValuePairs(
         "App Build" to appInfo.build.asString(),
         "App Version" to appInfo.fullVersion,
         "Last Action" to (error.lastAction ?: "Unknown"),
+        "Current Status" to project?.let { SourceStatusService.getInstance(it).getCurrentStatus().first.name },
         "error.message" to error.message,
         "error.stacktrace" to error.stackTrace,
         "error.hash" to error.exceptionHash
