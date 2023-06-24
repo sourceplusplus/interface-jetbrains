@@ -269,7 +269,10 @@ private fun getKeyValuePairs(
         if (error.pluginName.isBlank()) error.pluginName = name
         if (error.pluginVersion.isBlank()) error.pluginVersion = version
     }
-    val params = mutableMapOf(
+    val status = project?.let {
+        SourceStatusService.getInstance(it).getCurrentStatus().first.name
+    } ?: "Unknown"
+    val params: MutableMap<String, String> = mutableMapOf(
         "error.description" to error.description,
         "Plugin Name" to error.pluginName,
         "Plugin Version" to error.pluginVersion,
@@ -282,7 +285,7 @@ private fun getKeyValuePairs(
         "App Build" to appInfo.build.asString(),
         "App Version" to appInfo.fullVersion,
         "Last Action" to (error.lastAction ?: "Unknown"),
-        "Current Status" to project?.let { SourceStatusService.getInstance(it).getCurrentStatus().first.name },
+        "Current Status" to status,
         "error.message" to error.message,
         "error.stacktrace" to error.stackTrace,
         "error.hash" to error.exceptionHash
