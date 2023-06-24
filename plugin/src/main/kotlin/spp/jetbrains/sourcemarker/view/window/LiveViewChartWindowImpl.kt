@@ -288,9 +288,7 @@ class LiveViewChartWindowImpl(
         histogram.update(metricValue)
 
         if (metricType.requiresConversion) {
-            //only for SLA
-            chart.ranges.yMax = (histogram.snapshot.max / metricType.unitConversion) * 1.01
-            if (chart.ranges.yMax == 0.0) chart.ranges.yMax = 100.0
+            chart.ranges.yMax = 100.0 //only for SLA
         } else {
             val step = ceil((histogram.snapshot.max / 10.0) / 5.0) * 5
             if (step >= 1) {
