@@ -16,7 +16,11 @@
  */
 package spp.jetbrains.sourcemarker.command.status.ui.config;
 
+import javax.swing.border.*;
+import com.intellij.ui.components.*;
+import com.intellij.ui.components.JBPanel;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.PluginUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +29,7 @@ import java.util.Objects;
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 
-public class LiveBreakpointConfigurationPanel extends JPanel {
+public class LiveBreakpointConfigurationPanel extends JBPanel<LiveBreakpointConfigurationPanel> {
 
     private int maxObjectDepth = 5;
     private int maxObjectSize = 1024 * 1024;
@@ -153,11 +157,12 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        // Generated using JFormDesigner Evaluation license - Valentino Pecaoco
         panel7 = new JPanel();
         panel8 = new JPanel();
-        label4 = new JLabel();
-        label5 = new JLabel();
-        label8 = new JLabel();
+        label4 = new JBLabel();
+        label5 = new JBLabel();
+        label8 = new JBLabel();
         maxObjectDepthSpinner = new JSpinner();
         separator1 = new JSeparator();
         maxObjectSizeSpinner = new JSpinner();
@@ -167,26 +172,32 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
         separator4 = new JSeparator();
         panel4 = new JPanel();
         panel3 = new JPanel();
-        label3 = new JLabel();
+        label3 = new JBLabel();
         panel1 = new JPanel();
-        expiration15MinButton = new JRadioButton();
-        expiration30MinButton = new JRadioButton();
-        expiration1HrButton = new JRadioButton();
-        expiration3HrsButton = new JRadioButton();
-        expiration6HrsButton = new JRadioButton();
-        expiration12HrsButton = new JRadioButton();
-        expiration24HrsButton = new JRadioButton();
+        expiration15MinButton = new JBRadioButton();
+        expiration30MinButton = new JBRadioButton();
+        expiration1HrButton = new JBRadioButton();
+        expiration3HrsButton = new JBRadioButton();
+        expiration6HrsButton = new JBRadioButton();
+        expiration12HrsButton = new JBRadioButton();
+        expiration24HrsButton = new JBRadioButton();
         separator3 = new JSeparator();
         panel5 = new JPanel();
-        label6 = new JLabel();
+        label6 = new JBLabel();
         panel2 = new JPanel();
         rateLimitCountSpinner = new JSpinner();
-        label7 = new JLabel();
+        label7 = new JBLabel();
         rateLimitStepCombobox = new JComboBox<>();
 
         //======== this ========
-        setBackground(getBackgroundColor());
-        setBorder(getPanelBorder());
+        setBorder(new LineBorder(new Color(0x555555)));
+        setBackground(null);
+        setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.border
+        .EmptyBorder(0,0,0,0), "JF\u006frmDes\u0069gner \u0045valua\u0074ion",javax.swing.border.TitledBorder.CENTER,javax
+        .swing.border.TitledBorder.BOTTOM,new java.awt.Font("D\u0069alog",java.awt.Font.BOLD,
+        12),java.awt.Color.red), getBorder())); addPropertyChangeListener(new java.beans
+        .PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("\u0062order".equals(e.
+        getPropertyName()))throw new RuntimeException();}});
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -223,18 +234,15 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                     "[]"));
 
                 //---- label4 ----
-                label4.setText(message("Max Object Depth"));
-                label4.setFont(SMALLER_FONT);
+                label4.setText("Max Object Depth");
                 panel8.add(label4, "cell 0 0");
 
                 //---- label5 ----
-                label5.setText(message("Max Object Size"));
-                label5.setFont(SMALLER_FONT);
+                label5.setText("Max Object Size");
                 panel8.add(label5, "cell 2 0 2 1");
 
                 //---- label8 ----
-                label8.setText(message("Max Collection Length"));
-                label8.setFont(SMALLER_FONT);
+                label8.setText("Max Collection Length");
                 panel8.add(label8, "cell 5 0");
 
                 //---- maxObjectDepthSpinner ----
@@ -250,9 +258,9 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
                 //---- maxObjectSizeComboBox ----
                 maxObjectSizeComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
-                    message("bytes"),
-                    message("kilobytes"),
-                    message("megabytes")
+                    "bytes",
+                    "kilobytes",
+                    "megabytes"
                 }));
                 panel8.add(maxObjectSizeComboBox, "cell 3 1");
                 panel8.add(separator2, "cell 4 1");
@@ -293,8 +301,8 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                     "[]"));
 
                 //---- label3 ----
-                label3.setText(message("expiration_date"));
-                label3.setFont(SMALLER_FONT);
+                label3.setText("Expiration Date");
+                label3.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                 panel3.add(label3, "cell 0 0");
 
                 //======== panel1 ========
@@ -315,46 +323,46 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                         "[]"));
 
                     //---- expiration15MinButton ----
-                    expiration15MinButton.setText("15 " + message("minutes"));
+                    expiration15MinButton.setText("15 Minutes");
                     expiration15MinButton.setSelected(true);
                     expiration15MinButton.setBackground(null);
-                    expiration15MinButton.setFont(SMALLER_FONT);
+                    expiration15MinButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel1.add(expiration15MinButton, "cell 0 0");
 
                     //---- expiration30MinButton ----
-                    expiration30MinButton.setText("30 " + message("minutes"));
+                    expiration30MinButton.setText("30 Minutes");
                     expiration30MinButton.setBackground(null);
-                    expiration30MinButton.setFont(SMALLER_FONT);
+                    expiration30MinButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel1.add(expiration30MinButton, "cell 1 0");
 
                     //---- expiration1HrButton ----
-                    expiration1HrButton.setText("1 " + message("hour"));
+                    expiration1HrButton.setText("1 Hour");
                     expiration1HrButton.setBackground(null);
-                    expiration1HrButton.setFont(SMALLER_FONT);
+                    expiration1HrButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel1.add(expiration1HrButton, "cell 2 0");
 
                     //---- expiration3HrsButton ----
-                    expiration3HrsButton.setText("3 " + message("hours"));
+                    expiration3HrsButton.setText("3 Hours");
                     expiration3HrsButton.setBackground(null);
-                    expiration3HrsButton.setFont(SMALLER_FONT);
+                    expiration3HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel1.add(expiration3HrsButton, "cell 3 0");
 
                     //---- expiration6HrsButton ----
-                    expiration6HrsButton.setText("6 " + message("hours"));
+                    expiration6HrsButton.setText("6 Hours");
                     expiration6HrsButton.setBackground(null);
-                    expiration6HrsButton.setFont(SMALLER_FONT);
+                    expiration6HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel1.add(expiration6HrsButton, "cell 4 0");
 
                     //---- expiration12HrsButton ----
-                    expiration12HrsButton.setText("12 " + message("hours"));
+                    expiration12HrsButton.setText("12 Hours");
                     expiration12HrsButton.setBackground(null);
-                    expiration12HrsButton.setFont(SMALLER_FONT);
+                    expiration12HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel1.add(expiration12HrsButton, "cell 5 0");
 
                     //---- expiration24HrsButton ----
-                    expiration24HrsButton.setText("24 " + message("hours"));
+                    expiration24HrsButton.setText("24 Hours");
                     expiration24HrsButton.setBackground(null);
-                    expiration24HrsButton.setFont(SMALLER_FONT);
+                    expiration24HrsButton.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                     panel1.add(expiration24HrsButton, "cell 6 0");
                 }
                 panel3.add(panel1, "cell 0 1 3 1");
@@ -378,8 +386,8 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                     "[grow]"));
 
                 //---- label6 ----
-                label6.setText(message("hit_throttle"));
-                label6.setFont(SMALLER_FONT);
+                label6.setText("Hit Throttle");
+                label6.setFont(new Font("Roboto Light", Font.PLAIN, 15));
                 panel5.add(label6, "cell 0 0");
 
                 //======== panel2 ========
@@ -400,14 +408,14 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
                     panel2.add(rateLimitCountSpinner, "cell 0 0");
 
                     //---- label7 ----
-                    label7.setText(message("per"));
+                    label7.setText("per");
                     panel2.add(label7, "cell 1 0");
 
                     //---- rateLimitStepCombobox ----
                     rateLimitStepCombobox.setModel(new DefaultComboBoxModel<>(new String[] {
-                        message("second"),
-                        message("minute"),
-                        message("hour")
+                        "second",
+                        "minute",
+                        "hour"
                     }));
                     panel2.add(rateLimitStepCombobox, "cell 2 0");
                 }
@@ -418,7 +426,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
         add(panel4, "cell 0 2");
 
         //---- expirationButtonGroup ----
-        ButtonGroup expirationButtonGroup = new ButtonGroup();
+        var expirationButtonGroup = new ButtonGroup();
         expirationButtonGroup.add(expiration15MinButton);
         expirationButtonGroup.add(expiration30MinButton);
         expirationButtonGroup.add(expiration1HrButton);
@@ -430,11 +438,12 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    // Generated using JFormDesigner Evaluation license - Valentino Pecaoco
     private JPanel panel7;
     private JPanel panel8;
-    private JLabel label4;
-    private JLabel label5;
-    private JLabel label8;
+    private JBLabel label4;
+    private JBLabel label5;
+    private JBLabel label8;
     private JSpinner maxObjectDepthSpinner;
     private JSeparator separator1;
     private JSpinner maxObjectSizeSpinner;
@@ -444,21 +453,21 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
     private JSeparator separator4;
     private JPanel panel4;
     private JPanel panel3;
-    private JLabel label3;
+    private JBLabel label3;
     private JPanel panel1;
-    private JRadioButton expiration15MinButton;
-    private JRadioButton expiration30MinButton;
-    private JRadioButton expiration1HrButton;
-    private JRadioButton expiration3HrsButton;
-    private JRadioButton expiration6HrsButton;
-    private JRadioButton expiration12HrsButton;
-    private JRadioButton expiration24HrsButton;
+    private JBRadioButton expiration15MinButton;
+    private JBRadioButton expiration30MinButton;
+    private JBRadioButton expiration1HrButton;
+    private JBRadioButton expiration3HrsButton;
+    private JBRadioButton expiration6HrsButton;
+    private JBRadioButton expiration12HrsButton;
+    private JBRadioButton expiration24HrsButton;
     private JSeparator separator3;
     private JPanel panel5;
-    private JLabel label6;
+    private JBLabel label6;
     private JPanel panel2;
     private JSpinner rateLimitCountSpinner;
-    private JLabel label7;
+    private JBLabel label7;
     private JComboBox<String> rateLimitStepCombobox;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

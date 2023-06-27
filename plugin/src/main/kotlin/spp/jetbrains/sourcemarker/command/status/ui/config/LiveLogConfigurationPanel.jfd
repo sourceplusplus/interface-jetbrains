@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.5.1.409" Java: "11.0.7" encoding: "UTF-8"
+JFDML JFormDesigner: "8.1.0.0.283" Java: "17.0.7" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -17,7 +17,7 @@ new FormModel {
 			} ) {
 				name: "panel4"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "lblCondition"
 					"text": "Condtion"
 					"font": &Font0 new java.awt.Font( "Roboto Light", 0, 15 )
@@ -47,7 +47,7 @@ new FormModel {
 			} ) {
 				name: "panel6"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "lblHint"
 					"text": "Hit Limit"
 					"font": #Font0
@@ -93,7 +93,7 @@ new FormModel {
 				} ) {
 					name: "panel1"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-					add( new FormComponent( "javax.swing.JRadioButton" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 						name: "expiration15MinButton"
 						"text": "15 Minutes"
 						"selected": true
@@ -103,7 +103,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 0 0"
 					} )
-					add( new FormComponent( "javax.swing.JRadioButton" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 						name: "expiration30MinButton"
 						"text": "30 Minutes"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -112,7 +112,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 1 0"
 					} )
-					add( new FormComponent( "javax.swing.JRadioButton" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 						name: "expiration1HrButton"
 						"text": "1 Hour"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -121,7 +121,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 2 0"
 					} )
-					add( new FormComponent( "javax.swing.JRadioButton" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 						name: "expiration3HrsButton"
 						"text": "3 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -130,7 +130,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 3 0"
 					} )
-					add( new FormComponent( "javax.swing.JRadioButton" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 						name: "expiration6HrsButton"
 						"text": "6 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -139,7 +139,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 4 0"
 					} )
-					add( new FormComponent( "javax.swing.JRadioButton" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 						name: "expiration12HrsButton"
 						"text": "12 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -148,7 +148,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 5 0"
 					} )
-					add( new FormComponent( "javax.swing.JRadioButton" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 						name: "expiration24HrsButton"
 						"text": "24 Hours"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -177,7 +177,7 @@ new FormModel {
 			} ) {
 				name: "panel5"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "label6"
 					"text": "Hit Throttle"
 					"font": #Font0
@@ -200,7 +200,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 0 0"
 					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "label7"
 						"text": "per"
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
