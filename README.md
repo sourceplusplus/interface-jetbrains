@@ -67,7 +67,9 @@ continuous insight into your application in its natural environment.
 
 ## How to use?
 
-Install this plugin via the JetBrains Marketplace by searching for: `Source++`.
+Install the Source++ plugin via the JetBrains Marketplace by searching for: `Source++`.
+Alternatively, you can download the Source++ plugin directly
+from [here](https://plugins.jetbrains.com/plugin/12033-source-).
 
 Once installed, this plugin adds
 the [Live Command Palette](https://docs.sourceplus.plus/features/live-commands/#live-command-palette) to the JetBrains
