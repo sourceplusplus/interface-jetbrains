@@ -31,6 +31,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.artifact.exception.qualifiedClassName
 import spp.protocol.instrument.location.LiveSourceLocation
+import spp.protocol.platform.general.Service
 
 /**
  * Used to determine the naming/location of JVM artifacts.
@@ -54,7 +55,7 @@ class JVMArtifactNamingService : IArtifactNamingService {
             log.warn("Unable to determine location source of: $sourceMark")
             return null
         }
-        return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+        return LiveSourceLocation(locationSource, lineNumber, service = Service.fromNameIfPresent(serviceName))
     }
 
     override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {

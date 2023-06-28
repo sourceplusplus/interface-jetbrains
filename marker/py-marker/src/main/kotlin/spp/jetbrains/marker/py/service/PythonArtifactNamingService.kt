@@ -30,6 +30,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.location.LiveSourceLocation
+import spp.protocol.platform.general.Service
 
 /**
  * Used to determine the naming/location of Python artifacts.
@@ -45,7 +46,7 @@ class PythonArtifactNamingService : IArtifactNamingService {
         serviceName: String?
     ): LiveSourceLocation {
         val locationSource = sourceMark.sourceFileMarker.psiFile.virtualFile.name
-        return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+        return LiveSourceLocation(locationSource, lineNumber, service = Service.fromNameIfPresent(serviceName))
     }
 
     override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {

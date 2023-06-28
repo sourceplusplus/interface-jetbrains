@@ -102,7 +102,7 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
                 null,
                 mutableSetOf(guideMark.getUserData(EndpointDetector.DETECTED_ENDPOINTS)!!.firstNotNullOf { it.name }),
                 guideMark.artifactQualifiedName,
-                LiveSourceLocation(guideMark.artifactQualifiedName.identifier, -1, service.id),
+                LiveSourceLocation(guideMark.artifactQualifiedName.identifier, -1, service),
                 LiveViewConfig(FUNCTION_DURATION.name, listenMetrics, 1000)
             )
         ).onSuccess {

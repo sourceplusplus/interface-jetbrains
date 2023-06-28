@@ -48,6 +48,7 @@ import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
 import spp.protocol.instrument.location.LiveSourceLocation
 import spp.protocol.instrument.meter.MeterType
+import spp.protocol.platform.general.Service
 import spp.protocol.service.listen.LiveInstrumentListener
 import spp.protocol.service.listen.LiveViewEventListener
 import spp.protocol.view.LiveView
@@ -201,7 +202,10 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                 return
             }
 
-            val location = LiveSourceLocation(functionIdentifier, service = config.serviceName)
+            val location = LiveSourceLocation(
+                source = functionIdentifier,
+                service = Service.fromNameIfPresent(config.serviceName)
+            )
             val statusBar = SpanStatusBar(location, inlayMark)
             inlayMark.putUserData(SourceMarkerKeys.STATE_BAR, statusBar)
             wrapperPanel.add(statusBar)

@@ -112,7 +112,7 @@ class LiveEndpointsWindow(
             null,
             mutableSetOf(endpoint.endpoint.name),
             null,
-            LiveSourceLocation("", 0, service.id),
+            LiveSourceLocation("", 0, service),
             LiveViewConfig("LiveEndpointsWindow", listenMetrics, refreshInterval)
         )
         addView(EndpointRowView(project, viewService, liveView, endpoint, model) {
