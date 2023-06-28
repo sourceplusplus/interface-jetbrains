@@ -43,8 +43,6 @@ import spp.jetbrains.marker.source.mark.api.component.swing.SwingSourceMarkCompo
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
 import spp.jetbrains.sourcemarker.SourceMarkerPlugin
 import spp.jetbrains.sourcemarker.command.status.ui.*
-import spp.protocol.artifact.ArtifactQualifiedName
-import spp.protocol.artifact.ArtifactType
 import spp.protocol.instrument.*
 import spp.protocol.instrument.location.LiveSourceLocation
 import spp.protocol.instrument.meter.MeterType
@@ -330,14 +328,9 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
 
                 UserData.liveViewService(project)!!.addLiveView(
                     LiveView(
-                        null,
                         mutableSetOf(liveMeter.id!!),
-                        ArtifactQualifiedName(liveMeter.location.source, type = ArtifactType.EXPRESSION),
-                        liveMeter.location,
-                        LiveViewConfig(
-                            "LIVE_METER",
-                            listOf(liveMeter.id!!)
-                        )
+                        LiveViewConfig("LIVE_METER", listOf(liveMeter.id!!)),
+                        service = liveMeter.location.service
                     )
                 ).onComplete {
                     if (it.succeeded()) {
