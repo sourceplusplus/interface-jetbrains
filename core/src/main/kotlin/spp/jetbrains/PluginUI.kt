@@ -21,6 +21,7 @@ import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.ui.Gray
 import com.intellij.ui.JBColor
+import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import com.intellij.util.ui.UIUtil.getWindowColor
@@ -70,7 +71,7 @@ object PluginUI {
     val PANEL_BACKGROUND_COLOR: JBColor = JBColor("PANEL_BACKGROUND_COLOR", Gray._37)
 
     @JvmField
-    val ROBOTO_LIGHT_BOLD_14: Font
+    val ROBOTO_LIGHT_BOLD_14: JBFont
 
     @JvmStatic
     fun getPlaceholderForeground(): JBColor {
@@ -112,41 +113,41 @@ object PluginUI {
         return LineBorder(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())
     }
 
-    private val ROBOTO_LIGHT_PLAIN_13: Font
-    private val ROBOTO_LIGHT_PLAIN_14: Font
-    private val ROBOTO_LIGHT_PLAIN_15: Font
-    private val ROBOTO_LIGHT_PLAIN_16: Font
-    private val ROBOTO_LIGHT_PLAIN_17: Font
-    private val MICROSOFT_YAHEI_PLAIN_12: Font
-    private val MICROSOFT_YAHEI_PLAIN_13: Font
+    private val ROBOTO_LIGHT_PLAIN_13: JBFont
+    private val ROBOTO_LIGHT_PLAIN_14: JBFont
+    private val ROBOTO_LIGHT_PLAIN_15: JBFont
+    private val ROBOTO_LIGHT_PLAIN_16: JBFont
+    private val ROBOTO_LIGHT_PLAIN_17: JBFont
+    private val MICROSOFT_YAHEI_PLAIN_12: JBFont
+    private val MICROSOFT_YAHEI_PLAIN_13: JBFont
 
     @JvmField
-    val MICROSOFT_YAHEI_PLAIN_14: Font
-    private val MICROSOFT_YAHEI_PLAIN_15: Font
-    private val MICROSOFT_YAHEI_PLAIN_16: Font
+    val MICROSOFT_YAHEI_PLAIN_14: JBFont
+    private val MICROSOFT_YAHEI_PLAIN_15: JBFont
+    private val MICROSOFT_YAHEI_PLAIN_16: JBFont
 
     init {
         try {
-            val robotoLightFont = Font.createFont(
+            val robotoLightFont = JBFont.createFont(
                 Font.TRUETYPE_FONT,
                 PluginUI::class.java.getResourceAsStream("/fonts/Roboto-Light.ttf")
             )
-            ROBOTO_LIGHT_BOLD_14 = robotoLightFont.deriveFont(Font.BOLD).deriveFont(14f)
-            ROBOTO_LIGHT_PLAIN_13 = robotoLightFont.deriveFont(Font.PLAIN).deriveFont(13f)
-            ROBOTO_LIGHT_PLAIN_14 = robotoLightFont.deriveFont(Font.PLAIN).deriveFont(14f)
-            ROBOTO_LIGHT_PLAIN_15 = robotoLightFont.deriveFont(Font.PLAIN).deriveFont(15f)
-            ROBOTO_LIGHT_PLAIN_16 = robotoLightFont.deriveFont(Font.PLAIN).deriveFont(16f)
-            ROBOTO_LIGHT_PLAIN_17 = robotoLightFont.deriveFont(Font.PLAIN).deriveFont(17f)
+            ROBOTO_LIGHT_BOLD_14 = JBFont.create(robotoLightFont.deriveFont(Font.BOLD).deriveFont(14f))
+            ROBOTO_LIGHT_PLAIN_13 = JBFont.create(robotoLightFont.deriveFont(Font.PLAIN).deriveFont(13f))
+            ROBOTO_LIGHT_PLAIN_14 = JBFont.create(robotoLightFont.deriveFont(Font.PLAIN).deriveFont(14f))
+            ROBOTO_LIGHT_PLAIN_15 = JBFont.create(robotoLightFont.deriveFont(Font.PLAIN).deriveFont(15f))
+            ROBOTO_LIGHT_PLAIN_16 = JBFont.create(robotoLightFont.deriveFont(Font.PLAIN).deriveFont(16f))
+            ROBOTO_LIGHT_PLAIN_17 = JBFont.create(robotoLightFont.deriveFont(Font.PLAIN).deriveFont(17f))
 
-            val yaheiFont = Font.createFont(
+            val yaheiFont = JBFont.createFont(
                 Font.TRUETYPE_FONT,
                 PluginUI::class.java.getResourceAsStream("/fonts/chinese.msyh.ttf")
             )
-            MICROSOFT_YAHEI_PLAIN_12 = yaheiFont.deriveFont(Font.PLAIN).deriveFont(12f)
-            MICROSOFT_YAHEI_PLAIN_13 = yaheiFont.deriveFont(Font.PLAIN).deriveFont(13f)
-            MICROSOFT_YAHEI_PLAIN_14 = yaheiFont.deriveFont(Font.PLAIN).deriveFont(14f)
-            MICROSOFT_YAHEI_PLAIN_15 = yaheiFont.deriveFont(Font.PLAIN).deriveFont(15f)
-            MICROSOFT_YAHEI_PLAIN_16 = yaheiFont.deriveFont(Font.PLAIN).deriveFont(16f)
+            MICROSOFT_YAHEI_PLAIN_12 = JBFont.create(yaheiFont.deriveFont(Font.PLAIN).deriveFont(12f))
+            MICROSOFT_YAHEI_PLAIN_13 = JBFont.create(yaheiFont.deriveFont(Font.PLAIN).deriveFont(13f))
+            MICROSOFT_YAHEI_PLAIN_14 = JBFont.create(yaheiFont.deriveFont(Font.PLAIN).deriveFont(14f))
+            MICROSOFT_YAHEI_PLAIN_15 = JBFont.create(yaheiFont.deriveFont(Font.PLAIN).deriveFont(15f))
+            MICROSOFT_YAHEI_PLAIN_16 = JBFont.create(yaheiFont.deriveFont(Font.PLAIN).deriveFont(16f))
         } catch (e: Exception) {
             throw RuntimeException(e)
         }

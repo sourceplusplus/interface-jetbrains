@@ -30,7 +30,7 @@ import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import java.awt.BorderLayout
 import java.util.concurrent.atomic.AtomicReference
-import javax.swing.JPanel
+import com.intellij.ui.components.JBPanel
 
 /**
  * todo: description.
@@ -48,7 +48,7 @@ class LiveLogWindowImpl(
     private val log = logger<LiveLogWindowImpl>()
     private var consumer: MessageConsumer<JsonObject>? = null
     override val console: ConsoleView
-    val component = JPanel(BorderLayout()).apply { isFocusable = true }
+    val component = JBPanel<Nothing>(BorderLayout()).apply { isFocusable = true }
     override var isRunning = false
         private set
     override val refreshInterval: Int
