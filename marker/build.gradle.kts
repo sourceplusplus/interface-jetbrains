@@ -48,7 +48,7 @@ configure<PublishingExtension> {
 dependencies {
     compileOnly(projectDependency(":core"))
     compileOnly("plus.sourceplus:protocol:$protocolVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
