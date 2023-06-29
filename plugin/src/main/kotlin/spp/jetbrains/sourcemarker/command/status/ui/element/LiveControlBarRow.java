@@ -16,6 +16,8 @@
  */
 package spp.jetbrains.sourcemarker.command.status.ui.element;
 
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
@@ -29,7 +31,7 @@ import java.util.Map;
 
 import static spp.jetbrains.PluginUI.*;
 
-public class LiveControlBarRow extends JPanel {
+public class LiveControlBarRow extends JBPanel<LiveControlBarRow> {
 
     public LiveControlBarRow() {
         initComponents();
@@ -94,7 +96,7 @@ public class LiveControlBarRow extends JPanel {
         panel1 = new JPanel();
         commandLabel = new JTextPane();
         descriptionLabel = new JTextPane();
-        commandIcon = new JLabel();
+        commandIcon = new JBLabel();
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
@@ -150,6 +152,6 @@ public class LiveControlBarRow extends JPanel {
     private JPanel panel1;
     private JTextPane commandLabel;
     private JTextPane descriptionLabel;
-    private JLabel commandIcon;
+    private JBLabel commandIcon;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

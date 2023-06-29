@@ -24,6 +24,8 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import io.vertx.core.json.JsonObject;
@@ -79,7 +81,7 @@ import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener,
+public class LogStatusBar extends JBPanel<LogStatusBar> implements LiveStateBar, VisibleAreaListener,
         LiveInstrumentListener, LiveViewEventListener {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss a")
@@ -98,7 +100,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
     private JWindow popup;
     private LiveLogConfigurationPanel configurationPanel;
     private boolean disposed = false;
-    private JLabel minimizeLabel;
+    private JBLabel minimizeLabel;
     private JPanel wrapper;
     private boolean errored = false;
     private boolean removed = false;
@@ -294,7 +296,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         if (minimizeLabel != null) {
             remove(minimizeLabel);
         }
-        minimizeLabel = new JLabel();
+        minimizeLabel = new JBLabel();
         minimizeLabel.setCursor(Cursor.getDefaultCursor());
         minimizeLabel.addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -664,13 +666,13 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
         configPanel = new JPanel();
-        configLabel = new JLabel();
-        configDropdownLabel = new JLabel();
-        timeLabel = new JLabel();
+        configLabel = new JBLabel();
+        configDropdownLabel = new JBLabel();
+        timeLabel = new JBLabel();
         separator1 = new JSeparator();
         liveLogTextField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
         liveLogTextField.setVarPattern(varPattern);
-        closeLabel = new JLabel();
+        closeLabel = new JBLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
@@ -742,11 +744,11 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel configPanel;
-    private JLabel configLabel;
-    private JLabel configDropdownLabel;
-    private JLabel timeLabel;
+    private JBLabel configLabel;
+    private JBLabel configDropdownLabel;
+    private JBLabel timeLabel;
     private JSeparator separator1;
-    private AutocompleteField liveLogTextField;
-    private JLabel closeLabel;
+    private AutocompleteField<AutocompleteFieldRow> liveLogTextField;
+    private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

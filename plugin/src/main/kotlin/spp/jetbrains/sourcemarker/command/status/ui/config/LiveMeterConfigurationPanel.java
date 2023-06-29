@@ -154,7 +154,7 @@ public class LiveMeterConfigurationPanel extends JBPanel<LiveMeterConfigurationP
         conditionPanel = new JPanel();
         separator1 = new JSeparator();
         panel3 = new JPanel();
-        label3 = new JLabel();
+        label3 = new JBLabel();
         panel1 = new JPanel();
         expirationNeverButton = new JBRadioButton();
         expiration15MinButton = new JBRadioButton();
@@ -306,13 +306,12 @@ public class LiveMeterConfigurationPanel extends JBPanel<LiveMeterConfigurationP
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - Valentino Pecaoco
     private JPanel panel4;
     private JBLabel label1;
     private JPanel conditionPanel;
     private JSeparator separator1;
     private JPanel panel3;
-    private JLabel label3;
+    private JBLabel label3;
     private JPanel panel1;
     private JBRadioButton expirationNeverButton;
     private JBRadioButton expiration15MinButton;

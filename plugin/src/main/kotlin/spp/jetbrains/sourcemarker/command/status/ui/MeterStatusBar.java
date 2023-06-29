@@ -21,8 +21,11 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
@@ -64,7 +67,7 @@ import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener {
+public class MeterStatusBar extends JBPanel<MeterStatusBar> implements LiveStateBar, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -410,16 +413,16 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
         configPanel = new JPanel();
-        configLabel = new JLabel();
-        configDropdownLabel = new JLabel();
+        configLabel = new JBLabel();
+        configDropdownLabel = new JBLabel();
         mainPanel = new JPanel();
         meterIdField = new AutocompleteField(inlayMark.getProject(), meterName, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false);
         meterConditionField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
-        label1 = new JLabel();
-        meterTypeComboBox = new JComboBox<>();
-        timeLabel = new JLabel();
+        label1 = new JBLabel();
+        meterTypeComboBox = new ComboBox<>();
+        timeLabel = new JBLabel();
         separator1 = new JSeparator();
-        closeLabel = new JLabel();
+        closeLabel = new JBLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
@@ -527,15 +530,15 @@ public class MeterStatusBar extends JPanel implements LiveStateBar, VisibleAreaL
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel configPanel;
-    private JLabel configLabel;
-    private JLabel configDropdownLabel;
+    private JBLabel configLabel;
+    private JBLabel configDropdownLabel;
     private JPanel mainPanel;
     private AutocompleteField meterIdField;
     private AutocompleteField meterConditionField;
-    private JLabel label1;
+    private JBLabel label1;
     private JComboBox<String> meterTypeComboBox;
-    private JLabel timeLabel;
+    private JBLabel timeLabel;
     private JSeparator separator1;
-    private JLabel closeLabel;
+    private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

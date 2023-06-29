@@ -21,14 +21,14 @@ import spp.jetbrains.PluginUI
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import java.awt.BorderLayout
 import javax.swing.JPanel
-import javax.swing.JTextField
+import com.intellij.ui.components.JBTextField
+import com.intellij.util.ui.JBUI
 import javax.swing.border.CompoundBorder
-import javax.swing.border.EmptyBorder
 import javax.swing.border.LineBorder
 
 class TextLiveTooltip : LiveTooltip {
 
-    private val label: JTextField
+    private val label: JBTextField
     var text: String
         get() = label.text
         set(value) {
@@ -38,7 +38,7 @@ class TextLiveTooltip : LiveTooltip {
     constructor(guideMark: GuideMark, text: String) : super(guideMark) {
         this.text = text
         panel = JPanel(BorderLayout())
-        label = JTextField(text)
+        label = JBTextField(text)
         label.isEditable = false
         panel!!.background = PluginUI.getInputBackgroundColor()
         label.background = PluginUI.getInputBackgroundColor()
@@ -46,7 +46,7 @@ class TextLiveTooltip : LiveTooltip {
         label.border = null
         panel!!.border = CompoundBorder(
             LineBorder(UIUtil.getBoundsColor(), 0, true),
-            EmptyBorder(3, 3, 3, 3)
+            JBUI.Borders.empty(3)
         )
         panel!!.add(label, BorderLayout.CENTER)
     }

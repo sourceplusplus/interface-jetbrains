@@ -17,6 +17,8 @@
 package spp.jetbrains.sourcemarker.command.status.ui.config;
 
 import javax.swing.border.*;
+
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.*;
 import com.intellij.ui.components.JBPanel;
 import net.miginfocom.swing.MigLayout;
@@ -166,7 +168,7 @@ public class LiveBreakpointConfigurationPanel extends JBPanel<LiveBreakpointConf
         maxObjectDepthSpinner = new JSpinner();
         separator1 = new JSeparator();
         maxObjectSizeSpinner = new JSpinner();
-        maxObjectSizeComboBox = new JComboBox<>();
+        maxObjectSizeComboBox = new ComboBox<>();
         separator2 = new JSeparator();
         maxCollectionLengthSpinner = new JSpinner();
         separator4 = new JSeparator();
@@ -187,7 +189,7 @@ public class LiveBreakpointConfigurationPanel extends JBPanel<LiveBreakpointConf
         panel2 = new JBPanel<>();
         rateLimitCountSpinner = new JSpinner();
         label7 = new JBLabel();
-        rateLimitStepCombobox = new JComboBox<>();
+        rateLimitStepCombobox = new ComboBox<>();
 
         //======== this ========
         setBorder(getPanelBorder());
@@ -435,7 +437,6 @@ public class LiveBreakpointConfigurationPanel extends JBPanel<LiveBreakpointConf
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - Valentino Pecaoco
     private JPanel panel7;
     private JPanel panel8;
     private JBLabel label4;
@@ -444,7 +445,7 @@ public class LiveBreakpointConfigurationPanel extends JBPanel<LiveBreakpointConf
     private JSpinner maxObjectDepthSpinner;
     private JSeparator separator1;
     private JSpinner maxObjectSizeSpinner;
-    private JComboBox<String> maxObjectSizeComboBox;
+    private ComboBox<String> maxObjectSizeComboBox;
     private JSeparator separator2;
     private JSpinner maxCollectionLengthSpinner;
     private JSeparator separator4;

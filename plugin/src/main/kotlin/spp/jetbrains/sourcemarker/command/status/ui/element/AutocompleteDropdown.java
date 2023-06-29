@@ -17,6 +17,8 @@
 package spp.jetbrains.sourcemarker.command.status.ui.element;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
@@ -26,7 +28,7 @@ import spp.protocol.platform.general.Service;
 
 import javax.swing.*;
 
-public class AutocompleteDropdown extends JPanel {
+public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
     public AutocompleteDropdown(Project project) {
         initComponents();
@@ -67,12 +69,12 @@ public class AutocompleteDropdown extends JPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         panel2 = new JPanel();
         infoPanel = new JPanel();
-        userText = new JLabel();
-        userLabel = new JLabel();
-        serviceText = new JLabel();
-        serviceLabel = new JLabel();
-        availableCommandsText = new JLabel();
-        totalCommandsLabel = new JLabel();
+        userText = new JBLabel();
+        userLabel = new JBLabel();
+        serviceText = new JBLabel();
+        serviceLabel = new JBLabel();
+        availableCommandsText = new JBLabel();
+        totalCommandsLabel = new JBLabel();
 
         //======== this ========
         setBorder(null);
@@ -137,11 +139,11 @@ public class AutocompleteDropdown extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JPanel panel2;
     private JPanel infoPanel;
-    private JLabel userText;
-    private JLabel userLabel;
-    private JLabel serviceText;
-    private JLabel serviceLabel;
-    private JLabel availableCommandsText;
-    private JLabel totalCommandsLabel;
+    private JBLabel userText;
+    private JBLabel userLabel;
+    private JBLabel serviceText;
+    private JBLabel serviceLabel;
+    private JBLabel availableCommandsText;
+    private JBLabel totalCommandsLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

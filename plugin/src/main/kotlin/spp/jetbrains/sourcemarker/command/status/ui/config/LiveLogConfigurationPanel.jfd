@@ -79,7 +79,7 @@ new FormModel {
 			} ) {
 				name: "panel3"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "lblExpirationDate"
 					"text": "Expiration Date"
 					"font": #Font0
@@ -206,7 +206,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 1 0"
 					} )
-					add( new FormComponent( "javax.swing.JComboBox" ) {
+					add( new FormComponent( "com.intellij.openapi.ui.ComboBox" ) {
 						name: "rateLimitStepCombobox"
 						"model": new javax.swing.DefaultComboBoxModel {
 							selectedItem: "second"

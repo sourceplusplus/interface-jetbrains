@@ -45,7 +45,7 @@ new FormModel {
 			} ) {
 				name: "panel3"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "label3"
 					"text": "Expiration Date"
 					"font": #Font0
