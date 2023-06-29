@@ -280,7 +280,7 @@ public class LogStatusBar extends JPanel implements LiveStateBar, VisibleAreaLis
         JsonObject rawMetrics = new JsonObject(event.getMetricsData());
         Log logData = new Log(rawMetrics.getJsonObject("log"));
         LogResult logResult = new LogResult(
-            event.getArtifactQualifiedName(),
+            null,
             LogOrderType.NEWEST_LOGS,
             logData.getTimestamp(),
             Collections.singletonList(logData),

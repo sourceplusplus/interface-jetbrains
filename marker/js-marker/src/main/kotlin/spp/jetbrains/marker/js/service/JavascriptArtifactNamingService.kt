@@ -34,6 +34,7 @@ import spp.protocol.artifact.ArtifactQualifiedName
 import spp.protocol.artifact.ArtifactType
 import spp.protocol.artifact.exception.LiveStackTraceElement
 import spp.protocol.instrument.location.LiveSourceLocation
+import spp.protocol.platform.general.Service
 import java.util.*
 
 /**
@@ -64,7 +65,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
                     relativePath
                 }
 
-                return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+                return LiveSourceLocation(locationSource, lineNumber, service = Service.fromNameIfPresent(serviceName))
             }
         }
 
@@ -79,7 +80,7 @@ class JavascriptArtifactNamingService : IArtifactNamingService {
             }
         }
 
-        return LiveSourceLocation(locationSource, lineNumber, service = serviceName)
+        return LiveSourceLocation(locationSource, lineNumber, service = Service.fromNameIfPresent(serviceName))
     }
 
     override fun getDisplayLocation(language: Language, artifactQualifiedName: ArtifactQualifiedName): String {
