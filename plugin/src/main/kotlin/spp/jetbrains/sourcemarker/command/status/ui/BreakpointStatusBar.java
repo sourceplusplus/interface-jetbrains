@@ -36,6 +36,7 @@ import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.SourceMarkerKeys;
@@ -348,7 +349,7 @@ public class BreakpointStatusBar extends JBPanel<BreakpointStatusBar> implements
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(getBackgroundColor());
+        setBackground(PluginUI.getCommandHighlightForeground());
         configPanel = new JPanel();
         configLabel = new JBLabel();
         configDropdownLabel = new JBLabel();

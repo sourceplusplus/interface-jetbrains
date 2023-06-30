@@ -19,6 +19,7 @@ package spp.jetbrains.sourcemarker.command.status.ui.element;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBScrollPane;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
@@ -33,7 +34,7 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
     public AutocompleteDropdown(Project project) {
         initComponents();
 
-        infoPanel.setBackground(PluginUI.getBackgroundColor());
+        infoPanel.setBackground(PluginUI.getCommandHighlightForeground());
         availableCommandsText.setForeground(PluginUI.getPlaceholderForeground());
         totalCommandsLabel.setForeground(PluginUI.getCommandHighlightForeground());
 
@@ -53,7 +54,7 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
         }
     }
 
-    public void setScrollPane(JScrollPane scrollPane) {
+    public void setScrollPane(JBScrollPane scrollPane) {
         this.panel2.add(scrollPane);
     }
 

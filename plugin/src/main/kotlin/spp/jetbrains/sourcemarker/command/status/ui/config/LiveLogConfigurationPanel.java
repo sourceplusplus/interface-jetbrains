@@ -20,6 +20,7 @@ import javax.swing.border.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.*;
 import com.intellij.ui.components.JBPanel;
@@ -28,6 +29,7 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.PluginUI;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
@@ -187,7 +189,7 @@ public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(getBackgroundColor());
+        setBackground(null);
         panel4 = new JPanel();
         lblCondition = new JBLabel();
         conditionPanel = new JPanel();
@@ -212,7 +214,7 @@ public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel
         panel2 = new JPanel();
         rateLimitCountSpinner = new JSpinner();
         label7 = new JBLabel();
-        rateLimitStepCombobox = new JComboBox<>();
+        rateLimitStepCombobox = new ComboBox<>();
 
         //======== this ========
         setBorder(getPanelBorder());

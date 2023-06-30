@@ -193,7 +193,7 @@ public class PluginConfigurationPanel {
             }
 
             add(decorator.createPanel(), BorderLayout.EAST);
-            JScrollPane scrollPane = new JBScrollPane(myList);
+            JBScrollPane scrollPane = new JBScrollPane(myList);
             add(scrollPane, BorderLayout.CENTER);
 
             scrollPane.setMinimumSize(new Dimension(100, 0));

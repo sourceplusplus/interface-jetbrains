@@ -20,10 +20,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ScalableIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI
 import spp.jetbrains.PluginUI.SMALLEST_FONT
+import spp.jetbrains.PluginUI.commandHighlightForeground
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.instrument.log.VariableParser
 import spp.jetbrains.marker.SourceMarkerUtils.substringAfterIgnoreCase
@@ -92,7 +94,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
     }
 
     init {
-        foreground = UIUtil.getTextFieldForeground()
+        foreground = PluginUI.getBackgroundFocusColor()
 
         results = ArrayList()
         popup = JWindow(SwingUtilities.getWindowAncestor(this))
@@ -114,10 +116,10 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         })
 
         list.font = SMALLEST_FONT
-        list.setCellRenderer(AutocompleteCellRenderer(artifactQualifiedName))
+        list.cellRenderer = AutocompleteCellRenderer(artifactQualifiedName)
 
-        list.setBorder(JBUI.Borders.empty())
-        val scroll: JScrollPane = object : JScrollPane(list) {
+        list.border = JBUI.Borders.empty()
+        val scroll: JBScrollPane = object : JBScrollPane(list) {
             override fun getPreferredSize(): Dimension {
                 val ps = super.getPreferredSize()
                 ps.width = this@AutocompleteField.width
