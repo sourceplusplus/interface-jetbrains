@@ -19,6 +19,7 @@ package spp.jetbrains.sourcemarker.command.ui;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
@@ -46,7 +47,7 @@ import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class ControlBar extends JPanel implements VisibleAreaListener {
+public class ControlBar extends JBPanel<ControlBar> implements VisibleAreaListener {
 
     private static final JaroWinkler sift4 = new JaroWinkler(1.0d);
     private final List<LiveCommandFieldRow> availableCommands;

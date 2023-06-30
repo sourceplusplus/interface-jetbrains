@@ -13,7 +13,7 @@ new FormModel {
 			"minimumSize": new java.awt.Dimension( 500, 40 )
 			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
 			"background": new java.awt.Color( 43, 43, 43, 255 )
-			add( new FormComponent( "javax.swing.JLabel" ) {
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "label1"
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "label1.setIcon(PluginIcons.Command.logo);"
@@ -33,7 +33,7 @@ new FormModel {
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 1 0"
 			} )
-			add( new FormComponent( "javax.swing.JLabel" ) {
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "label2"
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "label2.setIcon(PluginIcons.close);"

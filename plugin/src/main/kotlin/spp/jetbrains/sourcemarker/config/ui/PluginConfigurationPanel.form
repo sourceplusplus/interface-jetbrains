@@ -47,7 +47,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="57fd0" class="javax.swing.JLabel" binding="hostLabel">
+              <component id="57fd0" class="com.intellij.ui.components.JBLabel" binding="hostLabel">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -56,7 +56,7 @@
                   <text resource-bundle="messages/PluginBundle" key="service_host"/>
                 </properties>
               </component>
-              <component id="60f8b" class="javax.swing.JTextField" binding="serviceHostTextField">
+              <component id="60f8b" class="com.intellij.ui.components.JBTextField" binding="serviceHostTextField">
                 <constraints>
                   <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
@@ -64,7 +64,7 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="afa10" class="javax.swing.JLabel" binding="authorizationCodeLabel">
+              <component id="afa10" class="com.intellij.ui.components.JBLabel" binding="authorizationCodeLabel">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -72,7 +72,7 @@
                   <text resource-bundle="messages/PluginBundle" key="authorization_code"/>
                 </properties>
               </component>
-              <component id="a2d9" class="javax.swing.JTextField" binding="authorizationCodeTextField">
+              <component id="a2d9" class="com.intellij.ui.components.JBTextField" binding="authorizationCodeTextField">
                 <constraints>
                   <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
@@ -80,7 +80,7 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="9bd2e" class="javax.swing.JLabel" binding="certificatePinsLabel">
+              <component id="9bd2e" class="com.intellij.ui.components.JBLabel" binding="certificatePinsLabel">
                 <constraints>
                   <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -96,7 +96,7 @@
                 <border type="none"/>
                 <children/>
               </grid>
-              <component id="99c47" class="javax.swing.JLabel" binding="serviceLabel">
+              <component id="99c47" class="com.intellij.ui.components.JBLabel" binding="serviceLabel">
                 <constraints>
                   <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -104,7 +104,7 @@
                   <text value="Service"/>
                 </properties>
               </component>
-              <component id="12773" class="javax.swing.JComboBox" binding="serviceComboBox">
+              <component id="12773" class="com.intellij.openapi.ui.ComboBox" binding="serviceComboBox">
                 <constraints>
                   <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -114,7 +114,7 @@
                   </model>
                 </properties>
               </component>
-              <component id="9ac62" class="javax.swing.JLabel" binding="verifyHostLabel">
+              <component id="9ac62" class="com.intellij.ui.components.JBLabel" binding="verifyHostLabel">
                 <constraints>
                   <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -122,7 +122,7 @@
                   <text value="Verify Host"/>
                 </properties>
               </component>
-              <component id="9583d" class="javax.swing.JCheckBox" binding="verifyHostCheckBox">
+              <component id="9583d" class="com.intellij.ui.components.JBCheckBox" binding="verifyHostCheckBox">
                 <constraints>
                   <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -140,7 +140,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="e83fb" class="javax.swing.JLabel">
+              <component id="e83fb" class="com.intellij.ui.components.JBLabel">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>

@@ -21,7 +21,7 @@ new FormModel {
 				"preferredSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				"minimumSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				"maximumSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "configLabel"
 					auxiliary() {
 						"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.eye);"
@@ -29,7 +29,7 @@ new FormModel {
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "configDropdownLabel"
 					auxiliary() {
 						"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.angleDown);"
@@ -47,7 +47,7 @@ new FormModel {
 			} ) {
 				name: "mainPanel"
 				"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JTextField" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBTextField" ) {
 					name: "meterNameField"
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0,growx"
@@ -63,7 +63,7 @@ new FormModel {
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 1 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "label1"
 					"text": "Type"
 					"foreground": sfield java.awt.Color gray
@@ -71,7 +71,7 @@ new FormModel {
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 2 0"
 				} )
-				add( new FormComponent( "javax.swing.JComboBox" ) {
+				add( new FormComponent( "com.intellij.openapi.ui.ComboBox" ) {
 					name: "meterTypeComboBox"
 					"model": new javax.swing.DefaultComboBoxModel {
 						selectedItem: "Count"
@@ -82,7 +82,7 @@ new FormModel {
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 2 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "timeLabel"
 					"font": new java.awt.Font( "Roboto Light", 0, 14 )
 					"iconTextGap": 8
@@ -106,7 +106,7 @@ new FormModel {
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 1 0"
 			} )
-			add( new FormComponent( "javax.swing.JLabel" ) {
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "closeLabel"
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.close);"

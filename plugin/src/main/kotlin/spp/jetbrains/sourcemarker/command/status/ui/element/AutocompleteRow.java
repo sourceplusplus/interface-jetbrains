@@ -16,6 +16,9 @@
  */
 package spp.jetbrains.sourcemarker.command.status.ui.element;
 
+import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
 import spp.jetbrains.PluginUI;
@@ -25,7 +28,7 @@ import java.awt.*;
 
 import static spp.jetbrains.PluginUI.LABEL_FOREGROUND_COLOR;
 
-public class AutocompleteRow extends JPanel {
+public class AutocompleteRow extends JBPanel<AutocompleteRow> {
 
     public AutocompleteRow() {
         initComponents();
@@ -52,8 +55,8 @@ public class AutocompleteRow extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        commandLabel = new JLabel();
-        descriptionLabel = new JLabel();
+        commandLabel = new JBLabel();
+        descriptionLabel = new JBLabel();
 
         //======== this ========
         setMaximumSize(new Dimension(2147483647, 38));
@@ -73,13 +76,13 @@ public class AutocompleteRow extends JPanel {
 
         //---- descriptionLabel ----
         descriptionLabel.setText("");
-        descriptionLabel.setForeground(Color.gray);
+        descriptionLabel.setForeground(JBColor.GRAY);
         add(descriptionLabel, "cell 0 1");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    private JLabel commandLabel;
-    private JLabel descriptionLabel;
+    private JBLabel commandLabel;
+    private JBLabel descriptionLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

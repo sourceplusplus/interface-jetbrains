@@ -430,7 +430,6 @@ public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - Valentino Pecaoco
     private JPanel panel4;
     private JBLabel lblCondition;
     private JPanel conditionPanel;

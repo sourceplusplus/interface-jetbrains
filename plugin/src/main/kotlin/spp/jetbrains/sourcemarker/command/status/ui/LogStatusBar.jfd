@@ -21,7 +21,7 @@ new FormModel {
 				"preferredSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				"minimumSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
 				"maximumSize": sfield com.jformdesigner.model.FormObject NULL_VALUE
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "configLabel"
 					auxiliary() {
 						"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.alignLeft);"
@@ -29,7 +29,7 @@ new FormModel {
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "configDropdownLabel"
 					auxiliary() {
 						"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.angleDown);"
@@ -40,7 +40,7 @@ new FormModel {
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 0 0, grow"
 			} )
-			add( new FormComponent( "javax.swing.JLabel" ) {
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "timeLabel"
 				"font": new java.awt.Font( "Roboto Light", 0, 14 )
 				"iconTextGap": 8
@@ -72,7 +72,7 @@ new FormModel {
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 2 0"
 			} )
-			add( new FormComponent( "javax.swing.JLabel" ) {
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "closeLabel"
 				auxiliary() {
 					"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.close);"
