@@ -144,7 +144,7 @@ class LiveViewChartWindowImpl(
         step = if (historicalMinutes >= 720) MetricStep.HOUR else MetricStep.MINUTE
         reservoirSize = historicalMinutes
         histogram = Histogram(SlidingWindowReservoir(histogramSize))
-        //chart.clear() //todo: possible memory leak
+        chart.clear()
         xStepSize = (step.milliseconds).toLong() * reservoirSize
 
         getHistoricalData()
@@ -155,7 +155,7 @@ class LiveViewChartWindowImpl(
             label = metricType.simpleName
             lineColor = chartColor
             fillColor = chartColor.transparent(0.5)
-            smooth = true
+            smooth = false
         }
         hoverOverlay = ValueDotPainter(dataset, metricType)
 
@@ -283,7 +283,7 @@ class LiveViewChartWindowImpl(
     }
 
     private fun addMetric(rawMetrics: JsonObject) = project.invokeLater {
-        val metricValue = rawMetrics.getLong("value")
+        val metricValue = rawMetrics.getLong("value") ?: 0
         histogram.update(metricValue)
 
         if (metricType.requiresConversion) {

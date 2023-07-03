@@ -42,10 +42,12 @@ import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.gutter.GutterMark
 import spp.jetbrains.sourcemarker.config.SourceMarkerConfig
 import spp.jetbrains.sourcemarker.discover.TCPServiceDiscoveryBackend
+import spp.jetbrains.status.SourceStatusService
 import spp.protocol.instrument.LiveBreakpoint
 import spp.protocol.instrument.LiveInstrument
 import spp.protocol.instrument.LiveLog
 import spp.protocol.instrument.event.*
+import spp.protocol.service.LiveInstrumentService
 import spp.protocol.service.SourceServices.Subscribe.toLiveInstrumentSubscriberAddress
 import spp.protocol.service.SourceServices.Subscribe.toLiveInstrumentSubscription
 import spp.protocol.service.listen.LiveInstrumentListener
@@ -59,6 +61,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
 class LiveInstrumentEventListener(
+    private val instrumentService: LiveInstrumentService,
     private val project: Project,
     private val pluginConfig: SourceMarkerConfig
 ) : CoroutineVerticle(), LiveInstrumentListener, SourceMarkEventListener {
@@ -83,7 +86,7 @@ class LiveInstrumentEventListener(
         )
 
         //fetch currently active live instruments
-        UserData.liveInstrumentService(project)!!.getLiveInstruments().onSuccess {
+        instrumentService.getLiveInstruments().onSuccess {
             activeInstruments.addAllAbsent(it)
         }.onFailure {
             log.error("Failed to get active instruments", it)
@@ -138,6 +141,11 @@ class LiveInstrumentEventListener(
      * This re-emits instruments by their instrument ids to allow for individual processing.
      */
     override fun onInstrumentEvent(event: LiveInstrumentEvent) {
+        val currentService = SourceStatusService.getCurrentService(project) ?: return
+        if (event is LiveBreakpointHit && !currentService.isSameService(currentService.withName(event.service))) {
+            return //ignore breakpoints from other services
+        }
+
         vertx.eventBus().publish(
             toLiveInstrumentSubscription(event.instrument.id!!),
             event.toJson()
@@ -225,16 +233,27 @@ class LiveInstrumentEventListener(
         }
     }
 
-    override fun onInstrumentHitEvent(event: LiveInstrumentHit) = project.invokeLater {
-        InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
+    override fun onInstrumentHitEvent(event: LiveInstrumentHit) {
+        val currentService = SourceStatusService.getCurrentService(project) ?: return
+        if (event is LiveBreakpointHit && !currentService.isSameService(currentService.withName(event.service))) {
+            return //ignore breakpoints from other services
+        }
 
-        if (event is LiveBreakpointHit) {
-            SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!).forEach {
-                it.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onBreakpointHitEvent(event) }
-            }
-        } else if (event is LiveLogHit) {
-            SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!).forEach {
-                it.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach { it.onLogHitEvent(event) }
+        project.invokeLater {
+            InstrumentEventWindowService.getInstance(project).addInstrumentEvent(event)
+
+            if (event is LiveBreakpointHit) {
+                SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!).forEach {
+                    it.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach {
+                        it.onBreakpointHitEvent(event)
+                    }
+                }
+            } else if (event is LiveLogHit) {
+                SourceMarker.getInstance(project).findByInstrumentId(event.instrument.id!!).forEach {
+                    it.getUserData(SourceMarkerKeys.INSTRUMENT_EVENT_LISTENERS)?.forEach {
+                        it.onLogHitEvent(event)
+                    }
+                }
             }
         }
     }

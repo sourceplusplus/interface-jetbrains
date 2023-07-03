@@ -85,7 +85,9 @@ class SourceStatusServiceImpl(override val project: Project) : SourceStatusServi
 
         if (activeServices.isNotEmpty()) {
             if (initialService != null) {
-                currentService = activeServices.find { it.name == initialService }
+                if (activeServices.any { it.name == initialService }) {
+                    currentService = Service.fromName(initialService!!)
+                }
                 currentService?.let { log.info("Current service set to: ${it.name}") }
 
                 return if (currentService == null) {

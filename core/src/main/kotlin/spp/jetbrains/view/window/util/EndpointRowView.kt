@@ -80,15 +80,15 @@ class EndpointRowView(
                 val metricId = metric.getString("metricId")
                 when {
                     MetricType.Endpoint_CPM.equalsIgnoringRealtime(metricId) -> {
-                        endpoint.cpm = metric.getInteger("value")
+                        endpoint.cpm = metric.getInteger("value") ?: 0
                     }
 
                     MetricType.Endpoint_RespTime_AVG.equalsIgnoringRealtime(metricId) -> {
-                        endpoint.respTimeAvg = metric.getInteger("value")
+                        endpoint.respTimeAvg = metric.getInteger("value") ?: 0
                     }
 
                     MetricType.Endpoint_SLA.equalsIgnoringRealtime(metricId) -> {
-                        endpoint.sla = metric.getInteger("value") / 100.0
+                        endpoint.sla = (metric.getInteger("value") ?: 0) / 100.0
                     }
                 }
             }

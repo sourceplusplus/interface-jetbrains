@@ -39,7 +39,11 @@ data class InstrumentOverview(
 
     val source: String
         get() = events.first().instrument.location.let {
-            it.source.substringAfterLast(".") + ":" + it.line
+            var sourceStr = it.source.substringBefore("(").substringAfterLast(".")
+            if (it.line != -1) {
+                sourceStr += ":" + it.line
+            }
+            sourceStr
         }
 
     val status: String
