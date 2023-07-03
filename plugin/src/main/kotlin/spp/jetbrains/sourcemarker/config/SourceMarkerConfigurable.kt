@@ -17,6 +17,7 @@
 package spp.jetbrains.sourcemarker.config
 
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
@@ -55,8 +56,8 @@ class SourceMarkerConfigurable(val project: Project) : Configurable {
         }
     }
 
-    override fun createComponent(): JComponent {
-        if (form == null) {
+    override fun createComponent(): JComponent? {
+        if (form == null && !ApplicationManager.getApplication().isHeadlessEnvironment) {
             val config = SourceMarkerPlugin.getInstance(project).getConfig()
             val availServices = safeRunBlocking {
                 UserData.liveManagementService(project).getServices().await()
@@ -64,7 +65,7 @@ class SourceMarkerConfigurable(val project: Project) : Configurable {
             form = PluginConfigurationPanel(config, availServices)
             form!!.applySourceMarkerConfig(config)
         }
-        return form!!.contentPane as JComponent
+        return form?.contentPane
     }
 
     override fun disposeUIResources() {

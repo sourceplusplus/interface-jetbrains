@@ -365,12 +365,12 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
                 .apply { config.accessToken?.let { setToken(it) } }
                 .setAddress(SourceServices.LIVE_INSTRUMENT)
                 .build(LiveInstrumentService::class.java)
-            UserData.liveInstrumentService(project, liveInstrument)
+            val instrumentService = UserData.liveInstrumentService(project, liveInstrument)
 
             project.invokeLater {
                 InstrumentEventWindowService.getInstance(project).makeOverviewTab()
             }
-            val eventListener = LiveInstrumentEventListener(project, config)
+            val eventListener = LiveInstrumentEventListener(instrumentService, project, config)
             vertx.deployVerticle(eventListener).await()
             SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(eventListener)
         } else {

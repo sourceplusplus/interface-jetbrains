@@ -36,7 +36,6 @@ import spp.jetbrains.view.window.util.EndpointRowView
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_CPM
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_RespTime_AVG
 import spp.protocol.artifact.metrics.MetricType.Companion.Endpoint_SLA
-import spp.protocol.instrument.location.LiveSourceLocation
 import spp.protocol.platform.general.Service
 import spp.protocol.service.LiveViewService
 import spp.protocol.service.SourceServices.Subscribe.toLiveViewSubscriberAddress
@@ -94,7 +93,7 @@ class LiveEndpointsWindow(
 
         val vertx = UserData.vertx(project)
         vertx.safeLaunch {
-            UserData.liveManagementService(project).getEndpoints(service.id, 1000).await().forEach {
+            UserData.liveManagementService(project).getEndpoints(service, 1000).await().forEach {
                 val endpointRow = ServiceEndpointRow(it)
                 model.addRow(endpointRow)
                 addView(vertx, service, endpointRow)
@@ -109,11 +108,9 @@ class LiveEndpointsWindow(
             Endpoint_SLA.metricId
         )
         val liveView = LiveView(
-            null,
             mutableSetOf(endpoint.endpoint.name),
-            null,
-            LiveSourceLocation("", 0, service.id),
-            LiveViewConfig("LiveEndpointsWindow", listenMetrics, refreshInterval)
+            LiveViewConfig("LiveEndpointsWindow", listenMetrics, refreshInterval),
+            service = service
         )
         addView(EndpointRowView(project, viewService, liveView, endpoint, model) {
             consumerCreator(vertx, it, endpoint)
