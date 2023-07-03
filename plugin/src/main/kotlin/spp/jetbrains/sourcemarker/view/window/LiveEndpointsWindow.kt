@@ -93,7 +93,7 @@ class LiveEndpointsWindow(
 
         val vertx = UserData.vertx(project)
         vertx.safeLaunch {
-            UserData.liveManagementService(project).getEndpoints(service.id, 1000).await().forEach {
+            UserData.liveManagementService(project).getEndpoints(service, 1000).await().forEach {
                 val endpointRow = ServiceEndpointRow(it)
                 model.addRow(endpointRow)
                 addView(vertx, service, endpointRow)

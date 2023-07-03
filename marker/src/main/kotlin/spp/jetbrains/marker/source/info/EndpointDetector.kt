@@ -130,7 +130,7 @@ abstract class EndpointDetector<T : EndpointDetector.EndpointNameDetector>(val p
 
         log.debug("Determining endpoint id for endpoint name: ${endpoint.name}")
         val endpoints = UserData.liveManagementService(guideMark.project)
-            .searchEndpoints(service.id, endpoint.name, 1000)
+            .searchEndpoints(service, endpoint.name, 1000)
         val foundEndpoint = endpoints.await().find { it.name == endpoint.name }
         if (foundEndpoint != null) {
             log.debug("Found endpoint id: ${foundEndpoint.id}")
