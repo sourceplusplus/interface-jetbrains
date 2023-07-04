@@ -175,8 +175,13 @@ class JVMLoggerDetector(val project: Project) : LoggerDetector {
         loggerStatements: MutableList<DetectedLogger>,
         fileMarker: SourceFileMarker
     ) {
-        val loggerClass = element.getResolvedCall(element.analyze())
-            ?.resultingDescriptor?.fqNameSafe?.parent()?.asString()
+        val loggerClass = element.getResolvedCall(element.analyze())?.resultingDescriptor?.fqNameSafe?.let {
+            if (it.isRoot) {
+                it.asString()
+            } else {
+                it.parent().asString()
+            }
+        }
         if (loggerClass != null && LOGGER_CLASSES.contains(loggerClass)) {
             val methodName = element.getResolvedCall(element.analyze())
                 ?.resultingDescriptor?.name?.asString()
