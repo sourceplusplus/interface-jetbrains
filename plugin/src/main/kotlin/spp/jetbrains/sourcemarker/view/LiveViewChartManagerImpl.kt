@@ -32,7 +32,6 @@ import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.invokeLater
-import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ChangeTimeAction
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction

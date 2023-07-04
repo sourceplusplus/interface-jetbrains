@@ -33,7 +33,6 @@ import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.invokeLater
-import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
 import spp.jetbrains.sourcemarker.view.action.StopViewAction
