@@ -142,7 +142,7 @@ class LiveInstrumentEventListener(
      */
     override fun onInstrumentEvent(event: LiveInstrumentEvent) {
         val currentService = SourceStatusService.getCurrentService(project) ?: return
-        if (event is LiveBreakpointHit && !currentService.isSameService(currentService.withName(event.service))) {
+        if (event is LiveBreakpointHit && !currentService.isSameLocation(currentService.withName(event.service))) {
             return //ignore breakpoints from other services
         }
 
@@ -235,7 +235,7 @@ class LiveInstrumentEventListener(
 
     override fun onInstrumentHitEvent(event: LiveInstrumentHit) {
         val currentService = SourceStatusService.getCurrentService(project) ?: return
-        if (event is LiveBreakpointHit && !currentService.isSameService(currentService.withName(event.service))) {
+        if (event is LiveBreakpointHit && !currentService.isSameLocation(currentService.withName(event.service))) {
             return //ignore breakpoints from other services
         }
 
