@@ -40,7 +40,8 @@ import javax.swing.event.DocumentListener
 import javax.swing.text.*
 
 /**
- * todo: description.
+ * AutocompleteField is a custom text input field with autocomplete functionality.
+ * It extends JTextPane and implements various listener interfaces for handling user input and interactions.
  *
  * @since 0.3.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
@@ -255,88 +256,112 @@ class AutocompleteField<T : AutocompleteFieldRow>(
     override fun keyTyped(e: KeyEvent) = Unit
 
     override fun keyPressed(e: KeyEvent) {
-        if (e.keyCode == KeyEvent.VK_SPACE && hasControlHeld) {
-            results.clear()
-            results.addAll(allLookup
-                .filter { it.getText().lowercase().contains(text) }
-                .sortedBy { it.getText() })
-            model.updateView()
-            list.visibleRowCount = results.size.coerceAtMost(maxSuggestSize)
-            autocompleteDropdown?.setCurrentCommandsLabel(list.visibleRowCount)
-            if (results.size > 0) {
-                list.selectedIndex = 0
-            }
-
-            if (results.size > 0) {
-                showAutocompletePopup()
-            } else {
-                hideAutocompletePopup()
-            }
-        } else if (e.keyCode == KeyEvent.VK_CONTROL) {
-            hasControlHeld = true
+        if (e.keyCode == KeyEvent.VK_CONTROL) {
+            controlPressed()
         } else if (e.keyCode == KeyEvent.VK_UP) {
-            val index = list.selectedIndex
-            if (index > 0) {
-                list.selectedIndex = index - 1
-            }
-            scrollListToSelected()
+            upPressed()
         } else if (e.keyCode == KeyEvent.VK_DOWN) {
-            val index = list.selectedIndex
-            if (index != -1 && list.model.size > index + 1) {
-                list.selectedIndex = index + 1
-            }
-            scrollListToSelected()
+            downPressed()
         } else if (e.keyCode == KeyEvent.VK_TAB) {
-            if (text.isBlank() || list.selectedValue == null || (!replaceCommandOnTab && !autocompleteOnTab)) return
-            val autocompleteRow = list.selectedValue
-            if (replaceCommandOnTab) {
-                if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
-                    val triggerPrefix = autocompleteRow.liveCommand.getTriggerName().lowercase() + " "
-                    if (text.lowercase().startsWith(triggerPrefix)) {
-                        return //do nothing
-                    }
-                    setText(autocompleteRow.getText() + " ")
-                } else {
-                    setText(autocompleteRow.getText())
-                }
-            } else {
-                val userInput = text.substringAfterLast(" ")
-                setText(text.substring(0, text.length - userInput.length) + autocompleteRow.getText())
-            }
-            caretPosition = text.length
+            tabPressed()
         } else if (e.keyCode == KeyEvent.VK_ENTER) {
-            if (!autocompleteAndFinishOnEnter) {
-                ready = true
-                actualText = text
-                hideAutocompletePopup()
-                return
-            }
-            actualText = text
+            enterPressed()
+        } else if (e.keyCode == KeyEvent.VK_SPACE && hasControlHeld) {
+            controlSpacePressed()
+        }
+    }
 
-            val text = if (isPopupVisible()) list.selectedValue else null
-            if (text is LiveCommandFieldRow) {
-                val liveCommand = text.liveCommand
-                if (liveCommand.params.isNotEmpty()) {
-                    if (!getText().lowercase().startsWith(liveCommand.getTriggerName().lowercase() + " ")) {
-                        setText(text.getText() + " ")
+    private fun controlPressed() {
+        hasControlHeld = true
+    }
+
+    private fun upPressed() {
+        val index = list.selectedIndex
+        if (index > 0) {
+            list.selectedIndex = index - 1
+        }
+        scrollListToSelected()
+    }
+
+    private fun downPressed() {
+        val index = list.selectedIndex
+        if (index != -1 && list.model.size > index + 1) {
+            list.selectedIndex = index + 1
+        }
+        scrollListToSelected()
+    }
+
+    private fun tabPressed() {
+        if (text.isBlank() || list.selectedValue == null || (!replaceCommandOnTab && !autocompleteOnTab)) return
+        val autocompleteRow = list.selectedValue
+        if (replaceCommandOnTab) {
+            if (autocompleteRow is LiveCommandFieldRow && autocompleteRow.liveCommand.params.isNotEmpty()) {
+                val triggerPrefix = autocompleteRow.liveCommand.getTriggerName().lowercase() + " "
+                if (text.lowercase().startsWith(triggerPrefix)) {
+                    return //do nothing
+                }
+                setText(autocompleteRow.getText() + " ")
+            } else {
+                setText(autocompleteRow.getText())
+            }
+        } else {
+            val userInput = text.substringAfterLast(" ")
+            setText(text.substring(0, text.length - userInput.length) + autocompleteRow.getText())
+        }
+        caretPosition = text.length
+    }
+
+    private fun enterPressed() {
+        if (!autocompleteAndFinishOnEnter) {
+            ready = true
+            actualText = text
+            hideAutocompletePopup()
+            return
+        }
+        actualText = text
+
+        val text = if (isPopupVisible()) list.selectedValue else null
+        if (text is LiveCommandFieldRow) {
+            val liveCommand = text.liveCommand
+            if (liveCommand.params.isNotEmpty()) {
+                if (!getText().lowercase().startsWith(liveCommand.getTriggerName().lowercase() + " ")) {
+                    setText(text.getText() + " ")
+                    caretPosition = getText().length
+                } else {
+                    val params = substringAfterIgnoreCase(getText(), liveCommand.getTriggerName())
+                        .split(" ").filter { it.isNotEmpty() }
+                    if (params.size < liveCommand.params.size) {
+                        setText(getText().trimEnd() + " ")
                         caretPosition = getText().length
                     } else {
-                        val params = substringAfterIgnoreCase(getText(), liveCommand.getTriggerName())
-                            .split(" ").filter { it.isNotEmpty() }
-                        if (params.size < liveCommand.params.size) {
-                            setText(getText().trimEnd() + " ")
-                            caretPosition = getText().length
-                        } else {
-                            ready = true
-                        }
+                        ready = true
                     }
-                } else {
-                    ready = true
                 }
-            } else if (text != null) {
-                addAutoCompleteToInput(text)
+            } else {
                 ready = true
             }
+        } else if (text != null) {
+            addAutoCompleteToInput(text)
+            ready = true
+        }
+    }
+
+    private fun controlSpacePressed() {
+        results.clear()
+        results.addAll(allLookup
+            .filter { it.getText().lowercase().contains(text) }
+            .sortedBy { it.getText() })
+        model.updateView()
+        list.visibleRowCount = results.size.coerceAtMost(maxSuggestSize)
+        autocompleteDropdown?.setCurrentCommandsLabel(list.visibleRowCount)
+        if (results.size > 0) {
+            list.selectedIndex = 0
+        }
+
+        if (results.size > 0) {
+            showAutocompletePopup()
+        } else {
+            hideAutocompletePopup()
         }
     }
 
