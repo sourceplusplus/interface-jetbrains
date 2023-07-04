@@ -330,7 +330,7 @@ class LiveStatusBarManagerImpl(val project: Project, val vertx: Vertx) : LiveSta
                     LiveView(
                         mutableSetOf(liveMeter.id!!),
                         LiveViewConfig("LIVE_METER", listOf(liveMeter.id!!)),
-                        service = liveMeter.location.service
+                        location = liveMeter.location.service
                     )
                 ).onComplete {
                     if (it.succeeded()) {
