@@ -170,7 +170,7 @@ object JVMMarkerUtils {
 
     //todo: better
     private fun getQualifiedName(method: KtNamedFunction): String {
-        val methodName = method.nameIdentifier!!.text
+        val methodName = method.nameIdentifier?.text ?: method.name ?: "unknown"
         var methodParams = ""
         method.valueParameters.forEach {
             if (methodParams.isNotEmpty()) {
