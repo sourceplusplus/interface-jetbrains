@@ -110,7 +110,7 @@ object PluginUI {
 
     @JvmStatic
     fun getPanelBorder(): LineBorder {
-        return LineBorder(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())
+        return LineBorder(JBColor("SEPARATOR_FOREGROUND", JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()))
     }
 
     private val ROBOTO_LIGHT_PLAIN_13: JBFont

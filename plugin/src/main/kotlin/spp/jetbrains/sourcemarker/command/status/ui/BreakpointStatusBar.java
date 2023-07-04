@@ -349,7 +349,7 @@ public class BreakpointStatusBar extends JBPanel<BreakpointStatusBar> implements
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(PluginUI.getCommandHighlightForeground());
+        setBackground(getBackgroundColor());
         configPanel = new JPanel();
         configLabel = new JBLabel();
         configDropdownLabel = new JBLabel();

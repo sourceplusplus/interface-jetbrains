@@ -359,7 +359,7 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
 
         //======== mainPanel ========
         {
-            mainPanel.setBackground(getBackgroundColor());
+            // mainPanel.setBackground(getBackgroundColor());
             mainPanel.setLayout(new MigLayout(
                 "novisualpadding,hidemode 3",
                 // columns
@@ -369,7 +369,7 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
                 "0[grow]0"));
 
             //---- spanOperationNameField ----
-            spanOperationNameField.setBackground(getInputBackgroundColor());
+            // spanOperationNameField.setBackground(getInputBackgroundColor());
             spanOperationNameField.setBorder(new CompoundBorder(
                     new LineBorder(UIUtil.getBoundsColor(), 1, true),
                     JBUI.Borders.empty(2, 6, 0, 0)));

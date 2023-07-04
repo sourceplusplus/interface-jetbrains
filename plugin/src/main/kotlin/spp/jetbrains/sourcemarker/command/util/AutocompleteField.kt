@@ -94,7 +94,9 @@ class AutocompleteField<T : AutocompleteFieldRow>(
     }
 
     init {
-        foreground = PluginUI.getBackgroundFocusColor()
+        // foreground = PluginUI.getBackgroundFocusColor()
+        // foreground = UIUtil.getTextFieldForeground()
+        foreground = JBColor.WHITE.brighter()
 
         results = ArrayList()
         popup = JWindow(SwingUtilities.getWindowAncestor(this))
