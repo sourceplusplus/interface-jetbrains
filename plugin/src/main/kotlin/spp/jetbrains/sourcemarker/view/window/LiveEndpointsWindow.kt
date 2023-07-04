@@ -110,7 +110,7 @@ class LiveEndpointsWindow(
         val liveView = LiveView(
             mutableSetOf(endpoint.endpoint.name),
             LiveViewConfig("LiveEndpointsWindow", listenMetrics, refreshInterval),
-            service = service
+            location = service
         )
         addView(EndpointRowView(project, viewService, liveView, endpoint, model) {
             consumerCreator(vertx, it, endpoint)

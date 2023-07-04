@@ -101,7 +101,7 @@ class FunctionDurationContributor(private val remoteInsightsAvailable: Boolean) 
             LiveView(
                 mutableSetOf(guideMark.getUserData(EndpointDetector.DETECTED_ENDPOINTS)!!.firstNotNullOf { it.name }),
                 LiveViewConfig(FUNCTION_DURATION.name, listenMetrics, 1000),
-                service = service
+                location = service
             )
         ).onSuccess {
             val subscriptionId = it.subscriptionId!!
