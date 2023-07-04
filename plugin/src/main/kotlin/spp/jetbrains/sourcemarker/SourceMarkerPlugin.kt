@@ -525,7 +525,6 @@ class SourceMarkerPlugin : SourceMarkerStartupActivity() {
         val req = vertx.createHttpClient(HttpClientOptions().setSsl(ssl).setVerifyHost(false).setTrustAll(true))
             .request(
                 RequestOptions()
-                    .setHeaders(MultiMap.caseInsensitiveMultiMap().add("spp-platform-request", "true"))
                     .setHost("localhost")
                     .setPort(SourceMarkerConfig.DEFAULT_SERVICE_PORT)
                     .setURI(tokenUri)
