@@ -311,13 +311,14 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        configPanel = new JPanel();
+        configPanel = new JBPanel<>();
         configLabel = new JBLabel();
         configDropdownLabel = new JBLabel();
-        mainPanel = new JPanel();
+        mainPanel = new JBPanel<>();
         spanOperationNameField = new AutocompleteField(inlayMark.getProject(), placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false);
         timeLabel = new JBLabel();
         separator1 = new JSeparator();
+        closePanel = new JBPanel<>();
         closeLabel = new JBLabel();
 
         //======== this ========
@@ -369,7 +370,6 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
                 "0[grow]0"));
 
             //---- spanOperationNameField ----
-            spanOperationNameField.setBackground(getInputBackgroundColor());
             spanOperationNameField.setBorder(new CompoundBorder(
                     new LineBorder(UIUtil.getBoundsColor(), 1, true),
                     JBUI.Borders.empty(2, 6, 0, 0)));
@@ -379,6 +379,7 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
+            timeLabel.setForeground(JBColor.GRAY);
             timeLabel.setFont(SMALLEST_FONT);
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
@@ -394,9 +395,14 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
         separator1.setVisible(false);
         add(separator1, "cell 1 0");
 
-        //---- closeLabel ----
-        closeLabel.setIcon(PluginIcons.close);
-        add(closeLabel, "cell 2 0");
+        //---- closePanel ----
+        {
+            closePanel.setBackground(getInputBackgroundColor());
+            //---- closeLabel ----
+            closeLabel.setIcon(PluginIcons.close);
+            closePanel.add(closeLabel, "cell 0 0");
+        }
+        add(closePanel, "cell 2 0, grow");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -408,6 +414,7 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
     private AutocompleteField spanOperationNameField;
     private JBLabel timeLabel;
     private JSeparator separator1;
+    private JPanel closePanel;
     private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

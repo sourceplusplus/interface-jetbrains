@@ -153,24 +153,26 @@ public class LiveMeterStatusPanel extends JBPanel<LiveMeterStatusPanel> implemen
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        panel4 = new JPanel();
-        panel1 = new JPanel();
+        setBackground(getBackgroundColor());
+        panel4 = new JBPanel<>();
+        panel1 = new JBPanel<>();
         meterTypeValueLabel = new JBLabel();
         separator1 = new JSeparator();
         minuteLabel = new JBLabel();
         minuteValueLabel = new JBLabel();
         hourLabel = new JBLabel();
         hourValueLabel = new JBLabel();
-        panel3 = new JPanel();
+        panel3 = new JBPanel<>();
         dayLabel = new JBLabel();
         dayValueLabel = new JBLabel();
-        panel2 = new JPanel();
+        panel2 = new JBPanel<>();
         meterDescriptionTextField = new JBTextField();
         closeLabel = new JBLabel();
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
         setBorder(new EtchedBorder());
+        setBackground(null);
         setFont(SMALLER_FONT);
         setMinimumSize(new Dimension(385, 70));
         setPreferredSize(new Dimension(385, 70));

@@ -412,10 +412,10 @@ public class MeterStatusBar extends JBPanel<MeterStatusBar> implements LiveState
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        configPanel = new JPanel();
+        configPanel = new JBPanel<>();
         configLabel = new JBLabel();
         configDropdownLabel = new JBLabel();
-        mainPanel = new JPanel();
+        mainPanel = new JBPanel<>();
         meterIdField = new AutocompleteField(inlayMark.getProject(), meterName, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false);
         meterConditionField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
         label1 = new JBLabel();
@@ -474,7 +474,6 @@ public class MeterStatusBar extends JBPanel<MeterStatusBar> implements LiveState
                 "0[grow]0"));
 
             //---- meterNameField ----
-            meterIdField.setBackground(getInputBackgroundColor());
             meterIdField.setBorder(new CompoundBorder(
                   new LineBorder(UIUtil.getBoundsColor(), 1, true),
                     JBUI.Borders.empty(2, 6, 0, 0)));
@@ -483,7 +482,6 @@ public class MeterStatusBar extends JBPanel<MeterStatusBar> implements LiveState
             mainPanel.add(meterIdField, "cell 0 0,growx");
 
             //---- meterConditionField ----
-            meterConditionField.setBackground(getInputBackgroundColor());
             meterConditionField.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                     JBUI.Borders.empty(2, 6, 0, 0)));
@@ -493,7 +491,7 @@ public class MeterStatusBar extends JBPanel<MeterStatusBar> implements LiveState
 
             //---- label1 ----
             label1.setText(message("type"));
-            label1.setForeground(Color.gray);
+            label1.setForeground(JBColor.GRAY);
             label1.setFont(SMALLER_FONT);
             mainPanel.add(label1, "cell 2 0");
 
@@ -536,7 +534,7 @@ public class MeterStatusBar extends JBPanel<MeterStatusBar> implements LiveState
     private AutocompleteField meterIdField;
     private AutocompleteField meterConditionField;
     private JBLabel label1;
-    private JComboBox<String> meterTypeComboBox;
+    private ComboBox<String> meterTypeComboBox;
     private JBLabel timeLabel;
     private JSeparator separator1;
     private JBLabel closeLabel;

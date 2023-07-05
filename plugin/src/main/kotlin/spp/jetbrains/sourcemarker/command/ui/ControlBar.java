@@ -212,7 +212,7 @@ public class ControlBar extends JBPanel<ControlBar> implements VisibleAreaListen
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(PluginUI.getBackgroundFocusColor());
+        setBackground(getBackgroundColor());
         label1 = new JBLabel();
         String location = ArtifactNamingService.INSTANCE.getDisplayLocation(
                 inlayMark.getLanguage(),

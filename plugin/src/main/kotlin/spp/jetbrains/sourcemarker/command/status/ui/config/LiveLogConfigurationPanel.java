@@ -189,18 +189,18 @@ public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(null);
-        panel4 = new JPanel();
+        setBackground(getBackgroundColor());
+        panel4 = new JBPanel<>();
         lblCondition = new JBLabel();
-        conditionPanel = new JPanel();
+        conditionPanel = new JBPanel<>();
         separator2 = new JSeparator();
-        panel6 = new JPanel();
+        panel6 = new JBPanel<>();
         lblHint = new JBLabel();
         hitLimitSpinner = new JSpinner();
         separator1 = new JSeparator();
-        panel3 = new JPanel();
+        panel3 = new JBPanel<>();
         lblExpirationDate = new JBLabel();
-        panel1 = new JPanel();
+        panel1 = new JBPanel<>();
         expiration15MinButton = new JBRadioButton();
         expiration30MinButton = new JBRadioButton();
         expiration1HrButton = new JBRadioButton();
@@ -209,15 +209,16 @@ public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel
         expiration12HrsButton = new JBRadioButton();
         expiration24HrsButton = new JBRadioButton();
         separator3 = new JSeparator();
-        panel5 = new JPanel();
+        panel5 = new JBPanel<>();
         label6 = new JBLabel();
-        panel2 = new JPanel();
+        panel2 = new JBPanel<>();
         rateLimitCountSpinner = new JSpinner();
         label7 = new JBLabel();
         rateLimitStepCombobox = new ComboBox<>();
 
         //======== this ========
         setBorder(getPanelBorder());
+        setBackground(null);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -441,7 +442,7 @@ public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel
     private JSpinner hitLimitSpinner;
     private JSeparator separator1;
     private JPanel panel3;
-    private JLabel lblExpirationDate;
+    private JBLabel lblExpirationDate;
     private JPanel panel1;
     private JBRadioButton expiration15MinButton;
     private JBRadioButton expiration30MinButton;
@@ -456,6 +457,6 @@ public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel
     private JPanel panel2;
     private JSpinner rateLimitCountSpinner;
     private JBLabel label7;
-    private JComboBox<String> rateLimitStepCombobox;
+    private ComboBox<String> rateLimitStepCombobox;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
