@@ -149,13 +149,13 @@ public class LiveMeterConfigurationPanel extends JBPanel<LiveMeterConfigurationP
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        panel4 = new JPanel();
+        panel4 = new JBPanel<>();
         label1 = new JBLabel();
         conditionPanel = new JPanel();
         separator1 = new JSeparator();
-        panel3 = new JPanel();
+        panel3 = new JBPanel<>();
         label3 = new JBLabel();
-        panel1 = new JPanel();
+        panel1 = new JBPanel<>();
         expirationNeverButton = new JBRadioButton();
         expiration15MinButton = new JBRadioButton();
         expiration30MinButton = new JBRadioButton();
@@ -167,6 +167,7 @@ public class LiveMeterConfigurationPanel extends JBPanel<LiveMeterConfigurationP
 
         //======== this ========
         setBorder(getPanelBorder());
+        setBackground(null);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns

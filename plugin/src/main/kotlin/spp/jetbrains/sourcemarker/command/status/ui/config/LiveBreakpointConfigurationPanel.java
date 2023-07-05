@@ -466,6 +466,6 @@ public class LiveBreakpointConfigurationPanel extends JBPanel<LiveBreakpointConf
     private JPanel panel2;
     private JSpinner rateLimitCountSpinner;
     private JBLabel label7;
-    private JComboBox<String> rateLimitStepCombobox;
+    private ComboBox<String> rateLimitStepCombobox;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

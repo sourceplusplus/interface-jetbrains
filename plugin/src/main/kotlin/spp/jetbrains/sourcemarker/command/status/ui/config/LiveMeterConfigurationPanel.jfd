@@ -10,6 +10,7 @@ new FormModel {
 		} ) {
 			name: "this"
 			"border": new javax.swing.border.LineBorder( new java.awt.Color( 85, 85, 85, 255 ), 1, false )
+			"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
 				"$columnConstraints": "[100,grow,fill]"
 				"$rowConstraints": "[][]"

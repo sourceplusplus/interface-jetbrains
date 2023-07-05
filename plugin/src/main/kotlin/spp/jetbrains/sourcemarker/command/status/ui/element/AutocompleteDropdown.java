@@ -29,6 +29,9 @@ import spp.protocol.platform.general.Service;
 
 import javax.swing.*;
 
+import static spp.jetbrains.PluginUI.getBackgroundColor;
+import static spp.jetbrains.PluginUI.getInputBackgroundColor;
+
 public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
     public AutocompleteDropdown(Project project) {
@@ -68,8 +71,9 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
-        panel2 = new JPanel();
-        infoPanel = new JPanel();
+        setBackground(getBackgroundColor());
+        panel2 = new JBPanel<>();
+        infoPanel = new JBPanel<>();
         userText = new JBLabel();
         userLabel = new JBLabel();
         serviceText = new JBLabel();
@@ -89,12 +93,14 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
         //======== panel2 ========
         {
+            panel2.setBackground(getInputBackgroundColor());
             panel2.setLayout(new BoxLayout(panel2, BoxLayout.X_AXIS));
         }
         add(panel2, "cell 0 0");
 
         //======== infoPanel ========
         {
+            infoPanel.setBackground(getInputBackgroundColor());
             infoPanel.setLayout(new MigLayout(
                     "hidemode 3",
                     // columns
