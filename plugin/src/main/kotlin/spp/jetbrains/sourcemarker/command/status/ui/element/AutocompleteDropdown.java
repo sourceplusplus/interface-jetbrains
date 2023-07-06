@@ -29,15 +29,14 @@ import spp.protocol.platform.general.Service;
 
 import javax.swing.*;
 
-import static spp.jetbrains.PluginUI.getBackgroundColor;
-import static spp.jetbrains.PluginUI.getInputBackgroundColor;
+import static spp.jetbrains.PluginUI.*;
 
 public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
     public AutocompleteDropdown(Project project) {
         initComponents();
 
-        infoPanel.setBackground(PluginUI.getCommandHighlightForeground());
+        infoPanel.setBackground(getBackgroundFocusColor());
         availableCommandsText.setForeground(PluginUI.getPlaceholderForeground());
         totalCommandsLabel.setForeground(PluginUI.getCommandHighlightForeground());
 
@@ -82,7 +81,8 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
         totalCommandsLabel = new JBLabel();
 
         //======== this ========
-        setBorder(null);
+        setBorder(getPanelBorder());
+        setBackground(null);
         setLayout(new MigLayout(
                 "fill,insets 0,hidemode 3",
                 // columns
@@ -93,14 +93,14 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
         //======== panel2 ========
         {
-            panel2.setBackground(getInputBackgroundColor());
+            panel2.setBackground(null);
             panel2.setLayout(new BoxLayout(panel2, BoxLayout.X_AXIS));
         }
         add(panel2, "cell 0 0");
 
         //======== infoPanel ========
         {
-            infoPanel.setBackground(getInputBackgroundColor());
+            infoPanel.setBackground(null);
             infoPanel.setLayout(new MigLayout(
                     "hidemode 3",
                     // columns
