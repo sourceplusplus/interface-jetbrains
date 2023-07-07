@@ -25,7 +25,6 @@ import com.intellij.ui.charts.*
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.PluginUI
-import spp.jetbrains.PluginUI.getBackgroundColor
 import spp.jetbrains.invokeLater
 import spp.jetbrains.view.ResumableView
 import spp.jetbrains.view.overlay.ValueDotPainter

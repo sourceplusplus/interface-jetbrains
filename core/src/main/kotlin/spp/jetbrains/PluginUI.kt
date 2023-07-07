@@ -105,12 +105,14 @@ object PluginUI {
 
     @JvmStatic
     fun getInputBackgroundColor(): JBColor {
-        return JBColor("INPUT_BACKGROUND_COLOR", EditorColorsManager.getInstance().globalScheme.getColor(EditorColors.CARET_ROW_COLOR)!!)
+        return JBColor("INPUT_BACKGROUND_COLOR",
+            EditorColorsManager.getInstance().globalScheme.getColor(EditorColors.CARET_ROW_COLOR)!!)
     }
 
     @JvmStatic
     fun getPanelBorder(): LineBorder {
-        return LineBorder(JBColor("SEPARATOR_FOREGROUND", JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()))
+        return LineBorder(JBColor("SEPARATOR_FOREGROUND",
+            JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()))
     }
 
     private val ROBOTO_LIGHT_PLAIN_13: JBFont

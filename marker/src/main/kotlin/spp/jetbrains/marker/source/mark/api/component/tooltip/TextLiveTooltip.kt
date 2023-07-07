@@ -16,13 +16,13 @@
  */
 package spp.jetbrains.marker.source.mark.api.component.tooltip
 
+import com.intellij.ui.components.JBTextField
+import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import java.awt.BorderLayout
 import javax.swing.JPanel
-import com.intellij.ui.components.JBTextField
-import com.intellij.util.ui.JBUI
 import javax.swing.border.CompoundBorder
 import javax.swing.border.LineBorder
 

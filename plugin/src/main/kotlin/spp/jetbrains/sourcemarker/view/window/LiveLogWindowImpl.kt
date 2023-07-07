@@ -23,6 +23,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.components.JBPanel
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.view.window.LiveLogWindow
@@ -30,7 +31,6 @@ import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import java.awt.BorderLayout
 import java.util.concurrent.atomic.AtomicReference
-import com.intellij.ui.components.JBPanel
 
 /**
  * todo: description.
