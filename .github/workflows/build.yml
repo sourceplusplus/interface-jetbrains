@@ -100,7 +100,7 @@ jobs:
 
       # Check plugin
       - name: Check plugin
-        run: ./gradlew check -x :commander:kotlin-compiler-wrapper:test --refresh-dependencies
+        run: ./gradlew check --scan -x :commander:kotlin-compiler-wrapper:test --refresh-dependencies
 
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
