@@ -174,7 +174,7 @@ class LiveViewChartWindowImpl(
     }
 
     private fun makeGrid(dataset: XYLineDataset<Long, Double>): Grid<Long, Double>.() -> Unit = {
-        xLines = generator(xStepSize.toLong())
+        xLines = generator(xStepSize)
         xPainter {
             paintLine = if (value - (keepTimeSize / 25) == xOrigin) {
                 false
