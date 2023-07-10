@@ -36,7 +36,7 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
     public AutocompleteDropdown(Project project) {
         initComponents();
 
-        infoPanel.setBackground(getBackgroundFocusColor());
+        infoPanel.setBackground(PluginUI.getBackgroundColor());
         availableCommandsText.setForeground(PluginUI.getPlaceholderForeground());
         totalCommandsLabel.setForeground(PluginUI.getCommandHighlightForeground());
 
@@ -70,7 +70,6 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
-        setBackground(getBackgroundColor());
         panel2 = new JBPanel<>();
         infoPanel = new JBPanel<>();
         userText = new JBLabel();
@@ -81,8 +80,7 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
         totalCommandsLabel = new JBLabel();
 
         //======== this ========
-        setBorder(getPanelBorder());
-        setBackground(null);
+        setBorder(null);
         setLayout(new MigLayout(
                 "fill,insets 0,hidemode 3",
                 // columns
@@ -93,14 +91,12 @@ public class AutocompleteDropdown extends JBPanel<AutocompleteDropdown> {
 
         //======== panel2 ========
         {
-            panel2.setBackground(null);
             panel2.setLayout(new BoxLayout(panel2, BoxLayout.X_AXIS));
         }
         add(panel2, "cell 0 0");
 
         //======== infoPanel ========
         {
-            infoPanel.setBackground(null);
             infoPanel.setLayout(new MigLayout(
                     "hidemode 3",
                     // columns
