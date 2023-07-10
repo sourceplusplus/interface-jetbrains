@@ -23,7 +23,6 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
-import org.apache.lucene.util.SameThreadExecutorService
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.UserData
