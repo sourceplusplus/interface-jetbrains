@@ -19,6 +19,7 @@ package spp.jetbrains.marker.service
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.util.concurrency.AppExecutorUtil
 import spp.jetbrains.marker.service.define.AbstractSourceGuideProvider
 import spp.jetbrains.marker.source.SourceFileMarker
 import java.util.concurrent.ConcurrentHashMap
@@ -65,6 +66,6 @@ object SourceGuideProvider : AbstractSourceGuideProvider {
             } else {
                 log.warn("No guide provider found for language: ${fileMarker.psiFile.language}")
             }
-        }
+        }.submit(AppExecutorUtil.getAppExecutorService())
     }
 }

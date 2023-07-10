@@ -13,7 +13,7 @@ plugins {
     id("com.diffplug.spotless") apply false
     id("org.jetbrains.kotlin.jvm") apply false
     id("io.gitlab.arturbosch.detekt") apply false
-    id("org.jetbrains.intellij") version "1.14.2"
+    id("org.jetbrains.intellij") version "1.15.0"
     id("com.asarkar.gradle.build-time-tracker") version "4.3.0"
 }
 
@@ -208,5 +208,12 @@ fun projectDependency(name: String): ProjectDependency {
         DependencyHandlerScope.of(rootProject.dependencies).project(name)
     } else {
         DependencyHandlerScope.of(rootProject.dependencies).project(":interfaces:jetbrains$name")
+    }
+}
+
+if (hasProperty("buildScan")) {
+    extensions.findByName("buildScan")?.withGroovyBuilder {
+        setProperty("termsOfServiceUrl", "https://gradle.com/terms-of-service")
+        setProperty("termsOfServiceAgree", "yes")
     }
 }
