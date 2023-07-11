@@ -163,90 +163,92 @@ class LiveViewChartWindowImpl(
             yMin = 0.0
             yMax = 100.0
         }
-        grid {
-            xLines = generator(xStepSize.toLong())
-            xPainter {
-                paintLine = if (value - (keepTimeSize / 25) == xOrigin) {
-                    false
-                } else {
-                    val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
-                        .truncatedTo(ChronoUnit.MINUTES)
-                    val lineTime = Instant.ofEpochMilli(value).truncatedTo(ChronoUnit.MINUTES)
-                    val minutesBetween = ChronoUnit.MINUTES.between(latestTime, lineTime)
-
-                    if (latestTime == lineTime) {
-                        true
-                    } else if (reservoirSize == 30 || reservoirSize == 60) {
-                        (minutesBetween % 5).toInt() == 0
-                    } else if (reservoirSize == 120) {
-                        (minutesBetween % 10).toInt() == 0
-                    } else if (reservoirSize == 240) {
-                        (minutesBetween % 20).toInt() == 0
-                    } else if (reservoirSize == 480) {
-                        (minutesBetween % 40).toInt() == 0
-                    } else if (reservoirSize >= 720) {
-                        (minutesBetween % 60).toInt() == 0
-                    } else {
-                        true
-                    }
-                }
-                majorLine = false
-                label = if (hoverOverlay.mouseLocation != null) {
-                    ""
-                } else if (value - (keepTimeSize / 25) == xOrigin) {
-                    ""
-                } else {
-                    val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
-                        .truncatedTo(ChronoUnit.MINUTES)
-                    val lineTime = Instant.ofEpochMilli(value).truncatedTo(ChronoUnit.MINUTES)
-                    val minutesBetween = ChronoUnit.MINUTES.between(latestTime, lineTime)
-
-                    if (latestTime == lineTime) {
-                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
-                    } else if (reservoirSize == 30 || reservoirSize == 60) {
-                        if ((minutesBetween % 5).toInt() == 0) {
-                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
-                        } else ""
-                    } else if (reservoirSize == 120) {
-                        if ((minutesBetween % 10).toInt() == 0) {
-                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
-                        } else ""
-                    } else if (reservoirSize == 240) {
-                        if ((minutesBetween % 20).toInt() == 0) {
-                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
-                        } else ""
-                    } else if (reservoirSize == 480) {
-                        if ((minutesBetween % 40).toInt() == 0) {
-                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
-                        } else ""
-                    } else if (reservoirSize >= 720) {
-                        if ((minutesBetween % 60).toInt() == 0) {
-                            timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
-                        } else ""
-                    } else {
-                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
-                    }
-                }
-                verticalAlignment = SwingConstants.BOTTOM
-                horizontalAlignment = SwingConstants.CENTER
-            }
-            yLines = generator(10.0)
-            yPainter {
-                majorLine = value == 100.0
-                label = if (metricType.requiresConversion) {
-                    "${value.toInt()}%"
-                } else {
-                    format(value)
-                }
-                verticalAlignment = SwingConstants.CENTER
-                horizontalAlignment = SwingConstants.RIGHT
-            }
-        }
+        grid(makeGrid(dataset))
         overlays = listOf(
             titleOverlay("${metricType.simpleName} (${metricType.unitType}) - $entityName"),
             hoverOverlay
         )
         datasets = listOf(dataset)
+    }
+
+    private fun makeGrid(dataset: XYLineDataset<Long, Double>): Grid<Long, Double>.() -> Unit = {
+        xLines = generator(xStepSize)
+        xPainter {
+            paintLine = if (value - (keepTimeSize / 25) == xOrigin) {
+                false
+            } else {
+                val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
+                    .truncatedTo(ChronoUnit.MINUTES)
+                val lineTime = Instant.ofEpochMilli(value).truncatedTo(ChronoUnit.MINUTES)
+                val minutesBetween = ChronoUnit.MINUTES.between(latestTime, lineTime)
+
+                if (latestTime == lineTime) {
+                    true
+                } else if (reservoirSize == 30 || reservoirSize == 60) {
+                    (minutesBetween % 5).toInt() == 0
+                } else if (reservoirSize == 120) {
+                    (minutesBetween % 10).toInt() == 0
+                } else if (reservoirSize == 240) {
+                    (minutesBetween % 20).toInt() == 0
+                } else if (reservoirSize == 480) {
+                    (minutesBetween % 40).toInt() == 0
+                } else if (reservoirSize >= 720) {
+                    (minutesBetween % 60).toInt() == 0
+                } else {
+                    true
+                }
+            }
+            majorLine = false
+            label = if (hoverOverlay.mouseLocation != null) {
+                ""
+            } else if (value - (keepTimeSize / 25) == xOrigin) {
+                ""
+            } else {
+                val latestTime = Instant.ofEpochMilli(dataset.data.lastOrNull()?.x ?: System.currentTimeMillis())
+                    .truncatedTo(ChronoUnit.MINUTES)
+                val lineTime = Instant.ofEpochMilli(value).truncatedTo(ChronoUnit.MINUTES)
+                val minutesBetween = ChronoUnit.MINUTES.between(latestTime, lineTime)
+
+                if (latestTime == lineTime) {
+                    timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                } else if (reservoirSize == 30 || reservoirSize == 60) {
+                    if ((minutesBetween % 5).toInt() == 0) {
+                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                    } else ""
+                } else if (reservoirSize == 120) {
+                    if ((minutesBetween % 10).toInt() == 0) {
+                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                    } else ""
+                } else if (reservoirSize == 240) {
+                    if ((minutesBetween % 20).toInt() == 0) {
+                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                    } else ""
+                } else if (reservoirSize == 480) {
+                    if ((minutesBetween % 40).toInt() == 0) {
+                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                    } else ""
+                } else if (reservoirSize >= 720) {
+                    if ((minutesBetween % 60).toInt() == 0) {
+                        timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                    } else ""
+                } else {
+                    timeFormat.format(Date.from(Instant.ofEpochMilli(value)))
+                }
+            }
+            verticalAlignment = SwingConstants.BOTTOM
+            horizontalAlignment = SwingConstants.CENTER
+        }
+        yLines = generator(10.0)
+        yPainter {
+            majorLine = value == 100.0
+            label = if (metricType.requiresConversion) {
+                "${value.toInt()}%"
+            } else {
+                format(value)
+            }
+            verticalAlignment = SwingConstants.CENTER
+            horizontalAlignment = SwingConstants.RIGHT
+        }
     }
 
     private fun titleOverlay(label: String) = object : Overlay<ChartWrapper>() {
