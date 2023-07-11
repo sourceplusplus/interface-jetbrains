@@ -93,7 +93,7 @@ public class LiveControlBarRow extends JBPanel<LiveControlBarRow> {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        panel1 = new JPanel();
+        panel1 = new JBPanel<>();
         commandLabel = new JTextPane();
         descriptionLabel = new JTextPane();
         commandIcon = new JBLabel();

@@ -212,7 +212,7 @@ public class ControlBar extends JBPanel<ControlBar> implements VisibleAreaListen
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        setBackground(null);
+        setBackground(getBackgroundColor());
         label1 = new JBLabel();
         String location = ArtifactNamingService.INSTANCE.getDisplayLocation(
                 inlayMark.getLanguage(),
@@ -251,7 +251,7 @@ public class ControlBar extends JBPanel<ControlBar> implements VisibleAreaListen
         add(label1, "cell 0 0");
 
         //---- textField1 ----
-        setBackground(null);
+        textField1.setBackground(getInputBackgroundColor());
         textField1.setBorder(new CompoundBorder(
                 new LineBorder(UIUtil.getBoundsColor(), 1, true),
                 JBUI.Borders.empty(2, 6, 0, 0)));
