@@ -673,7 +673,6 @@ public class LogStatusBar extends JBPanel<LogStatusBar> implements LiveStateBar,
         separator1 = new JSeparator();
         liveLogTextField = new AutocompleteField(inlayMark.getProject(), placeHolderText, scopeVars, lookup, inlayMark.getArtifactQualifiedName(), false);
         liveLogTextField.setVarPattern(varPattern);
-        closePanel = new JBPanel<>();
         closeLabel = new JBLabel();
 
         //======== this ========
@@ -739,14 +738,9 @@ public class LogStatusBar extends JBPanel<LogStatusBar> implements LiveStateBar,
         liveLogTextField.setMinimumSize(new Dimension(0, 27));
         add(liveLogTextField, "cell 2 0");
 
-        //---- closePanel ----
-        {
-            closePanel.setBackground(getInputBackgroundColor());
-            //---- closeLabel ----
-            closeLabel.setIcon(PluginIcons.close);
-            closePanel.add(closeLabel, "cell 0 0");
-        }
-        add(closePanel, "cell 3 0, grow");
+        //---- closeLabel ----
+        closeLabel.setIcon(PluginIcons.close);
+        add(closeLabel, "cell 3 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -757,7 +751,6 @@ public class LogStatusBar extends JBPanel<LogStatusBar> implements LiveStateBar,
     private JBLabel timeLabel;
     private JSeparator separator1;
     private AutocompleteField<AutocompleteFieldRow> liveLogTextField;
-    private JPanel closePanel;
     private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

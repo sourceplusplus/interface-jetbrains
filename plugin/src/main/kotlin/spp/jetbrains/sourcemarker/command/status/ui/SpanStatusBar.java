@@ -318,7 +318,6 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
         spanOperationNameField = new AutocompleteField(inlayMark.getProject(), placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false);
         timeLabel = new JBLabel();
         separator1 = new JSeparator();
-        closePanel = new JBPanel<>();
         closeLabel = new JBLabel();
 
         //======== this ========
@@ -395,14 +394,9 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
         separator1.setVisible(false);
         add(separator1, "cell 1 0");
 
-        //---- closePanel ----
-        {
-            closePanel.setBackground(getInputBackgroundColor());
-            //---- closeLabel ----
-            closeLabel.setIcon(PluginIcons.close);
-            closePanel.add(closeLabel, "cell 0 0");
-        }
-        add(closePanel, "cell 2 0, grow");
+        //---- closeLabel ----
+        closeLabel.setIcon(PluginIcons.close);
+        add(closeLabel, "cell 2 0");
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -414,7 +408,6 @@ public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBa
     private AutocompleteField spanOperationNameField;
     private JBLabel timeLabel;
     private JSeparator separator1;
-    private JPanel closePanel;
     private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
