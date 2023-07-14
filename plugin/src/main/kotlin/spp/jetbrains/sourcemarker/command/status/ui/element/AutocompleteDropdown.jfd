@@ -23,37 +23,37 @@ new FormModel {
 				"$rowConstraints": "[]"
 			} ) {
 				name: "infoPanel"
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "userText"
 					"text": "User:"
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 0 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "userLabel"
 					"text": "n/a"
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 1 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "serviceText"
 					"text": "Service:"
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 3 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "serviceLabel"
 					"text": "n/a"
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 4 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "availableCommandsText"
 					"text": "Available Commands:"
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 					"value": "cell 6 0"
 				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
+				add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 					name: "totalCommandsLabel"
 					"text": "n/a"
 				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {

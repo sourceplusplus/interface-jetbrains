@@ -16,7 +16,13 @@
  */
 package spp.jetbrains.sourcemarker.command.status.ui.config;
 
+import javax.swing.border.*;
+
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.components.*;
+import com.intellij.ui.components.JBPanel;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.PluginUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +31,7 @@ import java.util.Objects;
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 
-public class LiveBreakpointConfigurationPanel extends JPanel {
+public class LiveBreakpointConfigurationPanel extends JBPanel<LiveBreakpointConfigurationPanel> {
 
     private int maxObjectDepth = 5;
     private int maxObjectSize = 1024 * 1024;
@@ -153,40 +159,41 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        panel7 = new JPanel();
-        panel8 = new JPanel();
-        label4 = new JLabel();
-        label5 = new JLabel();
-        label8 = new JLabel();
+        setBackground(getBackgroundColor());
+        panel7 = new JBPanel<>();
+        panel8 = new JBPanel<>();
+        label4 = new JBLabel();
+        label5 = new JBLabel();
+        label8 = new JBLabel();
         maxObjectDepthSpinner = new JSpinner();
         separator1 = new JSeparator();
         maxObjectSizeSpinner = new JSpinner();
-        maxObjectSizeComboBox = new JComboBox<>();
+        maxObjectSizeComboBox = new ComboBox<>();
         separator2 = new JSeparator();
         maxCollectionLengthSpinner = new JSpinner();
         separator4 = new JSeparator();
-        panel4 = new JPanel();
-        panel3 = new JPanel();
-        label3 = new JLabel();
-        panel1 = new JPanel();
-        expiration15MinButton = new JRadioButton();
-        expiration30MinButton = new JRadioButton();
-        expiration1HrButton = new JRadioButton();
-        expiration3HrsButton = new JRadioButton();
-        expiration6HrsButton = new JRadioButton();
-        expiration12HrsButton = new JRadioButton();
-        expiration24HrsButton = new JRadioButton();
+        panel4 = new JBPanel<>();
+        panel3 = new JBPanel<>();
+        label3 = new JBLabel();
+        panel1 = new JBPanel<>();
+        expiration15MinButton = new JBRadioButton();
+        expiration30MinButton = new JBRadioButton();
+        expiration1HrButton = new JBRadioButton();
+        expiration3HrsButton = new JBRadioButton();
+        expiration6HrsButton = new JBRadioButton();
+        expiration12HrsButton = new JBRadioButton();
+        expiration24HrsButton = new JBRadioButton();
         separator3 = new JSeparator();
-        panel5 = new JPanel();
-        label6 = new JLabel();
-        panel2 = new JPanel();
+        panel5 = new JBPanel<>();
+        label6 = new JBLabel();
+        panel2 = new JBPanel<>();
         rateLimitCountSpinner = new JSpinner();
-        label7 = new JLabel();
-        rateLimitStepCombobox = new JComboBox<>();
+        label7 = new JBLabel();
+        rateLimitStepCombobox = new ComboBox<>();
 
         //======== this ========
-        setBackground(getBackgroundColor());
         setBorder(getPanelBorder());
+        setBackground(null);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -250,9 +257,9 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
                 //---- maxObjectSizeComboBox ----
                 maxObjectSizeComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
-                    message("bytes"),
-                    message("kilobytes"),
-                    message("megabytes")
+                        message("bytes"),
+                        message("kilobytes"),
+                        message("megabytes")
                 }));
                 panel8.add(maxObjectSizeComboBox, "cell 3 1");
                 panel8.add(separator2, "cell 4 1");
@@ -405,9 +412,9 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
 
                     //---- rateLimitStepCombobox ----
                     rateLimitStepCombobox.setModel(new DefaultComboBoxModel<>(new String[] {
-                        message("second"),
-                        message("minute"),
-                        message("hour")
+                            message("second"),
+                            message("minute"),
+                            message("hour")
                     }));
                     panel2.add(rateLimitStepCombobox, "cell 2 0");
                 }
@@ -418,7 +425,7 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
         add(panel4, "cell 0 2");
 
         //---- expirationButtonGroup ----
-        ButtonGroup expirationButtonGroup = new ButtonGroup();
+        var expirationButtonGroup = new ButtonGroup();
         expirationButtonGroup.add(expiration15MinButton);
         expirationButtonGroup.add(expiration30MinButton);
         expirationButtonGroup.add(expiration1HrButton);
@@ -432,33 +439,33 @@ public class LiveBreakpointConfigurationPanel extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel panel7;
     private JPanel panel8;
-    private JLabel label4;
-    private JLabel label5;
-    private JLabel label8;
+    private JBLabel label4;
+    private JBLabel label5;
+    private JBLabel label8;
     private JSpinner maxObjectDepthSpinner;
     private JSeparator separator1;
     private JSpinner maxObjectSizeSpinner;
-    private JComboBox<String> maxObjectSizeComboBox;
+    private ComboBox<String> maxObjectSizeComboBox;
     private JSeparator separator2;
     private JSpinner maxCollectionLengthSpinner;
     private JSeparator separator4;
     private JPanel panel4;
     private JPanel panel3;
-    private JLabel label3;
+    private JBLabel label3;
     private JPanel panel1;
-    private JRadioButton expiration15MinButton;
-    private JRadioButton expiration30MinButton;
-    private JRadioButton expiration1HrButton;
-    private JRadioButton expiration3HrsButton;
-    private JRadioButton expiration6HrsButton;
-    private JRadioButton expiration12HrsButton;
-    private JRadioButton expiration24HrsButton;
+    private JBRadioButton expiration15MinButton;
+    private JBRadioButton expiration30MinButton;
+    private JBRadioButton expiration1HrButton;
+    private JBRadioButton expiration3HrsButton;
+    private JBRadioButton expiration6HrsButton;
+    private JBRadioButton expiration12HrsButton;
+    private JBRadioButton expiration24HrsButton;
     private JSeparator separator3;
     private JPanel panel5;
-    private JLabel label6;
+    private JBLabel label6;
     private JPanel panel2;
     private JSpinner rateLimitCountSpinner;
-    private JLabel label7;
-    private JComboBox<String> rateLimitStepCombobox;
+    private JBLabel label7;
+    private ComboBox<String> rateLimitStepCombobox;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

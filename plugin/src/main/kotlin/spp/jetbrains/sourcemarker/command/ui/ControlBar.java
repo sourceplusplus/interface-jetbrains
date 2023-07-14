@@ -19,10 +19,13 @@ package spp.jetbrains.sourcemarker.command.ui;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.VisibleAreaEvent;
 import com.intellij.openapi.editor.event.VisibleAreaListener;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import net.miginfocom.swing.MigLayout;
+import spp.jetbrains.PluginUI;
 import spp.jetbrains.marker.command.LiveCommand;
 import spp.jetbrains.marker.command.LiveLocationContext;
 import spp.jetbrains.icons.PluginIcons;
@@ -46,7 +49,7 @@ import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class ControlBar extends JPanel implements VisibleAreaListener {
+public class ControlBar extends JBPanel<ControlBar> implements VisibleAreaListener {
 
     private static final JaroWinkler sift4 = new JaroWinkler(1.0d);
     private final List<LiveCommandFieldRow> availableCommands;
@@ -210,7 +213,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        label1 = new JLabel();
+        label1 = new JBLabel();
         String location = ArtifactNamingService.INSTANCE.getDisplayLocation(
                 inlayMark.getLanguage(),
                 inlayMark.getArtifactQualifiedName()
@@ -228,7 +231,7 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
         textField1.setAutocompleteAndFinishOnEnter(true);
         textField1.setMaxSuggestSize(3);
         textField1.setCellRenderer(new ControlBarCellRenderer(inlayMark, textField1));
-        label2 = new JLabel();
+        label2 = new JBLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
@@ -263,8 +266,8 @@ public class ControlBar extends JPanel implements VisibleAreaListener {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    private JLabel label1;
+    private JBLabel label1;
     private AutocompleteField<LiveCommandFieldRow> textField1;
-    private JLabel label2;
+    private JBLabel label2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

@@ -27,12 +27,16 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.EditorTextField;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.JBIntSpinner;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.PluginUI;
 import spp.jetbrains.UserData;
 import spp.jetbrains.icons.PluginIcons;
 import spp.jetbrains.marker.SourceMarkerKeys;
@@ -67,7 +71,7 @@ import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveInstrumentListener, VisibleAreaListener {
+public class BreakpointStatusBar extends JBPanel<BreakpointStatusBar> implements LiveStateBar, LiveInstrumentListener, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -346,15 +350,15 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        configPanel = new JPanel();
-        configLabel = new JLabel();
-        configDropdownLabel = new JLabel();
-        mainPanel = new JPanel();
-        label1 = new JLabel();
+        configPanel = new JBPanel<>();
+        configLabel = new JBLabel();
+        configDropdownLabel = new JBLabel();
+        mainPanel = new JBPanel<>();
+        label1 = new JBLabel();
         hitLimitSpinner = new JBIntSpinner(1, 1, 10_000);
-        timeLabel = new JLabel();
+        timeLabel = new JBLabel();
         separator1 = new JSeparator();
-        closeLabel = new JLabel();
+        closeLabel = new JBLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
@@ -413,7 +417,7 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
 
             //---- label1 ----
             label1.setText(message("hit_limit"));
-            label1.setForeground(Color.gray);
+            label1.setForeground(JBColor.GRAY);
             label1.setFont(SMALLER_FONT);
             mainPanel.add(label1, "cell 1 0");
 
@@ -447,14 +451,14 @@ public class BreakpointStatusBar extends JPanel implements LiveStateBar, LiveIns
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel configPanel;
-    private JLabel configLabel;
-    private JLabel configDropdownLabel;
+    private JBLabel configLabel;
+    private JBLabel configDropdownLabel;
     private JPanel mainPanel;
     private XDebuggerExpressionComboBox breakpointConditionField;
-    private JLabel label1;
+    private JBLabel label1;
     private JBIntSpinner hitLimitSpinner;
-    private JLabel timeLabel;
+    private JBLabel timeLabel;
     private JSeparator separator1;
-    private JLabel closeLabel;
+    private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

@@ -24,6 +24,8 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.miginfocom.swing.MigLayout;
@@ -58,7 +60,7 @@ import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaListener {
+public class SpanStatusBar extends JBPanel<SpanStatusBar> implements LiveStateBar, VisibleAreaListener {
 
     private final InlayMark inlayMark;
     private final LiveSourceLocation sourceLocation;
@@ -309,14 +311,14 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        configPanel = new JPanel();
-        configLabel = new JLabel();
-        configDropdownLabel = new JLabel();
-        mainPanel = new JPanel();
+        configPanel = new JBPanel<>();
+        configLabel = new JBLabel();
+        configDropdownLabel = new JBLabel();
+        mainPanel = new JBPanel<>();
         spanOperationNameField = new AutocompleteField(inlayMark.getProject(), placeHolderText, Collections.emptyList(), null, inlayMark.getArtifactQualifiedName(), false);
-        timeLabel = new JLabel();
+        timeLabel = new JBLabel();
         separator1 = new JSeparator();
-        closeLabel = new JLabel();
+        closeLabel = new JBLabel();
 
         //======== this ========
         setPreferredSize(new Dimension(500, 40));
@@ -367,7 +369,6 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
                 "0[grow]0"));
 
             //---- spanOperationNameField ----
-            spanOperationNameField.setBackground(getInputBackgroundColor());
             spanOperationNameField.setBorder(new CompoundBorder(
                     new LineBorder(UIUtil.getBoundsColor(), 1, true),
                     JBUI.Borders.empty(2, 6, 0, 0)));
@@ -377,6 +378,7 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
 
             //---- timeLabel ----
             timeLabel.setIcon(PluginIcons.clock);
+            timeLabel.setForeground(JBColor.GRAY);
             timeLabel.setFont(SMALLEST_FONT);
             timeLabel.setIconTextGap(8);
             timeLabel.setVisible(false);
@@ -400,12 +402,12 @@ public class SpanStatusBar extends JPanel implements LiveStateBar, VisibleAreaLi
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel configPanel;
-    private JLabel configLabel;
-    private JLabel configDropdownLabel;
+    private JBLabel configLabel;
+    private JBLabel configDropdownLabel;
     private JPanel mainPanel;
     private AutocompleteField spanOperationNameField;
-    private JLabel timeLabel;
+    private JBLabel timeLabel;
     private JSeparator separator1;
-    private JLabel closeLabel;
+    private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

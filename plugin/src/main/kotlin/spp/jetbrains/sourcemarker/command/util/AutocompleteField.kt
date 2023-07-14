@@ -18,11 +18,14 @@ package spp.jetbrains.sourcemarker.command.util
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ScalableIcon
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import spp.jetbrains.PluginUI
 import spp.jetbrains.PluginUI.SMALLEST_FONT
+import spp.jetbrains.PluginUI.commandHighlightForeground
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.instrument.log.VariableParser
 import spp.jetbrains.marker.SourceMarkerUtils.substringAfterIgnoreCase
@@ -58,11 +61,11 @@ class AutocompleteField<T : AutocompleteFieldRow>(
     var autocompleteOnTab: Boolean = true
     var replaceCommandOnTab: Boolean = false
     var autocompleteAndFinishOnEnter: Boolean = false
-    var varColor: Color = PluginUI.commandHighlightForeground
+    var varColor: JBColor = PluginUI.commandHighlightForeground
     private val results: MutableList<AutocompleteFieldRow>
     private val autocompleteDropdown: AutocompleteDropdown?
     private val popup: JWindow
-    private val list: JList<AutocompleteFieldRow>
+    private val list: JBList<AutocompleteFieldRow>
     private val model: ListModel<AutocompleteFieldRow>
     var editMode: Boolean = true
     private var showSaveButton: Boolean = false
@@ -70,7 +73,7 @@ class AutocompleteField<T : AutocompleteFieldRow>(
     private var hasControlHeld = false
     var saveOnSuggestionDoubleClick: Boolean = false
     var addOnSuggestionDoubleClick: Boolean = true
-    var placeHolderTextColor: Color? = null
+    var placeHolderTextColor: JBColor? = null
     var canShowSaveButton = true
     var varPattern: Pattern = Pattern.compile("")
     var includeCurlyPattern: Boolean = false
@@ -113,10 +116,10 @@ class AutocompleteField<T : AutocompleteFieldRow>(
         })
 
         list.font = SMALLEST_FONT
-        list.setCellRenderer(AutocompleteCellRenderer(artifactQualifiedName))
+        list.cellRenderer = AutocompleteCellRenderer(artifactQualifiedName)
 
-        list.setBorder(JBUI.Borders.empty())
-        val scroll: JScrollPane = object : JScrollPane(list) {
+        list.border = JBUI.Borders.empty()
+        val scroll: JBScrollPane = object : JBScrollPane(list) {
             override fun getPreferredSize(): Dimension {
                 val ps = super.getPreferredSize()
                 ps.width = this@AutocompleteField.width
@@ -427,12 +430,12 @@ class AutocompleteField<T : AutocompleteFieldRow>(
                 if (index < params.size) continue
 
                 val paramTextX = insets.left + pG.getFontMetrics().stringWidth(text.trimEnd() + " ") + textOffset
-                g.color = Color(
+                g.color = JBColor("PLACEHOLDER_FOREGROUND", Color(
                     UIUtil.getTextFieldForeground().red,
                     UIUtil.getTextFieldForeground().green,
                     UIUtil.getTextFieldForeground().blue,
                     75
-                )
+                ))
                 g.drawString("[$param]", paramTextX, pG.getFontMetrics().maxAscent + insets.top)
                 textOffset += pG.getFontMetrics().stringWidth("[$param] ")
             }

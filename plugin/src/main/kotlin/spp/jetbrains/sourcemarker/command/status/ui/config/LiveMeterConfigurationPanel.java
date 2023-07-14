@@ -16,10 +16,13 @@
  */
 package spp.jetbrains.sourcemarker.command.status.ui.config;
 
+import javax.swing.border.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.ui.EditorTextField;
+import com.intellij.ui.components.*;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
@@ -37,7 +40,7 @@ import java.util.Objects;
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 
-public class LiveMeterConfigurationPanel extends JPanel {
+public class LiveMeterConfigurationPanel extends JBPanel<LiveMeterConfigurationPanel> {
 
     private final XDebuggerExpressionComboBox comboBox;
     private XExpression condition;
@@ -146,24 +149,25 @@ public class LiveMeterConfigurationPanel extends JPanel {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        panel4 = new JPanel();
-        label1 = new JLabel();
+        panel4 = new JBPanel<>();
+        label1 = new JBLabel();
         conditionPanel = new JPanel();
         separator1 = new JSeparator();
-        panel3 = new JPanel();
-        label3 = new JLabel();
-        panel1 = new JPanel();
-        expirationNeverButton = new JRadioButton();
-        expiration15MinButton = new JRadioButton();
-        expiration30MinButton = new JRadioButton();
-        expiration1HrButton = new JRadioButton();
-        expiration3HrsButton = new JRadioButton();
-        expiration6HrsButton = new JRadioButton();
-        expiration12HrsButton = new JRadioButton();
-        expiration24HrsButton = new JRadioButton();
+        panel3 = new JBPanel<>();
+        label3 = new JBLabel();
+        panel1 = new JBPanel<>();
+        expirationNeverButton = new JBRadioButton();
+        expiration15MinButton = new JBRadioButton();
+        expiration30MinButton = new JBRadioButton();
+        expiration1HrButton = new JBRadioButton();
+        expiration3HrsButton = new JBRadioButton();
+        expiration6HrsButton = new JBRadioButton();
+        expiration12HrsButton = new JBRadioButton();
+        expiration24HrsButton = new JBRadioButton();
 
         //======== this ========
         setBorder(getPanelBorder());
+        setBackground(null);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -290,7 +294,7 @@ public class LiveMeterConfigurationPanel extends JPanel {
         add(panel3, "cell 0 2");
 
         //---- expirationButtonGroup ----
-        ButtonGroup expirationButtonGroup = new ButtonGroup();
+        var expirationButtonGroup = new ButtonGroup();
         expirationButtonGroup.add(expirationNeverButton);
         expirationButtonGroup.add(expiration15MinButton);
         expirationButtonGroup.add(expiration30MinButton);
@@ -304,19 +308,19 @@ public class LiveMeterConfigurationPanel extends JPanel {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel panel4;
-    private JLabel label1;
+    private JBLabel label1;
     private JPanel conditionPanel;
     private JSeparator separator1;
     private JPanel panel3;
-    private JLabel label3;
+    private JBLabel label3;
     private JPanel panel1;
-    private JRadioButton expirationNeverButton;
-    private JRadioButton expiration15MinButton;
-    private JRadioButton expiration30MinButton;
-    private JRadioButton expiration1HrButton;
-    private JRadioButton expiration3HrsButton;
-    private JRadioButton expiration6HrsButton;
-    private JRadioButton expiration12HrsButton;
-    private JRadioButton expiration24HrsButton;
+    private JBRadioButton expirationNeverButton;
+    private JBRadioButton expiration15MinButton;
+    private JBRadioButton expiration30MinButton;
+    private JBRadioButton expiration1HrButton;
+    private JBRadioButton expiration3HrsButton;
+    private JBRadioButton expiration6HrsButton;
+    private JBRadioButton expiration12HrsButton;
+    private JBRadioButton expiration24HrsButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

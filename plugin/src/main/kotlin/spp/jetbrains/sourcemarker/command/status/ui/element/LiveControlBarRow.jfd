@@ -48,7 +48,7 @@ new FormModel {
 				"gridY": 1
 				"insets": new java.awt.Insets( 3, 10, 0, 0 )
 			} )
-			add( new FormComponent( "javax.swing.JLabel" ) {
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 				name: "commandIcon"
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 				"gridX": 3

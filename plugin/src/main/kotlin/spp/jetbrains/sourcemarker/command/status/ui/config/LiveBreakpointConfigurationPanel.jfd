@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "8.0.0.0.194" Java: "17.0.4.1" encoding: "UTF-8"
+JFDML JFormDesigner: "8.1.0.0.283" Java: "17.0.7" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -25,19 +25,19 @@ new FormModel {
 				} ) {
 					name: "panel8"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "label4"
 						"text": "Max Object Depth"
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 0 0"
 					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "label5"
 						"text": "Max Object Size"
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 2 0 2 1"
 					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "label8"
 						"text": "Max Collection Length"
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
@@ -68,7 +68,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 						"value": "cell 2 1"
 					} )
-					add( new FormComponent( "javax.swing.JComboBox" ) {
+					add( new FormComponent( "com.intellij.openapi.ui.ComboBox" ) {
 						name: "maxObjectSizeComboBox"
 						"model": new javax.swing.DefaultComboBoxModel {
 							selectedItem: "bytes"
@@ -119,7 +119,7 @@ new FormModel {
 				} ) {
 					name: "panel3"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "label3"
 						"text": "Expiration Date"
 						"font": &Font0 new java.awt.Font( "Roboto Light", 0, 15 )
@@ -133,7 +133,7 @@ new FormModel {
 					} ) {
 						name: "panel1"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-						add( new FormComponent( "javax.swing.JRadioButton" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 							name: "expiration15MinButton"
 							"text": "15 Minutes"
 							"selected": true
@@ -143,7 +143,7 @@ new FormModel {
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 0 0"
 						} )
-						add( new FormComponent( "javax.swing.JRadioButton" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 							name: "expiration30MinButton"
 							"text": "30 Minutes"
 							"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -152,7 +152,7 @@ new FormModel {
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 1 0"
 						} )
-						add( new FormComponent( "javax.swing.JRadioButton" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 							name: "expiration1HrButton"
 							"text": "1 Hour"
 							"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -161,7 +161,7 @@ new FormModel {
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 2 0"
 						} )
-						add( new FormComponent( "javax.swing.JRadioButton" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 							name: "expiration3HrsButton"
 							"text": "3 Hours"
 							"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -170,7 +170,7 @@ new FormModel {
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 3 0"
 						} )
-						add( new FormComponent( "javax.swing.JRadioButton" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 							name: "expiration6HrsButton"
 							"text": "6 Hours"
 							"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -179,7 +179,7 @@ new FormModel {
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 4 0"
 						} )
-						add( new FormComponent( "javax.swing.JRadioButton" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 							name: "expiration12HrsButton"
 							"text": "12 Hours"
 							"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -188,7 +188,7 @@ new FormModel {
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 5 0"
 						} )
-						add( new FormComponent( "javax.swing.JRadioButton" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBRadioButton" ) {
 							name: "expiration24HrsButton"
 							"text": "24 Hours"
 							"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
@@ -217,7 +217,7 @@ new FormModel {
 				} ) {
 					name: "panel5"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "label6"
 						"text": "Hit Throttle"
 						"font": #Font0
@@ -241,13 +241,13 @@ new FormModel {
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 0 0"
 						} )
-						add( new FormComponent( "javax.swing.JLabel" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 							name: "label7"
 							"text": "per"
 						}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 							"value": "cell 1 0"
 						} )
-						add( new FormComponent( "javax.swing.JComboBox" ) {
+						add( new FormComponent( "com.intellij.openapi.ui.ComboBox" ) {
 							name: "rateLimitStepCombobox"
 							"model": new javax.swing.DefaultComboBoxModel {
 								selectedItem: "second"

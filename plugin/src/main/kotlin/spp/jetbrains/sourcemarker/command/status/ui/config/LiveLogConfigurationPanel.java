@@ -16,15 +16,20 @@
  */
 package spp.jetbrains.sourcemarker.command.status.ui.config;
 
+import javax.swing.border.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.EditorTextField;
+import com.intellij.ui.components.*;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionComboBox;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
+import spp.jetbrains.PluginUI;
 import spp.jetbrains.marker.service.ArtifactConditionService;
 import spp.jetbrains.marker.source.mark.inlay.InlayMark;
 import spp.jetbrains.sourcemarker.command.util.AutocompleteField;
@@ -38,7 +43,7 @@ import java.util.Objects;
 import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 
-public class LiveLogConfigurationPanel extends JPanel {
+public class LiveLogConfigurationPanel extends JBPanel<LiveLogConfigurationPanel> {
 
     private final XDebuggerExpressionComboBox comboBox;
     private XExpression condition;
@@ -185,34 +190,35 @@ public class LiveLogConfigurationPanel extends JPanel {
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         setBackground(getBackgroundColor());
-        panel4 = new JPanel();
-        lblCondition = new JLabel();
-        conditionPanel = new JPanel();
+        panel4 = new JBPanel<>();
+        lblCondition = new JBLabel();
+        conditionPanel = new JBPanel<>();
         separator2 = new JSeparator();
-        panel6 = new JPanel();
-        lblHint = new JLabel();
+        panel6 = new JBPanel<>();
+        lblHint = new JBLabel();
         hitLimitSpinner = new JSpinner();
         separator1 = new JSeparator();
-        panel3 = new JPanel();
-        lblExpirationDate = new JLabel();
-        panel1 = new JPanel();
-        expiration15MinButton = new JRadioButton();
-        expiration30MinButton = new JRadioButton();
-        expiration1HrButton = new JRadioButton();
-        expiration3HrsButton = new JRadioButton();
-        expiration6HrsButton = new JRadioButton();
-        expiration12HrsButton = new JRadioButton();
-        expiration24HrsButton = new JRadioButton();
+        panel3 = new JBPanel<>();
+        lblExpirationDate = new JBLabel();
+        panel1 = new JBPanel<>();
+        expiration15MinButton = new JBRadioButton();
+        expiration30MinButton = new JBRadioButton();
+        expiration1HrButton = new JBRadioButton();
+        expiration3HrsButton = new JBRadioButton();
+        expiration6HrsButton = new JBRadioButton();
+        expiration12HrsButton = new JBRadioButton();
+        expiration24HrsButton = new JBRadioButton();
         separator3 = new JSeparator();
-        panel5 = new JPanel();
-        label6 = new JLabel();
-        panel2 = new JPanel();
+        panel5 = new JBPanel<>();
+        label6 = new JBLabel();
+        panel2 = new JBPanel<>();
         rateLimitCountSpinner = new JSpinner();
-        label7 = new JLabel();
-        rateLimitStepCombobox = new JComboBox<>();
+        label7 = new JBLabel();
+        rateLimitStepCombobox = new ComboBox<>();
 
         //======== this ========
         setBorder(getPanelBorder());
+        setBackground(null);
         setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -404,9 +410,9 @@ public class LiveLogConfigurationPanel extends JPanel {
 
                 //---- rateLimitStepCombobox ----
                 rateLimitStepCombobox.setModel(new DefaultComboBoxModel<>(new String[] {
-                    message("second"),
-                    message("minute"),
-                    message("hour")
+                        message("second"),
+                        message("minute"),
+                        message("hour")
                 }));
                 panel2.add(rateLimitStepCombobox, "cell 2 0");
             }
@@ -415,7 +421,7 @@ public class LiveLogConfigurationPanel extends JPanel {
         add(panel5, "cell 2 2");
 
         //---- expirationButtonGroup ----
-        ButtonGroup expirationButtonGroup = new ButtonGroup();
+        var expirationButtonGroup = new ButtonGroup();
         expirationButtonGroup.add(expiration15MinButton);
         expirationButtonGroup.add(expiration30MinButton);
         expirationButtonGroup.add(expiration1HrButton);
@@ -428,29 +434,29 @@ public class LiveLogConfigurationPanel extends JPanel {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel panel4;
-    private JLabel lblCondition;
+    private JBLabel lblCondition;
     private JPanel conditionPanel;
     private JSeparator separator2;
     private JPanel panel6;
-    private JLabel lblHint;
+    private JBLabel lblHint;
     private JSpinner hitLimitSpinner;
     private JSeparator separator1;
     private JPanel panel3;
-    private JLabel lblExpirationDate;
+    private JBLabel lblExpirationDate;
     private JPanel panel1;
-    private JRadioButton expiration15MinButton;
-    private JRadioButton expiration30MinButton;
-    private JRadioButton expiration1HrButton;
-    private JRadioButton expiration3HrsButton;
-    private JRadioButton expiration6HrsButton;
-    private JRadioButton expiration12HrsButton;
-    private JRadioButton expiration24HrsButton;
+    private JBRadioButton expiration15MinButton;
+    private JBRadioButton expiration30MinButton;
+    private JBRadioButton expiration1HrButton;
+    private JBRadioButton expiration3HrsButton;
+    private JBRadioButton expiration6HrsButton;
+    private JBRadioButton expiration12HrsButton;
+    private JBRadioButton expiration24HrsButton;
     private JSeparator separator3;
     private JPanel panel5;
-    private JLabel label6;
+    private JBLabel label6;
     private JPanel panel2;
     private JSpinner rateLimitCountSpinner;
-    private JLabel label7;
-    private JComboBox<String> rateLimitStepCombobox;
+    private JBLabel label7;
+    private ComboBox<String> rateLimitStepCombobox;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

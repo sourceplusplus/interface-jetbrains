@@ -23,6 +23,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.components.JBPanel
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import spp.jetbrains.view.window.LiveLogWindow
@@ -30,7 +31,6 @@ import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import java.awt.BorderLayout
 import java.util.concurrent.atomic.AtomicReference
-import javax.swing.JPanel
 
 /**
  * todo: description.
@@ -48,7 +48,7 @@ class LiveLogWindowImpl(
     private val log = logger<LiveLogWindowImpl>()
     private var consumer: MessageConsumer<JsonObject>? = null
     override val console: ConsoleView
-    val component = JPanel(BorderLayout()).apply { isFocusable = true }
+    val component = JBPanel<Nothing>(BorderLayout()).apply { isFocusable = true }
     override var isRunning = false
         private set
     override val refreshInterval: Int

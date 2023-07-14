@@ -19,13 +19,13 @@ package spp.jetbrains.sourcemarker.config.ui;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.IdeBorderFactory;
 import com.intellij.ui.ListUtil;
 import com.intellij.ui.ScrollingUtil;
 import com.intellij.ui.ToolbarDecorator;
-import com.intellij.ui.components.JBList;
-import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.*;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.Nullable;
 import spp.jetbrains.sourcemarker.config.PortalConfig;
@@ -44,16 +44,16 @@ public class PluginConfigurationPanel {
     private JPanel myGlobalSettingsPanel;
     private JCheckBox autoResolveEndpointNamesCheckBox;
     private JPanel myServiceSettingsPanel;
-    private JTextField serviceHostTextField;
-    private JTextField authorizationCodeTextField;
+    private JBTextField serviceHostTextField;
+    private JBTextField authorizationCodeTextField;
     private JPanel testPanel;
-    private JComboBox serviceComboBox;
-    private JCheckBox verifyHostCheckBox;
-    private JLabel verifyHostLabel;
-    private JLabel hostLabel;
-    private JLabel authorizationCodeLabel;
-    private JLabel certificatePinsLabel;
-    private JLabel serviceLabel;
+    private ComboBox<String> serviceComboBox;
+    private JBCheckBox verifyHostCheckBox;
+    private JBLabel verifyHostLabel;
+    private JBLabel hostLabel;
+    private JBLabel authorizationCodeLabel;
+    private JBLabel certificatePinsLabel;
+    private JBLabel serviceLabel;
     private JPanel myPortalSettingsPanel;
     private JSpinner portalZoomSpinner;
     private SourceMarkerConfig config;
@@ -162,7 +162,7 @@ public class PluginConfigurationPanel {
         setUIEnabled(!config.getOverride());
     }
 
-    class CertificatePinPanel extends JPanel {
+    class CertificatePinPanel extends JBPanel<CertificatePinPanel> {
         final DefaultListModel<String> listModel = new DefaultListModel<>();
         final JBList<String> myList = new JBList<>(listModel);
 
@@ -193,7 +193,7 @@ public class PluginConfigurationPanel {
             }
 
             add(decorator.createPanel(), BorderLayout.EAST);
-            JScrollPane scrollPane = new JBScrollPane(myList);
+            JBScrollPane scrollPane = new JBScrollPane(myList);
             add(scrollPane, BorderLayout.CENTER);
 
             scrollPane.setMinimumSize(new Dimension(100, 0));

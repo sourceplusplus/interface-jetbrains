@@ -16,6 +16,10 @@
  */
 package spp.jetbrains.sourcemarker.command.status.ui;
 
+import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.UIUtil;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
@@ -42,7 +46,7 @@ import static spp.jetbrains.PluginBundle.message;
 import static spp.jetbrains.PluginUI.*;
 import static spp.jetbrains.utils.ViewUtils.addRecursiveMouseListener;
 
-public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListener, LiveViewEventListener {
+public class LiveMeterStatusPanel extends JBPanel<LiveMeterStatusPanel> implements LiveInstrumentListener, LiveViewEventListener {
 
     private final LiveMeter liveMeter;
     private final GutterMark gutterMark;
@@ -149,24 +153,26 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        panel4 = new JPanel();
-        panel1 = new JPanel();
-        meterTypeValueLabel = new JLabel();
+        setBackground(getBackgroundColor());
+        panel4 = new JBPanel<>();
+        panel1 = new JBPanel<>();
+        meterTypeValueLabel = new JBLabel();
         separator1 = new JSeparator();
-        minuteLabel = new JLabel();
-        minuteValueLabel = new JLabel();
-        hourLabel = new JLabel();
-        hourValueLabel = new JLabel();
-        panel3 = new JPanel();
-        dayLabel = new JLabel();
-        dayValueLabel = new JLabel();
-        panel2 = new JPanel();
-        meterDescriptionTextField = new JTextField();
-        closeLabel = new JLabel();
+        minuteLabel = new JBLabel();
+        minuteValueLabel = new JBLabel();
+        hourLabel = new JBLabel();
+        hourValueLabel = new JBLabel();
+        panel3 = new JBPanel<>();
+        dayLabel = new JBLabel();
+        dayValueLabel = new JBLabel();
+        panel2 = new JBPanel<>();
+        meterDescriptionTextField = new JBTextField();
+        closeLabel = new JBLabel();
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
         setBorder(new EtchedBorder());
+        setBackground(null);
         setFont(SMALLER_FONT);
         setMinimumSize(new Dimension(385, 70));
         setPreferredSize(new Dimension(385, 70));
@@ -215,7 +221,7 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
                 separator1.setMinimumSize(new Dimension(2, 1));
                 separator1.setMaximumSize(new Dimension(2, 1));
                 separator1.setPreferredSize(new Dimension(2, 1));
-                separator1.setForeground(Color.darkGray);
+                separator1.setForeground(JBColor.DARK_GRAY);
                 panel1.add(separator1, new CellConstraints(3, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.DEFAULT, new Insets(5, 0, 5, 0)));
 
                 //---- minuteLabel ----
@@ -291,17 +297,17 @@ public class LiveMeterStatusPanel extends JPanel implements LiveInstrumentListen
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel panel4;
     private JPanel panel1;
-    private JLabel meterTypeValueLabel;
+    private JBLabel meterTypeValueLabel;
     private JSeparator separator1;
-    private JLabel minuteLabel;
-    private JLabel minuteValueLabel;
-    private JLabel hourLabel;
-    private JLabel hourValueLabel;
+    private JBLabel minuteLabel;
+    private JBLabel minuteValueLabel;
+    private JBLabel hourLabel;
+    private JBLabel hourValueLabel;
     private JPanel panel3;
-    private JLabel dayLabel;
-    private JLabel dayValueLabel;
+    private JBLabel dayLabel;
+    private JBLabel dayValueLabel;
     private JPanel panel2;
-    private JTextField meterDescriptionTextField;
-    private JLabel closeLabel;
+    private JBTextField meterDescriptionTextField;
+    private JBLabel closeLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

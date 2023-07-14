@@ -25,7 +25,7 @@ new FormModel {
 					name: "panel1"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
 					"font": #Font0
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "meterTypeValueLabel"
 						"text": "Count"
 						"font": new java.awt.Font( "Roboto Light", 0, 16 )
@@ -43,28 +43,28 @@ new FormModel {
 						"gridX": 3
 						"insets": new java.awt.Insets( 5, 0, 5, 0 )
 					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "minuteLabel"
 						"text": "Minute"
 						"font": &Font1 new java.awt.Font( "Roboto Light", 0, 15 )
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 5
 					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "minuteValueLabel"
 						"text": "n/a"
 						"font": new java.awt.Font( "Roboto Light", 0, 16 )
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 7
 					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "hourLabel"
 						"text": "Hour"
 						"font": #Font1
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 						"gridX": 9
 					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "hourValueLabel"
 						"text": "n/a"
 						"font": new java.awt.Font( "Roboto Light", 0, 16 )
@@ -77,12 +77,12 @@ new FormModel {
 					} ) {
 						name: "panel3"
 						"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-						add( new FormComponent( "javax.swing.JLabel" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 							name: "dayLabel"
 							"text": "Day"
 							"font": #Font1
 						}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
-						add( new FormComponent( "javax.swing.JLabel" ) {
+						add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 							name: "dayValueLabel"
 							"text": "n/a"
 							"font": new java.awt.Font( "Roboto Light", 0, 16 )
@@ -101,11 +101,11 @@ new FormModel {
 				} ) {
 					name: "panel2"
 					"background": sfield com.jformdesigner.model.FormObject NULL_VALUE
-					add( new FormComponent( "javax.swing.JTextField" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBTextField" ) {
 						name: "meterDescriptionTextField"
 						"editable": false
 					}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) )
-					add( new FormComponent( "javax.swing.JLabel" ) {
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
 						name: "closeLabel"
 						auxiliary() {
 							"JavaCodeGenerator.preInitCode": "${field}.setIcon(PluginIcons.close);"

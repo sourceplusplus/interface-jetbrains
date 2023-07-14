@@ -20,7 +20,6 @@ import com.codahale.metrics.Histogram
 import com.codahale.metrics.SlidingWindowReservoir
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import com.intellij.ui.DarculaColors
 import com.intellij.ui.JBColor
 import com.intellij.ui.charts.*
 import io.vertx.core.eventbus.MessageConsumer
@@ -34,7 +33,6 @@ import spp.protocol.artifact.metrics.MetricType
 import spp.protocol.service.LiveViewService
 import spp.protocol.view.LiveView
 import spp.protocol.view.LiveViewEvent
-import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.Insets
 import java.text.DecimalFormat
@@ -151,7 +149,7 @@ class LiveViewChartWindowImpl(
         getHistoricalData()
     }
 
-    private fun singleLineChart(metricType: MetricType, chartColor: Color) = lineChart<Long, Double> {
+    private fun singleLineChart(metricType: MetricType, chartColor: JBColor) = lineChart<Long, Double> {
         val dataset = XYLineDataset<Long, Double>().apply {
             label = metricType.simpleName
             lineColor = chartColor
@@ -329,13 +327,13 @@ class LiveViewChartWindowImpl(
     }
 
     companion object {
-        fun defaultChartColor(metricType: MetricType): Color {
+        fun defaultChartColor(metricType: MetricType): JBColor {
             return if (metricType.metricId.contains("sla")) {
                 PluginUI.purple
             } else if (metricType.metricId.contains("cpm")) {
                 PluginUI.yellow
             } else {
-                DarculaColors.BLUE
+                PluginUI.getPlaceholderForeground()
             }
         }
 
