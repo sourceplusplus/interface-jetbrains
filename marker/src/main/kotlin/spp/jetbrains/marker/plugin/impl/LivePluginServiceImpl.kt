@@ -23,6 +23,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import spp.jetbrains.PluginBundle
+import spp.jetbrains.doOnWorker
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.command.LiveCommand
 import spp.jetbrains.marker.command.LiveLocationContext
@@ -30,7 +31,6 @@ import spp.jetbrains.marker.indicator.LiveIndicator
 import spp.jetbrains.marker.plugin.LivePluginService
 import spp.jetbrains.marker.source.mark.api.event.SourceMarkEventListener
 import spp.jetbrains.marker.source.mark.guide.GuideMark
-import spp.jetbrains.safeLaunch
 
 class LivePluginServiceImpl(val project: Project) : LivePluginService {
 
@@ -60,7 +60,7 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         val eventListener = SourceMarkEventListener {
             val trigger = indicator.listenForAllEvents || indicator.listenForEvents.contains(it.eventCode)
             if (trigger && it.sourceMark is GuideMark) {
-                indicator.vertx.safeLaunch {
+                indicator.vertx.doOnWorker {
                     indicator.trigger(it.sourceMark, it)
                 }
             }
@@ -68,7 +68,7 @@ class LivePluginServiceImpl(val project: Project) : LivePluginService {
         SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(eventListener)
         indicators[indicator] = eventListener
 
-        indicator.vertx.safeLaunch {
+        indicator.vertx.doOnWorker {
             try {
                 indicator.onRegister()
             } catch (e: Throwable) {
