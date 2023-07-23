@@ -60,7 +60,7 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
     }
 
     fun isSupported(element: PsiElement): Boolean {
-        return getServiceIfPresent(element.language.baseLanguage?.id ?: element.language.id) != null
+        return getServiceIfPresent(element.language) != null
     }
 
     fun isFunction(element: PsiElement): Boolean {

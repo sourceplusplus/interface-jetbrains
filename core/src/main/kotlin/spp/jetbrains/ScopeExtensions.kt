@@ -27,10 +27,10 @@ import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.*
 
+private val log = logger<ScopeExtensions>()
+
 @Suppress("ThrowingExceptionsWithoutMessageOrCause")
 object ScopeExtensions {
-
-    private val log = logger<ScopeExtensions>()
 
     fun <T> safeRunBlocking(action: suspend () -> T): T {
         val source = Exception()
@@ -153,4 +153,16 @@ fun Project.invokeLater(action: () -> Unit) {
     ApplicationManager.getApplication().invokeLater({
         action()
     }, disposed)
+}
+
+fun Vertx.doOnWorker(action: suspend () -> Unit) {
+    executeBlocking<Void> {
+        GlobalScope.launch(dispatcher()) {
+            try {
+                action()
+            } catch (ex: Throwable) {
+                log.warn("Exception in worker", ex)
+            }
+        }
+    }
 }

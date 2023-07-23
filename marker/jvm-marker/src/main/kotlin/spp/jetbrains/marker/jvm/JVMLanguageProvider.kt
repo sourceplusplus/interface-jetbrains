@@ -24,6 +24,7 @@ import spp.jetbrains.UserData
 import spp.jetbrains.artifact.service.ArtifactModelService
 import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.artifact.service.ArtifactTypeService
+import spp.jetbrains.doOnWorker
 import spp.jetbrains.marker.LanguageProvider
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.SourceMarkerKeys.ENDPOINT_DETECTOR
@@ -41,7 +42,6 @@ import spp.jetbrains.marker.source.mark.api.event.SynchronousSourceMarkEventList
 import spp.jetbrains.marker.source.mark.guide.GuideMark
 import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 import spp.jetbrains.marker.source.mark.inlay.InlayMark
-import spp.jetbrains.safeLaunch
 
 /**
  * Provides JVM support for the Marker API.
@@ -81,7 +81,7 @@ class JVMLanguageProvider : LanguageProvider {
                 //setup endpoint detector and attempt detection
                 if (mark is GuideMark) {
                     mark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
-                    UserData.vertx(project).safeLaunch { endpointDetector.getOrFindEndpointIds(mark) }
+                    UserData.vertx(project).doOnWorker { endpointDetector.getOrFindEndpointIds(mark) }
                 }
 
                 //setup logger detector
@@ -92,7 +92,7 @@ class JVMLanguageProvider : LanguageProvider {
 
                 //attempt to detect logger(s) on method guide marks
                 if (mark is MethodGuideMark) {
-                    UserData.vertx(project).safeLaunch { loggerDetector.determineLoggerStatements(mark) }
+                    UserData.vertx(project).doOnWorker { loggerDetector.determineLoggerStatements(mark) }
                 }
             }
         })

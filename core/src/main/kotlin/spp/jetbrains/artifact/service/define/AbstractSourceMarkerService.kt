@@ -36,8 +36,12 @@ abstract class AbstractSourceMarkerService<T : ISourceMarkerService> {
         return getServiceIfPresent(language) ?: throw IllegalArgumentException("No service for language $language")
     }
 
-    fun getServiceIfPresent(language: String): T? {
+    private fun getServiceIfPresent(language: String): T? {
         return services[language]
+    }
+
+    fun getServiceIfPresent(language: Language): T? {
+        return getServiceIfPresent(language.baseLanguage?.id ?: language.id)
     }
 
     fun getService(language: Language): T {

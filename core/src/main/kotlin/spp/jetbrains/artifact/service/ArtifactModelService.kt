@@ -31,7 +31,7 @@ object ArtifactModelService : AbstractSourceMarkerService<IArtifactModelService>
 
     override fun toArtifact(element: PsiElement): ArtifactElement? {
         if (element is ArtifactElement) return element
-        return getService(element.language).toArtifact(element)
+        return getServiceIfPresent(element.language)?.toArtifact(element)
     }
 }
 
