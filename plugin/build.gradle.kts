@@ -78,7 +78,7 @@ dependencies {
     implementation("plus.sourceplus:protocol:$protocolVersion")
 
     implementation("org.apache.commons:commons-text:1.10.0")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion") {
