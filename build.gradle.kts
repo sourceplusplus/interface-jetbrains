@@ -96,13 +96,6 @@ allprojects {
 }
 
 subprojects {
-
-    configurations { create("externalLibs") }
-
-    dependencies {
-        implementation(files("$rootDir/../../protocol/build/libs/protocol-0.7.10-SNAPSHOT.jar"))
-    }
-
     repositories {
         mavenCentral()
         maven(url = "https://pkg.sourceplus.plus/sourceplusplus/protocol")

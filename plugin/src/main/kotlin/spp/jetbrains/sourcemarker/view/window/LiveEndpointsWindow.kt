@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.sourcemarker.view.window
 
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
@@ -62,8 +61,6 @@ class LiveEndpointsWindow(
     service: Service
 ) : ResumableViewCollection() {
 
-    private val log = logger<LiveEndpointsWindow>()
-
     private val model = ListTableModel<ServiceEndpointRow>(
         arrayOf(
             ServiceEndpointColumnInfo("Name"),
@@ -96,14 +93,11 @@ class LiveEndpointsWindow(
 
         val vertx = UserData.vertx(project)
         vertx.safeLaunch {
-            log.info("########## START LiveEndpointsWindow getEndpoints")
-            UserData.liveManagementService(project).getEndpoints(service, 1000, true).await().forEach {
+            UserData.liveManagementService(project).getEndpoints(service, 1000, false).await().forEach {
                 val endpointRow = ServiceEndpointRow(it)
-                log.info(">>>>>>>>>> endpointRow = $endpointRow\n")
                 model.addRow(endpointRow)
                 addView(vertx, service, endpointRow)
             }
-            log.info("########## END LiveEndpointsWindow getEndpoints")
         }
     }
 
