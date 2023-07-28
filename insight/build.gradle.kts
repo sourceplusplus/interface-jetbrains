@@ -63,7 +63,7 @@ dependencies {
     compileOnly("io.vertx:vertx-core:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin:$vertxVersion")
     compileOnly("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersion")
-    compileOnly("org.apache.commons:commons-lang3:3.12.0")
+    compileOnly("org.apache.commons:commons-lang3:3.13.0")
 
     testImplementation(projectDependency(":marker:js-marker"))
     testImplementation(projectDependency(":marker:jvm-marker"))
