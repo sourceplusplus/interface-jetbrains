@@ -20,6 +20,7 @@ import com.intellij.lang.Language
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import spp.jetbrains.artifact.model.ArtifactElement
 import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
 import spp.jetbrains.marker.service.define.IArtifactNamingService
 import spp.jetbrains.marker.source.mark.api.SourceMark
@@ -53,6 +54,7 @@ object ArtifactNamingService : AbstractSourceMarkerService<IArtifactNamingServic
     }
 
     override fun getFullyQualifiedName(element: PsiElement): ArtifactQualifiedName {
+        if (element is ArtifactElement) return getService(element.language).getFullyQualifiedName(element.psiElement)
         return getService(element.language).getFullyQualifiedName(element)
     }
 
