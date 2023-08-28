@@ -45,7 +45,7 @@ import spp.jetbrains.marker.source.mark.guide.GuideMark
  */
 class JVMEndpointDetector(project: Project) : EndpointDetector<JVMEndpointNameDetector>(project) {
 
-    override val detectorSet: Set<JVMEndpointNameDetector> = setOf(
+    override val detectorSet = mutableSetOf(
         SkywalkingTraceEndpoint(),
         SpringMVCEndpoint(),
         MicronautEndpoint(),

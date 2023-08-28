@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector.JVMEndpointNameDetector
+import spp.jetbrains.marker.service.ArtifactNamingService
 import spp.jetbrains.marker.source.info.EndpointDetector.DetectedEndpoint
 
 /**
@@ -48,7 +49,7 @@ class MicronautEndpoint : JVMEndpointNameDetector {
         val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             val annotation = element.annotations.find {
-                it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
+                ArtifactNamingService.getFullyQualifiedName(it).identifier.startsWith(endpointAnnotationPrefix)
             }
             if (annotation != null) {
                 val endpointType = annotation.qualifiedName!!.substringAfterLast(".").uppercase()
@@ -61,7 +62,7 @@ class MicronautEndpoint : JVMEndpointNameDetector {
 
                 //get controller
                 val controllerAnnotation = element.containingClass?.annotations?.find {
-                    it.qualifiedName?.startsWith(endpointAnnotationPrefix) == true
+                    ArtifactNamingService.getFullyQualifiedName(it).identifier.startsWith(endpointAnnotationPrefix)
                 }
                 val controllerValue = controllerAnnotation?.let { getAttributeValue(it, "value") }
                 val controller = if (controllerValue is PsiLiteral) {

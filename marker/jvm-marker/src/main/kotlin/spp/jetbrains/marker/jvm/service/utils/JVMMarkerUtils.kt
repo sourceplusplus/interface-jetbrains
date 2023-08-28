@@ -52,6 +52,7 @@ object JVMMarkerUtils {
         when {
             element.isKotlin() && element is KtClass -> return getFullyQualifiedName(element)
             element.isKotlin() && element is KtNamedFunction -> return getFullyQualifiedName(element)
+            element is PsiAnnotation -> return getFullyQualifiedName(element)
             element is PsiClass -> return getFullyQualifiedName(element)
             element is PsiMethod -> return getFullyQualifiedName(element)
             else -> Unit
@@ -77,6 +78,35 @@ object JVMMarkerUtils {
             type = ArtifactType.EXPRESSION,
             lineNumber = SourceMarkerUtils.getLineNumber(element)
         )
+    }
+
+    private fun getFullyQualifiedName(annotation: PsiAnnotation): ArtifactQualifiedName {
+        val qualifiedName = getFullyQualifiedName(annotation, annotation.qualifiedName.toString())
+        return ArtifactQualifiedName(
+            qualifiedName,
+            type = ArtifactType.ANNOTATION,
+            lineNumber = annotation.nameReferenceElement?.let { SourceMarkerUtils.getLineNumber(it) }
+        )
+    }
+
+    private fun getFullyQualifiedName(psiElement: PsiElement, simpleName: String): String {
+        var parent = psiElement
+        while (parent !is PsiJavaFile && parent.parent != null) {
+            parent = parent.parent
+        }
+        val javaFile = parent as? PsiJavaFile ?: TODO() //todo: others
+
+        // Loop through imports to find fully qualified name
+        for (importStatement in javaFile.importList?.importStatements ?: emptyArray()) {
+            val qName = importStatement.qualifiedName
+            if (qName?.endsWith(".$simpleName") == true || qName == simpleName) {
+                return qName
+            }
+        }
+
+        // If the simple name wasn't found in the imports, it might be in the same package.
+        val packageName = javaFile.packageStatement?.packageName
+        return if (packageName != null) "$packageName.$simpleName" else simpleName
     }
 
     private fun getFullyQualifiedName(clazz: PsiClass): ArtifactQualifiedName {
