@@ -26,12 +26,12 @@ import org.jetbrains.kotlin.idea.base.psi.KotlinPsiHeuristics
 import org.jetbrains.kotlin.idea.base.utils.fqname.fqName
 import org.jetbrains.kotlin.nj2k.postProcessing.type
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.resolve.jvm.JvmPrimitiveType
-import spp.jetbrains.artifact.service.ArtifactScopeService
-import spp.jetbrains.artifact.service.ArtifactTypeService
-import spp.jetbrains.artifact.service.isKotlin
+import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
+import spp.jetbrains.artifact.service.*
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.source.mark.api.SourceMark
 import spp.protocol.artifact.ArtifactQualifiedName
@@ -90,23 +90,42 @@ object JVMMarkerUtils {
     }
 
     private fun getFullyQualifiedName(psiElement: PsiElement, simpleName: String): String {
-        var parent = psiElement
-        while (parent !is PsiJavaFile && parent.parent != null) {
-            parent = parent.parent
-        }
-        val javaFile = parent as? PsiJavaFile ?: TODO() //todo: others
-
-        // Loop through imports to find fully qualified name
-        for (importStatement in javaFile.importList?.importStatements ?: emptyArray()) {
-            val qName = importStatement.qualifiedName
-            if (qName?.endsWith(".$simpleName") == true || qName == simpleName) {
-                return qName
+        if (psiElement.isJava() && psiElement.containingFile is PsiJavaFile) {
+            val javaFile = psiElement.containingFile as PsiJavaFile
+            for (importStatement in javaFile.importList?.importStatements ?: emptyArray()) {
+                val qName = importStatement.qualifiedName
+                if (qName?.endsWith(".$simpleName") == true || qName == simpleName) {
+                    return qName
+                }
             }
-        }
 
-        // If the simple name wasn't found in the imports, it might be in the same package.
-        val packageName = javaFile.packageStatement?.packageName
-        return if (packageName != null) "$packageName.$simpleName" else simpleName
+            val packageName = javaFile.packageStatement?.packageName
+            return if (packageName != null) "$packageName.$simpleName" else simpleName
+        } else if (psiElement.isKotlin() && psiElement.containingFile is KtFile) {
+            val ktFile = psiElement.containingFile as KtFile
+            for (importDirective in ktFile.importDirectives) {
+                val qName = importDirective.importedFqName?.asString()
+                if (qName?.endsWith(".$simpleName") == true || qName == simpleName) {
+                    return qName
+                }
+            }
+
+            val packageName = ktFile.packageFqName.asString()
+            return "$packageName.$simpleName"
+        } else if (psiElement.isGroovy() && psiElement.containingFile is GroovyFile) {
+            val groovyFile = psiElement.containingFile as GroovyFile
+            for (importStatement in groovyFile.importStatements) {
+                val qName = importStatement.importFqn.toString()
+                if (qName.endsWith(".$simpleName") || qName == simpleName) {
+                    return qName
+                }
+            }
+
+            val packageName = groovyFile.packageDefinition?.packageName
+            return if (packageName != null) "$packageName.$simpleName" else simpleName
+        } else {
+            return simpleName
+        }
     }
 
     private fun getFullyQualifiedName(clazz: PsiClass): ArtifactQualifiedName {

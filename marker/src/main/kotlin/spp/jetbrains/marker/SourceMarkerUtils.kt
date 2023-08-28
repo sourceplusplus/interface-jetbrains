@@ -91,13 +91,15 @@ object SourceMarkerUtils {
 
     @JvmStatic
     fun getStartLineNumber(element: PsiElement): Int {
-        val document = element.containingFile.viewProvider.document
+        val containingFile = element.containingFile ?: return -1
+        val document = containingFile.viewProvider.document
         return document!!.getLineNumber(element.textRange.startOffset) + 1
     }
 
     @JvmStatic
     fun getEndLineNumber(element: PsiElement): Int {
-        val document = element.containingFile.viewProvider.document
+        val containingFile = element.containingFile ?: return -1
+        val document = containingFile.viewProvider.document
         return document!!.getLineNumber(element.textRange.endOffset) + 1
     }
 
