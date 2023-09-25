@@ -96,6 +96,6 @@ class SetRefreshIntervalAction(private val viewManager: ResumableViewManager) : 
                     return null
                 }
             }
-        ).showUnderneathOf(e.inputEvent.component)
+        ).apply { e.inputEvent?.let { showUnderneathOf(it.component) } }
     }
 }

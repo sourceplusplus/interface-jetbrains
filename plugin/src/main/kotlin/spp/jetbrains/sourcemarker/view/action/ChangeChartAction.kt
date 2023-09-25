@@ -71,6 +71,6 @@ class ChangeChartAction : AnAction(PluginIcons.chartMixed) {
                 override fun hasSubstep(selectedValue: String?): Boolean = false
                 override fun onChosen(selectedValue: String?, finalChoice: Boolean): PopupStep<*>? = null
             }
-        ).showUnderneathOf(e.inputEvent.component)
+        ).apply { e.inputEvent?.let { showUnderneathOf(it.component) } }
     }
 }

@@ -106,6 +106,6 @@ class ChangeTimeAction(private val viewManager: LiveViewChartManager) : AnAction
                     return null
                 }
             }
-        ).showUnderneathOf(e.inputEvent.component)
+        ).apply { e.inputEvent?.let { showUnderneathOf(it.component) } }
     }
 }
