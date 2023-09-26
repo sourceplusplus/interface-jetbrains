@@ -197,12 +197,10 @@ object JVMMarkerUtils {
                     methodParams += "[]"
                 }
             } else if (it.typeElement != null) {
-                methodParams += if (it.typeElement!!.text == "String") {
-                    "java.lang.String"
-                } else if (it.typeElement!!.text == "String[]") {
-                    "java.lang.String[]"
-                } else {
-                    it.typeElement!!.text
+                methodParams += findFullyQualifiedName(it.type, it.containingFile) ?: when (it.typeElement!!.text) {
+                    "String" -> "java.lang.String"
+                    "String[]" -> "java.lang.String[]"
+                    else -> it.typeElement!!.text
                 }
             } else if (it.type is PsiPrimitiveType) {
                 methodParams += if (ArtifactTypeService.isKotlin(it)) {
@@ -215,6 +213,22 @@ object JVMMarkerUtils {
             }
         }
         return "$methodName($methodParams)"
+    }
+
+    /**
+     * Search imports for a fully qualified name that ends with the simple name of the type.
+     */
+    private fun findFullyQualifiedName(psiType: PsiType, psiFile: PsiFile): String? {
+        val simpleName = psiType.presentableText
+        val psiJavaFile = psiFile as? PsiJavaFile ?: return null
+        val importList = psiJavaFile.importList ?: return null
+        for (importStatement in importList.allImportStatements) {
+            val qualifiedName = importStatement.importReference?.qualifiedName
+            if (qualifiedName?.endsWith(".$simpleName") == true) {
+                return qualifiedName
+            }
+        }
+        return null
     }
 
     //todo: better
