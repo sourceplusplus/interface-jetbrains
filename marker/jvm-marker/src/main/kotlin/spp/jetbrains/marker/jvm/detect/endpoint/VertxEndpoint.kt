@@ -18,15 +18,14 @@ package spp.jetbrains.marker.jvm.detect.endpoint
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.util.Key
 import com.intellij.psi.util.descendants
 import com.intellij.psi.util.findParentInFile
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import io.vertx.core.http.HttpMethod
-import spp.jetbrains.artifact.model.ArtifactLiteralValue
-import spp.jetbrains.artifact.model.CallArtifact
-import spp.jetbrains.artifact.model.FunctionArtifact
-import spp.jetbrains.artifact.model.getCallerExpressions
+import spp.jetbrains.artifact.model.*
+import spp.jetbrains.artifact.service.ArtifactScopeService
 import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.marker.jvm.detect.JVMEndpointDetector
 import spp.jetbrains.marker.service.getFullyQualifiedName
@@ -38,6 +37,7 @@ class VertxEndpoint : JVMEndpointDetector.JVMEndpointNameDetector {
 
     private val log = logger<VertxEndpoint>()
     private val httpMethods = HttpMethod.values().map { it.name() }.toSet()
+    private val DETECTED_ENDPOINT = Key.create<EndpointDetector.DetectedEndpoint>("VertxEndpoint.DetectedEndpoint")
 
     override fun detectEndpointNames(guideMark: GuideMark): Future<List<EndpointDetector.DetectedEndpoint>> {
         if (guideMark !is MethodGuideMark) {
@@ -52,8 +52,16 @@ class VertxEndpoint : JVMEndpointDetector.JVMEndpointNameDetector {
                 return@runReadAction
             }
 
+            var fallbackSearch = false
             val callers = mutableListOf<EndpointDetector.DetectedEndpoint>()
-            artifact.getCallerExpressions().forEach {
+            val callerExpressions = try {
+                artifact.getCallerExpressions()
+            } catch (e: IllegalArgumentException) {
+                log.warn("Failed to get caller expressions for ${artifact.getFullyQualifiedName()}", e)
+                fallbackSearch = true
+                emptyList()
+            }
+            callerExpressions.forEach {
                 it.findParentInFile {
                     val innerArtifact = it.toArtifact()
                     if (innerArtifact !is CallArtifact) return@findParentInFile false
@@ -61,10 +69,44 @@ class VertxEndpoint : JVMEndpointDetector.JVMEndpointNameDetector {
                     false
                 }
             }
+
+            if (fallbackSearch) {
+                //won't be able to search for references in files outside current file
+                //instead use regex to search for calls to router.post, router.get, etc
+                if (artifact.psiElement.getUserData(DETECTED_ENDPOINT) != null) {
+                    callers.add(artifact.psiElement.getUserData(DETECTED_ENDPOINT)!!)
+                } else {
+                    artifact.getCalls().forEach { checkSimple(it) }
+                }
+            }
+
             promise.complete(callers.toSet().toList())
         }
 
         return promise.future()
+    }
+
+    private fun checkSimple(artifact: CallArtifact) {
+        val importRegex = Regex("""import io\.vertx""")
+        importRegex.find(artifact.containingFile.text) ?: return
+
+        val regex = Regex("""router\.([a-zA-Z]+)\("([^"]+)"\)\.handler\(this::([a-zA-Z]+)\)""")
+        val match = regex.matchEntire(artifact.text) ?: return
+        val httpMethod = match.groupValues[1].uppercase()
+        val endpointName = match.groupValues[2]
+        val referenceMethod = match.groupValues[3]
+
+        val fileFunctions = ArtifactScopeService.getFunctions(artifact.containingFile)
+        val refFunction = fileFunctions.firstOrNull { it.name == referenceMethod } ?: return
+
+        val endpoint = EndpointDetector.DetectedEndpoint(
+            "$httpMethod:$endpointName",
+            false,
+            endpointName,
+            httpMethod
+        )
+        refFunction.putUserData(DETECTED_ENDPOINT, endpoint)
+        log.info("Detected endpoint: $endpoint")
     }
 
     private fun check(artifact: CallArtifact): EndpointDetector.DetectedEndpoint? {
