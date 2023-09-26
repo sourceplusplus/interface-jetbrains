@@ -35,9 +35,11 @@ import spp.jetbrains.marker.source.mark.guide.MethodGuideMark
 
 class VertxEndpoint : JVMEndpointDetector.JVMEndpointNameDetector {
 
-    private val log = logger<VertxEndpoint>()
-    private val httpMethods = HttpMethod.values().map { it.name() }.toSet()
-    private val DETECTED_ENDPOINT = Key.create<EndpointDetector.DetectedEndpoint>("VertxEndpoint.DetectedEndpoint")
+    companion object {
+        private val log = logger<VertxEndpoint>()
+        private val httpMethods = HttpMethod.values().map { it.name() }.toSet()
+        private val DETECTED_ENDPOINT = Key.create<EndpointDetector.DetectedEndpoint>("VertxEndpoint.DetectedEndpoint")
+    }
 
     override fun detectEndpointNames(guideMark: GuideMark): Future<List<EndpointDetector.DetectedEndpoint>> {
         if (guideMark !is MethodGuideMark) {
