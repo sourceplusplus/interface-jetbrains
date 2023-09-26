@@ -152,7 +152,7 @@ jobs:
 
       # Store already-built plugin as an artifact for downloading
       - name: Upload artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: ${{ steps.artifact.outputs.filename }}
           path: ./plugin/build/distributions/content/*/*
