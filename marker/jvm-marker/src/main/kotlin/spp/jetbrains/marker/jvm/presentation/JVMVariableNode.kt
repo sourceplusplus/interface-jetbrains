@@ -83,42 +83,9 @@ class JVMVariableNode(
         if (variable.value == null && variable.liveIdentity == null) {
             presentation.addText("null", REGULAR_ATTRIBUTES)
         } else if (variable.liveClazz != null && primitives.contains(variable.liveClazz)) {
-            if (variable.liveClazz == "java.lang.Boolean") {
-                presentation.addText(variable.value.toString(), REGULAR_ATTRIBUTES)
-            } else if (variable.liveClazz == "java.lang.Character") {
-                presentation.addText(
-                    "'" + variable.value + "' " + (variable.value as String).toCharArray()[0].toInt(),
-                    REGULAR_ATTRIBUTES
-                )
-            } else if (variable.liveClazz == "java.lang.String") {
-                presentation.addText("\"" + variable.value + "\"", fromTextAttributes(scheme.getAttributes(STRING)))
-            } else if (numerals.contains(variable.liveClazz)) {
-                presentation.addText(variable.value.toString(), fromTextAttributes(scheme.getAttributes(NUMBER)))
-            }
-            presentation.setIcon(AllIcons.Debugger.Db_primitive)
+            presentPrimitive(variable, presentation)
         } else if (variable.liveClazz != null) {
-            val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
-            var identity = variable.liveIdentity ?: ""
-            if (identity.isNotEmpty()) {
-                identity = "@$identity"
-            }
-            if (variable.presentation != null) {
-                presentation.addText("{ $simpleClassName$identity } ", GRAYED_ATTRIBUTES)
-                presentation.addText("\"${variable.presentation}\"", REGULAR_ATTRIBUTES)
-            } else {
-                presentation.addText("{ $simpleClassName$identity }", GRAYED_ATTRIBUTES)
-            }
-            presentation.setIcon(AllIcons.Debugger.Value)
-
-            val varValue = variable.value
-            if (varValue is JsonObject && varValue.getString("@skip") != null) {
-                val skipReason = varValue.getString("@skip")
-                if (skipReason == "EXCEPTION_OCCURRED" && varValue.getString("@toString") != null) {
-                    presentation.addText(" " + varValue.getString("@toString"), ERROR_ATTRIBUTES)
-                } else {
-                    presentation.addText(" $skipReason", ERROR_ATTRIBUTES)
-                }
-            }
+            presentLiveClazz(variable, presentation)
         } else {
             if (variable.value is LiveVariable) {
                 val liveVar = variable.value as LiveVariable
@@ -150,5 +117,46 @@ class JVMVariableNode(
                 presentation.tooltip = variable.value.toString()
             }
         }
+    }
+
+    private fun presentLiveClazz(variable: LiveVariable, presentation: PresentationData) {
+        val simpleClassName = variable.liveClazz!!.substringAfterLast(".")
+        var identity = variable.liveIdentity ?: ""
+        if (identity.isNotEmpty()) {
+            identity = "@$identity"
+        }
+        if (variable.presentation != null) {
+            presentation.addText("{ $simpleClassName$identity } ", GRAYED_ATTRIBUTES)
+            presentation.addText("\"${variable.presentation}\"", REGULAR_ATTRIBUTES)
+        } else {
+            presentation.addText("{ $simpleClassName$identity }", GRAYED_ATTRIBUTES)
+        }
+        presentation.setIcon(AllIcons.Debugger.Value)
+
+        val varValue = variable.value
+        if (varValue is JsonObject && varValue.getString("@skip") != null) {
+            val skipReason = varValue.getString("@skip")
+            if (skipReason == "EXCEPTION_OCCURRED" && varValue.getString("@toString") != null) {
+                presentation.addText(" " + varValue.getString("@toString"), ERROR_ATTRIBUTES)
+            } else {
+                presentation.addText(" $skipReason", ERROR_ATTRIBUTES)
+            }
+        }
+    }
+
+    private fun presentPrimitive(variable: LiveVariable, presentation: PresentationData) {
+        if (variable.liveClazz == "java.lang.Boolean") {
+            presentation.addText(variable.value.toString(), REGULAR_ATTRIBUTES)
+        } else if (variable.liveClazz == "java.lang.Character") {
+            presentation.addText(
+                "'" + variable.value + "' " + (variable.value as String).toCharArray()[0].toInt(),
+                REGULAR_ATTRIBUTES
+            )
+        } else if (variable.liveClazz == "java.lang.String") {
+            presentation.addText("\"" + variable.value + "\"", fromTextAttributes(scheme.getAttributes(STRING)))
+        } else if (numerals.contains(variable.liveClazz)) {
+            presentation.addText(variable.value.toString(), fromTextAttributes(scheme.getAttributes(NUMBER)))
+        }
+        presentation.setIcon(AllIcons.Debugger.Db_primitive)
     }
 }
