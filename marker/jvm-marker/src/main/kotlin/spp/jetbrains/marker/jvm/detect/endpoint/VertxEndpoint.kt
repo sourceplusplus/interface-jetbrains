@@ -59,7 +59,7 @@ class VertxEndpoint : JVMEndpointDetector.JVMEndpointNameDetector {
             val callerExpressions = try {
                 artifact.getCallerExpressions()
             } catch (e: IllegalArgumentException) {
-                log.warn("Failed to get caller expressions for ${artifact.getFullyQualifiedName()}", e)
+                log.warn("Failed to get caller expressions for ${artifact.getFullyQualifiedName()}. Reason: $e")
                 fallbackSearch = true
                 emptyList()
             }
