@@ -22,9 +22,10 @@ import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
 import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
+import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.idea.base.psi.KotlinPsiHeuristics
 import org.jetbrains.kotlin.idea.base.utils.fqname.fqName
-import org.jetbrains.kotlin.nj2k.postProcessing.type
+import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
@@ -239,7 +240,7 @@ object JVMMarkerUtils {
             if (methodParams.isNotEmpty()) {
                 methodParams += ","
             }
-            val paramType = it.type()
+            val paramType = (it.resolveToDescriptorIfAny() as? CallableDescriptor)?.returnType
             val qualifiedType = if (paramType != null && KotlinBuiltIns.isPrimitiveArray(paramType)) {
                 val arrayType = KotlinBuiltIns.getPrimitiveArrayElementType(paramType)
                 arrayType?.let { JvmPrimitiveType.get(it).javaKeywordName + "[]" }
