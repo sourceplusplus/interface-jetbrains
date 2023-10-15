@@ -19,6 +19,7 @@ package spp.jetbrains.marker.jvm.service.utils
 import com.intellij.lang.jvm.util.JvmClassUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.psi.*
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiUtil
 import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
@@ -26,11 +27,9 @@ import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.idea.base.psi.KotlinPsiHeuristics
 import org.jetbrains.kotlin.idea.base.utils.fqname.fqName
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
-import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.jvm.JvmPrimitiveType
+import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import spp.jetbrains.artifact.service.*
 import spp.jetbrains.marker.SourceMarkerUtils
@@ -240,25 +239,10 @@ object JVMMarkerUtils {
             if (methodParams.isNotEmpty()) {
                 methodParams += ","
             }
-            val paramType = (it.resolveToDescriptorIfAny() as? CallableDescriptor)?.returnType
-            val qualifiedType = if (paramType != null && KotlinBuiltIns.isPrimitiveArray(paramType)) {
-                val arrayType = KotlinBuiltIns.getPrimitiveArrayElementType(paramType)
-                arrayType?.let { JvmPrimitiveType.get(it).javaKeywordName + "[]" }
-            } else if (paramType != null && KotlinBuiltIns.isArray(paramType)
-                && paramType.arguments.firstOrNull()?.type?.fqName?.asString() == "kotlin.String"
-            ) {
-                "java.lang.String[]"
-            } else {
-                paramType?.let {
-                    KotlinBuiltIns.getPrimitiveType(it)?.let { JvmPrimitiveType.get(it) }?.javaKeywordName
-                } ?: if (paramType != null && KotlinBuiltIns.isString(paramType)) {
-                    "java.lang.String"
-                } else if (paramType?.unwrap()?.constructor?.declarationDescriptor?.psiElement is KtClass) {
-                    val clazz = paramType.unwrap().constructor.declarationDescriptor?.psiElement as KtClass
-                    getFullyQualifiedName(clazz).identifier
-                } else {
-                    paramType?.fqName?.toString()?.replace(".", "$")
-                }
+            val qualifiedType = try {
+                (it.resolveToDescriptorIfAny() as? CallableDescriptor)?.returnType?.let { getQualifiedName(it) }
+            } catch (ignore: Exception) {
+                fallbackImportScan(method, it.typeReference)
             }
             if (qualifiedType != null) {
                 methodParams += qualifiedType
@@ -272,6 +256,37 @@ object JVMMarkerUtils {
             }
         }
         return "$methodName($methodParams)"
+    }
+
+    private fun fallbackImportScan(element: KtElement, typeReference: KtTypeReference?): String? {
+        if (typeReference == null) return null
+        val simpleName = typeReference.text.split("<")[0]
+        val ktFile = PsiTreeUtil.getParentOfType(element, KtFile::class.java) ?: return null
+        val importDirective = ktFile.importDirectives.find { it.importedFqName?.shortName()?.asString() == simpleName }
+        return importDirective?.importedFqName?.asString()
+    }
+
+    private fun getQualifiedName(paramType: KotlinType): String? {
+        val qualifiedType = if (KotlinBuiltIns.isPrimitiveArray(paramType)) {
+            val arrayType = KotlinBuiltIns.getPrimitiveArrayElementType(paramType)
+            arrayType?.let { JvmPrimitiveType.get(it).javaKeywordName + "[]" }
+        } else if (KotlinBuiltIns.isArray(paramType) &&
+            paramType.arguments.firstOrNull()?.type?.fqName?.asString() == "kotlin.String"
+        ) {
+            "java.lang.String[]"
+        } else {
+            paramType.let {
+                KotlinBuiltIns.getPrimitiveType(it)?.let { JvmPrimitiveType.get(it) }?.javaKeywordName
+            } ?: if (KotlinBuiltIns.isString(paramType)) {
+                "java.lang.String"
+            } else if (paramType.unwrap().constructor.declarationDescriptor?.psiElement is KtClass) {
+                val clazz = paramType.unwrap().constructor.declarationDescriptor?.psiElement as KtClass
+                getFullyQualifiedName(clazz).identifier
+            } else {
+                paramType.fqName?.toString()?.replace(".", "$")
+            }
+        }
+        return qualifiedType
     }
 
     private fun getArrayDimensions(s: String): Int {

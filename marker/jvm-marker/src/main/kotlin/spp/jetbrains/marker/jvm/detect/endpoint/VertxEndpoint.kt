@@ -92,7 +92,7 @@ class VertxEndpoint : JVMEndpointDetector.JVMEndpointNameDetector {
         val importRegex = Regex("""import io\.vertx""")
         importRegex.find(artifact.containingFile.text) ?: return
 
-        val regex = Regex("""router\.([a-zA-Z]+)\("([^"]+)"\)\.handler\(this::([a-zA-Z]+)\)""")
+        val regex = Regex("""router\.([a-zA-Z]+)\("([^"]+)"\)\.handler\s?[({]\s?(?:this::)?([a-zA-Z]+).+""")
         val match = regex.matchEntire(artifact.text) ?: return
         val httpMethod = match.groupValues[1].uppercase()
         val endpointName = match.groupValues[2]
