@@ -43,6 +43,7 @@ import spp.jetbrains.artifact.service.ArtifactTypeService
 import spp.jetbrains.artifact.service.define.IArtifactScopeService
 import spp.jetbrains.artifact.service.isGroovy
 import spp.jetbrains.artifact.service.isKotlin
+import spp.jetbrains.artifact.service.toArtifact
 import spp.jetbrains.marker.SourceMarkerUtils
 import spp.jetbrains.marker.SourceMarkerUtils.doOnReadThread
 
@@ -108,7 +109,24 @@ class JVMArtifactScopeService : IArtifactScopeService {
 
     override fun getCalls(element: PsiElement): List<PsiElement> {
         return when {
-            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtCallExpression>().toList()
+            ArtifactTypeService.isKotlin(element) -> {
+                //use top most call expression (e.g. `bar()` becomes `foo.bar()`)
+                val callExpressions = element.descendantsOfType<KtCallExpression>().toList()
+                callExpressions.map {
+                    val selfArtifact = it.toArtifact()
+                    var returnValue: PsiElement = it
+                    while (selfArtifact != null && returnValue.parent != null) {
+                        val parentArtifact = returnValue.parent!!.toArtifact()
+                        if (parentArtifact != null) {
+                            if (parentArtifact::class == selfArtifact::class) {
+                                returnValue = parentArtifact.psiElement
+                            } else break
+                        } else break
+                    }
+                    returnValue
+                }.toSet().toList()
+            }
+
             else -> element.descendantsOfType<PsiCallExpression>().toList()
         }
     }
