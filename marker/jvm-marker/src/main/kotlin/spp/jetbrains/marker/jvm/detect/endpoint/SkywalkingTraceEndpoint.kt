@@ -67,7 +67,11 @@ class SkywalkingTraceEndpoint : JVMEndpointNameDetector {
     override fun determineEndpointName(element: KtNamedFunction): Future<List<DetectedEndpoint>> {
         val promise = Promise.promise<List<DetectedEndpoint>>()
         DumbService.getInstance(element.project).runReadActionInSmartMode {
-            val annotation = element.findAnnotation(FqName(skywalkingTraceAnnotation))
+            val annotation = try {
+                element.findAnnotation(FqName(skywalkingTraceAnnotation))
+            } catch (ignored: Exception) {
+                null
+            }
             if (annotation != null) {
                 val operationNameExpr = getAttributeValue(annotation, "operationName")
                 val value = if (operationNameExpr is KtStringTemplateExpression) {

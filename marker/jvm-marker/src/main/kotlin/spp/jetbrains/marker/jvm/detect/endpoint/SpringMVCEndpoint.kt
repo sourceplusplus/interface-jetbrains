@@ -80,7 +80,11 @@ class SpringMVCEndpoint : JVMEndpointNameDetector {
         val promise = Promise.promise<List<DetectedEndpoint>>()
         ApplicationManager.getApplication().runReadAction {
             for (annotationName in qualifiedNameSet) {
-                val annotation = element.findAnnotation(FqName(annotationName))
+                val annotation = try {
+                    element.findAnnotation(FqName(annotationName))
+                } catch (ignored: Exception) {
+                    null
+                }
                 if (annotation != null) {
                     val detectedEndpoint = handleAnnotation(false, annotation, annotationName)
                     val classRequestMapping = element.containingClass()
