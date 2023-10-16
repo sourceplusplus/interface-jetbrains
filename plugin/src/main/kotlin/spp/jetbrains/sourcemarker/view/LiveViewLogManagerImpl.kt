@@ -33,7 +33,6 @@ import io.vertx.core.json.JsonObject
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.invokeLater
-import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
 import spp.jetbrains.sourcemarker.view.action.StopViewAction
@@ -87,11 +86,13 @@ class LiveViewLogManagerImpl(
         project.putUserData(LiveViewLogManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
             if (it.isReady) {
-                val vertx = UserData.vertx(project)
-                vertx.safeLaunch {
-                    val service = SourceStatusService.getCurrentService(project)!!
-                    showServicesWindow(service)
+                val service = SourceStatusService.getCurrentService(project)
+                if (service == null) {
+                    log.warn("No service found for project: ${project.name}")
+                    return@onReadyChange
                 }
+
+                showServicesWindow(service)
             } else {
                 project.invokeLater {
                     hideWindows()

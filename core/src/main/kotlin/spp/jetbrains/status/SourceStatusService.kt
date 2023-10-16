@@ -16,11 +16,10 @@
  */
 package spp.jetbrains.status
 
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.Pair
-import spp.jetbrains.UserData
+import io.vertx.core.Vertx
 import spp.protocol.platform.general.Service
 
 /**
@@ -30,7 +29,6 @@ import spp.protocol.platform.general.Service
  */
 interface SourceStatusService {
     companion object {
-        private val log = logger<SourceStatusService>()
         val KEY = Key.create<SourceStatusService>("SPP_SOURCE_STATUS_SERVICE")
 
         @JvmStatic
@@ -44,6 +42,7 @@ interface SourceStatusService {
         }
     }
 
+    val vertx: Vertx
     val project: Project
 
     fun isReady(): Boolean
@@ -56,17 +55,12 @@ interface SourceStatusService {
     fun getCurrentService(): Service?
     fun setCurrentService(service: Service)
     fun setActiveServices(services: List<Service>)
-    fun onStatusChange(triggerInitial: Boolean = true, listener: (SourceStatus) -> Unit)
-    fun onServiceChange(triggerInitial: Boolean = true, listener: () -> Unit)
-    fun onReadyChange(triggerInitial: Boolean = true, listener: (SourceStatus) -> Unit)
-    suspend fun start(initialService: String?)
+    fun onStatusChange(triggerInitial: Boolean = true, listener: suspend (SourceStatus) -> Unit)
+    fun onServiceChange(triggerInitial: Boolean = true, listener: suspend () -> Unit)
+    fun onReadyChange(triggerInitial: Boolean = true, listener: suspend (SourceStatus) -> Unit)
+    suspend fun start(vertx: Vertx, initialService: String?)
 
     fun publishStatus(status: SourceStatus) {
-        if (!UserData.hasVertx(project)) {
-            log.warn("Vert.x unavailable. Ignoring status: $status")
-            return
-        }
-
-        UserData.vertx(project).eventBus().publish("spp.status", status)
+        vertx.eventBus().publish("spp.status", status)
     }
 }
