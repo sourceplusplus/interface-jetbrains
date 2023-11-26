@@ -16,7 +16,6 @@
  */
 package spp.jetbrains.marker.source.mark.api
 
-import com.intellij.codeInsight.hints.InlayHintsPassFactory
 import com.intellij.lang.Language
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ReadAction
@@ -222,9 +221,7 @@ interface SourceMark : JBPopupListener, MouseMotionListener, VisibleAreaListener
                         }
                     })
                 } else {
-                    project.invokeLater {
-                        InlayHintsPassFactory.forceHintsUpdateOnNextPass()
-                    }
+                    sourceFileMarker.refresh()
                 }
             }
         }

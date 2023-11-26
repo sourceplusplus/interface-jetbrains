@@ -79,7 +79,7 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                                 it.update()
                             }
 
-                        InlayHintsPassFactory.forceHintsUpdateOnNextPass()
+                        event.sourceMark.sourceFileMarker.refresh()
                     }
                 }
 
@@ -91,7 +91,7 @@ class SourceInlayHintProvider : InlayHintsProvider<NoSettings> {
                                 disposeInlayIfNecessary(it, event.sourceMark)
                             }
 
-                        InlayHintsPassFactory.forceHintsUpdateOnNextPass()
+                        event.sourceMark.sourceFileMarker.refresh()
                     }
                 }
             }
