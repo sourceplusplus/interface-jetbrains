@@ -49,43 +49,45 @@ class PythonLanguageProvider : LanguageProvider {
 
     override fun canSetup() = classExists("com.jetbrains.python.psi.PyElement")
 
-    override fun setup(project: Project) {
+    override fun setup(project: Project, setupDetectors: Boolean) {
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(PyFile::class.java)
 
-        val endpointDetector = AggregateEndpointDetector(
-            project,
-            mutableListOf<EndpointDetector<*>>().apply {
-                getUltimateProvider(project)?.let { addAll(it.getEndpointDetectors(project)) }
-                add(PythonEndpointDetector(project))
-            }
-        )
-        val loggerDetector = PythonLoggerDetector(project)
-
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
-            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
-                val mark = it.sourceMark
-                if (it.sourceMark.language.id != "Python") {
-                    return@SynchronousSourceMarkEventListener
+        if (setupDetectors) {
+            val endpointDetector = AggregateEndpointDetector(
+                project,
+                mutableListOf<EndpointDetector<*>>().apply {
+                    getUltimateProvider(project)?.let { addAll(it.getEndpointDetectors(project)) }
+                    add(PythonEndpointDetector(project))
                 }
+            )
+            val loggerDetector = PythonLoggerDetector(project)
 
-                //setup endpoint detector and attempt detection
-                if (mark is GuideMark) {
-                    mark.putUserData(SourceMarkerKeys.ENDPOINT_DETECTOR, endpointDetector)
-                    UserData.vertx(project).doOnWorker { endpointDetector.getOrFindEndpointIds(mark) }
-                }
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
+                if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
+                    val mark = it.sourceMark
+                    if (it.sourceMark.language.id != "Python") {
+                        return@SynchronousSourceMarkEventListener
+                    }
 
-                //setup logger detector
-                if (mark is InlayMark) {
-                    //add logger detector to all inlay marks as live logs can be placed anywhere
-                    mark.putUserData(SourceMarkerKeys.LOGGER_DETECTOR, loggerDetector)
-                }
+                    //setup endpoint detector and attempt detection
+                    if (mark is GuideMark) {
+                        mark.putUserData(SourceMarkerKeys.ENDPOINT_DETECTOR, endpointDetector)
+                        UserData.vertx(project).doOnWorker { endpointDetector.getOrFindEndpointIds(mark) }
+                    }
 
-                //attempt to detect logger(s) on method guide marks
-                if (mark is MethodGuideMark) {
-                    UserData.vertx(project).doOnWorker { loggerDetector.determineLoggerStatements(mark) }
+                    //setup logger detector
+                    if (mark is InlayMark) {
+                        //add logger detector to all inlay marks as live logs can be placed anywhere
+                        mark.putUserData(SourceMarkerKeys.LOGGER_DETECTOR, loggerDetector)
+                    }
+
+                    //attempt to detect logger(s) on method guide marks
+                    if (mark is MethodGuideMark) {
+                        UserData.vertx(project).doOnWorker { loggerDetector.determineLoggerStatements(mark) }
+                    }
                 }
-            }
-        })
+            })
+        }
 
         ArtifactMarkService.addService(PythonArtifactMarkService(), "Python")
         ArtifactCreationService.addService(PythonArtifactCreationService(), "Python")

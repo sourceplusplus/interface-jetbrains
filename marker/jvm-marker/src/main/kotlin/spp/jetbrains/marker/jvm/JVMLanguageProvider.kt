@@ -53,7 +53,7 @@ class JVMLanguageProvider : LanguageProvider {
 
     override fun canSetup() = classExists("com.intellij.psi.PsiJavaFile")
 
-    override fun setup(project: Project) {
+    override fun setup(project: Project, setupDetectors: Boolean) {
         SUPPORTED_FILE_TYPES.add(PsiJavaFile::class.java)
         if (classExists("org.jetbrains.plugins.groovy.lang.psi.GroovyFile")) {
             SUPPORTED_FILE_TYPES.add(GroovyFile::class.java)
@@ -62,40 +62,42 @@ class JVMLanguageProvider : LanguageProvider {
             SUPPORTED_FILE_TYPES.add(KtFile::class.java)
         }
 
-        val endpointDetector = AggregateEndpointDetector(
-            project,
-            mutableListOf<EndpointDetector<*>>().apply {
-                getUltimateProvider(project)?.let { addAll(it.getEndpointDetectors(project)) }
-                add(JVMEndpointDetector(project))
-            }
-        )
-        val loggerDetector = JVMLoggerDetector(project)
-
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
-            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
-                val mark = it.sourceMark
-                if (!SourceMarkerUtils.isJvm(it.sourceMark.language)) {
-                    return@SynchronousSourceMarkEventListener //non-jvm language
+        if (setupDetectors) {
+            val endpointDetector = AggregateEndpointDetector(
+                project,
+                mutableListOf<EndpointDetector<*>>().apply {
+                    getUltimateProvider(project)?.let { addAll(it.getEndpointDetectors(project)) }
+                    add(JVMEndpointDetector(project))
                 }
+            )
+            val loggerDetector = JVMLoggerDetector(project)
 
-                //setup endpoint detector and attempt detection
-                if (mark is GuideMark) {
-                    mark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
-                    UserData.vertx(project).doOnWorker { endpointDetector.getOrFindEndpointIds(mark) }
-                }
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
+                if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
+                    val mark = it.sourceMark
+                    if (!SourceMarkerUtils.isJvm(it.sourceMark.language)) {
+                        return@SynchronousSourceMarkEventListener //non-jvm language
+                    }
 
-                //setup logger detector
-                if (mark is InlayMark) {
-                    //add logger detector to all inlay marks as live logs can be placed anywhere
-                    mark.putUserData(LOGGER_DETECTOR, loggerDetector)
-                }
+                    //setup endpoint detector and attempt detection
+                    if (mark is GuideMark) {
+                        mark.putUserData(ENDPOINT_DETECTOR, endpointDetector)
+                        UserData.vertx(project).doOnWorker { endpointDetector.getOrFindEndpointIds(mark) }
+                    }
 
-                //attempt to detect logger(s) on method guide marks
-                if (mark is MethodGuideMark) {
-                    UserData.vertx(project).doOnWorker { loggerDetector.determineLoggerStatements(mark) }
+                    //setup logger detector
+                    if (mark is InlayMark) {
+                        //add logger detector to all inlay marks as live logs can be placed anywhere
+                        mark.putUserData(LOGGER_DETECTOR, loggerDetector)
+                    }
+
+                    //attempt to detect logger(s) on method guide marks
+                    if (mark is MethodGuideMark) {
+                        UserData.vertx(project).doOnWorker { loggerDetector.determineLoggerStatements(mark) }
+                    }
                 }
-            }
-        })
+            })
+        }
 
         SourceMarkerUtils.getJvmLanguages().let {
             ArtifactMarkService.addService(JVMArtifactMarkService(), it)

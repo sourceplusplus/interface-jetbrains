@@ -50,43 +50,45 @@ class JavascriptLanguageProvider : LanguageProvider {
 
     override fun canSetup() = classExists("com.intellij.lang.javascript.psi.impl.JSElementImpl")
 
-    override fun setup(project: Project) {
+    override fun setup(project: Project, setupDetectors: Boolean) {
         SourceFileMarker.SUPPORTED_FILE_TYPES.add(JSFile::class.java)
 
-        val endpointDetector = AggregateEndpointDetector(
-            project,
-            mutableListOf<EndpointDetector<*>>().apply {
-                getUltimateProvider(project)?.let { addAll(it.getEndpointDetectors(project)) }
-                add(JavascriptEndpointDetector(project))
-            }
-        )
-        val loggerDetector = JavascriptLoggerDetector(project)
-
-        SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
-            if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
-                val mark = it.sourceMark
-                if (!SourceMarkerUtils.isJavaScript(it.sourceMark.language)) {
-                    return@SynchronousSourceMarkEventListener //non-javascript language
+        if (setupDetectors) {
+            val endpointDetector = AggregateEndpointDetector(
+                project,
+                mutableListOf<EndpointDetector<*>>().apply {
+                    getUltimateProvider(project)?.let { addAll(it.getEndpointDetectors(project)) }
+                    add(JavascriptEndpointDetector(project))
                 }
+            )
+            val loggerDetector = JavascriptLoggerDetector(project)
 
-                //setup endpoint detector and attempt detection
-                if (mark is GuideMark) {
-                    mark.putUserData(SourceMarkerKeys.ENDPOINT_DETECTOR, endpointDetector)
-                    UserData.vertx(project).doOnWorker { endpointDetector.getOrFindEndpointIds(mark) }
-                }
+            SourceMarker.getInstance(project).addGlobalSourceMarkEventListener(SynchronousSourceMarkEventListener {
+                if (it.eventCode == SourceMarkEventCode.MARK_BEFORE_ADDED) {
+                    val mark = it.sourceMark
+                    if (!SourceMarkerUtils.isJavaScript(it.sourceMark.language)) {
+                        return@SynchronousSourceMarkEventListener //non-javascript language
+                    }
 
-                //setup logger detector
-                if (mark is InlayMark) {
-                    //add logger detector to all inlay marks as live logs can be placed anywhere
-                    mark.putUserData(SourceMarkerKeys.LOGGER_DETECTOR, loggerDetector)
-                }
+                    //setup endpoint detector and attempt detection
+                    if (mark is GuideMark) {
+                        mark.putUserData(SourceMarkerKeys.ENDPOINT_DETECTOR, endpointDetector)
+                        UserData.vertx(project).doOnWorker { endpointDetector.getOrFindEndpointIds(mark) }
+                    }
 
-                //attempt to detect logger(s) on method guide marks
-                if (mark is MethodGuideMark) {
-                    UserData.vertx(project).doOnWorker { loggerDetector.determineLoggerStatements(mark) }
+                    //setup logger detector
+                    if (mark is InlayMark) {
+                        //add logger detector to all inlay marks as live logs can be placed anywhere
+                        mark.putUserData(SourceMarkerKeys.LOGGER_DETECTOR, loggerDetector)
+                    }
+
+                    //attempt to detect logger(s) on method guide marks
+                    if (mark is MethodGuideMark) {
+                        UserData.vertx(project).doOnWorker { loggerDetector.determineLoggerStatements(mark) }
+                    }
                 }
-            }
-        })
+            })
+        }
 
         SourceMarkerUtils.getJavaScriptLanguages().let {
             ArtifactMarkService.addService(JavascriptArtifactMarkService(), it)

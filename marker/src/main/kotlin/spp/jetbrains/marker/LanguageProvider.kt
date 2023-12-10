@@ -21,7 +21,7 @@ import java.util.*
 
 interface LanguageProvider {
     fun canSetup(): Boolean
-    fun setup(project: Project)
+    fun setup(project: Project, setupDetectors: Boolean = true)
 
     fun getUltimateProvider(project: Project): UltimateProvider? {
         val ultimateProvider: UltimateProvider?
