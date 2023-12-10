@@ -55,7 +55,7 @@ class PythonLanguageProvider : LanguageProvider {
         val endpointDetector = AggregateEndpointDetector(
             project,
             mutableListOf<EndpointDetector<*>>().apply {
-                addAll(getUltimateProvider(project).getEndpointDetectors(project))
+                getUltimateProvider(project)?.let { addAll(it.getEndpointDetectors(project)) }
                 add(PythonEndpointDetector(project))
             }
         )

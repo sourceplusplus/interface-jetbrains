@@ -23,7 +23,7 @@ interface LanguageProvider {
     fun canSetup(): Boolean
     fun setup(project: Project)
 
-    fun getUltimateProvider(project: Project): UltimateProvider {
+    fun getUltimateProvider(project: Project): UltimateProvider? {
         val ultimateProvider: UltimateProvider?
         val originalClassLoader = Thread.currentThread().contextClassLoader
         try {
@@ -32,7 +32,7 @@ interface LanguageProvider {
         } finally {
             Thread.currentThread().contextClassLoader = originalClassLoader
         }
-        return ultimateProvider!!
+        return ultimateProvider
     }
 
     fun classExists(className: String): Boolean {
