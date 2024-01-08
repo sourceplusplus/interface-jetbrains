@@ -1,4 +1,4 @@
-public class MultiInsight {
+class MultiInsight {
     fun probabilityAndDuration() {
         if (Math.random() > 0.5) { //sleep 100ms
             if (Math.random() > 0.5) { //sleep 100ms

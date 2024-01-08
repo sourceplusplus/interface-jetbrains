@@ -1,4 +1,4 @@
-public class SimplifyBranch {
+class SimplifyBranch {
     fun simplifyBranch() {
         if (true) {
             Thread.sleep(100)

@@ -1,4 +1,4 @@
-public class ThreadSleep {
+class ThreadSleep {
     fun sleep() {
         Thread.sleep(1000)
     }

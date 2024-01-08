@@ -1,4 +1,4 @@
-public class Recursion {
+class Recursion {
     fun recursion() {
         recursion()
     }

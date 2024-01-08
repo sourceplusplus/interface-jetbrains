@@ -1,4 +1,4 @@
-public class DeadCodeDuration {
+class DeadCodeDuration {
     fun code1() {
         if (false) {
             Thread.sleep(200)

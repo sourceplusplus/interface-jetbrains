@@ -1,4 +1,4 @@
-public class ReanalyzeDuration {
+class ReanalyzeDuration {
     fun code1() {
         code2()
     }
