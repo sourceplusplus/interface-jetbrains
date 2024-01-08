@@ -36,6 +36,7 @@ import com.siyeh.ig.psiutils.ControlFlowUtils
 import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
 import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.containingClass
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.joor.Reflect
@@ -64,11 +65,25 @@ class JVMArtifactScopeService : IArtifactScopeService {
         }
     }
 
-    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement, includeInnerClasses: Boolean): List<PsiNamedElement> {
         return when {
-            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtNamedFunction>().toList()
-            ArtifactTypeService.isScala(element) -> element.descendantsOfType<ScFunctionDefinition>().toList()
-            else -> element.descendantsOfType<PsiMethod>().toList()
+            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtNamedFunction>().filter {
+                if (element is KtClass && !includeInnerClasses) {
+                    element == it.containingClass()
+                } else true
+            }.toList()
+
+            ArtifactTypeService.isScala(element) -> element.descendantsOfType<ScFunctionDefinition>().filter {
+                if (element is PsiClass && !includeInnerClasses) {
+                    element == it.containingClass
+                } else true
+            }.toList()
+
+            else -> element.descendantsOfType<PsiMethod>().filter {
+                if (element is PsiClass && !includeInnerClasses) {
+                    element == it.containingClass
+                } else true
+            }.toList()
         }
     }
 

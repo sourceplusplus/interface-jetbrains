@@ -24,6 +24,8 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import kotlinx.coroutines.runBlocking
 import spp.jetbrains.artifact.service.ArtifactScopeService
+import spp.jetbrains.artifact.service.getClasses
+import spp.jetbrains.artifact.service.getFunctions
 import spp.jetbrains.marker.SourceMarker
 import spp.jetbrains.marker.jvm.JVMLanguageProvider
 
@@ -103,5 +105,29 @@ class JVMArtifactScopeServiceTest : BasePlatformTestCase() {
 //        assertEquals(2, internalCallerFunctions.size)
 //        assertEquals("directCalledFunction", internalCallerFunctions.first().name)
 //        assertEquals("callerFunction", internalCallerFunctions.last().name)
+    }
+
+    fun testGetFunctionsOnInnerClass() {
+        doGetFunctionsOnInnerClass("groovy")
+        doGetFunctionsOnInnerClass("java")
+        doGetFunctionsOnInnerClass("kt")
+    }
+
+    private fun doGetFunctionsOnInnerClass(extension: String) {
+        val psiFile = myFixture.configureByFile(getTestName(false) + ".$extension")
+        assertEquals(2, psiFile.getClasses().size)
+
+        val classFunctions = psiFile.getClasses().first().getFunctions()
+        assertEquals(1, classFunctions.size)
+        assertEquals("function1", classFunctions.first().name)
+
+        val innerClassFunctions = psiFile.getClasses().last().getFunctions()
+        assertEquals(1, innerClassFunctions.size)
+        assertEquals("function2", innerClassFunctions.first().name)
+
+        val allFunctions = psiFile.getClasses().first().getFunctions(true)
+        assertEquals(2, allFunctions.size)
+        assertEquals("function1", allFunctions.first().name)
+        assertEquals("function2", allFunctions.last().name)
     }
 }

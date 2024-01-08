@@ -39,8 +39,8 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
         return getService(element.language).getLoops(element)
     }
 
-    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
-        return getService(element.language).getFunctions(element)
+    override fun getFunctions(element: PsiElement, includeInnerClasses: Boolean): List<PsiNamedElement> {
+        return getService(element.language).getFunctions(element, includeInnerClasses)
     }
 
     override fun getClasses(element: PsiElement): List<PsiNamedElement> {
@@ -118,8 +118,8 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
 
 // Extensions
 
-fun PsiElement.getFunctions(): List<PsiNamedElement> {
-    return ArtifactScopeService.getService(language).getFunctions(this)
+fun PsiElement.getFunctions(includeInnerClasses: Boolean = false): List<PsiNamedElement> {
+    return ArtifactScopeService.getService(language).getFunctions(this, includeInnerClasses)
 }
 
 fun PsiElement.getClasses(): List<PsiNamedElement> {

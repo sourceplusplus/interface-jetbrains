@@ -54,7 +54,7 @@ class PythonArtifactScopeService : IArtifactScopeService {
         return element.descendantsOfType<PyLoopStatement>().toList()
     }
 
-    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement, includeInnerClasses: Boolean): List<PsiNamedElement> {
         require(ArtifactTypeService.isPython(element))
         return element.descendantsOfType<PyFunction>().toList()
     }

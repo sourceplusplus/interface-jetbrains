@@ -54,7 +54,7 @@ class JavascriptArtifactScopeService : IArtifactScopeService {
         return element.descendantsOfType<JSLoopStatement>().toList()
     }
 
-    override fun getFunctions(element: PsiElement): List<PsiNamedElement> {
+    override fun getFunctions(element: PsiElement, includeInnerClasses: Boolean): List<PsiNamedElement> {
         require(ArtifactTypeService.isJavaScript(element))
         return element.descendantsOfType<JSFunction>().toList()
     }

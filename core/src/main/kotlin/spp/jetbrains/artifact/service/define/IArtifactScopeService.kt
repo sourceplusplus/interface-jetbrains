@@ -32,7 +32,7 @@ import com.intellij.psi.PsiNamedElement
 interface IArtifactScopeService : ISourceMarkerService {
 
     fun getLoops(element: PsiElement): List<PsiElement>
-    fun getFunctions(element: PsiElement): List<PsiNamedElement>
+    fun getFunctions(element: PsiElement, includeInnerClasses: Boolean = false): List<PsiNamedElement>
     fun getClasses(element: PsiElement): List<PsiNamedElement>
     fun getChildIfs(element: PsiElement): List<PsiElement>
     fun getParentIf(element: PsiElement): PsiElement?
