@@ -68,7 +68,7 @@ class JVMArtifactScopeService : IArtifactScopeService {
     override fun getFunctions(element: PsiElement, includeInnerClasses: Boolean): List<PsiNamedElement> {
         return when {
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtNamedFunction>().filter {
-                if (element is KtClass && !includeInnerClasses) {
+                if (element is KtClassOrObject && !includeInnerClasses) {
                     element == it.containingClass()
                 } else true
             }.toList()
@@ -89,7 +89,7 @@ class JVMArtifactScopeService : IArtifactScopeService {
 
     override fun getClasses(element: PsiElement): List<PsiNamedElement> {
         return when {
-            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtClass>().toList()
+            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtClassOrObject>().toList()
             else -> element.descendantsOfType<PsiClass>().toList()
         }
     }
@@ -117,7 +117,7 @@ class JVMArtifactScopeService : IArtifactScopeService {
 
     override fun getParentClass(element: PsiElement): PsiNamedElement? {
         return when {
-            ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtClass>()
+            ArtifactTypeService.isKotlin(element) -> element.findParentOfType<KtClassOrObject>()
             else -> element.findParentOfType<PsiClass>()
         }
     }
