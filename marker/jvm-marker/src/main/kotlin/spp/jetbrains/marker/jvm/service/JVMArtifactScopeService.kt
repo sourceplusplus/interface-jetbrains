@@ -36,7 +36,7 @@ import com.siyeh.ig.psiutils.ControlFlowUtils
 import org.jetbrains.kotlin.backend.jvm.ir.psiElement
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
 import org.jetbrains.kotlin.psi.*
-import org.jetbrains.kotlin.psi.psiUtil.containingClass
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrCall
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.joor.Reflect
@@ -69,7 +69,7 @@ class JVMArtifactScopeService : IArtifactScopeService {
         return when {
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtNamedFunction>().filter {
                 if (element is KtClassOrObject && !includeInnerClasses) {
-                    element == it.containingClass()
+                    element == it.containingClassOrObject
                 } else true
             }.toList()
 
