@@ -44,6 +44,7 @@ import java.util.*
  * @since 0.4.0
  * @author [Brandon Fergerson](mailto:bfergerson@apache.org)
  */
+@Suppress("TooManyFunctions")
 object JVMMarkerUtils {
 
     private val log = logger<JVMMarkerUtils>()
