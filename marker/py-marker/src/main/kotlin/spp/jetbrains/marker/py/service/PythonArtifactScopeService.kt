@@ -49,6 +49,11 @@ import spp.jetbrains.marker.SourceMarkerUtils
 @Suppress("TooManyFunctions") // public API
 class PythonArtifactScopeService : IArtifactScopeService {
 
+    override fun getFields(element: PsiElement): List<PsiElement> {
+        require(ArtifactTypeService.isPython(element))
+        return element.descendantsOfType<PyTargetExpression>().toList()
+    }
+
     override fun getLoops(element: PsiElement): List<PsiElement> {
         require(ArtifactTypeService.isPython(element))
         return element.descendantsOfType<PyLoopStatement>().toList()

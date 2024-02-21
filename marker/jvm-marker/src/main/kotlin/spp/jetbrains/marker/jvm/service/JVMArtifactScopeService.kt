@@ -57,6 +57,13 @@ import spp.jetbrains.marker.SourceMarkerUtils.doOnReadThread
 @Suppress("TooManyFunctions") // public API
 class JVMArtifactScopeService : IArtifactScopeService {
 
+    override fun getFields(element: PsiElement): List<PsiElement> {
+        return when {
+            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtProperty>().toList()
+            else -> element.descendantsOfType<PsiField>().toList()
+        }
+    }
+
     override fun getLoops(element: PsiElement): List<PsiElement> {
         return when {
             ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtLoopExpression>().toList()

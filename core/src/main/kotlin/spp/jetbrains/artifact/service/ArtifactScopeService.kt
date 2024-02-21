@@ -35,6 +35,10 @@ import spp.protocol.artifact.ArtifactType
 @Suppress("MemberVisibilityCanBePrivate", "TooManyFunctions") // public API
 object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>(), IArtifactScopeService {
 
+    override fun getFields(element: PsiElement): List<PsiElement> {
+        return getService(element.language).getFields(element)
+    }
+
     override fun getLoops(element: PsiElement): List<PsiElement> {
         return getService(element.language).getLoops(element)
     }
@@ -117,6 +121,10 @@ object ArtifactScopeService : AbstractSourceMarkerService<IArtifactScopeService>
 }
 
 // Extensions
+
+fun PsiElement.getFields(): List<PsiElement> {
+    return ArtifactScopeService.getService(language).getFields(this)
+}
 
 fun PsiElement.getFunctions(includeInnerClasses: Boolean = false): List<PsiNamedElement> {
     return ArtifactScopeService.getService(language).getFunctions(this, includeInnerClasses)

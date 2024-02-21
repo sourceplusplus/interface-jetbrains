@@ -55,6 +55,7 @@ object JVMMarkerUtils {
             element is PsiAnnotation -> return getFullyQualifiedName(element)
             element is PsiClass -> return getFullyQualifiedName(element)
             element is PsiMethod -> return getFullyQualifiedName(element)
+            element is PsiField -> return getFullyQualifiedName(element)
             else -> Unit
         }
 
@@ -155,6 +156,17 @@ object JVMMarkerUtils {
             "$classQualifiedName.${getQualifiedName(method)}",
             type = ArtifactType.FUNCTION,
             lineNumber = method.nameIdentifier?.let { SourceMarkerUtils.getLineNumber(it) }
+        )
+    }
+
+    private fun getFullyQualifiedName(psiField: PsiField): ArtifactQualifiedName {
+        val classQualifiedName = psiField.findAnyContainingStrict(PsiClass::class.java)?.let {
+            getFullyQualifiedName(it).identifier
+        }
+        return ArtifactQualifiedName(
+            "$classQualifiedName.${psiField.name}",
+            type = ArtifactType.EXPRESSION, //todo: ArtifactType.VARIABLE
+            lineNumber = psiField.nameIdentifier.let { SourceMarkerUtils.getLineNumber(it) }
         )
     }
 

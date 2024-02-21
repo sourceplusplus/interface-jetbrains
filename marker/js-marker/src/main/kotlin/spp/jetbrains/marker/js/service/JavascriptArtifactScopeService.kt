@@ -49,6 +49,11 @@ import spp.jetbrains.marker.SourceMarkerUtils
 @Suppress("TooManyFunctions") // public API
 class JavascriptArtifactScopeService : IArtifactScopeService {
 
+    override fun getFields(element: PsiElement): List<PsiElement> {
+        require(ArtifactTypeService.isJavaScript(element))
+        return element.descendantsOfType<JSField>().toList()
+    }
+
     override fun getLoops(element: PsiElement): List<PsiElement> {
         require(ArtifactTypeService.isJavaScript(element))
         return element.descendantsOfType<JSLoopStatement>().toList()
