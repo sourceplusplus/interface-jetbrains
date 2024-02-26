@@ -59,7 +59,10 @@ class JVMArtifactScopeService : IArtifactScopeService {
 
     override fun getFields(element: PsiElement): List<PsiElement> {
         return when {
-            ArtifactTypeService.isKotlin(element) -> element.descendantsOfType<KtProperty>().toList()
+            ArtifactTypeService.isKotlin(element) -> {
+                element.descendantsOfType<KtProperty>().filter { it.isMember }.toList()
+            }
+
             else -> element.descendantsOfType<PsiField>().toList()
         }
     }
