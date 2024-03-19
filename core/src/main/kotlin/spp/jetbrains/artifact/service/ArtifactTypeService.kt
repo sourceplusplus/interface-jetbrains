@@ -18,6 +18,7 @@ package spp.jetbrains.artifact.service
 
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
 import spp.jetbrains.artifact.service.define.IArtifactTypeService
@@ -52,6 +53,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
 
     override fun getType(element: PsiElement): ArtifactType? {
         if (!isSupported(element)) return null
+        //language-agnostic check
+        if (element is PsiFile) return ArtifactType.FILE
+
+        //language-specific check
         return getService(element.language).getType(element)
     }
 
