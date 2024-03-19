@@ -72,6 +72,14 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
         return element is FunctionArtifact || getType(element) == ArtifactType.FUNCTION
     }
 
+    fun isClass(element: PsiElement): Boolean {
+        return getType(element) == ArtifactType.CLASS
+    }
+
+    fun isFile(element: PsiElement): Boolean {
+        return getType(element) == ArtifactType.FILE
+    }
+
     fun isPython(element: PsiElement): Boolean {
         return element.language.id == "Python"
     }
@@ -125,6 +133,14 @@ fun PsiElement?.isLiteral(): Boolean {
 
 fun PsiElement.isFunction(): Boolean {
     return ArtifactTypeService.isFunction(this)
+}
+
+fun PsiElement.isClass(): Boolean {
+    return ArtifactTypeService.isClass(this)
+}
+
+fun PsiElement.isFile(): Boolean {
+    return ArtifactTypeService.isFile(this)
 }
 
 fun PsiElement.isPython(): Boolean {
