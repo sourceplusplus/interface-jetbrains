@@ -11,6 +11,7 @@
     <depends optional="true" config-file="withKotlin.xml">org.jetbrains.kotlin</depends>
     <depends optional="true" config-file="withPython.xml">com.intellij.modules.python</depends>
     <depends optional="true" config-file="withJavascript.xml">JavaScript</depends>
+    <depends optional="true" config-file="withRust.xml">com.jetbrains.rust</depends>
     <depends optional="true" config-file="withJavascriptDebugger.xml">JavaScriptDebugger</depends>
 
     <extensions defaultExtensionNs="com.intellij">

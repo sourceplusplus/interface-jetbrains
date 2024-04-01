@@ -74,6 +74,7 @@ dependencies {
     runtimeOnly(projectDependency(":marker:js-marker"))
     runtimeOnly(projectDependency(":marker:jvm-marker"))
     runtimeOnly(projectDependency(":marker:py-marker"))
+    runtimeOnly(projectDependency(":marker:rs-marker"))
     runtimeOnly(projectDependency(":marker:ult-marker"))
     implementation("plus.sourceplus:protocol:$protocolVersion")
 
