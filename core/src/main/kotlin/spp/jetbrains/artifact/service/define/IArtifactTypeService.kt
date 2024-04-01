@@ -31,6 +31,7 @@ interface IArtifactTypeService : ISourceMarkerService {
     fun getAnnotationOwnerIfAnnotation(element: PsiElement): PsiElement?
     fun getAnnotationOwnerIfAnnotation(element: PsiElement, line: Int): PsiElement?
     fun isComment(element: PsiElement): Boolean
+    fun isWhiteSpaceOrNewLine(element: PsiElement): Boolean = false
     fun getType(element: PsiElement): ArtifactType?
 
     fun isLiteral(element: PsiElement): Boolean {

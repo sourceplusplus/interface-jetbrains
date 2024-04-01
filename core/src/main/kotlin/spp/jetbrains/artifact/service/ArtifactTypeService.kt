@@ -19,6 +19,7 @@ package spp.jetbrains.artifact.service
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiWhiteSpace
 import spp.jetbrains.artifact.model.FunctionArtifact
 import spp.jetbrains.artifact.service.define.AbstractSourceMarkerService
 import spp.jetbrains.artifact.service.define.IArtifactTypeService
@@ -49,6 +50,14 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
 
         //language-specific check
         return getService(element.language).isComment(element)
+    }
+
+    override fun isWhiteSpaceOrNewLine(element: PsiElement): Boolean {
+        //language-agnostic check
+        if (element is PsiWhiteSpace) return true
+
+        //language-specific check
+        return getService(element.language).isWhiteSpaceOrNewLine(element)
     }
 
     override fun getType(element: PsiElement): ArtifactType? {
@@ -121,6 +130,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
 
 fun PsiElement.isComment(): Boolean {
     return ArtifactTypeService.isComment(this)
+}
+
+fun PsiElement.isWhiteSpaceOrNewLine(): Boolean {
+    return ArtifactTypeService.isWhiteSpaceOrNewLine(this)
 }
 
 fun PsiElement.getType(): ArtifactType? {
