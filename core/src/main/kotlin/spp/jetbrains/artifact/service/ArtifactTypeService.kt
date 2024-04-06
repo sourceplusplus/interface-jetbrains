@@ -117,6 +117,10 @@ object ArtifactTypeService : AbstractSourceMarkerService<IArtifactTypeService>()
         return getJavaScriptLanguages().contains(element.language.id)
     }
 
+    fun isRust(element: PsiElement): Boolean {
+        return element.language.id == "Rust"
+    }
+
     fun getJvmLanguages(): List<String> {
         return listOf("JAVA", "kotlin", "Groovy", "Scala")
     }
@@ -182,4 +186,8 @@ fun PsiElement.isScala(): Boolean {
 
 fun PsiElement.isJavaScript(): Boolean {
     return ArtifactTypeService.isJavaScript(this)
+}
+
+fun PsiElement.isRust(): Boolean {
+    return ArtifactTypeService.isRust(this)
 }
