@@ -32,7 +32,6 @@ import com.intellij.ui.content.ContentManagerListener
 import spp.jetbrains.UserData
 import spp.jetbrains.icons.PluginIcons
 import spp.jetbrains.invokeLater
-import spp.jetbrains.safeLaunch
 import spp.jetbrains.sourcemarker.view.action.ChangeTimeAction
 import spp.jetbrains.sourcemarker.view.action.ResumeViewAction
 import spp.jetbrains.sourcemarker.view.action.SetRefreshIntervalAction
@@ -85,16 +84,14 @@ class LiveViewChartManagerImpl(
         project.putUserData(LiveViewChartManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
             if (it.isReady) {
-                UserData.vertx(project).safeLaunch {
-                    val service = SourceStatusService.getCurrentService(project)
-                    if (service == null) {
-                        log.warn("No service found for project: ${project.name}")
-                        return@safeLaunch
-                    }
+                val service = SourceStatusService.getCurrentService(project)
+                if (service == null) {
+                    log.warn("No service found for project: ${project.name}")
+                    return@onReadyChange
+                }
 
-                    project.invokeLater {
-                        showServiceWindow(service)
-                    }
+                project.invokeLater {
+                    showServiceWindow(service)
                 }
             } else {
                 project.invokeLater {

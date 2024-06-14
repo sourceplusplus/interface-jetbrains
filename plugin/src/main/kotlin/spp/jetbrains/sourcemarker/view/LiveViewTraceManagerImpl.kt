@@ -90,11 +90,13 @@ class LiveViewTraceManagerImpl(
         project.putUserData(LiveViewTraceManager.KEY, this)
         SourceStatusService.getInstance(project).onReadyChange {
             if (it.isReady) {
-                val vertx = UserData.vertx(project)
-                vertx.safeLaunch {
-                    val service = SourceStatusService.getCurrentService(project)!!
-                    showServiceWindow(service)
+                val service = SourceStatusService.getCurrentService(project)
+                if (service == null) {
+                    log.warn("No service found for project: ${project.name}")
+                    return@onReadyChange
                 }
+
+                showServiceWindow(service)
             } else {
                 project.invokeLater {
                     hideWindows()
